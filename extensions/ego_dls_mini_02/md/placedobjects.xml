@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/cue[@name='Place_DataVaults']/cues">
+    <cue name="Place_DataVaults_29" comment="patch for dlc_mini_02 vault 29">
+      <conditions>
+        <event_cue_signalled comment="vault found during story, not before"/>
+      </conditions>
+      <actions>
+        <debug_text text="'Place Data Vault 29'"/>
+        <find_zone name="$zone" macro="macro.zone001_cluster_740_sector001_macro"/>
+        <do_if value="$zone.exists">
+          <create_object name="$vault" groupname="$VaultsGroup" owner="faction.ownerless" macro="macro.landmarks_vault_04_macro" zone="$zone">
+            <position x="34182m" y="-100m" z="47513m"/>
+          </create_object>
+          <do_if value="$vault.exists">
+            <find_signalleak_location name="$slot" container="$vault"/>
+            <create_signal_leak name="$leak29" type="signalleaktype.data" object="$vault" slot="$slot" macro="macro.dataleak_xs_vault_01_macro"/>
+            <!--add_cargo object="$lockbox" exact="5" ware="ware.inv_agidevice_02"/-->
+          </do_if>
+          <add_to_group object="$vault" groupname="$UnbihexiumVaults"/>
+        </do_if>
+      </actions>
+      <cues>
+        <cue name="Place_DataVaults_Warp_DEBUG">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <warp object="player.ship" sector="$UnbihexiumVaults.{1}.sector">
+              <position object="$UnbihexiumVaults.{1}"/>
+            </warp>
+          </actions>
+        </cue>
+
+        <cue name="Place_DataVaults_Unlocked29">
+          <conditions>
+            <check_any chance="if @$leak29 then 100 else 0" comment="suppress Scenario_Transport_Refugees error in ego_dlc_timelines\md\placedobjects.xml">
+              <event_player_signal_unlock_finished signal="$leak29"/>
+              <event_player_repaired_signal_leak signal="$leak29"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$TimelineID" exact="'unbihexium'"/>
+            <include_actions ref="Unlock_Timeline_Entry"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+  </add>
+
+</diff>

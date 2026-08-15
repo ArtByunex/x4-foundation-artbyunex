@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Yaki_Supply" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Manager" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+
+        <find_sector name="$YakiSector" macro="macro.cluster_112_sector001_macro" required="true"/>
+        <set_value name="$ShipSectorSpawnRange" exact="5"/>
+        <create_group groupname="$Ships"/>
+        
+        <!--Max number of ships heading to the Yaki wharf which can exist at one time-->
+        <!--Note: Currently 1 to keep it simple. Otherwise we'll have to keep track of incoming ship resources to avoid overloading the wharf-->
+        <set_value name="$MaxNumShips" exact="1"/>
+        <set_value name="$NextShipSpawnTime" exact="player.age"/>
+      </actions>
+      <cues>
+        <cue name="Find_Wharf" checkinterval="5s">
+          <conditions>
+            <count_stations result="$Wharf" space="$YakiSector" trueowner="faction.yaki" plannedwharf="true" min="1" multiple="false"/>
+          </conditions>
+          <actions>
+            <debug_text text="'Found wharf ' + $Wharf + ' ' + $Wharf.knownname" chance="$DebugChance"/>
+          </actions>
+          <cues>
+            <cue name="Debug_Clear_Storage" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_for_each name="$CargoWare" valuename="$CargoAmount" in="$Wharf.cargo.table">
+                  <remove_cargo object="$Wharf" ware="$CargoWare" exact="$CargoAmount"/>
+                </do_for_each>
+              </actions>
+            </cue>
+            
+            <cue name="Wharf_Destroyed">
+              <conditions>
+                <event_object_destroyed object="$Wharf"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Wharf ' + $Wharf + ' ' + $Wharf.knownname + ' was destroyed. Resetting.'" chance="$DebugChance"/>
+                <reset_cue cue="Find_Wharf"/>
+              </actions>
+            </cue>
+
+            <cue name="Check_Wharf_Resources" checkinterval="1min" instantiate="true">
+              <conditions>
+                <check_value value="$Wharf.isoperational and $Ships.count lt $MaxNumShips and player.age gt $NextShipSpawnTime and $Wharf.canbuildships"/>
+              </conditions>
+              <actions>
+                <set_value name="$Needed" exact="table[]"/>
+                <set_value name="$Resources" exact="$Wharf.resources.list"/>
+                <do_for_each name="$Ware" in="$Resources">
+                  <set_value name="$Target" exact="$Wharf.cargo.{$Ware}.target"/>
+                  <set_value name="$Stored" exact="$Wharf.cargo.{$Ware}.count"/>
+                  <do_if value="$Stored lt $Target * 0.3">
+                    <set_value name="$Needed.{$Ware}" exact="$Target - $Stored"/>
+                  </do_if>
+                </do_for_each>
+
+                <do_if value="$Needed.keys.count">
+                  <set_value name="$NeededWorkforceWares" exact="[]"/>
+                  <find_object_component name="$HabitationModules" class="class.habitation" object="$Wharf" multiple="true"/>
+                  <do_for_each name="$Habitation" in="$HabitationModules">
+                    <set_value name="$HabitationWares" exact="$Habitation.resources.list"/>
+                    <do_for_each name="$HabitationWare" in="$HabitationWares">
+                      <do_if value="$NeededWorkforceWares.indexof.{$HabitationWare} == 0 and $Needed.{$HabitationWare}?">
+                        <debug_text text="'Habitation ware ' + $HabitationWare + ' is needed'" chance="$DebugChance"/>
+                        <append_to_list name="$NeededWorkforceWares" exact="$HabitationWare"/>
+                      </do_if>
+                    </do_for_each>
+                  </do_for_each>
+                  
+                  <!--Only create a ship for recycling if there is a non-workforce related ware that's needed-->
+                  <do_if value="$Needed.keys.count gt $NeededWorkforceWares.count">
+                    <set_value name="$SpawnSector" exact="null"/>
+                    <find_sector_in_range name="$PotentialSectors" object="$Wharf" maxdistance="$ShipSectorSpawnRange" multiple="true"/>
+                    <shuffle_list list="$PotentialSectors"/>
+                    <do_for_each name="$PotentialSector" in="$PotentialSectors">
+                      <!--Do a gate distance check back to the wharf to account for the one-way highway-->
+                      <do_if value="$PotentialSector != player.sector">
+                        <set_value name="$SectorDist" exact="$PotentialSector.gatedistance.{$Wharf}"/>
+                        <do_if value="$SectorDist ge 0 and $SectorDist le $ShipSectorSpawnRange">
+                          <set_value name="$SpawnSector" exact="$PotentialSector"/>
+                          <break/>
+                        </do_if>
+                      </do_if>
+                    </do_for_each>
+                    <remove_value name="$SectorDist"/>
+                    <do_if value="$SpawnSector">
+                      <set_value name="$PotentialShipFactions" exact="[]"/>
+                      <do_for_each name="$PotentialFaction" in="lookup.faction.list">
+                        <do_if value="$PotentialFaction.isactive and $PotentialFaction.iseconomic">
+                          <append_to_list name="$PotentialShipFactions" exact="$PotentialFaction"/>
+                        </do_if>
+                      </do_for_each>
+
+                      <do_if value="$PotentialShipFactions.count">
+                        <shuffle_list list="$PotentialShipFactions"/>
+
+                        <!--Mission tagged ships are safe to be spawned for this purpose-->
+                        <set_value name="$ShipTags" exact="[tag.mission]"/>
+                        <do_any>
+                          <set_value name="$ShipSize" exact="class.ship_s" weight="70"/>
+                          <set_value name="$ShipSize" exact="class.ship_m" weight="30"/>
+                        </do_any>
+
+                        <set_value name="$Ship" exact="null"/>
+                        <do_for_each name="$ShipFaction" in="$PotentialShipFactions">
+                          <get_ship_definition macro="$ShipMacro" faction="$ShipFaction" size="$ShipSize" tags="$ShipTags"/>
+                          <do_if value="$ShipMacro">
+                            <set_value name="$SectorCentre" exact="$SpawnSector.coreposition"/>
+                            <set_value name="$Yaw" min="0deg" max="360deg"/>
+                            <set_value name="$Y" min="$SectorCentre.y - 5km" max="$SectorCentre.y + 5km"/>
+                            <set_value name="$PlacementDist" min="($SpawnSector.coresize / 2) + 5km" max="($SpawnSector.coresize / 2) + 20km" profile="increasing" scale="2"/>
+
+                            <set_value name="$loadoutlevel" min="0.1" max="0.5"/>
+                            <generate_loadout result="$loadout" faction="$ShipFaction" macro="$ShipMacro" level="$loadoutlevel"/>
+                            <create_ship name="$Ship" groupname="$Ships" macro="$ShipMacro" sector="$SpawnSector">
+                              <pilot>
+                                <select faction="faction.yaki" tags="tag.fighterpilot"/>
+                              </pilot>
+                              <loadout loadout="$loadout.{1}"/>
+                              <owner exact="faction.yaki" overridenpc="true"/>
+                              <drop ref="ship_small_military"/>
+                              <!--No 'people' node-->
+                              <safepos x="$SectorCentre.x + sin($Yaw) * $PlacementDist" y="$Y" z="$SectorCentre.z + cos($Yaw) * $PlacementDist" allowyaxis="false"/>
+                            </create_ship>
+                            <remove_value name="$loadout"/>
+                            <remove_value name="$loadoutlevel"/>
+                            <do_if value="$Ship">
+                              <break/>
+                            </do_if>
+                          </do_if>
+                        </do_for_each>
+
+                        <do_if value="$Ship">
+                          <debug_text text="'Created ship ' + $Ship + ' ' + $Ship.knownname + ' in sector ' + $SpawnSector.knownname + ' to recycle at ' + $Wharf.knownname" chance="$DebugChance"/>
+                          <set_value name="$MaxNumWares" min="1" max="3"/>
+                          <do_if value="$MaxNumWares">
+                            <set_value name="$NeededWares" exact="$Needed.keys.list"/>
+                            <shuffle_list list="$NeededWares"/>
+                            <do_for_each name="$NeededWare" in="$NeededWares">
+                              <set_value name="$NeededWareAmount" exact="$Needed.{$NeededWare}"/>
+                              <set_value name="$FreeSpace" exact="[$Ship.cargo.{$NeededWare}.free, $NeededWareAmount].min"/>
+                              <do_if value="$FreeSpace">
+                                <add_cargo object="$Ship" ware="$NeededWare" min="$FreeSpace / 4" max="$FreeSpace" profile="decreasing" scale="2"/>
+                                <debug_text text="'Ship was given ' + $Ship.cargo.{$NeededWare}.count + ' of ' + $NeededWare" chance="$DebugChance"/>
+                                <set_value name="$MaxNumWares" operation="subtract"/>
+                                <do_if value="$MaxNumWares le 0">
+                                  <break/>
+                                </do_if>
+                              </do_if>
+                            </do_for_each>
+                          </do_if>
+
+                          <add_build_to_recycle_ship result="$RecycleOrder" buildobject="$Ship" object="$Wharf" faction="faction.yaki"/>
+                          <set_value name="$NextShipSpawnTime" min="player.age + 20min" max="player.age + 30min"/>
+                        </do_if>
+                      </do_if>
+                    </do_if>
+                  </do_if>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ship_Captured" instantiate="true">
+          <conditions>
+            <event_object_changed_true_owner group="$Ships"/>
+            <check_value value="event.param != faction.yaki"/>
+          </conditions>
+          <actions>
+            <debug_text text="event.object + ' ' + event.object.knownname + ' is no longer Yaki. Remove from group.'" chance="$DebugChance"/>
+            <remove_from_group group="$Ships" object="event.object"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

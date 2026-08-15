@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Terran2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_terran2" version="2">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Terran_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="0"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$CurrentStep" exact="0"/>
+
+        <set_ambient_sound_state active="false"/>
+        <!--Have a black screen for a little while, with the following fade-in kicking in shortly-->
+        <fade_screen fadeout="0s" fadein="200s"/>
+      </actions>
+      <delay exact="5s"/>
+      <actions>
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="Start.hasmission">
+          <update_mission cue="Start" group="missiongroup.gs_terran2"/>
+        </do_if>
+      </patch>
+      <cues>
+
+        <cue name="Setup" >
+          <delay exact="2s"/>
+          <actions>
+            <do_if value="@md.Story_HQ_Discovery.Start.$SkipGamestartMission">
+              <signal_cue_instantly cue="md.Story_HQ_Discovery.Ch1_Intro" param="true"/>
+            </do_if>
+            <do_else>
+              <signal_cue cue="Ch0_Prelude_Cutscene"/>
+            </do_else>
+          </actions>
+          <cues>
+            <cue name="SetupMap">
+              <actions>
+
+                <!-- find HQ -->
+                <find_sector name="$HQSector" macro="macro.cluster_114_sector001_macro"/>
+                <find_station name="$HQ" macro="macro.station_pla_headquarters_base_01_macro" space="$HQSector" required="true"/>
+
+                <!-- set part of the map to known (Neptune, Brennan's Triumph, Gaian prophecy, Segaris) -->
+                <set_value name="$InitialMap" exact="[
+                      macro.cluster_110_sector001_macro,
+                      macro.cluster_115_sector001_macro, 
+                      macro.cluster_114_sector001_macro
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates">
+                  <param name="InitialMap" value="$InitialMap"/>
+                  <param name="UncoverStationFaction" value="faction.pioneers"/>
+                  <param name="ExceptionList" value="[$HQ]"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Locations">
+              <actions>
+                <find_sector name="$BrennanSector" macro="macro.cluster_115_sector001_macro"/>
+                <!-- TODO: sync locations with the other gamestarts -->
+                <set_value name="$DeployOffset1" exact="position.[-77km, 0m, -278km]"/>
+                <set_value name="$DeployOffset2" exact="position.[-141km, 0m, -117km]"/>
+                <set_value name="$DeployOffset3" exact="position.[10km, 0m, 70km]"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Character_HeadScientist">
+              <actions>
+                <!-- Same as in Story_Terraforming, since we'll never meet him in person, we can create a clone -->
+                <create_cue_actor name="$HeadScientistActor" cue="namespace" macro="character_pioneer_male_plot_head_scientist_macro">
+                  <page exact="10156"/>
+                  <owner exact="faction.civilian"/>
+                  <skills>
+                    <skill type="management"  exact="15"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="5"/>
+                    <skill type="engineering" exact="1"/>
+                    <skill type="boarding"    exact="6"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$HeadScientistActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$HeadScientistActor" icon="'factionrepresentative'" title="'{30221,153}'"/>
+                <!--set_value name="md.$PersistentCharacters.$HeadScientistActor" exact="$HeadScientistActor"/-->
+                <set_value name="$HeadScientistActorCutsceneKey"   exact="table[ $key = 'ShowCharacter']"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Start_Station">
+              <actions>
+                <set_value name="this.$Station" exact="player.station"/>
+                <assert value="this.$Station.exists" text="'Player was not placed on a station'"/>
+                <do_if value="this.$Station">
+                  <set_value name="this.$Interior" exact="player.room.dynamicinterior"/>
+                  <do_if value="this.$Interior">
+                    <debug_text text="'Setting start interior ' + this.$Interior + ' ' + this.$Interior.knownname + ' to persistent'" chance="$DebugChance"/>
+                    <set_dynamic_interior_persistent object="this.$Station" interior="this.$Interior" persistent="true"/>
+                  </do_if>
+                </do_if>
+              </actions>
+              <!--A short delay to have the unabortable cutscene start before the player can warp to their ship-->
+              <delay exact="2s"/>
+              <actions>
+                <find_dockingbay name="this.$DockingBay" object="this.$Station" checkoperational="true" walkable="true" comment="walkable=true ignores launchtubes!" required="true">
+                  <match_any>
+                    <match_dock size="tag.dock_s"/>
+                  </match_any>
+                </find_dockingbay>
+                <do_if value="this.$DockingBay">
+                  <create_loadout result="this.$Loadout" comment="Rapier (Scout): ship_ter_s_scout_01_a_macro">
+                    <macros>
+                      <engine macro="engine_ter_s_travel_01_mk1_macro" path="../con_engine_01"/>
+                      <weapon macro="weapon_ter_s_laser_01_mk1_macro" path="../con_weapon_01"/>
+                      <shield macro="shield_ter_s_standard_01_mk1_macro" path="../con_shield_01"/>
+                    </macros>
+                    <ammunition>
+                      <ammunition macro="eq_arg_satellite_01_macro" exact="5"/>
+                    </ammunition>
+                    <software>
+                      <software ware="software_flightassistmk1"/>
+                      <software ware="software_scannerlongrangemk2"/>
+                      <software ware="software_scannerobjectmk1"/>
+                    </software>
+                    <virtualmacros>
+                      <thruster macro="thruster_gen_s_allround_01_mk1_macro"/>
+                    </virtualmacros>
+                    <crew>
+                      <crew role="marine" exact="0"/>
+                      <crew role="service" exact="0"/>
+                    </crew>
+                  </create_loadout>
+                  <create_ship name="$PlayerShip" dock="this.$DockingBay" macro="ship_ter_s_scout_01_a_macro">
+                    <owner exact="faction.player" overridenpc="true"/>
+                    <loadout loadout="this.$Loadout"/>
+                  </create_ship>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+
+
+        <!-- shared cues -->
+        <cue name="SharedCues">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Shared_ReachedArea_Deploy" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Player reached deployment area'" chance="$DebugChance"/>
+                <do_if value="$CurrentStep == 3">
+                  <set_value name="this.$Lines" exact="[[30285202]]" comment="exact positioning is of utmost imporance for this one to get optimal performance"/>
+                </do_if>
+                <do_elseif value="$CurrentStep == 2">
+                  <set_value name="this.$Lines" exact="[[30285201]]" comment="we need to be more precise with positioning the second satellite"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="this.$Lines" exact="[[30285200]]" comment="exact position not so critical"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="Shared_ReachedArea_Deploy_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$HeadScientistActor"/>
+                  <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                  <param name="DelayInitial"      value="3s"/>
+                  <param name="Lines"             value="parent.$Lines"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <!--
+                <t id="30221234">Split not fond of outsiders meddling with Split matters.</t>
+               -->
+                </cue>
+
+                <cue name="Shared_ReachedArea_Deploy1_Hint">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$CurrentStep == 3"/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <show_help line="4010"  position="1" force="true" duration="20s" comment="Press $INPUT_ACTION_OPEN_COCKPIT_MENU$ to open the ship menu." allowclose="false" timeout="false"/>
+                  </actions>
+                  <cues>
+                    <cue name="Shared_ReachedArea_Deploy1_Hint2">
+                      <conditions>
+                        <event_ui_triggered screen="'DockedMenu'"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <remove_help line="4010"/>
+                        <show_help line="8024"  position="1" force="true" duration="10s" comment="Objects like satellites, beacons or mines can be deployed from this menu. Your ship will drop the item from its XS dock." allowclose="false" timeout="false"/>
+                        <show_help line="8100"  position="1" force="true" duration="6s" comment="Deploy a satellite now." allowclose="false" timeout="false"/>
+                      </actions>
+                    </cue>
+                    <cue name="Shared_ReachedArea_Deploy1_ClearHints">
+                      <conditions>
+                        <event_ui_triggered screen="'DockedMenu'" control="'menu_close'"/>
+                      </conditions>
+                      <actions>
+                        <remove_help line="[8024,8100]"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Shared_LeftArea_Deploy" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Player left deployment area'" chance="$DebugChance"/>
+                <do_if value="$CurrentStep == 3">
+                  <set_value name="this.$Lines" exact="[[30285212]]"/>
+                </do_if>
+                <do_elseif value="$CurrentStep == 2">
+                  <set_value name="this.$Lines" exact="[[30285211]]"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="this.$Lines" exact="[[30285210]]"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="Shared_LeftArea_Deploy_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$HeadScientistActor"/>
+                  <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                  <param name="DelayInitial"      value="3s"/>
+                  <param name="Lines"             value="parent.$Lines"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Shared_OutOfRange_Deployed" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Shared_OutOfRange_Deployed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$HeadScientistActor"/>
+                  <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                  <param name="DelayInitial"      value="3s"/>
+                  <param name="Lines"             value="[[30285220], [30285221]]"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <!--
+                    <t id="30285220">No no no! This is not deployed at the correct location!</t>
+                    <t id="30285221">Do I have to do everything myself?!</t>
+                  -->
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Shared_Other_Deployed" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Shared_Other_Deployed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$HeadScientistActor"/>
+                  <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                  <param name="DelayInitial"      value="3s"/>
+                  <param name="Lines"             value="[[30285230]]"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <!--
+                    <t id="30285230">You deployed the wrong thing! Satellites is what we need!</t>
+                  -->
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Shared_LeaveMissionArea" checkinterval="5s">
+              <conditions>
+                <check_value value="(player.entity.sector != $BrennanSector)"/>
+                <check_any>
+                  <check_value value="(player.entity.distanceto.[$BrennanSector, $DeployOffset1] gt 100km)"/>
+                  <check_value value="(player.entity.distanceto.[$BrennanSector, $DeployOffset2] gt 100km)"/>
+                  <check_value value="(player.entity.distanceto.[$BrennanSector, $DeployOffset3] gt 100km)"/>
+                </check_any>
+              </conditions>
+              <cues>
+                <cue name="Ch1_Deploy_LeaveArea_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor" comment="introductory chatter">
+                  <param name="Actor"             value="$HeadScientistActor"/>
+                  <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                  <param name="DelayInitial"      value="5s"/>
+                  <param name="Lines"             value="[[30285240]]"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <!--
+                    <t id="30285240">Hey, we aren't done yet.</t>
+                    <t id="30285241">Please return to the mission area and proceed with satellite deployment!</t>
+                  -->
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch0_Prelude_Cutscene">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <play_music music="'pioneers_gamestart'"/>
+            <play_cutscene result="this.$PIOCutscene" key="'gamestart_terran2_intro'" abortable="true">
+              <param name="target_object" object="player.entity"/>
+            </play_cutscene>
+          </actions>
+          <cues>
+            <cue name="Ch0_Prelude_Cutscene_Start">
+              <conditions>
+                <event_cutscene_started cutscene="parent.$PIOCutscene"/>
+              </conditions>
+              <delay exact="1ms"/>
+              <actions>
+                <!--<start_actor_sequence actor="player.entity" type="'idle_forward'" transition="false" behavior="'generic'"/>-->
+              </actions>
+              <delay exact="10s"/>
+              <actions>
+                <!--
+                <start_actor_sequence actor="player.entity" type="'idle_forward'" transition="false" behavior="'generic'"/>
+                -->
+                <write_incoming_message title="{30285,301}" text="{30285,302}" source="$HeadScientistActor" highpriority="true" read="true"/>
+                <speak  voiceover="true" actor="player.entity" priority="99">
+                  <text page="10159" line="30223501"/>
+                  <text page="10159" line="30223502"/>
+                  <text page="10159" line="30223503" delay="2s"/>
+                  <text page="10159" line="30223504" delay="2s"/>
+                  <text page="10159" line="30223505" delay="2s"/>
+                </speak>
+              </actions>
+            </cue>
+            <cue name="Ch0_Prelude_Cutscene_Speak_Ended">
+              <conditions>
+                <event_speak_finished actor="player.entity"/>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="2s" fadein="2s" realtime="true"/>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <stop_cutscene cutscene="parent.$PIOCutscene"/>
+                <stop_music/>
+                <set_ambient_sound_state active="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch0_Prelude_Cutscene_End">
+              <conditions>
+                <event_cutscene_stopped cutscene="parent.$PIOCutscene"/>
+              </conditions>
+              <actions>
+                <do_if value="Ch0_Prelude_Cutscene_Speak_Ended.state == cuestate.complete">
+                  <unlock_achievement name="COH_PIONEER"/>
+                  <debug_text text="'achievement COH_PIONEER unlocked'" chance="$DebugChance"/>
+                </do_if>
+                <do_else>
+                  <cancel_cue cue="Ch0_Prelude_Cutscene_Speak_Ended"/>
+                  <interrupt_speak actor="player.entity" priority="99"/>
+                  <stop_cutscene cutscene="parent.$PIOCutscene"/>
+                  <stop_music/>
+                  <set_ambient_sound_state active="true"/>
+                  <debug_text text="'Cutscene cancelled'" chance="$DebugChance"/>
+                </do_else>
+                <signal_cue cue="Ch1_Intro_Lines"/>
+                <signal_cue cue="SharedCues"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+        
+        <!-- Cutscene brieging handling -->
+
+        <!--These cues handle the briefing presentations e.g. Holomap or cutscene render targets (depending on the mission)
+                note: play_cutscene action should not be in the actions of the cue with a event_briefing_submission_selected condition. It must be delayed-->
+        <cue name="BriefingStarted">
+          <conditions>
+            <check_any>
+              <event_briefing_started cue="Start"/>
+              <event_briefing_submission_selected cue="Start"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$RenderTarget" exact="event.param.{1}"/>
+            <set_value name="$StartBriefingCutscene"/>
+            <debug_text text="'Briefing started'" chance="$DebugChance"/>
+          </actions>
+          <cues>
+            <cue name="DisplayCutscene" onfail="cancel">
+              <conditions>
+                <check_value value="$StartBriefingCutscene?"/>
+              </conditions>
+              <actions>
+                <create_presentation_cluster name="$CutsceneCluster" background="macro.cluster_black_wlight_bg_macro"/>
+                <find_sector name="$CutsceneSector" space="$CutsceneCluster"/>
+
+                <create_ship name="$BriefingObject" macro="macro.ship_ter_l_research_01_a_macro" sector="$CutsceneSector" capturable="false">
+                  <owner exact="faction.pioneers" overridenpc="true" />
+                  <loadout>
+                    <level exact="1.0"/>
+                  </loadout>
+                  <position x="0" y="0" z="0"/>
+                </create_ship>
+                
+                <set_value name="$BriefingCutsceneStarted"/>
+                <set_value name="$CutsceneKey" exact="'OrbitIndefinitelySlower'"/>
+                <play_cutscene key="$CutsceneKey" rendertarget="$RenderTarget">
+                  <param name="targetobject" object="$BriefingObject"/>
+                </play_cutscene>
+              </actions>
+            </cue>
+
+            <cue name="BriefingStopped">
+              <conditions>
+                <check_any>
+                  <event_briefing_cancelled cue="Start"/>
+                  <event_briefing_submission_unselected cue="Start"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <do_if value="$BriefingCutsceneStarted?">
+                  <!--Temp value. This is used to identify if a cutscene for this mission is still playing.-->
+                  <remove_value name="$BriefingCutsceneStarted"/>
+                  <stop_cutscene key="$CutsceneKey"/>
+                </do_if>
+                
+                <do_if value="$CutsceneCluster?">
+                  <destroy_object object="$CutsceneCluster"/>
+                </do_if>
+
+                <do_if value="$HoloMap?">
+                  <remove_holomap />
+                  <remove_value name="$HoloMap"/>
+                </do_if>
+
+                <debug_text text="'Briefing canceled'" chance="$DebugChance"/>
+                <reset_cue cue="BriefingStarted"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- story start -->
+        <cue name="Ch1_Intro_Lines">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$InitialStation" exact="player.station"/>
+          </actions>
+          <cues>
+            <cue name="Ch1_Intro_Lines_Chatter" ref="md.LIB_Dialog.Speak_Actor" comment="introductory chatter">
+              <param name="Actor"             value="$HeadScientistActor"/>
+              <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+              <param name="DelayInitial"      value="5s"/>
+              <param name="Lines"             value="[[30285160], [30285163], [30285161], [30285162]]"/>
+              <param name="EndSignalCue"      value="Ch1_Deploy_Satellite"/>
+              <param name="MissionCue"        value="null"/>
+              <param name="IsInMission"       value="false"/>
+              <!--
+                <t id="30285160">\033MNajia, what are you doing? Are you off daydreaming again?</t>
+                <t id="30285163">\033MHave you not read my email? I clearly stated the importance of this task!</t>
+                <t id="30285161">\033MI have set up the instruments and now I'm only waiting on you.</t>
+                <t id="30285162">\033MHurry up we dont have all cycle!</t>
+              -->
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch1_Deploy_Satellite">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <create_mission cue="Start" type="missiontype.plot" name="{30285,1001}" description="{30285,1002}" difficulty="level.easy" faction="faction.pioneers" abortable="false" icon="'briefing_dr_rick_feynman_01'" iconcaption="$HeadScientistActor.name" group="missiongroup.gs_terran2"/>
+            <write_incoming_message title="{30285,303}" text="{30285,304}" source="$HeadScientistActor" highpriority="true"/>
+            <set_value name="$CurrentStep" exact="1"/>
+            <!--set_objective cue="$MissionCue" step="$CurrentStep" action="objective.flyto" text="{30201, 1009}" object="$HQSector" offset="$HQPosition" radius="$FlyToDistance"/-->
+            <set_value name="$DeployedSatellites" exact="[]"/>
+          </actions>
+
+          <cues>
+            <cue name="Ch1_Undock_Wait">
+              <conditions>
+                <event_object_undocked_from container="$InitialStation"/>
+              </conditions>
+              <actions>
+                <set_value name="$Traveldrivetime" exact="player.age + 60"/>
+              </actions>
+              <cues>
+                <cue name="Ch1_Undock_Wait_Distance">
+                  <cues>
+                    <cue name="DepartSattion_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$InitialStation"/>
+                      <param name="ApproachDistance"  value="500m"/>
+                      <param name="Invert"            value="true" comment="Invert the distance check (left the station)"/>
+                      <param name="SuccessSignalCue"  value="Ch1_TravelDrive"/>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- enable traveldrive hint -->
+            <cue name="Ch1_TravelDrive">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Ch1_TravelDrive_NotNeeded">
+                  <conditions>
+                    <event_player_travelmode_started/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Ch1_TravelDrive_Delay"/>
+                    <cancel_cue cue="Ch1_TravelDrive_Chatter"/>
+                  </actions>
+                </cue>
+                <cue name="Ch1_TravelDrive_Delay" checkinterval="1s">
+                  <conditions>
+                    <check_age min="$Traveldrivetime"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch1_TravelDrive_Chatter"/>
+                  </actions>
+                </cue>
+                <cue name="Ch1_TravelDrive_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_TravelDrive_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="DelayInitial"      value="3s"/>
+                      <param name="Lines"             value="[[30285250]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="EndSignalCue"      value="Ch1_TravelDrive_Hint"/>
+                      <!--
+                        <t id="30285250">"It's critical that we keep our schedule, so please use your traveldrive."</t>
+                      -->
+                    </cue>
+                    <cue name="Ch1_TravelDrive_Hint">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <cues>
+                        <cue name="Ch1_TravelDrive_Hint_Show">
+                          <delay exact="1s"/>
+                          <actions>
+                            <show_help line="4302" log="true" position="13" force="true" width="350" duration="10s" comment="Every ship engine can accelerate beyond its normal top speed using TRAVEL MODE." allowclose="false"/>
+                            <show_help line="4301" log="true" position="13" force="true" width="350" duration="10s" comment="Press $INPUT_ACTION_TOGGLE_TRAVEL_MODE$ or activate TRAVEL MODE from the SHIP MENU \($INPUT_ACTION_OPEN_COCKPIT_MENU$\)." allowclose="false"/>
+                          </actions>
+                        </cue>
+                        <cue name="Ch1_TravelDrive_Hint_Remove">
+                          <conditions>
+                            <event_player_changed_activity activity="activity.travel"/>
+                          </conditions>
+                          <actions>
+                            <cancel_cue cue="Ch1_TravelDrive_Hint_Show"/>
+                            <remove_help line="4301"/>
+                            <remove_help line="4302"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- player on the way to 1st deploy location -->
+            <cue name="Ch1_Deploy_Introductory_Chatter">
+              <cues>
+                <cue name="Ch1_DeployInPlace_CahtterFar_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                  <param name="ApproachObject"    value="player.entity"/>
+                  <param name="ApproachSector"    value="$BrennanSector"/>
+                  <param name="ApproachOffset"    value="$DeployOffset1"/>
+                  <param name="ApproachDistance"  value="200km"/>
+                  <param name="SuccessSignalCue"  value="Ch1_Deploy_Satellite_Chatter"/>
+                </cue>
+                <cue name="Ch1_Deploy_Satellite_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <!-- introductory chatter -->
+                    <cue name="Ch1_Deploy_Satellite_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor" comment="introductory chatter">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="DelayInitial"      value="2s"/>
+                      <param name="Lines"             value="[[30285101], [30285102], [30285103]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <!--
+                      <t id="30285101">You need place the satellites as exact as possible."/>
+                      <t id="30285102">"Major deviations might result in wrong data and my experiment depends on it being accurate."/>
+                      <t id="30285103">"I would do it myself but I have to monitor the data as it comes in.</t>
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- player approaches 1st deploy location (Hint)-->
+            <cue name="Ch1_DeployInPlace_ApproachFar">
+              <cues>
+                <cue name="Ch1_DeployInPlace_ApproachFar_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                  <param name="ApproachObject"    value="player.entity"/>
+                  <param name="ApproachSector"    value="$BrennanSector"/>
+                  <param name="ApproachOffset"    value="$DeployOffset1"/>
+                  <param name="ApproachDistance"  value="40km"/>
+                  <param name="SuccessSignalCue"  value="Ch1_DeployInPlace_Approach_Hint"/>
+                </cue>
+
+                <cue name="Ch1_DeployInPlace_Approach_Hint">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="player.activity == activity.travel"/>
+                  </conditions>
+                  <actions>
+                    <show_help line="4308" log="true" position="1" force="true" width="250" duration="10s" comment="You can quickly leave travel mode by pressing $INPUT_ACTION_STOP$." allowclose="false"/>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_DeployInPlace_Approach_Hint_Remove">
+                      <conditions>
+                        <event_player_travelmode_stopped/>
+                      </conditions>
+                      <actions>
+                        <remove_help line="4308"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- player approaches 1st deploy location (near) -->
+            <cue name="Ch1_DeployInPlace_ApproachNear">
+              <cues>
+                <cue name="Ch1_DeployInPlace_Approach_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                  <param name="ApproachObject"    value="player.entity"/>
+                  <param name="ApproachSector"    value="$BrennanSector"/>
+                  <param name="ApproachOffset"    value="$DeployOffset1"/>
+                  <param name="ApproachDistance"  value="40km"/>
+                  <param name="SuccessSignalCue"  value="Ch1_DeployInPlace_Approach_Chatter"/>
+                </cue>
+
+                <cue name="Ch1_DeployInPlace_Approach_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_DeployInPlace_Approach_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285100]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <!--
+                        <t id="30285100">Najia make sure to be precise."/>
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- satellite deployment-->
+            <cue name="Ch1_DeployInPlace">
+              <cues>
+                <cue name="Ch1_DeployInPlace_Ref" ref="md.RML_DeployInPlace.DeployInPlace">
+                  <param name="ReachedAreaCue"            value="Shared_ReachedArea_Deploy"/>
+                  <param name="LeftAreaCue"               value="Shared_LeftArea_Deploy"/>
+                  <param name="DeployOutOfRangeCue"       value="Shared_OutOfRange_Deployed"/>
+                  <param name="DeployWrongDeployableCue"  value="Shared_Other_Deployed"/>
+                  <param name="EndSignalCue"              value="Ch1_Satellite_Deployed"/>
+                  <param name="MissionCue"                value="$MissionCue"/>
+                  <param name="StartStep"                 value="$CurrentStep"/>
+                  <param name="UpdateBriefing"            value="true"/>
+                  <param name="DebugChance"               value="$DebugChance"/>
+                  <param name="ObjectiveText"             value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange"     value="{30285,1004}"/>
+                  <param name="ObjectiveText_Plural"          value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange_Plural"  value="{30285,1004}"/>
+                  <param name="TargetSector"              value="$BrennanSector"/>
+                  <param name="TargetOffset"              value="$DeployOffset1"/>
+                  <param name="TargetRadius"              value="8km" comment="allow larger tollerance for first satellite"/>
+                  <param name="TargetCount"               value="1"/>
+                  <param name="DeployableCategory"        value="deployablecategory.satellite"/>
+                  <param name="Faction"                   value="faction.civilian"/>
+                  <param name="ResultObjectListRef"       value="$DeployedSatellites"/>
+                </cue>
+
+                <cue name="Ch1_Satellite_Deployed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_Deploy_Satellite_Deployed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285110]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="EndSignalCue"      value="Ch1_Complete"/>
+                      <!--
+                          <t id="30285110">1st sat deployed, but doesn't say much as we need all 3 to get data.</t>
+                        -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- reset current chapter and trigger the next -->
+                <signal_cue cue="Ch2_Deploy_Satellite"/>
+                <cancel_cue cue="Ch1_Deploy_Satellite" />
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch2_Deploy_Satellite">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$CurrentStep" exact="2"/>
+          </actions>
+          <cues>
+
+            <!--cue name="Ch2_Deploy_Satellite_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor" comment="good job, next one chatter">
+              <param name="Actor"             value="$HeadScientistActor"/>
+              <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+              <param name="DelayInitial"      value="5s"/>
+              <param name="Lines"             value="[[30221232]]"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+              <param name="EndSignalCue"      value="Ch1_Deploy_Satellite"/>
+            </cue-->
+
+            <!-- player approaches 2nd deploy location -->
+            <cue name="Ch2_DeployInPlace_Approach">
+              <cues>
+                <cue name="Ch2_DeployInPlace_Approach_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                  <param name="ApproachObject"    value="player.entity"/>
+                  <param name="ApproachSector"    value="$BrennanSector"/>
+                  <param name="ApproachOffset"    value="$DeployOffset2"/>
+                  <param name="ApproachDistance"  value="170km"/>
+                  <param name="SuccessSignalCue"  value="Ch2_DeployInPlace_Approach_Chatter"/>
+                </cue>
+
+                <cue name="Ch2_DeployInPlace_Approach_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch2_DeployInPlace_Approach_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285120], [30285121], [30285122]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <!--
+                        <t id="30285120">\033MI read in your file that you have ancesstors that are originaly from Aldrin. They developed some interesting technology when they were cut off from Sol.</t>
+                        <t id="30285121">\033MIts ironic that they are cut off again. Its almost as the universe doesn't want us to mix.</t>
+                        <t id="30285122">\033MI for one am glad to be on this side of the gate and have access to Sol and its full glory. Maybe one day you too even get granted access to Earth.</t>
+                        -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- satellite deployment-->
+            <cue name="Ch2_DeployInPlace">
+              <cues>
+                <cue name="Ch2_DeployInPlace_Ref" ref="md.RML_DeployInPlace.DeployInPlace">
+                  <!-- always pass these -->
+                  <param name="ReachedAreaCue"            value="Shared_ReachedArea_Deploy"/>
+                  <param name="LeftAreaCue"               value="Shared_LeftArea_Deploy"/>
+                  <param name="DeployOutOfRangeCue"       value="Shared_OutOfRange_Deployed"/>
+                  <param name="DeployWrongDeployableCue"  value="Shared_Other_Deployed"/>
+                  <param name="EndSignalCue"              value="Ch2_Satellite_Deployed"/>
+                  <param name="MissionCue"                value="$MissionCue"/>
+                  <param name="StartStep"                 value="$CurrentStep"/>
+                  <param name="UpdateBriefing"            value="true"/>
+                  <param name="DebugChance"               value="$DebugChance"/>
+                  <param name="ObjectiveText"             value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange"     value="{30285,1004}"/>
+                  <param name="ObjectiveText_Plural"          value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange_Plural"  value="{30285,1004}"/>
+                  <!-- mission-related parameters -->
+                  <param name="TargetSector"              value="$BrennanSector"/>
+                  <param name="TargetOffset"              value="$DeployOffset2"/>
+                  <param name="TargetRadius"              value="4km" comment="second time, lower tollerance"/>
+                  <param name="TargetCount"               value="1"/>
+                  <param name="DeployableCategory"        value="deployablecategory.satellite"/>
+                  <param name="Faction"                   value="faction.civilian"/>
+                  <param name="ResultObjectListRef"       value="$DeployedSatellites"/>
+                </cue>
+
+                <cue name="Ch2_Satellite_Deployed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch2_Deploy_Satellite_Deployed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285111], [30285112]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="EndSignalCue"      value="Ch2_Complete"/>
+                      <!--
+                        <t id="30285111">Second satellite deployment noted.</t>
+                        <t id="30285112">One to go.</t>
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch3_Deploy_Satellite"/>
+                <cancel_cue cue="Ch2_Complete" />
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+
+        <cue name="Ch3_Deploy_Satellite">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$CurrentStep" exact="3"/>
+          </actions>
+          <cues>
+
+            <cue name="Ch3_Deploy_Satellite_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor" comment="going great, last one chatter">
+              <param name="Actor"             value="$HeadScientistActor"/>
+              <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+              <param name="DelayInitial"      value="15s"/>
+              <param name="Lines"             value="[[30285130], [30285131], [30285132]]"/>
+              <param name="MissionCue"        value="$MissionCue"/>
+              <!-- 
+                <t id="30285130">\033MI find it interesting you like spending so much time here. Most people prefer the relative peacefulness of Sol.</t>
+                <t id="30285131">\033MTo think I'd see the day where Brennan's Triumph, the legendary epicentre of anarchy, being routinely patrolled by Terran forces.</t>
+                <t id="30285132">\033MGiven the history, you can see why the former space command chose to establish a connection here, but there's only so much that polish can accomplish...</t>
+              -->
+            </cue>
+
+            <!-- player approaches 3rd and final deploy location -->
+            <cue name="Ch3_DeployInPlace_Approach">
+              <cues>
+                <cue name="Ch3_DeployInPlace_Approach_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                  <param name="ApproachObject"    value="player.entity"/>
+                  <param name="ApproachSector"    value="$BrennanSector"/>
+                  <param name="ApproachOffset"    value="$DeployOffset3"/>
+                  <param name="ApproachDistance"  value="80km"/>
+                  <param name="SuccessSignalCue"  value="Ch3_DeployInPlace_Approach_Chatter"/>
+                </cue>
+
+                <cue name="Ch3_DeployInPlace_Approach_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch3_DeployInPlace_Approach_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285140]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <!--
+                        <t id="30285140">How are we looking on that last sat placement? We have things to do here and these readings dont look good, we need that sensory data.</t>
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- satellite deployment-->
+            <cue name="Ch3_DeployInPlace">
+              <cues>
+                <cue name="Ch3_DeployInPlace_Ref" ref="md.RML_DeployInPlace.DeployInPlace">
+                  <!-- always pass these -->
+                  <param name="ReachedAreaCue"            value="Shared_ReachedArea_Deploy"/>
+                  <param name="LeftAreaCue"               value="Shared_LeftArea_Deploy"/>
+                  <param name="DeployOutOfRangeCue"       value="Shared_OutOfRange_Deployed"/>
+                  <param name="DeployWrongDeployableCue"  value="Shared_Other_Deployed"/>
+                  <param name="EndSignalCue"              value="Ch3_Satellite_Deployed"/>
+                  <param name="MissionCue"                value="$MissionCue"/>
+                  <param name="StartStep"                 value="$CurrentStep"/>
+                  <param name="UpdateBriefing"            value="true"/>
+                  <param name="DebugChance"               value="$DebugChance"/>
+                  <param name="ObjectiveText"             value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange"     value="{30285,1004}"/>
+                  <param name="ObjectiveText_Plural"          value="{30285,1003}"/>
+                  <param name="ObjectiveText_InRange_Plural"  value="{30285,1004}"/>
+                  <!-- mission-related parameters -->
+                  <param name="TargetSector"              value="$BrennanSector"/>
+                  <param name="TargetOffset"              value="$DeployOffset3"/>
+                  <param name="TargetRadius"              value="2km" comment="last one, low tollerance"/>
+                  <param name="TargetCount"               value="1"/>
+                  <param name="DeployableCategory"        value="deployablecategory.satellite"/>
+                  <param name="Faction"                   value="faction.civilian"/>
+                  <param name="ResultObjectListRef"       value="$DeployedSatellites"/>
+                </cue>
+
+                <cue name="Ch3_Satellite_Deployed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch3_Deploy_Satellite_Deployed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$HeadScientistActor"/>
+                      <param name="CutsceneKey"       value="$HeadScientistActorCutsceneKey"/>
+                      <param name="Lines"             value="[[30285113], [30285114]]"/>
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="EndSignalCue"      value="Ch3_Complete"/>
+                      <!--
+                        <t id="30285113">Finally, 3rd sat deployed</t>
+                        <t id="30285114">It's about time.</t>
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch3_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <remove_mission cue="$MissionCue" type="completed"/>
+              </actions>
+              <delay min="40s" max="60s"/>
+              <actions>
+                <write_to_logbook category="missions" faction="faction.player" title="{30285,1001}" text="{30285,1002}"/>
+                <signal_cue cue="md.Story_HQ_Discovery.Ch1_Intro"/>
+                <cancel_cue cue="Start"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

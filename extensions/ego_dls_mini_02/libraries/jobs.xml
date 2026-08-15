@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff>
+  <add sel="/jobs">
+
+    <!-- - start deactivated
+         - story activates blueprints/jobs for factions
+    -->
+    <job id="argon_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="argon" tags="[factionlogic, envoy]"/>
+      <quota galaxy="3"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="argon"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>        
+        <owner exact="argon" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="argon_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="argon" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="argon"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="argon" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="antigone_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="antigone" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="antigone" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="antigone"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="antigone" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="teladi_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="teladi" tags="[factionlogic, envoy]"/>
+      <quota galaxy="3"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="teladi" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="teladi"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="teladi" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="teladi_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="teladi" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="teladi" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="teladi"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="teladi" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="ministry_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="ministry" tags="[factionlogic, envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" policefaction="ministry" relation="ally" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="ministry"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="ministry" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="paranid_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="paranid" tags="[factionlogic, envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="paranid" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="paranid"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="paranid" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="paranid_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="paranid" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="paranid" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="paranid"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="paranid" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="holyorder_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="holyorder" tags="[factionlogic, envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="holyorder" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="holyorder"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="holyorder" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="holyorder_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="holyorder" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="holyorder" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="holyorder"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="holyorder" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="trinity_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="trinity" tags="[factionlogic, envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="trinity" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="trinity"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="trinity" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="trinity_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="trinity" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="trinity" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="trinity"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="trinity" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="buccaneers_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="buccaneers" tags="[factionlogic, envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="buccaneers" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="buccaneers"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="buccaneers" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="buccaneers_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="buccaneers" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="buccaneers" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="buccaneers"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="buccaneers" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="scaleplate_cypher" name="{20204,10013}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Plunder" default="true">
+          <param name="range_internal" value="'sector'"/>
+          <param name="plundermode" value="2"/>
+        </order>
+      </orders>
+      <category faction="scaleplate" tags="[plunderer]" size="ship_m"/>
+      <quota galaxy="8"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="xenon" relation="self" comparison="lt" excludedtags="anarchy" matchextension="false"/>
+      <environment buildatshipyard="false" gate="true"/>
+      <ship>
+        <select tags="[cypher]" faction="scaleplate"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+        </loadout>
+        <owner exact="scaleplate" overridenpc="true"/>
+      </ship>
+    </job>
+
+  </add>
+  <add sel="/jobs/job[@id='zyarth_scout_patrol_s']" pos="after" silent="true">
+    <job id="split_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="split" tags="[factionlogic, envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="split" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="split"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="split" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="split_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="split" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="split" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="split"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="split" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="freesplit_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="freesplit" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="freesplit" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="freesplit"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="freesplit" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="court_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="court" tags="[envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="court" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="court"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="ministry"/>
+        </loadout>
+        <owner exact="court" overridenpc="true"/>
+      </ship>
+    </job>
+  </add>
+  <add sel="/jobs/job[@id='terran_scout_patrol_s']" pos="after" silent="true">
+    <job id="terran_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="terran" tags="[envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="terran" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="terran"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="terran" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="terran_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="terran" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="terran" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="terran"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="terran" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="pioneers_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="pioneers" tags="[factionlogic, envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="pioneers" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="pioneers"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="pioneers" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="pioneers_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="pioneers" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="pioneers" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="pioneers"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="pioneers" overridenpc="true"/>
+      </ship>
+    </job>
+  </add>
+  <add sel="/jobs/job[@id='scavenger_free_tug_m']" pos="after" silent="true">
+    <job id="scavenger_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="scavenger" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="scavenger"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="scavenger" overridenpc="true"/>
+      </ship>
+    </job>
+  </add>
+  <add sel="/jobs/job[@id='boron_scout_patrol_s']" pos="after" silent="true">
+    <job id="boron_envoy" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="boron" tags="[envoy]"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="boron"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.7"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="boron_envoy_mission" name="{20204,10027}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="VisitStations" default="true"/>
+      </orders>
+      <category faction="boron" tags="[envoy]"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="friend" comparison="ge" matchextension="false"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select tags="[envoy]" faction="boron"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+          <level faction="argon"/>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+  </add>
+</diff>

@@ -1,0 +1,1532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Terran1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_terran1" version="3">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Terran_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="100"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="30284"/>
+      </actions>
+      <patch sinceversion="2">
+        <!-- Patching away gamestarts.xml faction relation which messes with story_split court and story_paranid trinity faction rewards -->
+        <!--<set_faction_relation faction="faction.player" otherfaction="faction.court" value="faction.player.relationto.{faction.court} + 0.032"/> faction unknown with SV inactive -->
+        <set_faction_relation faction="faction.player" otherfaction="faction.trinity" value="faction.player.relationto.{faction.trinity} + 0.032"/>
+      </patch>
+      <patch sinceversion="3">
+        <do_if value="@$MissionCue.hasmission">
+          <update_mission cue="$MissionCue" group="missiongroup.gs_terran1"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Setup">
+          <actions>
+            <play_music music="'music_dlc_terran_cadet_gs_1'"/>
+          </actions>
+          <delay exact="3s"/>
+          <actions>
+            <do_if value="@md.Story_HQ_Discovery.Start.$SkipGamestartMission">
+              <signal_cue_instantly cue="md.Story_HQ_Discovery.Ch1_Intro" param="true"/>
+            </do_if>
+            <do_else>
+              <signal_cue cue="Ch1_Maintenance"/>
+            </do_else>
+          </actions>
+          <cues>
+
+            <cue name="Setup_Actors">
+              <delay exact="1s" comment="Give Story_Yaki enough time to setup the actors."/>
+              <actions>
+                <set_value name="$SecretServiceActor" exact="md.Story_Yaki.Start.$SecretServiceActor"/>
+                <set_value name="$SecretServiceCutsceneKey" exact="md.Story_Yaki.Start.$SecretServiceCutsceneKey"/>
+                <set_value name="$WingmateActor" exact="md.Story_Yaki.Start.$WingmateActor"/>
+                <set_value name="$WingmateCutsceneKey" exact="md.Story_Yaki.Start.$WingmateCutsceneKey"/>
+                <set_value name="$NellieActor" exact="md.Story_Yaki.Start.$NellieActor"/>
+
+                <create_cue_actor name="$DistressSignalActor" cue="namespace">
+                  <select race="race.terran" faction="faction.terran"/>
+                  <page exact="10168"/>
+                </create_cue_actor>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Locations">
+              <actions>
+                <find_sector name="$TerranCadetSector" macro="macro.cluster_101_sector001_macro"/>
+                <create_position name="$TerranCadetStartingPosition" object="player.entity" space="$TerranCadetSector"/>
+                <find_sector name="$CloseToEarthSector" macro="macro.cluster_102_sector001_macro" comment="Venus"/>
+                <find_sector name="$EarthSector" macro="macro.cluster_104_sector001_macro" comment="Earth"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Map">
+              <actions>
+                <!-- Set part of the map to known, starting in 'Mars' (Terran space) -->
+                <set_value name="$InitialMap" exact="[
+                    macro.cluster_102_sector001_macro,
+                    macro.cluster_101_sector001_macro,
+                    macro.cluster_100_sector001_macro,
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                  <param name="UncoverStationFaction" value="faction.terran"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Comms_Chatter_Handler" onfail="cancel">
+              <conditions>
+                <check_value value="Ch3_Epilogue.state == cuestate.waiting" comment="To prevent existing beta saves from having their comms chatter permanently disabled."/>
+                <check_value value="player.sector == $TerranCadetSector"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Generic.SuppressCommChatter_AddCue">
+                  <param name="Cue" value="Start"/>
+                </run_actions>
+              </actions>
+              <cues>
+
+                <cue name="Activate_Comms_Chatter">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled cue="Ch3_Epilogue"/>
+                      <event_object_changed_sector object="player.entity" previous="$TerranCadetSector"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <run_actions ref="md.LIB_Generic.SuppressCommChatter_RemoveCue">
+                      <param name="Cue" value="Start"/>
+                    </run_actions>
+                  </actions>
+                  <cues>
+
+                    <cue name="Deactivate_Comms_Chatter">
+                      <conditions>
+                        <event_object_changed_sector object="player.entity" sector="$TerranCadetSector"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="Ch3_Epilogue.state == cuestate.waiting">
+                          <reset_cue cue="Setup_Comms_Chatter_Handler"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch1_Maintenance">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Terran Cadet gamestart mission chapter 1.'" chance="$DebugChance"/>
+
+            <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+          </actions>
+          <cues>
+
+            <cue name="Ch1_Setup_Satellites">
+              <actions>
+                <!-- TODO: Actual positions -->
+                <create_position name="$NormalSatellitePosition"  space="$TerranCadetSector" x="$TerranCadetStartingPosition.x"       y ="$TerranCadetStartingPosition.y" z ="$TerranCadetStartingPosition.z + 4km"/>
+                <create_position name="$MissingSatellitePosition" space="$TerranCadetSector" x="$TerranCadetStartingPosition.x + 9km" y ="$TerranCadetStartingPosition.y" z ="$TerranCadetStartingPosition.z + 6km"/>
+                <create_position name="$SkipSatellitePosition"    space="$TerranCadetSector" x="$TerranCadetStartingPosition.x - 3km" y ="$TerranCadetStartingPosition.y" z ="$TerranCadetStartingPosition.z + 8km"/>
+                <create_position name="$BrokenSatellitePosition"  space="$TerranCadetSector" x="$TerranCadetStartingPosition.x + 4km" y ="$TerranCadetStartingPosition.y" z ="$TerranCadetStartingPosition.z + 16km"/>
+
+                <set_value name="$TerranSatelliteMacro" exact="macro.eq_arg_satellite_01_macro"/>
+
+                <create_object name="$NormalSatellite" macro="$TerranSatelliteMacro" owner="faction.terran" sector="$TerranCadetSector">
+                  <position value="$NormalSatellitePosition"/>
+                </create_object>
+                <set_object_min_hull object="$NormalSatellite" exact="100"/>
+
+                <create_object name="$SkipSatellite" macro="$TerranSatelliteMacro" owner="faction.terran" sector="$TerranCadetSector">
+                  <position value="$SkipSatellitePosition"/>
+                </create_object>
+                <set_object_min_hull object="$SkipSatellite" exact="100"/>
+
+                <create_object name="$BrokenSatellite" macro="$TerranSatelliteMacro" owner="faction.terran" sector="$TerranCadetSector">
+                  <position value="$BrokenSatellitePosition"/>
+                </create_object>
+                <set_object_hull object="$BrokenSatellite" exact="20"/>
+                <set_object_min_hull object="$BrokenSatellite" exact="20"/>
+
+                <set_value name="$SatelliteApproachDistance" exact="500m"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <signal_cue cue="Ch1_1_Normal_Satellite"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_1_Normal_Satellite">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 1.'" chance="$DebugChance"/>
+
+                <create_mission cue="$MissionCue" type="missiontype.plot" group="missiongroup.gs_terran1" name="{30284,1001}" description="{30284,1002}" rewardtext="{30284,1003}" difficulty="level.easy" faction="faction.terran" abortable="false" icon="'briefing_haile_shinamon_01'" iconcaption="$WingmateActor.name">
+                  <briefing>
+                    <objective step="1" action="objective.approach" object="$NormalSatellite" text="{30284,1010}"/>
+                  </briefing>
+                </create_mission>
+
+                <set_value name="$CurrentStep"/>
+              </actions>
+              <cues>
+
+                <!--These cues handle the briefing presentations e.g. Holomap or cutscene render targets (depending on the mission)
+                note: play_cutscene action should not be in the actions of the cue with a event_briefing_submission_selected condition. It must be delayed-->
+                <cue name="BriefingStarted">
+                  <conditions>
+                    <check_any>
+                      <event_briefing_started cue="$MissionCue"/>
+                      <event_briefing_submission_selected cue="$MissionCue"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$RenderTarget" exact="event.param.{1}"/>
+                    <set_value name="$StartBriefingCutscene"/>
+                    <debug_text text="'Briefing started'" chance="$DebugChance"/>
+                  </actions>
+                  <cues>
+                    <cue name="DisplayCutscene" onfail="cancel">
+                      <conditions>
+                        <check_value value="$StartBriefingCutscene?"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$BriefingCutsceneStarted"/>
+                        <set_value name="$CutsceneKey" exact="'ShowLogoTerran'"/>
+                        <play_cutscene key="$CutsceneKey" rendertarget="$RenderTarget">
+                          <param name="npcref" object="$SecretServiceActor"/>
+                        </play_cutscene>
+                      </actions>
+                    </cue>
+
+                    <cue name="BriefingStopped">
+                      <conditions>
+                        <check_any>
+                          <event_briefing_cancelled cue="$MissionCue"/>
+                          <event_briefing_submission_unselected cue="$MissionCue"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <do_if value="$BriefingCutsceneStarted?">
+                          <!--Temp value. This is used to identify if a cutscene for this mission is still playing.-->
+                          <remove_value name="$BriefingCutsceneStarted"/>
+                          <stop_cutscene key="$CutsceneKey"/>
+                        </do_if>
+
+                        <do_if value="$HoloMap?">
+                          <remove_holomap />
+                          <remove_value name="$HoloMap"/>
+                        </do_if>
+
+                        <debug_text text="'Briefing canceled'" chance="$DebugChance"/>
+                        <reset_cue cue="BriefingStarted"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_1_Wingmate_Orders">
+                  <actions>
+                    <cancel_all_orders object="$WingmateShip"/>
+                    <create_order id="'Wait'" object="$WingmateShip" default="true"/>
+                    <create_order object="$WingmateShip" id="'MoveToObject'" immediate="true">
+                      <param name="destination" value="$NormalSatellite"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_1_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="Lines"             value="[[30284001]]"/>
+                  <param name="EndSignalCue"      value="Ch1_1_Update_Objective"/>
+                  <!--
+                          Wingmate:
+                          (bored)Tell me again why we're stuck with maintenance duty in Mars of all places?
+                          -->
+                </cue>
+
+                <cue name="Ch1_1_Update_Objective">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_objective_from_briefing cue="$MissionCue" step="$CurrentStep"/>
+                  </actions>
+                  <delay exact="8s"/>
+                  <actions>
+                    <do_if value="Ch1_1_Satellite_Approached_Wingmate_Speak.state == cuestate.waiting">
+                      <signal_cue cue="Ch1_1_Follow_Up_Comment"/>
+                    </do_if>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_1_Approach_ActivateSatellite_Ref_v2" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$NormalSatellite"/>
+                      <param name="ApproachDistance"  value="$SatelliteApproachDistance"/>
+                      <param name="SuccessSignalCue"  value="Ch1_1_Satellite_Approached_Wingmate_Speak"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_1_Follow_Up_Comment">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Ch1_1_Wingmate_Speak_3_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284002]]"/>
+                      <param name="EndSignalCue"      value="null"/>
+                      <!--
+                          Wingmate:
+                          As if anyone's going to attack our back yard.
+                          -->
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_1_Satellite_Approached_Wingmate_Speak">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_1_Wingmate_Speak_2_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284003],[30284004, null, Ch1_2_Missing_Satellite],[30284005]]"/>
+                      <param name="EndSignalCue"      value="Ch1_2_Wingmate_Orders"/>
+                      <!--
+                          Wingmate:
+                          (sighing)This one's fine.
+                          Go check that satellite over there.
+                          (as if he picked a direction at random)I'll just move... this way.
+                          -->
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_2_Missing_Satellite">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 2.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.approach" object="$TerranCadetSector" offset="$MissingSatellitePosition" text="{30284,1011}" updatebriefing="true"/>
+
+                <set_object_min_hull object="$NormalSatellite" exact="0"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_2_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="10s"/>
+                  <param name="Lines"             value="[[30284006],[30284007]]"/>
+                  <param name="EndSignalCue"      value="Ch1_2_Approach_MissingSatellite"/>
+                  <!--
+                          Wingmate:
+                          (frustrated)Seriously, we're already three months out of cadet school and they still fob us off with housekeeping.
+                          (dreamy; "Intervention" is shorthand for a branch of the military)We should be out there with Intervention, saving the universe.
+                          -->
+                </cue>
+
+                <cue name="Ch1_2_Wingmate_Orders">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="$WingmateShip"/>
+                    <create_order id="'Wait'" object="$WingmateShip" default="true"/>
+                    <create_order object="$WingmateShip" id="'MoveToObject'" immediate="true">
+                      <param name="destination" value="$SkipSatellite"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Approach_MissingSatellite">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_2_Approach_MissingSatellite_Ref" ref="md.LIB_Generic.ApproachLocation_Handler">
+                      <param name="ApproachSector"    value="$TerranCadetSector"/>
+                      <param name="ApproachOffset"    value="$MissingSatellitePosition"/>
+                      <param name="ApproachDistance"  value="$SatelliteApproachDistance"/>
+                      <param name="SuccessSignalCue"  value="Ch1_2_Satellite_Approached_Wingmate_Speak"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_2_Satellite_Approached_Wingmate_Speak">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_2_Wingmate_Speak_2_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284008],[30284009]]"/>
+                      <param name="EndSignalCue"      value="Ch1_3_Replace_Satellite"/>
+                      <!--
+                          Wingmate:
+                          (surprised)Wait, that one's missing?
+                          (absentminded while writing to Mission Command)Why is it...?
+                          -->
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_3_Replace_Satellite">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 3.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_3_DeployInPlace_Ref" ref="md.RML_DeployInPlace.DeployInPlace">
+                  <!-- always pass these -->
+                  <param name="EndSignalCue"                  value="Ch1_3_DeployInPlace_Finished"/>
+                  <param name="MissionCue"                    value="$MissionCue"/>
+                  <param name="StartStep"                     value="$CurrentStep" comment="Briefing step to start the mission on"/>
+                  <param name="UpdateBriefing"                value="true" comment="Update the briefing objective step when the objective is updated"/>
+                  <param name="DebugChance"                   value="$DebugChance"/>
+                  <param name="ObjectiveText"                 value="{30136,130}"/>
+                  <param name="ObjectiveText_Plural"          value="{30136,131}"/>
+                  <param name="ObjectiveText_InRange"         value="{30136,130}"/>
+                  <param name="ObjectiveText_InRange_Plural"  value="{30136,131}"/>
+
+                  <!-- mission-related parameters -->
+                  <param name="TargetSector"        value="$TerranCadetSector"/>
+                  <param name="TargetOffset"        value="$MissingSatellitePosition"/>
+                  <param name="TargetRadius"        value="1km"/>
+                  <param name="TargetCount"         value="1"/>
+                  <param name="DeployableCategory"  value="deployablecategory.satellite"/>
+                  <param name="Faction"             value="faction.terran"/>
+                </cue>
+
+                <cue name="Ch1_3_DeployInPlace_Finished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch1_3_Check_Completion"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_3_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="2s"/>
+                  <param name="Lines"             value="[[30284010],[30284011]]"/>
+                  <param name="EndSignalCue"      value="Ch1_3_All_Speaks_Finished"/>
+                  <!--
+                          Wingmate:
+                          Mission Command says just deploy a new one.
+                          (dry laugh)See? They don't even care.
+                          -->
+                </cue>
+
+                <cue name="Ch1_3_All_Speaks_Finished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch1_3_Check_Completion"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_3_Check_Completion">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="(Ch1_3_DeployInPlace_Finished.state != cuestate.waiting) and (Ch1_3_All_Speaks_Finished.state != cuestate.waiting)"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch1_4_Follow_Wingmate"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_4_Follow_Wingmate">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 4.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.custom" object="$SkipSatellite" radius="$SatelliteApproachDistance" customaction="{30284,1012}" updatebriefing="true"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_4_Wingmate_Speak_1">
+                  <delay exact="6s"/>
+                  <actions>
+                    <speak actor="$WingmateActor" comment="Talking to himself." priority="100">
+                      <text line="30284012" comment="(grumbling)It's as if they're keeping us away from the fight on purpose."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_4_Nellie_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284012"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$NellieActor" comment="Responding to Wingmate." recipient="$WingmateActor" broadcast="true" priority="100">
+                      <text line="30284001" comment="Trained pilots are among the most vital resources of the Terran Protectorate."/>
+                      <text line="30284002" delay="0.5s" comment="Terran aces are known to subdue entire squadrons of adversaries through superiour manoeuvres."/>
+                      <text line="30284003" delay="0.5s" comment="You, by contrast, are not.(As in 'You do not possess these qualities.')"/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_4_Wingmate_Speak_2">
+                  <conditions>
+                    <event_speak_finished actor="$NellieActor" line="30284001"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" comment="Responding to Nellie." recipient="player.entity" priority="100">
+                      <text line="30284013" comment="Gee, thanks Nellie."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_4_Approach_WingmateShip">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284013"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_4_Approach_WingmateShip_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$SkipSatellite"/>
+                      <param name="ApproachDistance"  value="$SatelliteApproachDistance"/>
+                      <param name="SuccessSignalCue"  value="Ch1_4_Wingmate_Speak_3"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_4_Wingmate_Speak_3">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_4_Wingmate_Speak_3_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284014],[30284015]]"/>
+                      <param name="EndSignalCue"      value="Ch1_5_Broken_Satellite"/>
+                      <!--
+                          Wingmate:
+                          (clears throat, realises he was distracted)Uh, diagnostics are taking a tad long on this one.
+                          You go on ahead, I'll come after.
+                          -->
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_5_Broken_Satellite">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 5.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.approach" object="$BrokenSatellite" text="{30284,1013}" updatebriefing="true"/>
+
+                <set_object_min_hull object="$SkipSatellite" exact="0"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_5_Wingmate_Speak_1">
+                  <delay exact="5s"/>
+                  <actions>
+                    <speak actor="$WingmateActor" comment="Talking to himself." recipient="player.entity" priority="100">
+                      <text line="30284016" comment="(grumpy, mumbling to himself)I guess we're supposed to show off our 'superiour menoeuvres' to these useless tins."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_5_Nellie_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284016"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$NellieActor" comment="Responding to Wingmate." recipient="$WingmateActor" broadcast="true" priority="100">
+                      <text line="30284004" comment="(gleeful)Feedback forwarded."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_5_Wingmate_Speak_2">
+                  <conditions>
+                    <event_speak_finished actor="$NellieActor" line="30284004"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" comment="Responding to Nellie." recipient="player.entity" priority="100">
+                      <text line="30284017" comment="(scoffs)Typical."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_5_Approach_BrokenSatellite">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284017"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_5_Approach_BrokenSatellite_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$BrokenSatellite"/>
+                      <param name="ApproachDistance"  value="$SatelliteApproachDistance"/>
+                      <param name="SuccessSignalCue"  value="Ch1_6_Repair_Satellite"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_6_Repair_Satellite">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 1 part 6.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <add_to_group groupname="$RepairTargetGroup" object="$BrokenSatellite"/>
+                <set_value name="$RepairPercentage" exact="100"/>
+
+                <!-- RML requires both strings. -->
+                <substitute_text text="$SingularObjectiveText" source="{30146,20}">
+                  <replace string="'$PERCENTAGE$'" with="$RepairPercentage"/>
+                </substitute_text>
+                <substitute_text text="$MultipleObjectiveText" source="{30146,21}">
+                  <replace string="'$PERCENTAGE$'" with="$RepairPercentage"/>
+                </substitute_text>
+
+                <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_6_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="2s"/>
+                  <param name="Lines"             value="[[30284018],[30284019]]"/>
+                  <param name="EndSignalCue"      value="Ch1_6_Display_Repair_Hint"/>
+                  <!--
+                          Wingmate:
+                          Damaged, huh?
+                          You'll have to get out of your ship and repair it manually.
+                          -->
+                </cue>
+
+                <cue name="Ch1_6_Display_Repair_Hint">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="not player.ship.isclass.spacesuit">
+                      <show_help custom="{30223,2004}" position="3" allowclose="true" timeout="false" comment="Your spacesuit is equipped with a repair laser. Get out of your seat and leave your ship via the transporter room control panel."/>
+                      <set_value name="$RepairLaserHintActive"/>
+                    </do_if>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_6_Remove_Repair_Hint">
+                      <conditions>
+                        <event_object_changed_object object="player.entity"/>
+                        <check_value value="$RepairLaserHintActive?"/>
+                      </conditions>
+                      <actions>
+                        <remove_help all="true"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_6_RepairObject_Ref" ref="md.RML_RepairObject.RepairObject">
+                  <!-- always pass these -->
+                  <param name="EndSignalCue"      value="Ch1_6_RepairObject_Finished"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="StartStep"         value="$CurrentStep"/>
+                  <!--Don't update the briefing. We've populated the briefing step with text including the initial number of targets. Should be fine to keep static.-->
+                  <param name="UpdateBriefing"    value="true" comment="Update the briefing objective step when the objective is updated"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <!-- mission-related parameters -->
+                  <param name="SingularObjectiveText" value="$SingularObjectiveText"/>
+                  <param name="MultipleObjectiveText" value="$MultipleObjectiveText"/>
+                  <param name="TargetsParam"      value="$RepairTargetGroup"/>
+                </cue>
+
+                <cue name="Ch1_6_RepairObject_Finished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Repairs finished.'" chance="$DebugChance"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_6_Player_Left_Ship">
+                  <conditions>
+                    <event_object_changed_room object="player.entity"/>
+                    <check_value value="player.ship.isclass.spacesuit"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ApproachDistance" exact="player.ship.maxcombatrange.all + 10m"/>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_6_Approach_BrokenSatellite_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$BrokenSatellite"/>
+                      <param name="ApproachDistance"  value="$ApproachDistance"/>
+                      <param name="SuccessSignalCue"  value="Ch1_6_Wingmate_Speak_2"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_6_Wingmate_Speak_2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" recipient="player.entity" priority="100">
+                      <text line="30284020" comment="(stretch word 'fooooor' as if waiting for an answer)Yeah, that one's super trash, and it looks like it's been that way for..."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_6_Nellie_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284020"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$NellieActor" recipient="$WingmateActor" broadcast="true" priority="100">
+                      <text line="30284005" comment="(gets cut off at the end)13 Earth days, 22 Earth hours, 9..."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_6_Wingmate_Speak_3">
+                  <conditions>
+                    <event_speak_finished actor="$NellieActor" line="30284005"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" recipient="player.entity" priority="100">
+                      <text line="30284021" comment="(honestly amazed)Damn!"/>
+                      <text line="30284022" delay="0.5s" comment="Goes to show that nobody cares about this place."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_6_Wingmate_Speak_Finished">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284021"/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Ch1_6_Wait_For_Repair_Completion" checkinterval="1s">
+                      <conditions>
+                        <check_value value="Ch1_6_RepairObject_Finished.state == cuestate.complete"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Ch1_Clean_Up"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Clean_Up">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch2_Distress"/>
+                <cancel_cue cue="Ch1_Maintenance"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch2_Distress">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Terran Cadet gamestart mission chapter 2.'" chance="$DebugChance"/>
+
+            <do_if value="not @player.controlled.isclass.spacesuit">
+              <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+            </do_if>
+
+            <set_object_min_hull object="$BrokenSatellite" exact="0"/>
+
+            <play_music music="'music_dlc_terran_cadet_gs_2'"/>
+          </actions>
+          <cues>
+
+            <cue name="Ch2_Setup_Wreck">
+              <actions>
+                <create_position name="$TraderWreckPosition" space="$TerranCadetSector" x="$TerranCadetStartingPosition.x + 15km" y ="$TerranCadetStartingPosition.y" z ="$TerranCadetStartingPosition.z + 30km"/>
+                <create_object name="$TraderWreck" macro="macro.ship_ter_l_trans_container_01_landmark_macro" sector="$TerranCadetSector">
+                  <safepos value="$TraderWreckPosition"/>
+                </create_object>
+                <set_object_name object="$TraderWreck" page="30284" line="201" comment="Elysian Plains Botany Club"/>
+                <set_object_radar_visible object="$TraderWreck" visible="false"/>
+                <create_position name="$GuidancePosition" space="$TerranCadetSector" x="$TraderWreckPosition.x + 3km" y ="$TraderWreckPosition.y" z ="$TraderWreckPosition.z - 6km"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Setup_Xenon_Ambush">
+              <actions>
+                <set_value name="$XenonAmbushComposition" exact="[
+                   [ macro.ship_xen_s_fighter_01_a_macro, 2 ]
+                   ]" />
+                <do_all exact="$XenonAmbushComposition.count" counter="$m">
+                  <do_all exact="$XenonAmbushComposition.{$m}.{2}" counter="$a">
+                    <create_ship name="$CurrentShip" macro="$XenonAmbushComposition.{$m}.{1}" commandeerable="false" capturable="false" missioncue="namespace" sector="$TerranCadetSector">
+                      <owner exact="faction.xenon" overridenpc="true"/>
+                      <pilot>
+                        <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                      </pilot>
+                      <loadout>
+                        <level exact="1.0"/>
+                      </loadout>
+                      <safepos value="$TraderWreckPosition"/>
+                    </create_ship>
+                    <create_order id="'Wait'" object="$CurrentShip" default="true"/>
+                    <set_object_radar_visible object="$CurrentShip" visible="false"/>
+                    <add_to_group groupname="$XenonAmbushGroup" object="$CurrentShip"/>
+                  </do_all>
+                </do_all>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_1_Orders">
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 2 part 1.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.custom" customaction="{30284,1014}" updatebriefing="true"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_1_DistressSignal_Speak">
+                  <actions>
+                    <speak actor="$DistressSignalActor" broadcast="true" backgroundcomm="true" priority="100">
+                      <text line="30284001" comment="Mayday, mayday!"/>
+                      <text line="30284002" comment="(cutting off at times)... critical engine failure in Mars ..."/>
+                      <text line="30284003" comment="(cutting off at times)... Botany Club ... dead in the water!"/>
+                      <text line="30284004" comment="I repeat!" delay="1s"/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_1_Wingmate_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$DistressSignalActor" line="30284001"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch2_1_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284023]]"/>
+                      <param name="EndSignalCue"      value="Ch2_1_Wingmate_Speak_2"/>
+                      <!--
+                          Wingmate:
+                          A distress signal!
+                          -->
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_1_Wingmate_Speak_2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" broadcast="true" recipient="$SecretServiceActor" priority="100">
+                      <text line="30284024" comment="Mission command, we have a civilian ship signalling distress from the outskirts."/>
+                      <text line="30284025" delay="0.5s" comment="Apparently they're having some sort of accident; engine failure."/>
+                      <text line="30284026" delay="0.5s" comment="Permission to investigate."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_1_SecretService_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284024"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$SecretServiceActor" broadcast="true" recipient="$WingmateActor" priority="100">
+                      <text line="30284001" comment="(gets cut off at the end)13 Earth days, 22 Earth hours, 9..."/>
+                      <text line="30284002" delay="1s" comment="Permission granted."/>
+                      <text line="30284003" delay="0.5s" comment="(stress every word)Proceed with caution."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_1_All_Speaks_Finished">
+                  <conditions>
+                    <event_speak_finished actor="$SecretServiceActor" line="30284001"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch2_2_Rescue"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_2_Rescue">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 2 part 2.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.custom" customaction="{30284,1015}" object="$TerranCadetSector" offset="$GuidancePosition" radius="13km" updatebriefing="true"/>
+
+                <do_if value="not @player.controlled.isclass.spacesuit">
+                  <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+                </do_if>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_2_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="Lines"             value="[[30284027],[30284028]]"/>
+                  <param name="EndSignalCue"      value="null"/>
+                  <!--
+                      Wingmate:
+                      (cheering)Finally some action!
+                      Let's put our maintenance skills to good use for once.
+                      -->
+                </cue>
+
+                <cue name="Ch2_2_Approach_TraderWreck_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                  <param name="ApproachTarget"    value="$TraderWreck"/>
+                  <param name="ApproachDistance"  value="2km"/>
+                  <param name="SuccessSignalCue"  value="Ch2_2_Clean_Up"/>
+                </cue>
+
+                <cue name="Ch2_2_Player_Already_Seated" onfail="cancel">
+                  <conditions>
+                    <check_value value="player.occupiedship"/>
+                    <check_value value="not player.spacesuit"/>
+                    <check_value value="player.sector == $TerranCadetSector"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch2_2_Long_Range_Scan_Hint_Wingmate_Speak"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_2_Long_Range_Scan_Hint_1">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="(Ch2_2_Long_Range_Scan.state == cuestate.waiting) and (Ch2_2_Clean_Up.state == cuestate.waiting)">
+                      <show_help line="4200" position="13" force="true" comment="Open SHIP MENU..." allowclose="false" timeout="false"/>
+                    </do_if>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch2_2_Long_Range_Scan_Hint_2" version="2">
+                      <conditions>
+                        <event_player_changed_activity activity="activity.scan_longrange" />
+                        <check_value value="Ch2_2_Clean_Up.state == cuestate.waiting"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <remove_help all="true"/>
+                        <show_help_multi log="true" position="13" force="true" allowclose="false">
+                          <text line="4201" comment="The long range scan mode can help you to navigate in unknown sectors."/>
+                          <text line="4202" comment="You scan objects up to 200km away in the direction your ship is facing."/>
+                          <text line="4210" comment="The scan direction is important for some objects."/>
+                        </show_help_multi>
+
+                        <show_help_multi log="false" position="13" force="true" allowclose="false">
+                          <text line="4204" comment="The signal will emit when releasing the fire button."/>
+                          <text line="4205" comment="Holding the button too long will cause the scan to FAIL."/>
+                          <text line="4206" comment="Holding it for a shorter time will scan a smaller range."/>
+                        </show_help_multi>
+                        <show_help line="4203" position="13" force="true" width="250" comment="Hold down the launch secondary button $INPUT_STATE_FIRE_SECONDARY_WEAPON$ for up to THREE SECONDS." allowclose="false" timeout="false"/>
+                      </actions>
+                      <patch sinceversion="2" comment="Ch2_2_Long_Range_Scan_Hint_2 used to be able to trigger after the chapter was done, so the help text got stuck on screen.">
+                        <do_if value="Ch2_2_Clean_Up.state != cuestate.waiting">
+                          <remove_help all="true"/>
+                        </do_if>
+                      </patch>
+                    </cue>
+
+                    <cue name="Ch2_2_Long_Range_Scan_Hint_Complete">
+                      <conditions>
+                        <event_long_range_scan_sent object="player.entity"/>
+                      </conditions>
+                      <actions>
+                        <remove_help all="true"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_2_Long_Range_Scan_Hint_Wingmate_Speak">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_object_changed_sector object="player.entity" sector="$TerranCadetSector"/>
+                      <check_all>
+                        <event_player_started_control/>
+                        <check_value value="player.sector == $TerranCadetSector"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch2_2_Wingmate_Speak_2_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284029]]"/>
+                      <param name="EndSignalCue"      value="Ch2_2_Long_Range_Scan_Hint_1"/>
+                      <!--
+                      Wingmate:
+                      (pondering)Now, how did that Long Range Scan work again?
+                      -->
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_2_Long_Range_Scan">
+                  <conditions>
+                    <event_long_range_scan_ping object="$TraderWreck"/>
+                    <check_value value="Ch2_2_Clean_Up.state == cuestate.waiting"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$CurrentStep" operation="add"/>
+                    <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.custom" customaction="{30284,1016}" object="$TraderWreck" updatebriefing="true"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch2_2_Wingmate_Speak_3_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$WingmateActor"/>
+                      <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                      <param name="Lines"             value="[[30284030]]"/>
+                      <param name="EndSignalCue"      value="null"/>
+                      <!--
+                          Wingmate:
+                          Don't worry, citizens, the cavalry's here!
+                      -->
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_2_Clean_Up">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <remove_help all="true"/>
+                    <!-- If the player wandered off before finding the wreck, the Xenon might have beem defeated by patrols. -->
+                    <do_if value="$XenonAmbushGroup.count">
+                      <signal_cue cue="Ch2_3_Fight"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="Ch2_4_Investigate"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_3_Fight">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 2 part 3.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.defeat" group="$XenonAmbushGroup" text="{30284,1017}" updatebriefing="true"/>
+
+                <set_value name="$CurrentPlayerShip" exact="player.ship"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_3_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="Lines"             value="[[30284031],[30284032]]"/>
+                  <param name="EndSignalCue"      value="null"/>
+                  <!--
+                      Wingmate:
+                      (slight panic)Xenon!
+                      (getting his bearings)Breaking formation!
+                      -->
+                </cue>
+
+                <cue name="Ch2_3_Xenon_Orders">
+                  <actions>
+                    <do_for_each in="$XenonAmbushGroup" name="$CurrentShip" counter="$i">
+                      <set_object_radar_visible object="$CurrentShip" visible="true"/>
+                      <cancel_all_orders object="$CurrentShip"/>
+                      <create_order id="'ProtectPosition'" object="$CurrentShip" default="true">
+                        <param name="destination"   value="[$TerranCadetSector, $TraderWreckPosition]"/>
+                        <param name="radius"        value="10km"/>
+                        <param name="pursuetargets" value="true"/>
+                      </create_order>
+                      <create_order id="'Attack'" object="$CurrentShip" immediate="true">
+                        <param name="primarytarget" value="$WingmateShip"/>
+                        <param name="pursuetargets" value="true"/>
+                        <param name="checkrelation" value="false"/>
+                      </create_order>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_3_Wingmate_Orders">
+                  <actions>
+                    <cancel_all_orders object="$WingmateShip"/>
+                    <create_order id="'Wait'" object="$WingmateShip" default="true"/>
+                    <create_order id="'Attack'" object="$WingmateShip" immediate="true">
+                      <param name="primarytarget" value="$XenonAmbushGroup.random"/>
+                      <param name="secondarytargets" value="$XenonAmbushGroup"/>
+                      <param name="pursuetargets" value="true"/>
+                      <param name="checkrelation" value="false"/>
+                      <param name="allowothertargets" value="false"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_3_Fight_Music">
+                  <conditions>
+                    <event_object_attacked group="$XenonAmbushGroup"/>
+                    <check_value value="event.param == player.ship"/>
+                  </conditions>
+                  <actions>
+                    <play_music music="'music_dlc_terran_cadet_gs_3'"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_3_Success">
+                  <conditions>
+                    <event_object_destroyed group="$XenonAmbushGroup"/>
+                    <check_value value="$XenonAmbushGroup.count == 1"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch2_4_Investigate"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_4_Investigate">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 2 part 4.'" chance="$DebugChance"/>
+
+                <set_object_radar_visible object="$TraderWreck" visible="true"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.investigate" object="$TraderWreck" text="{30284,201}" updatebriefing="true" comment="Investigate: Elysian Plains Botany Club"/>
+
+                <play_music music="'music_dlc_terran_cadet_gs_4'"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_4_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="2s"/>
+                  <param name="Lines"             value="[[30284033],[30284034]]"/>
+                  <param name="EndSignalCue"      value="Ch2_4_Activate_Approach_Check"/>
+                  <!--
+                      Wingmate:
+                      (aghast)Seriously, what the...
+                      (aghast; stress "happened")What's happened here?
+                      -->
+                </cue>
+
+                <cue name="Ch2_4_Activate_Approach_Check">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Ch2_4_Approach_TraderWreck_Ref_v2" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$TraderWreck"/>
+                      <param name="ApproachDistance"  value="500m"/>
+                      <param name="SuccessSignalCue"  value="Ch2_4_Wingmate_Speak_2"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_4_Wingmate_Orders">
+                  <actions>
+                    <cancel_all_orders object="$WingmateShip"/>
+                    <create_order id="'Wait'" object="$WingmateShip" default="true"/>
+                    <create_order object="$WingmateShip" id="'MoveToObject'" immediate="true">
+                      <param name="destination" value="$TraderWreck"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_4_Wingmate_Speak_2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$WingmateActor" recipient="player.entity" priority="100">
+                      <text line="30284035" comment="Nellie? Analysis"/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_4_Nellie_Speak_1">
+                  <conditions>
+                    <event_speak_finished actor="$WingmateActor" line="30284035"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$NellieActor" recipient="$WingmateActor" broadcast="true" priority="100" comment="No delays.">
+                      <text line="30284006" comment="Classification."/>
+                      <text line="30284007" comment="High-Tech Trader."/>
+                      <text line="30284008" comment="Crew."/>
+                      <text line="30284009" comment="Deceased."/>
+                      <text line="30284010" comment="Cargo."/>
+                      <text line="30284011" comment="No unclassified information available."/>
+                      <text line="30284012" comment="Reconstructing events."/>
+                      <text line="30284013" delay="1s" comment="Processing."/>
+                      <text line="30284013" delay="1s" comment="Processing."/>
+                      <text line="30284013" delay="1s" comment="Processing."/>
+                      <text line="30284014" delay="1s" comment="(gleeful)Interdiction."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_4_All_Speaks_Finished">
+                  <conditions>
+                    <event_speak_finished actor="$NellieActor" line="30284006"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch2_5_Debriefing"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_5_Debriefing">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Terran Cadet gamestart mission chapter 2 part 5.'" chance="$DebugChance"/>
+
+                <set_value name="$CurrentStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$CurrentStep" action="objective.custom" customaction="{30284,1019}" updatebriefing="true"/>
+
+                <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_5_SecretService_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$SecretServiceActor"/>
+                  <param name="CutsceneKey"       value="$SecretServiceCutsceneKey"/>
+                  <param name="Lines"             value="[[30284004],[30284005],[30284006],[30284007]]"/>
+                  <param name="EndSignalCue"      value="Ch2_Clean_Up_Terran_Cadet_Gamestart_Mission"/>
+                  <!--
+                      Secret Service Contact:
+                      (reprimanding)That's quite enough!
+                      Our specialists will take over from here.
+                      (menacing)And you, Cadets, will hear from me... shortly.
+                      Dismissed.
+                      -->
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Clean_Up_Terran_Cadet_Gamestart_Mission">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'Cleaning up Terran Cadet gamestart mission.'" chance="$DebugChance"/>
+
+                <remove_mission cue="$MissionCue" type="completed"/>
+                <write_to_logbook category="missions" faction="faction.terran" title="{30284,1001}" text="{30284,1004}"/>
+
+                <reward_player money="25000Cr"/>
+
+                <unlock_achievement name="COH_CADET"/>
+
+                <signal_cue cue="Ch3_Epilogue"/>
+                <cancel_cue cue="Ch2_Distress"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch3_Epilogue">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <include_actions ref="md.Story_Yaki.Setup_Wingmate"/>
+          </actions>
+          <cues>
+
+            <cue name="Ch3_Setup_Terran_Specialist">
+              <actions>
+                <create_ship name="$TerranSpecialistShip" macro="macro.ship_ter_m_corvette_01_a_macro" capturable="true" missioncue="$MissionCue" sector="$TerranCadetSector">
+                  <owner exact="faction.terran" overridenpc="true"/>
+                  <pilot>
+                    <select faction="faction.terran" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <loadout>
+                    <level exact="1.0"/>
+                  </loadout>
+                  <safepos object="player.entity" z="-20km"/>
+                </create_ship>
+
+                <create_order id="'Wait'" object="$TerranSpecialistShip" default="true"/>
+                <create_order id="'MoveToObject'" object="$TerranSpecialistShip">
+                  <param name="destination" value="$TraderWreck"/>
+                </create_order>
+              </actions>
+              <cues>
+
+                <cue name="Ch3_Remove_Terran_Specialist">
+                  <conditions>
+                    <event_object_changed_sector object="player.entity" previous="$TerranCadetSector"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="$TerranSpecialistShip"/>
+                    <create_order id="'MoveDie'" object="$TerranSpecialistShip"/>
+                    <destroy_object object="$TraderWreck"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch3_1_Protocol">
+              <cues>
+
+                <cue name="Ch3_1_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="IsInMission"       value="false"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="6s"/>
+                  <param name="Lines"             value="[[30284036],[30284037],[30284039, 0.8s],[30284040]]"/>
+                  <param name="EndSignalCue"      value="Ch3_2_Summary"/>
+                  <!--
+                      Wingmate:
+                      (worried)Did we... break some sort of protocol?
+                      (worried)I'm not seeing any reprimands in my profile...
+                      REMOVED: ("recovery" as in "resting phase between missions")Well, at least that maintenance task has been cleared, so I guess we're officially in recovery?
+                      Let's find something else to do until Mission Command comes back to haunt us.
+                      I'll stick with you.
+                      -->
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch3_2_Summary">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+
+                <cue name="Ch3_2_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="IsInMission"       value="false"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="25s"/>
+                  <param name="Lines"             value="[[30284041],[30284042],[30284043],[30284044],[30284045]]"/>
+                  <param name="EndSignalCue"      value="null"/>
+                  <!--
+                      Wingmate:
+                        <t id="30284041">So, let's summarise.</t>
+                        <t id="30284042">Someone, or something, raided that trading vessel for highly classified high-tech goods.</t>
+                        <t id="30284043">They knew about a secret trade route in the outskirts of our stronghold sector, and took out nearby satellites to let the distress signal run aground.</t>
+                        <t id="30284044">And on top of that, Xenon scouts are still drawn to the wreckage days after the incident?</t>
+                        <t id="30284045">Something's brewing.</t>
+                      -->
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch3_3_Close_To_Earth">
+              <conditions>
+                <event_object_changed_sector object="player.entity" sector="$CloseToEarthSector"/>
+                <check_value value="not faction.player.haslicence.{$EarthSector.accesslicence}.{faction.terran}"/>
+                <check_value value="md.Story_Yaki.Ch9_Secret_Service.state == cuestate.waiting"/>
+                <check_value value="md.Story_Yaki.Activate_Wingmate_Handlers.state == cuestate.complete"/>
+              </conditions>
+              <cues>
+
+                <cue name="Ch3_3_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="IsInMission"       value="false"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="5s"/>
+                  <param name="Lines"             value="[[30284101],[30284102],[30284103]]"/>
+                  <param name="EndSignalCue"      value="null"/>
+                  <!--
+                      Wingmate:
+                        <t id="30284101">(sighs)We're so close to old Earth now, you can practically see it floating out there in the distance.</t>
+                        <t id="30284102">A shame that High Command only issues the Inner Core Licence to distinguished citizens.</t>
+                        <t id="30284103">Unless you're Earthborn, of course; in their mind, that's the highest honour there is.</t>
+                      -->
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch3_4_Entered_Earth">
+              <conditions>
+                <event_object_changed_sector object="player.entity" sector="$EarthSector"/>
+                <check_value value="faction.player.haslicence.{$EarthSector.accesslicence}.{faction.terran}"/>
+                <check_value value="md.Story_Yaki.Ch9_Secret_Service.state == cuestate.waiting"/>
+                <check_value value="md.Story_Yaki.Activate_Wingmate_Handlers.state == cuestate.complete"/>
+              </conditions>
+              <cues>
+
+                <cue name="Ch3_4_Wingmate_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="IsInMission"       value="false"/>
+                  <param name="Actor"             value="$WingmateActor"/>
+                  <param name="CutsceneKey"       value="$WingmateCutsceneKey"/>
+                  <param name="DelayInitial"      value="5s"/>
+                  <param name="Lines"             value="[[30284153],[30284154]]"/>
+                  <param name="EndSignalCue"      value="null"/>
+                  <!--
+                      Wingmate:
+                        <t id="30284153">They let us in! This is incredible!</t>
+                        <t id="30284154">And here I was, thinking that we'd have to sell our souls to some half-baked military operation.</t>
+                      -->
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="PatchSVCourtRelations" module="x4ep1_gamestart_terran1">
+      <conditions>
+        <event_game_loaded comment="needs to be parent level cue (fix scheduled)"/>
+        <check_value value="md.Setup_DLC_Split?" comment="SV active, child cue of this populates md.$SplitCurbFactions"/>
+      </conditions>
+      <!-- Fix a bad relation setup towards faction.court in gamestarts.xml in old games. -->
+      <!-- Fix if:
+            - split dlc is active
+            - relation is lt 0
+            - split story state doesn't dictate a hostile cabal relationship (.hasbeenrenamed)
+      -->
+      <actions>
+      </actions>
+      <cues>
+        <cue name="PatchSVCourtRelations_QueryFaction">
+          <delay exact="1s"/>
+          <actions>
+            <do_if value="md.$SplitCurbFactions.count">
+              <set_value name="$PatchSVCourtRelations_CheckRelation" exact="md.$SplitCurbFactions.{1}.relationto.{faction.player} lt 0"/>
+              <set_value name="$PatchSVCourtRelations_CheckName"     exact="not md.$SplitCurbFactions.{1}.hasbeenrenamed"/>
+              <signal_cue cue="PatchSVCourtRelations_SetRelation"/>
+            </do_if>
+            <do_else>
+              <reset_cue cue="this"/>
+            </do_else>
+          </actions>
+        </cue>
+
+        <cue name="PatchSVCourtRelations_SetRelation">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="$PatchSVCourtRelations_CheckRelation"/>
+            <check_value value="$PatchSVCourtRelations_CheckName"/>
+          </conditions>
+          <actions>
+            <do_for_each in="md.$SplitCurbFactions" name="$faction">
+              <do_if value="$faction.id == 'court'">
+                <set_faction_relation faction="faction.player" otherfaction="$faction" value="$faction.relationto.{faction.player} + 0.032"/>
+              </do_if>
+            </do_for_each>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

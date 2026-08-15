@@ -1,0 +1,1664 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_HQ_Discovery" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this" mapeditor="false" version="2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy"/>
+        <check_value value="player.module == 'x4ep1_gamestart_terran1' or player.module == 'x4ep1_gamestart_terran2' or gamestart.storystate.story_hq_secret_service"/>
+        <!--<check_value value="false" comment="prevent savegame compatibility issues during development"/>-->
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance"                exact="0"/>
+        <set_value name="$DeepDebugChance"            exact="0"     comment="for AI scripts and similar external code"/>
+        <set_value name="$MissionCue"                 exact="this"/>
+        <set_value name="$Page"                       exact="30223"/>
+        <set_value name="$CharacterCutsceneTable"     exact="table[]"/>
+
+        <!--DEBUG: Set this to true to skip to the shared part of the HQ discovery mission-->
+        <set_value name="$SkipGamestartMission"       exact="false"/>
+
+        <debug_text text="'Initializing HQ Discovery'" chance="$DebugChance"/>
+
+        <find_sector name="$Neptune"          macro="macro.cluster_110_sector001_macro"/>
+        <find_sector name="$BrennansTriumph"  macro="macro.cluster_115_sector001_macro"/>
+        <find_sector name="$HQSector"         macro="macro.cluster_114_sector001_macro"/>
+        <find_sector name="$GrandExchange"    macro="macro.cluster_01_sector001_macro"/>
+
+        <set_value name="$HasCustomGamestartSkip" exact="gamestart.storystate.story_hq_secret_service gt 0"/>
+        <set_value name="$PioneerVariant" exact="not $HasCustomGamestartSkip and player.module == 'x4ep1_gamestart_terran2'"/>
+        <do_if value="$HasCustomGamestartSkip">
+          <!--Create the HQ ourselves for the custom gamestart skip-->
+          <create_station name="$HQ" macro="macro.station_pla_headquarters_base_01_macro" constructionplan="'x4ep1_playerheadquarters_pioneer_configuration'" sector="$HQSector" owner="faction.pioneers" encyclopedia="true">
+            <safepos x="-207000" y="-1100" z="-31000" />
+          </create_station>
+        </do_if>
+        <do_else>
+          <!-- Find HQ, spawned by god.xml -->
+          <find_station name="$HQ" macro="macro.station_pla_headquarters_base_01_macro" space="$HQSector" required="true"/>
+        </do_else>
+
+        <find_dockingbay name="$HQDock" object="$HQ" required="true">
+          <match_dock size="tag.dock_l"/>
+        </find_dockingbay>
+
+        <!--TODO @Owen find a better way to remove the manager-->
+        <destroy_object object="$HQ.tradenpc"/>
+
+        <!--Pioneer Head Scientist: TODO: Use Global Actor ! -->
+        <create_cue_actor name="$HeadScientist" cue="namespace" macro="character_pioneer_male_plot_head_scientist_macro">
+          <page exact="10156"/>
+          <owner exact="faction.pioneers"/>
+          <skills>
+            <skill type="management"  exact="12"/>
+            <skill type="morale"      exact="8"/>
+            <skill type="piloting"    exact="4"/>
+            <skill type="engineering" exact="13"/>
+            <skill type="boarding"    exact="2"/>
+          </skills>
+        </create_cue_actor>
+        <set_entity_traits entity="$HeadScientist" missionactor="true" customhandler="true" subtitlename="true"/>
+        <set_entity_overrides entity="$HeadScientist" icon="'specialist'"/>
+        <set_value name="md.$PersistentCharacters.$PioneerHeadScientist" exact="$HeadScientist"/>
+        <set_value name="$CharacterCutsceneTable.{$HeadScientist}"   exact="table[ $key = 'ShowNPCFace']"/>
+
+        <do_if value="$PioneerVariant">
+          <!--Terran gamestart player character as a plot actor-->
+          <create_cue_actor name="$GamestartActor" cue="namespace" macro="character_terran_male_plot_terran_gamestart_actor_macro">
+            <page exact="10158"/>
+            <owner exact="faction.terran"/>
+            <skills>
+              <skill type="management"  exact="10"/>
+              <skill type="morale"      exact="9"/>
+              <skill type="piloting"    exact="12"/>
+              <skill type="engineering" exact="6"/>
+              <skill type="boarding"    exact="4"/>
+            </skills>
+          </create_cue_actor>
+        </do_if>
+        <do_else>
+          <!--Pioneer gamestart player character as a plot actor-->
+          <create_cue_actor name="$GamestartActor" cue="namespace" macro="character_pioneer_female_plot_pioneer_gamestart_actor_macro">
+            <page exact="10159"/>
+            <owner exact="faction.pioneers"/>
+            <skills>
+              <skill type="management"  exact="11"/>
+              <skill type="morale"      exact="7"/>
+              <skill type="piloting"    exact="6"/>
+              <skill type="engineering" exact="13"/>
+              <skill type="boarding"    exact="4"/>
+            </skills>
+          </create_cue_actor>
+        </do_else>
+        <!--TODO @Owen custom handlers-->
+        <set_entity_traits entity="$GamestartActor" missionactor="true" customhandler="true" subtitlename="true"/>
+        <set_entity_overrides entity="$GamestartActor" icon="'specialist'"/>
+
+      </actions>
+      <patch sinceversion="2" state="complete">
+        <set_value name="$HasCustomGamestartSkip" exact="false"/>
+      </patch>
+      <cues>
+
+        <!-- *** STORY MANAGER INTERACTION *** -->
+
+        <cue name="Story_Activation_Manager">
+          <cues>
+
+            <cue name="Activate_Immediately" onfail="cancel">
+              <conditions>
+                <check_value value="$HQ" comment="Found pioneers HQ"/>
+                <check_value value="false"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Activate_Story"/>
+              </actions>
+            </cue>
+
+            <!-- Cues checking preconditions, if any -->
+
+            <!-- Cue which activates the story (all preconditions met) -->
+
+            <cue name="Activate_Story">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch1_Intro"/>
+                <cancel_cue cue="Story_Activation_Manager"/>
+              </actions>
+            </cue>
+
+            <cue name="Handle_Custom_Gamestart_Skip" onfail="cancel">
+              <conditions>
+                <check_value value="$HasCustomGamestartSkip"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch1_Intro"/>
+              </actions>
+
+            </cue>
+
+          </cues>
+        </cue>
+
+
+        <!-- *** STORY CHAPTERS *** -->
+
+        <!-- Chapter 1: brief description -->
+
+        <!-- 
+          <t id="100">(Cast)</t>
+          <t id="1000">(Chapter 1 - Intro)</t>
+          <t id="1001">(Title)</t>
+          <t id="1002">(Description)</t>
+          <t id="1003">(Objective)</t>
+          <t id="2000">(Chapter 2 - ...)</t>
+        -->
+
+        <cue name="Ch1_Force">
+          <force name="Ch1_HQDiscovery_Intro">
+            <!-- Special setup when you "fast-forward" into a chapter (skipping earlier ones) -->
+            <signal_cue_instantly cue="Ch1_Intro" param="true"/>
+          </force>
+        </cue>
+
+        <!-- Cutscene Briefing Handling -->
+        <!--These cues handle the briefing presentations e.g. Holomap or cutscene render targets (depending on the mission)
+        note: play_cutscene action should not be in the actions of the cue with a event_briefing_submission_selected condition. It must be delayed-->
+        <cue name="BriefingStarted">
+          <conditions>
+            <check_any>
+              <event_briefing_started cue="$MissionCue"/>
+              <event_briefing_submission_selected cue="$MissionCue"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$RenderTarget" exact="event.param.{1}"/>
+            <set_value name="$StartBriefingCutscene"/>
+            <debug_text text="'Briefing started'" chance="$DebugChance"/>
+          </actions>
+          <cues>
+            <cue name="DisplayCutscene" onfail="cancel">
+              <conditions>
+                <check_value value="$StartBriefingCutscene?"/>
+              </conditions>
+              <actions>
+                <set_value name="$BriefingCutsceneStarted"/>
+                <set_value name="$CutsceneKey" exact="'OrbitIndefinitelySlower'"/>
+                <play_cutscene key="$CutsceneKey" rendertarget="$RenderTarget">
+                  <param name="targetobject" object="$HQ"/>
+                </play_cutscene>
+              </actions>
+            </cue>
+
+            <cue name="BriefingStopped">
+              <conditions>
+                <check_any>
+                  <event_briefing_cancelled cue="$MissionCue"/>
+                  <event_briefing_submission_unselected cue="$MissionCue"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <do_if value="$BriefingCutsceneStarted?">
+                  <!--Temp value. This is used to identify if a cutscene for this mission is still playing.-->
+                  <remove_value name="$BriefingCutsceneStarted"/>
+                  <stop_cutscene key="$CutsceneKey"/>
+                </do_if>
+
+                <do_if value="$HoloMap?">
+                  <remove_holomap />
+                  <remove_value name="$HoloMap"/>
+                </do_if>
+
+                <debug_text text="'Briefing canceled'" chance="$DebugChance"/>
+                <reset_cue cue="BriefingStarted"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!--event.param = forced true/false-->
+        <cue name="Ch1_Intro" version="3">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Chapter ' + this" chance="$DebugChance"/>
+            <set_value name="$CurrentChapterCue" exact="this"/>
+            <set_value name="$CurrentPartCue" exact="this"/>
+            <set_value name="$Forced" exact="@event.param"/>
+
+            <!--find a station in Neptune with a Black Marketeer so we can position the ship a bit closer to it-->
+            <find_station name="$Prelim_BlackMarketStation" owner="[faction.terran, faction.pioneers]" space="$Neptune">
+              <match_content controlpost="controlpost.shadyguy"/>
+            </find_station>
+            <do_if value="$Prelim_BlackMarketStation">
+              <!--Get a safepos closer to the sector centre than the black marketeer station-->
+              <create_position name="$StationPos" object="$Prelim_BlackMarketStation" space="$Neptune"/>
+              <get_safe_pos result="$SpawnPos" sector="$Neptune" radius="2km" x="$StationPos.x * 0.35" y="-1.5km" z="$StationPos.z * 0.3"/>
+            </do_if>
+            <do_else>
+              <get_safe_pos result="$SpawnPos" sector="$Neptune" radius="2km" x="20km" y="-1.5km" z="-5km"/>
+            </do_else>
+
+            <create_ship name="$ScientistShip" macro="macro.ship_ter_l_research_01_a_macro" sector="$Neptune" capturable="false">
+              <paint ware="ware.paintmod_0122"/>
+              <basket basket="all_container"/>
+              <drop ref="ship_large_civilian"/>
+              <pilot>
+                <select faction="faction.pioneers" tags="tag.pilot"/>
+              </pilot>
+              <owner exact="faction.pioneers" overridenpc="true"/>
+              <people ref="terran_freighter_crew"/>
+              <position value="$SpawnPos"/>
+            </create_ship>
+            <set_object_name object="$ScientistShip" page="30224" line="202" comment="Oberth"/>
+
+            <remove_value name="$Prelim_BlackMarketStation"/>
+            <remove_value name="$StationPos"/>
+            <remove_value name="$SpawnPos"/>
+
+            <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+              <param name="Object" value="$ScientistShip"/>
+              <param name="RequesterCue" value="namespace"/>
+              <param name="DebugChance" value="$DebugChance"/>
+            </run_actions>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $ScientistShip.controlroom,
+                            $priority = 100,
+                            $position = position.[-1.46m, 0.0m, -2.2m],
+                            $rotation = rotation.[45deg, 0deg, 0deg],
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+
+          </actions>
+          <patch sinceversion="3" state="complete">
+            <do_if value="$ScientistShip.isoperational and not $ScientistShip.isplayerowned">
+              <set_object_capturable object="$ScientistShip" capturable="false"/>
+              <set_value name="$BoardingOps" exact="$ScientistShip.boardingoperations"/>
+              <do_for_each name="$BoardingOp" in="$BoardingOps">
+                <debug_text text="'Aborting boarding operation ' + $BoardingOp + ' against story ship ' + $ScientistShip.debugname" filter="savegame"/>
+                <end_boarding_operation operation="$BoardingOp"/>
+              </do_for_each>
+              <remove_value name="$BoardingOps"/>
+            </do_if>
+            <do_else>
+              <create_ship name="$ScientistShip" macro="macro.ship_ter_l_research_01_a_macro" sector="$Neptune" capturable="false">
+                <paint ware="ware.paintmod_0122"/>
+                <basket basket="all_container"/>
+                <drop ref="ship_large_civilian"/>
+                <pilot>
+                  <select faction="faction.pioneers" tags="tag.pilot"/>
+                </pilot>
+                <owner exact="faction.pioneers" overridenpc="true"/>
+                <people ref="terran_freighter_crew"/>
+                <safepos space="$Neptune" radius="2km" x="20km" y="-1.5km" z="-5km"/>
+              </create_ship>
+              <set_object_name object="$ScientistShip" page="30224" line="202" comment="Oberth"/>
+              <debug_text text="'Scientist ship was destroyed or player owned. Recreating as ' + $ScientistShip" filter="savegame"/>
+
+              <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                <param name="Object" value="$ScientistShip"/>
+                <param name="RequesterCue" value="namespace"/>
+                <param name="DebugChance" value="$DebugChance"/>
+              </run_actions>
+
+              <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $ScientistShip.controlroom,
+                            $priority = 100,
+                            $position = position.[-1.46m, 0.0m, -2.2m],
+                            $rotation = rotation.[45deg, 0deg, 0deg],
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+            </do_else>
+          </patch>
+          <cues>
+            <cue name="Ch1_Intro_Dialogue_Pioneer" onfail="cancel">
+              <conditions>
+                <check_value value="$PioneerVariant and not $HasCustomGamestartSkip"/>
+              </conditions>
+              <actions>
+
+                <!--
+                30223001: Najia, it looks like your security clearance has been approved.
+                30223002: Please come see me in Neptune.
+                OR
+                30223003: Please come and see me so we can discuss this in person.-->
+              </actions>
+              <cues>
+                <cue name="Ch1_Intro_Dialogue_Pioneer_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$HeadScientist"/>
+                  <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$HeadScientist}"/>
+                  <param name="DelayInitial"      value="2s"/>
+                  <param name="Lines"             value="[[30223001], [30223003]]"/>
+                  <param name="EndSignalCue"      value="Ch1_Intro_Fly_To_Scientist"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Terran_Cadet_Handler" onfail="cancel">
+              <conditions>
+                <check_value value="not $PioneerVariant and not $HasCustomGamestartSkip"/>
+              </conditions>
+              <actions>
+                <set_value name="$TerranSecretServiceContact" exact="md.Story_Yaki.Start.$SecretServiceActor"/>
+                <set_value name="$CharacterCutsceneTable.{$TerranSecretServiceContact}" exact="table[ $key = 'ShowCharacter']"/>
+              </actions>
+              <cues>
+                <cue name="Ch1_Terran_Cadet_Handler_Force" onfail="cancel">
+                  <conditions>
+                    <check_value value="$Forced"/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <debug_text text="md.Story_Covert_Operations.Debug_Setup_Terran_SSC.state"/>
+                    <do_if value="md.Story_Covert_Operations.Debug_Setup_Terran_SSC.state == cuestate.waiting">
+                      <signal_cue cue="md.Story_Covert_Operations.Debug_Setup_Terran_SSC"/>
+                    </do_if>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <create_mission cue="Ch1_Terran_Cadet_Handler_Force" name="'Debug helper mission'" description="'Go talk to the secret service contact to accept the HQ discovery mission'" faction="faction.terran" type="missiontype.plot">
+                      <objective step="1" action="objective.talkto" object="$TerranSecretServiceContact"/>
+                    </create_mission>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_Terran_Cadet_Handler_Force_Conv">
+                      <conditions>
+                        <event_conversation_started actor="$TerranSecretServiceContact"/>
+                      </conditions>
+                      <actions>
+                        <remove_mission cue="Ch1_Terran_Cadet_Handler_Force"/>
+                        <!--
+                        <t id="30223001">Now, I would like you to talk about the so-called 'Project Genesis'. That is the codename of a top-secret operation that the Segaris Pioneers are cooking up.</t>
+                        <t id="30223002">We certainly know more about it than they would like, but we remain in the dark when it comes to their ultimate goal.</t>
+                        <t id="30223003">We do know that it involves a facility in their space with an unknown purpose.</t>
+                        <t id="30223004">Fortunately for us, there seems to have been an incident and the station was evacuated until repairs could be carried out.</t>
+                        <t id="30223005">This is a short-lived opportunity to gather intel. As such, we have taken action to inject false security documents into a Pioneer database.</t>
+                        <t id="30223006">Congratulations pilot. You're now a qualified Pioneer engineer, first class.</t>
+                        <t id="30223007">You are set to join one of their engineering teams to repair that facility. During the operation, gather whatever information you can, but use your disgression.</t>
+                        <t id="30223008">Just go along with their instructions and you'll be fine.</t>
+                    
+                        <t id="30223009">The team is gathering in Neptune.</t>
+                        OR
+                        <t id="30223010">I'm sending you the information on where the team is gathering.</t>-->
+                        <allow_conversation_escape enabled="false"/>
+                        <add_npc_line speaker="$TerranSecretServiceContact" line="[30223001, 30223002, 30223003, 30223004, 30223005, 30223006, 30223007, 30223008, 30223009]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Terran_Cadet_Handler_Force_Conv_End">
+                      <conditions>
+                        <event_conversation_finished actor="$TerranSecretServiceContact"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Ch1_Intro_Fly_To_Scientist"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Intro_Fly_To_Scientist">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" exact="1"/>
+
+                <!--Pioneer/Shared title/description range: 1001 - 1499
+                Terran exclusive title/description range: 1500 - 1999-->
+                <do_if value="$PioneerVariant">
+                  <create_mission cue="$MissionCue"
+                    name="{30223,1001}"
+                    description="{30223,1002}"
+                    type="missiontype.plot" faction="faction.pioneers" difficulty="level.easy" abortable="false" icon="'briefing_dr_rick_feynman_01'" iconcaption="{30285,101}"/>
+                </do_if>
+                <do_else>
+                  <!--No icon or icon caption for this stage for the Terran Cadet start-->
+                  <create_mission cue="$MissionCue"
+                    name="{30223,1501}"
+                    description="{30223,1502}"
+                    type="missiontype.plot" faction="faction.pioneers" difficulty="level.medium" abortable="false"/>
+                </do_else>
+
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.flyto" object="$ScientistShip" updatebriefing="true"/>
+              </actions>
+              <cues>
+                <cue name="Ch1_Intro_Cadet_En_Route" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $PioneerVariant"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_Intro_Cadet_En_Route_Comment" checkinterval="10s">
+                      <conditions>
+                        <check_value value="player.controlled and not player.controlled.dock and player.sector != $ScientistShip.sector"/>
+                      </conditions>
+                      <actions>
+                        <speak actor="$TerranSecretServiceContact" line="30223011" priority="100" comment="We believe the scientist in charge of Project Genesis is also heading the repair team. Be sure to stay on his good side."/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Intro_At_Scientist" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.sector == $ScientistShip.sector and player.entity.distanceto.{$ScientistShip} lt 3km"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$PioneerVariant">
+                      <!--
+                      30223010: Ah, you made it.
+                      30223011: Unfortunatly, we're still waiting on some of the team to arrive.
+                      30223012: In the meantime, perhaps you could do me a favor.
+                      30223013: I'm in need of an item not often found on the general market.
+                      30223014: Consider it a test in resourcefulness.
+                      30223015: I'll send over some details.-->
+                      <set_value name="this.$Lines" exact="[[30223010], [30223011], [30223012], [30223013], [30223014], [30223015]]"/>
+                    </do_if>
+                    <do_else>
+                      <cancel_cue cue="Ch1_Intro_Cadet_En_Route"/>
+                      <!--
+                      30223020: You're late. Fortunatly for you, we're having technical difficultites.
+                      30223021: I looked over your file and I must say it made for an interesting read.
+                      30223022: Know this. You will have to personally impress me if you want any chance of getting an assignment worthy of your skillset.
+                      30223023: While we wait for departure, perhaps you could showcase some of our resourcefulness.
+                      30223013: I'm in need of an item not often found on the general market.
+                      30223024: Should you find it, you will most certainly have piqued my interest.
+                      30223015: I'll send over some details.-->
+                      <set_value name="this.$Lines" exact="[[30223020], [30223021], [30223022], [30223023], [30223013], [30223024], [30223015]]"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_Intro_At_Scientist_Dialogue_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$HeadScientist"/>
+                      <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$HeadScientist}"/>
+                      <param name="DelayInitial"      value="2s"/>
+                      <param name="Lines"             value="parent.$Lines"/>
+                      <param name="EndSignalCue"      value="Ch1_Deliver_Item"/>
+                    </cue>
+
+                    <cue name="Ch1_Deliver_Item">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <create_group groupname="$NeptuneXenon"/>
+                        <set_value name="$ShadyGuy" exact="null"/>
+                        <find_station name="$BlackMarketStation" owner="[faction.terran, faction.pioneers]" space="$Neptune">
+                          <match_content controlpost="controlpost.shadyguy"/>
+                        </find_station>
+                        <do_if value="not $BlackMarketStation">
+                          <find_cluster_in_range name="this.$NearClusters" object="$Neptune" mindistance="1" maxdistance="2"/>
+                          <do_for_each name="this.$NearCluster" in="this.$NearClusters">
+                            <find_station name="$BlackMarketStation" owner="[faction.terran, faction.pioneers]" space="this.$NearCluster">
+                              <match_content controlpost="controlpost.shadyguy"/>
+                            </find_station>
+                            <do_if value="$BlackMarketStation">
+                              <break/>
+                            </do_if>
+                          </do_for_each>
+                        </do_if>
+
+                        <do_if value="$BlackMarketStation">
+                          <set_value name="$ShadyGuy" exact="$BlackMarketStation.shadyguy"/>
+                          <do_if value="$ShadyGuy">
+                            <add_inventory entity="$ShadyGuy" ware="ware.inv_agidevice_01" exact="1"/>
+                            <set_entity_traits entity="$ShadyGuy" tradesvisible="true"/>
+                            <do_if value="not $ShadyGuy.$InstantiationRequesters?">
+                              <set_value name="$ShadyGuy.$InstantiationRequesters" exact="[]"/>
+                            </do_if>
+                            <append_to_list name="$ShadyGuy.$InstantiationRequesters" exact="$MissionCue"/>
+                            <signal_objects object="$BlackMarketStation" param="'npc_instantiation__mission'" comment="Make sure the shady guy is actually properly instantiated on the station" />
+                            <set_known object="$BlackMarketStation" known="true" updatesnapshot="true"/>
+                            <set_known object="$BlackMarketStation.zone" known="true"/>
+                            <set_known object="$BlackMarketStation.sector" known="true"/>
+                            <set_known object="$BlackMarketStation.cluster" known="true"/>
+                          </do_if>
+
+                          <create_position name="$StationPos" object="$BlackMarketStation" space="$Neptune"/>
+                          <!--TODO @Owen make this not so close if the station is close to the capship-->
+                          <get_safe_pos result="$XenonSpawnPos" sector="$Neptune" radius="1km" x="$StationPos.x * 1.25" y="5km" z="$StationPos.z * 1.2"/>
+                          <do_all exact="3" counter="$i">
+                            <create_ship name="$Xenon" groupname="$NeptuneXenon" sector="$Neptune">
+                              <select faction="faction.xenon" size="class.ship_s" tags="tag.military"/>
+                              <owner exact="faction.xenon" overridenpc="true"/>
+                              <safepos value="$XenonSpawnPos" max="200m"/>
+                            </create_ship>
+                            <do_if value="$i le 2">
+                              <set_drop_object object="$Xenon" drop="'drops_hqdiscovery_xenondrop_1'"/>
+                            </do_if>
+
+                            <do_if value="$i == 1">
+                              <set_value name="$XenonLeader" exact="$Xenon"/>
+                              <create_order object="$Xenon" id="'Patrol'" default="true">
+                                <param name="space" value="$Neptune"/>
+                              </create_order>
+                            </do_if>
+                            <do_else>
+                              <create_order object="$Xenon" id="'Escort'">
+                                <param name="target" value="$XenonLeader" />
+                              </create_order>
+                            </do_else>
+                          </do_all>
+                        </do_if>
+                        <set_value name="$DeliveryWare" exact="ware.inv_agidevice_01"/>
+                        <set_value name="$DeliveryAmount" exact="1"/>
+                        <set_value name="$DeliverStep" exact="1"/>
+
+                        <do_if value="$PioneerVariant">
+                          <update_mission cue="$MissionCue" description="{30223,1003}"/>
+                        </do_if>
+                        <do_else>
+                          <update_mission cue="$MissionCue" description="{30223,1503}" icon="'briefing_dr_rick_feynman_01'" iconcaption="{30285,101}"/>
+                        </do_else>
+                      </actions>
+
+                      <cues>
+                        <cue name="Ch1_Deliver_Item_Map_Text" instantiate="true">
+                          <conditions>
+                            <event_ui_triggered screen="'MapMenu'" control="''"/>
+                          </conditions>
+                          <actions>
+                            <!--TODO @Owen - support colour text?-->
+                            <add_holomap_text object="$BlackMarketStation" text="{30223,2002}"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="Ch1_Deliver_Item_Hint" checkinterval="5s">
+                          <conditions>
+                            <check_age min="Ch1_Deliver_Item.time + 10s"/>
+                            <check_value value="not player.isinconversation and not player.entity.hascontext.{$ScientistShip}"/>
+                          </conditions>
+                          <cues>
+                            <!--
+                            Just so you're not completly lost without my guidance, I've marked a potential location where you can hope to find the item.
+                            Check your map for those details.
+                            These items are often sourced from Xenon, but it would not be very professional of me to encourage you to seek them out.
+                            -->
+                            <cue name="Ch1_Deliver_Item_Hint_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                              <param name="MissionCue"        value="$MissionCue"/>
+                              <param name="Actor"             value="$HeadScientist"/>
+                              <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$HeadScientist}"/>
+                              <param name="DelayInitial"      value="0s"/>
+                              <param name="Lines"             value="[[30223016], [30223017], [30223018]]"/>
+                              <param name="EndSignalCue"      value="Ch1_Deliver_Item_Hint_Box"/>
+                            </cue>
+
+                            <cue name="Ch1_Deliver_Item_Hint_Box">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <show_help custom="{30223,2001}" position="3" comment="Certain items can be found at Black Market traders"/>
+                              </actions>
+                              <cues>
+                                <cue name="Ch1_Deliver_Item_Cadet_Comment" onfail="cancel">
+                                  <conditions>
+                                    <check_value value="not $PioneerVariant"/>
+                                  </conditions>
+                                  <delay exact="10s"/>
+                                  <actions>
+                                    <!--
+                                    30223012 He's looking to acquire AGI technology? It seems we can add handling of illegal materials to his list of charges.
+                                    30223013 Continue on. We can't afford to make him suspicious now.-->
+                                    <speak actor="$TerranSecretServiceContact" line="[30223012, 30223013]" priority="100"/>
+                                  </actions>
+                                </cue>
+                              </cues>
+                            </cue>
+                          </cues>
+                        </cue>
+                        <cue name="Ch1_Deliver_Item_Dock_Hint">
+                          <conditions>
+                            <event_object_docked_at container="$BlackMarketStation"/>
+                            <check_value value="player.entity.hascontext.{event.param}"/>
+                          </conditions>
+                          <delay exact="10s"/>
+                          <actions>
+                            <do_if value="$PioneerVariant">
+                              <!--
+                              You can likely find the dealer in the bar.
+                              Knowing you, you're probably already acquainted.-->
+                              <speak actor="$HeadScientist" line="[30223026, 0.5s, 30223027]" priority="100"/>
+                            </do_if>
+                            <do_else>
+                              <!--If our own intel is correct, you can likely find the dealer in the bar.-->
+                              <speak actor="$TerranSecretServiceContact" line="30223014" priority="100"/>
+                            </do_else>
+                          </actions>
+                        </cue>
+
+                        <cue name="Ch1_Deliver_Item_Ref" ref="md.RML_Deliver_Inventory.Deliver_Inventory">
+                          <param name="EndSignalCue"        value="Ch1_Deliver_Item_End"/>
+                          <param name="MissionCue"          value="$MissionCue"/>
+                          <param name="StartStep"           value="$DeliverStep"/>
+                          <param name="IsPassive"           value="false"/>
+
+                          <!--Delivery params-->
+                          <param name="WaresTableParam"       value="table[{$DeliveryWare} = $DeliveryAmount]"/>
+                          <param name="DeliveryNPC"           value="$HeadScientist" />
+                          <param name="AcquireObjectiveObject" value="$BlackMarketStation"/>
+                          <param name="ProgressBarText"       value="{30004,1054}"/>
+                          <param name="ConversationOptionText" value="{1002,3000412}"/>
+                          <param name="ConversationTipText"   value="{30223,2001}"/>
+                          <param name="PlaceNPC"              value="false"/>
+
+                          <param name="DebugChance"           value="$DebugChance"/>
+                        </cue>
+
+                        <cue name="Ch1_Deliver_Item__Near_Station" checkinterval="1s">
+                          <conditions>
+                            <check_value value="not $BlackMarketStation.exists or (player.sector == $BlackMarketStation.sector and player.entity.bboxdistanceto.{$BlackMarketStation} lt 5km)"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <set_value name="Ch1_Deliver_Item_Ref.$AcquireObjectiveObject" exact="null"/>
+                            <signal_cue_instantly cue="Ch1_Deliver_Item_Ref" param="'update_briefing'"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="Ch1_Suppress_Police_Scans" checkinterval="1s" version="2">
+                          <conditions>
+                            <check_value value="player.entity.inventory.{$DeliveryWare}.count ge $DeliveryAmount"/>
+                          </conditions>
+                          <actions>
+                            <debug_text text="'Suppressing police scans on player entity'" chance="$DebugChance"/>
+                            <run_actions ref="md.LIB_Generic.RequestEntityDoNotScan" comment="galaxy wide">
+                              <param name="RequesterCue"      value="namespace"/>
+                              <param name="AddRequest"        value="true"/>
+                              <param name="DebugChance"       value="$DebugChance"/>
+                            </run_actions>
+                            <signal_cue cue="Ch1_Reset_Police_Scan_Suppression"/>
+                          </actions>
+                          <patch sinceversion="2">
+                            <do_if value="(Ch1_Reset_Police_Scan_Suppression.state == cuestate.active) or (Ch1_Reset_Police_Scan_Suppression.state == cuestate.waiting)">
+                              <run_actions ref="md.LIB_Generic.RequestEntityDoNotScan" comment="galaxy wide">
+                                <param name="RequesterCue"      value="namespace"/>
+                                <param name="AddRequest"        value="true"/>
+                                <param name="DebugChance"       value="$DebugChance"/>
+                              </run_actions>
+                            </do_if>
+                          </patch>
+                        </cue>
+
+                        <!--TODO @Owen timeout?
+                        30223025: We're out of time. Get back here when you can.-->
+
+                        <cue name="Ch1_Deliver_Item_End" version="2">
+                          <conditions>
+                            <event_cue_signalled/>
+                            <check_value value="this.$EndFeedbackValue gt 0"/>
+                          </conditions>
+                          <actions>
+                            <!--Good job. You're just in time. We're about ready to disembark.-->
+                            <add_npc_line speaker="$HeadScientist" line="30223030"/>
+                            <!--TODO @Owen check why it switches to the objective to get the AI processor when handing it over-->
+
+                            <!--clear the ship of role entities-->
+                            <set_value name="$ShipCrew" exact="$ScientistShip.roleentities"/>
+                            <do_for_each name="$ShipCrewperson" in="$ShipCrew">
+                              <signal_objects object="$ShipCrewperson" param="'npc_despawn'"/>
+                            </do_for_each>
+
+                            <cancel_all_orders object="$ScientistShip"/>
+                            <create_order object="$ScientistShip" id="'Wait'" default="true">
+                              <param name="allowdocked" value="false"/>
+                            </create_order>
+                          </actions>
+                          <delay exact="5s"/>
+                          <actions>
+                            <!--<signal_cue cue="DEBUG_WarpToHQ"/>-->
+                          </actions>
+                          <patch sinceversion="2" state="waiting">
+                            <do_if value="Ch1_Deliver_Item_Ref.state == cuestate.cancelled">
+                              <debug_text text="'Resetting deliver item RML'" filter="savegame"/>
+                              <reset_cue cue="Ch1_Deliver_Item_Ref"/>
+                            </do_if>
+                          </patch>
+                          <cues>
+                            <cue name="Ch1_Deliver_Item_Fadeout">
+                              <conditions>
+                                <event_conversation_finished actor="$HeadScientist"/>
+                              </conditions>
+                              <delay exact="1s"/>
+                              <actions>
+                                <signal_cue cue="Ch2_Satellites"/>
+                                <cancel_cue cue="Ch1_Intro"/>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch1_Reset_Police_Scan_Suppression">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <delay exact="30min"/>
+          <actions>
+            <debug_text text="'Removing suppression of police scans on player entity'" chance="$DebugChance"/>
+            <run_actions ref="md.LIB_Generic.RequestEntityDoNotScan">
+              <param name="RequesterCue"      value="namespace"/>
+              <param name="AddRequest"        value="false"/>
+              <param name="DebugChance"       value="$DebugChance"/>
+            </run_actions>
+          </actions>
+        </cue>
+
+        <cue name="Ch2_Force">
+          <force name="Ch2_HQDiscovery_Satellites">
+            <!-- Special setup when you "fast-forward" into a chapter (skipping earlier ones) -->
+            <do_if value="not $MissionCue.hasmission" comment="make sure we have a mission if we directly skip into ch2">
+              <create_mission cue="$MissionCue" name="{30223,1501}" description="{30223,1502}" type="missiontype.plot" faction="faction.pioneers" difficulty="level.medium" abortable="false"/>
+            </do_if>
+            <signal_cue_instantly cue="Ch2_Satellites" param="true"/>
+          </force>
+        </cue>
+
+        <cue name="Ch2_Satellites" version="3">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Chapter ' + this" chance="$DebugChance"/>
+            <set_value name="$CurrentChapterCue" exact="this"/>
+            <set_value name="$CurrentPartCue" exact="this"/>
+            <set_value name="$Forced" exact="@event.param"/>
+
+            <do_if value="@$Forced">
+              <create_ship name="$ScientistShip" macro="macro.ship_ter_l_research_01_a_macro" sector="$Neptune" capturable="false">
+                <paint ware="ware.paintmod_0122"/>
+                <basket basket="all_container"/>
+                <drop ref="ship_large_civilian"/>
+                <owner exact="faction.pioneers" overridenpc="true"/>
+                <people ref="terran_freighter_crew"/>
+                <safepos x="20km" y="-500m" z="-5km"/>
+              </create_ship>
+              <cancel_all_orders object="$ScientistShip"/>
+              <create_order object="$ScientistShip" id="'Wait'" default="true">
+                <param name="allowdocked" value="false"/>
+              </create_order>
+            </do_if>
+
+            <fade_screen fadeout="2s" fadein="1s" realtime="true"/>
+          </actions>
+          <delay exact="2s"/>
+          <actions>
+            <find_object name="$Gate" destination="$BrennansTriumph" space="$Neptune"/>
+            <create_position name="$LookatPos" object="$Gate" x="5km" space="$Gate.sector"/>
+            <warp object="$ScientistShip" sector="$ScientistShip.sector">
+              <safepos object="$Gate" x="5km" z="100km"/>
+              <orientation orientation="look_at" refposition="$LookatPos"/>
+            </warp>
+          </actions>
+          <delay exact="1ms"/>
+          <actions>
+            <create_position name="$CamPos" object="$ScientistShip" x="-10m" y="20m" z="-470m" space="$ScientistShip.zone"/>
+            <set_value name="$CutsceneKey" exact="'Story_hqdiscovery_1'"/>
+            <debug_text text="'campos ' + $CamPos"/>
+            <play_cutscene result="$Cutscene" key="$CutsceneKey" abortable="false">
+              <param name="capship" object="$ScientistShip"/>
+              <param name="gate" object="$Gate"/>
+              <param name="x" number="$CamPos.x"/>
+              <param name="y" number="$CamPos.y"/>
+              <param name="z" number="$CamPos.z"/>
+            </play_cutscene>
+
+            <create_cue_actor name="$Engineer_1" cue="namespace">
+              <select faction="faction.pioneers" tags="tag.service"/>
+              <owner exact="faction.pioneers"/>
+            </create_cue_actor>
+            <set_entity_traits entity="$Engineer_1" missionactor="true" subtitlename="true"/>
+            <set_entity_overrides entity="$Engineer_1" icon="'specialist'"/>
+
+            <create_cue_actor name="$Engineer_2" cue="namespace">
+              <select faction="faction.pioneers" tags="tag.service"/>
+              <owner exact="faction.pioneers"/>
+            </create_cue_actor>
+            <set_entity_traits entity="$Engineer_2" missionactor="true" subtitlename="true"/>
+            <set_entity_overrides entity="$Engineer_2" icon="'specialist'"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-1.46m, 0.01m, -2.6m],
+                    $rotation = rotation.[-142deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $GamestartActor, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-2.7m, 0.1m, -4.4m],
+                    $rotation = rotation.[30deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Engineer_1, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-1.4m, 0.01m, -4.8m],
+                    $rotation = rotation.[1deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Engineer_2, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-0.2m, 0.01m, -3.9m],
+                    $rotation = rotation.[-18deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <add_actor_to_room actor="player.entity" object="$ScientistShip.controlroom">
+              <position x="-2.3m" y="1.6m" z="-5.2m"/>
+              <rotation yaw="8deg"/>
+            </add_actor_to_room>
+          </actions>
+          <delay exact="2s"/>
+          <actions>
+            <cancel_all_orders object="$ScientistShip"/>
+            <create_order object="$ScientistShip" id="'MoveGeneric'">
+              <param name="destination" value="$BrennansTriumph"/>
+            </create_order>
+          </actions>
+          <delay exact="0.5s"/>
+          <actions>
+            <start_boost object="$ScientistShip"/>
+          </actions>
+          <delay exact="8.3s"/>
+          <actions>
+            <fade_screen fadeout="1.1s" fadein="2s" realtime="true"/>
+            <start_actor_sequence actor="$GamestartActor" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+            <start_actor_sequence actor="$Engineer_1" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+            <start_actor_sequence actor="$Engineer_2" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+          </actions>
+          <delay exact="1s"/>
+          <actions>
+            <set_value name="md.$SuppressChangedSpace" exact="true"/>
+            <warp object="$ScientistShip" sector="$BrennansTriumph">
+              <safepos x="-90km" z="-85km"/>
+              <rotation yaw="95deg"/>
+            </warp>
+          </actions>
+          <delay exact="1.5s"/>
+          <actions>
+            <start_conversation actor="$HeadScientist" conversation="hq_disco_team_meeting_1" priority="100"/>
+
+            <!--clear the ship of role entities-->
+            <set_value name="$ShipCrew" exact="$ScientistShip.roleentities"/>
+            <do_for_each name="$ShipCrewperson" in="$ShipCrew">
+              <signal_objects object="$ShipCrewperson" param="'npc_despawn'"/>
+            </do_for_each>
+          </actions>
+          <patch sinceversion="3" state="complete">
+            <do_if value="$ScientistShip.isoperational and not $ScientistShip.isplayerowned">
+              <set_object_capturable object="$ScientistShip" capturable="false"/>
+              <set_value name="$BoardingOps" exact="$ScientistShip.boardingoperations"/>
+              <do_for_each name="$BoardingOp" in="$BoardingOps">
+                <debug_text text="'Aborting boarding operation ' + $BoardingOp + ' against story ship ' + $ScientistShip.debugname" filter="savegame"/>
+                <end_boarding_operation operation="$BoardingOp"/>
+              </do_for_each>
+              <remove_value name="$BoardingOps"/>
+            </do_if>
+            <do_else>
+              <create_ship name="$ScientistShip" macro="macro.ship_ter_l_research_01_a_macro" sector="$BrennansTriumph" capturable="false">
+                <paint ware="ware.paintmod_0122"/>
+                <basket basket="all_container"/>
+                <drop ref="ship_large_civilian"/>
+                <pilot>
+                  <select faction="faction.pioneers" tags="tag.pilot"/>
+                </pilot>
+                <owner exact="faction.pioneers" overridenpc="true"/>
+                <people ref="terran_freighter_crew"/>
+                <safepos space="$BrennansTriumph" radius="2km" x="20km" y="-1.5km" z="-85km"/>
+              </create_ship>
+              <set_object_name object="$ScientistShip" page="30224" line="202" comment="Oberth"/>
+              <debug_text text="'Scientist ship was destroyed. Recreating as ' + $ScientistShip" filter="savegame"/>
+
+              <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                <param name="Object" value="$ScientistShip"/>
+                <param name="RequesterCue" value="namespace"/>
+                <param name="DebugChance" value="$DebugChance"/>
+              </run_actions>
+
+              <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $ScientistShip.controlroom,
+                            $priority = 100,
+                            $position = position.[-1.46m, 0.01m, -2.6m],
+                            $rotation = rotation.[15deg, 0deg, 0deg],
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+
+              <!--The other bridge actors can remain disconnected for now-->
+
+              <do_if value="Ch2_End_Conv_Started.state == cuestate.waiting">
+                <set_objective cue="$MissionCue" step="3" action="objective.talkto" object="$HeadScientist" updatebriefing="true"/>
+              </do_if>
+            </do_else>
+          </patch>
+          <cues>
+            <cue name="Ch2_ConvScene_1_Start">
+              <conditions>
+                <event_conversation_started actor="$HeadScientist"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false"/>
+
+                <add_npc_line speaker="$HeadScientist" line="30223031" delay="3s" comment="We're on our way towards a facility very important to the future of our people."/>
+                <add_npc_line speaker="$HeadScientist" line="30223032" emotion="[0.5, 'gesticulate03']" comment="It recently suffered structural damage due to some unknown spacial distrotion, hence why you have been brought in."/>
+                <add_npc_line speaker="$HeadScientist" line="30223033" emotion="[0.4, 'nod01']" comment="Our resources are limited, but our people are exceptional. I welcome you to the team."/>
+                <add_npc_line speaker="$HeadScientist" line="30223034" emotion="[0.2, 'rolleyes01']" comment="Unfortunatly, our limited resources force us to make a minor detour."/>
+                <add_npc_line speaker="$HeadScientist" line="30223035" comment="A number of satellites have been targetted by Xenon."/>
+                <add_npc_line speaker="$HeadScientist" line="30223036" comment="While we managed to intercept the attackers, several satellites have been left in a state of disrepair."/>
+                <add_npc_line speaker="$HeadScientist" line="30223037" comment="I will assign a number of satellites for you to bring back to working order."/>
+                <add_npc_line speaker="$HeadScientist" line="30223038" comment="Let's get to work."/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ConvScene_1_End">
+              <conditions>
+                <event_conversation_finished actor="$HeadScientist"/>
+              </conditions>
+              <actions>
+                <remove_value name="md.$SuppressChangedSpace"/>
+                <find_npc_slot name="$BridgeCrewSlots" role="entityrole.service" object="$ScientistShip.controlroom" multiple="true"/>
+                <do_if value="@$BridgeCrewSlots.{1}">
+                  <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $GamestartActor, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $BridgeCrewSlots.{1},
+                            $priority = 100,
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+                </do_if>
+                <do_if value="@$BridgeCrewSlots.{2}">
+                  <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Engineer_1, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $BridgeCrewSlots.{2},
+                            $priority = 100,
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+                </do_if>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                            table[
+                            $requestercue = namespace,
+                            $location = $ScientistShip.controlroom,
+                            $priority = 100,
+                            $position = position.[-1.46m, 0.01m, -2.6m],
+                            $rotation = rotation.[15deg, 0deg, 0deg],
+                            $debugchance = $DeepDebugChance,
+                            $debugcaller = if $DeepDebugChance == 100 then this else null]
+                            ]"/>
+
+                <set_value name="$PreferredSatPositions" exact="[
+                           position.[89km, 7km, -95km],
+                           position.[-77km, 0m, -117km],
+                           position.[-35km, 27km, -150km]]"/>
+                <create_group groupname="$Satellites"/>
+                <set_value name="$ExistingSatellites" exact="table[]"/>
+                <do_if value="$PioneerVariant and md.GS_Terran2.Start.$DeployedSatellites?">
+                  <!--See if we can choose some of the satellites deployed in the Pioneer gamestart-->
+                  <do_for_each name="$DeployedSatellite" in="md.GS_Terran2.Start.$DeployedSatellites">
+                    <do_if value="$DeployedSatellite.isoperational and $DeployedSatellite.sector == $BrennansTriumph">
+                      <do_all exact="$PreferredSatPositions.count" counter="$i">
+                        <do_if value="not $ExistingSatellites.{$i}? and $DeployedSatellite.distanceto.[$BrennansTriumph, $PreferredSatPositions.{$i}] lt 15km">
+                          <set_value name="$ExistingSatellites.{$i}" exact="$DeployedSatellite"/>
+                          <break/>
+                        </do_if>
+                      </do_all>
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+
+                <do_all exact="$PreferredSatPositions.count" counter="$i">
+                  <do_if value="$ExistingSatellites.{$i}?">
+                    <add_to_group groupname="$Satellites" object="$ExistingSatellites.{$i}"/>
+                  </do_if>
+                  <do_else>
+                    <create_object name="$NewSatellite" groupname="$Satellites" macro="macro.eq_arg_satellite_01_macro" owner="faction.pioneers" sector="$BrennansTriumph">
+                      <safepos value="$PreferredSatPositions.{$i}" max="2km"/>
+                    </create_object>
+                    <set_known object="$NewSatellite" known="true"/>
+                  </do_else>
+                </do_all>
+                <remove_value name="$NewSatellite"/>
+
+                <do_for_each name="$Satellite" in="$Satellites">
+                  <set_object_hull object="$Satellite" min="25" max="55"/>
+                </do_for_each>
+
+                <cancel_all_orders object="$ScientistShip"/>
+                <create_order object="$ScientistShip" id="'Wait'" default="true">
+                  <param name="allowdocked" value="false"/>
+                </create_order>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $Engineer_2, namespace]"/>
+                <signal_objects object="$Engineer_2" param="'npc_despawn'" param2="table[$disconnect = true]"/>
+
+                <substitute_text text="$SingularObjectiveText" source="{30146,20}">
+                  <replace string="'$PERCENTAGE$'" with="100"/>
+                </substitute_text>
+                <substitute_text text="$MultipleObjectiveText" source="{30146,21}">
+                  <replace string="'$PERCENTAGE$'" with="100"/>
+                </substitute_text>
+
+                <signal_cue cue="Ch2_Sat_Repair"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <!--(dejected)Satellites, why is it always satellites?-->
+                <speak actor="$GamestartActor" line="30223001"/>
+              </actions>
+              <cues>
+                <cue name="Ch2_Sat_Repair">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch2_Sat_Repair_Ref" ref="md.RML_RepairObject.RepairObject">
+                      <param name="EndSignalCue"          value="Ch2_Sat_Repair_End"/>
+                      <param name="MissionCue"            value="$MissionCue"/>
+                      <param name="StartStep"             value="2"/>
+                      <param name="DebugChance"           value="$DebugChance" />
+                      <param name="SingularObjectiveText" value="$SingularObjectiveText"/>
+                      <param name="MultipleObjectiveText" value="$MultipleObjectiveText"/>
+                      <param name="TargetsParam"          value="$Satellites"/>
+                      <param name="RepairedObjSignalCue"  value="Ch2_Sat_Repair_Object_Repaired"/>
+                    </cue>
+
+                    <cue name="Ch2_Sat_Repair_Comment_1" checkinterval="1s">
+                      <conditions>
+                        <check_value value="player.controlled and not player.controlled.dock"/>
+                        <check_any exact="$Satellites.count" counter="$i">
+                          <check_value value="player.sector == $Satellites.{$i}.sector and player.entity.distanceto.{$Satellites.{$i}} lt 20km"/>
+                        </check_any>
+                      </conditions>
+                      <cues>
+                        <!--Remember, this is critical work. Those satellites don't just help with our research, they also serve as a sensor net.-->
+                        <cue name="Ch2_Sat_Repair_Comment_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="MissionCue"        value="$MissionCue"/>
+                          <param name="Actor"             value="$HeadScientist"/>
+                          <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$HeadScientist}"/>
+                          <param name="DelayInitial"      value="0s"/>
+                          <param name="Lines"             value="[[30223028]]"/>
+                          <param name="EndSignalCue"      value="Ch2_Sat_Repair_Comment_1b"/>
+                        </cue>
+
+                        <cue name="Ch2_Sat_Repair_Comment_1b">
+                          <conditions>
+                            <event_cue_signalled/>
+                            <check_value value="not $PioneerVariant"/>
+                          </conditions>
+                          <cues>
+                            <!--I'm quite sure this sensor net is also used to keep tabs of Terran Protectorate activity in their sectors. Go ahead and repair it, but we make take action later.-->
+                            <cue name="Ch2_Sat_Repair_Comment_1b_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                              <param name="MissionCue"        value="$MissionCue"/>
+                              <param name="Actor"             value="$TerranSecretServiceContact"/>
+                              <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$TerranSecretServiceContact}"/>
+                              <param name="DelayInitial"      value="2s"/>
+                              <param name="Lines"             value="[[30223015]]"/>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_Sat_Repair_Hint" checkinterval="1s">
+                      <conditions>
+                        <check_value value="not player.spacesuit"/>
+                        <check_any exact="$Satellites.count" counter="$i">
+                          <check_value value="player.sector == $Satellites.{$i}.sector and player.entity.distanceto.{$Satellites.{$i}} lt 2km"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <show_help custom="{30223,2004}" position="3" comment="Your spacesuit is equipped with a repair laser. Get out of your seat and leave your ship via the transporter room control panel."/>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_Sat_Repair_Hint_Reset">
+                          <delay exact="1min"/>
+                          <actions>
+                            <reset_cue cue="Ch2_Sat_Repair_Hint"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_Sat_Repair_Object_Repaired" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <do_if value="Ch2_Sat_Repair_Hint.state != cuestate.cancelled">
+                          <cancel_cue cue="Ch2_Sat_Repair_Hint"/>
+                        </do_if>
+                        <set_value name="$RepairedSatellites" operation="add"/>
+                        <do_if value="$RepairedSatellites == 2">
+                          <!--This is gamma team. We're done with our satellites.-->
+                          <speak actor="$GamestartActor" line="30223003" delay="12s" backgroundcomm="true" broadcast="true"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <!--TODO @Owen feedback values and failure lines #text
+                    30223039: I guess those satellites were in worse shape than I thought.
+                    30223040: We'll pass on the word to get new ones deployed.-->
+                    <cue name="Ch2_Sat_Repair_End">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <cancel_cue cue="Ch2_Sat_Repair_Hint"/>
+                        <cancel_cue cue="Ch2_Sat_Repair_Object_Repaired"/>
+                        <set_objective cue="$MissionCue" step="3" action="objective.talkto" object="$HeadScientist" updatebriefing="true"/>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_End_Conv_Started">
+                          <conditions>
+                            <event_conversation_started actor="$HeadScientist"/>
+                            <check_value value="player.room == $HeadScientist.room"/>
+                          </conditions>
+                          <actions>
+                            <!--Now that's out of the way we can finally get on with our primary task. I can hardly wait.-->
+                            <add_npc_line speaker="$HeadScientist" line="30223041"/>
+                          </actions>
+                          <cues>
+                            <cue name="Ch2_End">
+                              <conditions>
+                                <event_conversation_finished actor="$HeadScientist"/>
+                              </conditions>
+                              <actions>
+                                <signal_cue cue="Ch3_HQ_EVA"/>
+                                <cancel_cue cue="Ch2_Satellites"/>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch3_Force">
+          <actions>
+            <!-- Special setup when you "fast-forward" into a chapter (skipping earlier ones) -->
+          </actions>
+          <force name="Ch3_HQ_EVA">
+          </force>
+        </cue>
+
+        <cue name="Ch3_HQ_EVA" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Chapter ' + this" chance="$DebugChance"/>
+            <set_value name="$CurrentChapterCue" exact="this"/>
+            <set_value name="$CurrentPartCue" exact="this"/>
+
+            <!--TODO @Owen $forced handling-->
+
+            <find_object name="$Gate" destination="$BrennansTriumph" space="$HQSector"/>
+            <set_value name="$Ship" exact="player.ship"/>
+            <cancel_all_orders object="$Ship"/>
+            <create_order object="$Ship" id="'Wait'" default="true">
+              <param name="allowdocked" value="false"/>
+            </create_order>
+            <create_position name="$LookatPos" object="$HQ" x="10km" space="$HQSector"/>
+            <set_value name="md.$SuppressChangedSpace" exact="true"/>
+            <precache_hint target="$HQ.zone" includechildren="true"/>
+            <fade_screen fadeout="0.5s" fadein="2s" realtime="true"/>
+          </actions>
+          <delay exact="0.5s"/>
+          <actions>
+            <warp object="$Ship" sector="$HQSector">
+              <safepos x="-163km" z="12km"/>
+              <rotation yaw="-136deg"/>
+            </warp>
+          </actions>
+          <delay exact="0.5s"/>
+          <actions>
+            <set_value name="$CutsceneKey" exact="'Story_hqdiscovery_2'"/>
+            <create_position name="$CamPos" object="$Ship" x="200m" y="80m" z="350m" space="$Ship.zone"/>
+            <debug_text text="$CamPos"/>
+            <play_cutscene result="$Cutscene" key="$CutsceneKey" abortable="false">
+              <param name="capship" object="$Ship"/>
+              <param name="x" number="$CamPos.x"/>
+              <param name="y" number="$CamPos.y"/>
+              <param name="z" number="$CamPos.z"/>
+            </play_cutscene>
+            <create_order object="$Ship" id="'MoveGeneric'">
+              <param name="destination" value="$HQ"/>
+            </create_order>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $HeadScientist, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-1.46m, 0.01m, -2.6m],
+                    $rotation = rotation.[162deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $GamestartActor, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-2.7m, 0.1m, -4.4m],
+                    $rotation = rotation.[30deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Engineer_1, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-1.4m, 0.01m, -4.8m],
+                    $rotation = rotation.[1deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Engineer_2, 
+                    table[
+                    $requestercue = namespace,
+                    $location = $ScientistShip.controlroom,
+                    $priority = 100,
+                    $position = position.[-0.2m, 0.01m, -3.9m],
+                    $rotation = rotation.[-18deg, 0deg, 0deg],
+                    $debugchance = $DeepDebugChance,
+                    $debugcaller = if $DeepDebugChance == 100 then this else null]
+                    ]"/>
+
+            <add_actor_to_room actor="player.entity" object="$ScientistShip.controlroom">
+              <position x="-2.3m" y="1.6m" z="-5.2m"/>
+              <rotation yaw="8deg"/>
+            </add_actor_to_room>
+          </actions>
+          <delay exact="1s"/>
+          <actions>
+            <start_boost object="$Ship"/>
+            <!--<start_actor_sequence actor="$HeadScientist" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>-->
+            <start_actor_sequence actor="$GamestartActor" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+            <start_actor_sequence actor="$Engineer_1" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+            <start_actor_sequence actor="$Engineer_2" type="'conversation'" behavior="'stand'" transition="false" immediate="true"/>
+          </actions>
+          <delay exact="13.5s"/>
+          <actions>
+            <fade_screen fadeout="1s" fadein="1.5s"/>
+          </actions>
+          <delay exact="1s"/>
+          <actions>
+            <spawn_docked ship="$ScientistShip" dock="$HQDock"/>
+            <cancel_all_orders object="$ScientistShip"/>
+            <create_order object="$ScientistShip" name="$DockAndWaitOrder" id="'DockAndWait'" default="true">
+              <param name="destination" value="$HQ"/>
+            </create_order>
+            <set_value name="$LeakMacro" exact="macro.dataleak_s_standard_01_macro"/>
+            <set_value name="$LeakDataList" exact="[
+                       [position.[-123m, 32m, 4841m],   position.[-123m,  -28m, 4841m], rotation.[0deg, -90deg, 0deg], rotation.[0deg, 0deg, 0deg]], 
+                       [position.[-193m, 31.5m, 4586m], position.[-203m, 31.5m, 4586m], rotation.[0deg, -90deg, 0deg], rotation.[30deg, 0deg, 40deg]],
+                       [position.[-194m, 39.5m, 4559m], position.[-194m, 39.5m, 4540m], rotation.[0deg, -90deg, 0deg], rotation.[0deg, -90deg, 0deg]]]"/>
+            <do_for_each name="$LeakData" in="$LeakDataList">
+              <find_object_surface posname="$LeakPos" rotname="$LeakRot" object="$HQ" height="$LeakMacro.boundingbox.max.y - $LeakMacro.boundingbox.center.y">
+                <position value="$LeakData.{1}"/>
+                <end value="$LeakData.{2}"/>
+                <offsetrotation value="$LeakData.{3}" />
+              </find_object_surface>
+              <do_if value="$LeakPos">
+                <create_signal_leak groupname="$Leaks" macro="macro.dataleak_s_standard_01_macro" type="signalleaktype.data" object="$HQ">
+                  <position value="$LeakPos" />
+                  <rotation value="$LeakRot" />
+                </create_signal_leak>
+              </do_if>
+              <do_else>
+                <assert value="false" text="'Unable to place leak at intended position on HQ [Owen]'"/>
+                <create_signal_leak groupname="$Leaks" macro="macro.dataleak_s_standard_01_macro" type="signalleaktype.data" object="$HQ">
+                  <position x="$LeakData.{1}.x" y="$LeakData.{1}.y + 3m" z="$LeakData.{1}.z"/>
+                  <rotation value="$LeakData.{4}" />
+                </create_signal_leak>
+              </do_else>
+            </do_for_each>
+            <!--We have to make a list to check the scanned leaks against, because they will no longer in the group at that point-->
+            <set_value name="$LeakList" exact="$Leaks.list"/>
+            <remove_value name="$HullPositionPairs"/>
+
+            <set_value name="$DockshipLineDelay" exact="2s"/>
+            <set_value name="$ScientistTurnDelay" exact="2s"/>
+            <start_conversation actor="$HeadScientist" conversation="hq_disco_team_meeting_2" priority="100"/>
+          </actions>
+          <delay exact="$DockshipLineDelay + $ScientistTurnDelay"/>
+          <actions>
+            <remove_value name="md.$SuppressChangedSpace"/>
+            <start_actor_sequence actor="$HeadScientist" type="'conversationturnright180'" behavior="'stand'" transition="false" immediate="true"/>
+          </actions>
+          <patch sinceversion="2">
+            <set_value name="$LeakDataList" exact="[
+                       [position.[-123m, 32m, 4841m],   position.[-123m,  -28m, 4841m], rotation.[0deg, -90deg, 0deg], rotation.[0deg, 0deg, 0deg]], 
+                       [position.[-193m, 31.5m, 4586m], position.[-203m, 31.5m, 4586m], rotation.[0deg, -90deg, 0deg], rotation.[30deg, 0deg, 40deg]],
+                       [position.[-194m, 39.5m, 4559m], position.[-194m, 39.5m, 4540m], rotation.[0deg, -90deg, 0deg], rotation.[0deg, -90deg, 0deg]]]"/>
+            <do_if value="$Leaks?">
+              <set_value name="$OldLeaks" exact="[]"/>
+              <set_value name="$LeakList" exact="[]"/>
+              <do_for_each name="$Patch_Leak" in="$Leaks" counter="$i">
+                <do_if value="$Patch_Leak.distanceto.{$HQ} lt 100m">
+                  <create_signal_leak name="$NewLeak" groupname="$Leaks" macro="macro.dataleak_s_standard_01_macro" type="signalleaktype.data" object="$HQ">
+                    <position x="$LeakDataList.{$i}.{1}.x" y="$LeakDataList.{$i}.{1}.y + 3m" z="$LeakDataList.{$i}.{1}.z" />
+                    <rotation value="$LeakDataList.{$i}.{4}" />
+                  </create_signal_leak>
+                  <debug_text text="'Replacing misplaced leak ' + $Patch_Leak + ' with ' + $NewLeak" filter="savegame"/>
+                  <append_to_list name="$LeakList" exact="$NewLeak"/>
+                  <append_to_list name="$OldLeaks" exact="$Patch_Leak"/>
+                </do_if>
+              </do_for_each>
+              <do_for_each name="$Patch_Leak" in="$OldLeaks">
+                <remove_from_group group="$Leaks" object="$Patch_Leak"/>
+                <destroy_object object="$Patch_Leak"/>
+              </do_for_each>
+              <do_if value="$OldLeaks.count">
+                <set_objective cue="$MissionCue" step="3" action="objective.repair" text="{30223,2003}" group="$Leaks" updatebriefing="true"/>
+              </do_if>
+            </do_if>
+            <remove_value name="$OldLeaks"/>
+          </patch>
+          <cues>
+            <cue name="Ch3_HQ_EVA_ConvScene_1_Started">
+              <conditions>
+                <event_conversation_started actor="$HeadScientist"/>
+              </conditions>
+              <actions>
+                <unlock_achievement name="PLOT_1" comment="Something Strange in our Neighbourhood" />
+                <add_npc_line speaker="$ScientistShip.pilot" line="10726" delay="$DockshipLineDelay"/>
+                <add_npc_line speaker="$HeadScientist" line="30223042" delay="$ScientistTurnDelay" comment="And here we are."/>
+                <add_npc_line speaker="$HeadScientist" line="30223043" comment="As you know, this is a high security facility. Just because you have clearance to do your job, it doesn't mean you can go wandering off or touch everything."/>
+                <add_npc_line speaker="$HeadScientist" line="30223044" comment="It is currently unmanned and in safe-mode until we can repair the damage and ensure no further anomalies occur."/>
+                <add_npc_line speaker="$GamestartActor" line="30223002" lookat="$HeadScientist"/>
+                <add_npc_line speaker="$HeadScientist" line="30223045" lookat="$GamestartActor"/>
+                <add_npc_line speaker="$HeadScientist" line="30223046"/>
+              </actions>
+              <cues>
+                <cue name="Ch3_HQ_EVA_ConvScene_1_End">
+                  <conditions>
+                    <event_conversation_finished actor="$HeadScientist"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch3_HQ_EVA_Objective"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="Ch3_HQ_EVA_Objective">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_objective cue="$MissionCue" step="3" action="objective.repair" text="{30223,2003}" group="$Leaks" updatebriefing="true"/>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $GamestartActor, namespace]"/>
+                <signal_objects object="$GamestartActor" param="'npc_despawn'" param2="table[$disconnect = true]"/>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $Engineer_1, namespace]"/>
+                <signal_objects object="$Engineer_1" param="'npc_despawn'" param2="table[$disconnect = true]"/>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $Engineer_2, namespace]"/>
+                <signal_objects object="$Engineer_2" param="'npc_despawn'" param2="table[$disconnect = true]"/>
+              </actions>
+              <cues>
+                <cue name="Ch3_HQ_EVA_Last_Leak_Destroyed">
+                  <conditions>
+                    <event_object_destroyed group="$Leaks"/>
+                    <check_value value="$Leaks.count == 1"/>
+                  </conditions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <!--This is just a failsafe if a leak was actually destroyed, and not scanned-->
+                    <speak actor="$HeadScientist" line="30223047" priority="100"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch3_HQ_EVA_Leak_Scanned" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_player_repaired_signal_leak/>
+                      <event_player_signal_unlock_impossible/>
+                      <event_player_signal_unlock_finished/>
+                    </check_any>
+                    <check_value value="$LeakList.indexof.{event.param}"/>
+                  </conditions>
+                  <actions>
+                    <remove_from_list name="$LeakList" exact="event.param"/>
+                    <do_if value="$Leaks.count and $LeakList.count">
+                      <cancel_cue cue="this"/>
+                    </do_if>
+                    <do_else>
+                      <cancel_cue cue="Ch3_HQ_EVA_Last_Leak_Destroyed"/>
+                      <!--The player is expected to be in a spacesuit, but just check anyway-->
+                      <do_if value="player.spacesuit">
+                        <find_ship_by_true_owner name="$NearbyPlayerShips" unit="false" excluded="player.spacesuit" faction="faction.player" space="player.sector" multiple="true">
+                          <match_distance object="player.spacesuit" max="500m"/>
+                        </find_ship_by_true_owner>
+                        <do_for_each name="$NearbyPlayerShip" in="$NearbyPlayerShips">
+                          <signal_cue_instantly cue="LockPlayerShipDock" param="$NearbyPlayerShip"/>
+                        </do_for_each>
+                      </do_if>
+                    </do_else>
+                  </actions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <!--We're picking up weird readings again. You better get back to the ship.-->
+                    <speak actor="$HeadScientist" line="30223047" priority="100"/>
+                  </actions>
+                </cue>
+
+                <!--TODO @Owen relocate build storage and any CV-->
+                <cue name="Ch3_HQ_Warping" version="2">
+                  <conditions>
+                    <event_speak_finished actor="$HeadScientist" line="30223047"/>
+                  </conditions>
+                  <actions>
+                    <set_objective cue="$MissionCue" step="3" action="objective.flyto" object="$ScientistShip"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="@$NearbyPlayerShips">
+                      <do_for_each name="$NearbyPlayerShip" in="$NearbyPlayerShips">
+                        <do_if value="$NearbyPlayerShip.parent.isclass.zone">
+                          <add_object_velocity object="$NearbyPlayerShip">
+                            <linear x="-0.4m" y="0.2m" z="-2m"/>
+                            <angular x="1.9m" y="-0.6m" z="-0.9m"/>
+                          </add_object_velocity>
+                        </do_if>
+                      </do_for_each>
+                    </do_if>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <!--Gravimetric shears! Disengage docking clamps!-->
+                    <speak actor="$HeadScientist" line="30223048" priority="100" delay="0.5s" backgroundcomm="true" broadcast="true"/>
+                    <add_object_velocity object="player.spacesuit">
+                      <linear x="-0.4m" y="0.2m" z="-1m"/>
+                      <angular x="-0.9m" y="-0.4m" z="-0.4m"/>
+                    </add_object_velocity>
+                    <add_effect object="$HQ.zone" effect="'hq_warpin'">
+                      <position object="$HQ"/>
+                    </add_effect>
+                  </actions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <create_position name="$FlyToPos" object="$HQ" z="10km" space="$HQSector"/>
+                    <create_order object="$ScientistShip" id="'MoveGeneric'">
+                      <param name="destination" value="$HQSector"/>
+                      <param name="position" value="$FlyToPos"/>
+                      <param name="noboost" value="true"/>
+                      <param name="uselocalhighways" value="false"/>
+                      <param name="debugchance" value="$DeepDebugChance"/>
+                    </create_order>
+                  </actions>
+                  <delay exact="5s"/>
+                  <actions>
+                    <do_if value="player.spacesuit">
+                      <generate_loadout macro="player.spacesuit.macro" macros="[macro.engine_spacesuit_weak_macro]" result="$Loadouts" flags="engines"/>
+                      <apply_loadout object="player.spacesuit" flags="engines" loadout="$Loadouts.{1}"/>
+                    </do_if>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <add_object_velocity object="player.spacesuit">
+                      <linear x="0.4m" y="0.2m"/>
+                      <angular x="0.8m" y="0.4m" z="0.4m"/>
+                    </add_object_velocity>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <add_effect object="player.spacesuit.controlroom" effect="'cpfx_gate_01'">
+
+                    </add_effect>
+                    <do_if value="$ScientistShip.hascontext.{$HQ}">
+                      <debug_text text="$ScientistShip + ' ' + $ScientistShip.knownname + ' was forced to undock when it should have done so itself by now'" filter="error"/>
+                      <undock ship="$ScientistShip"/>
+                    </do_if>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <set_value name="md.$SuppressChangedSpace" exact="true"/>
+                    <fade_screen fadeout="1.0s" fadein="2.0s" color="white"/>
+                    <!--Make sure the player is still in the spacesuit in the zone-->
+                    <do_if value="player.spacesuit">
+                      <set_value name="$PlayerOffset" exact="null"/>
+                      <do_if value="player.spacesuit.zone == $HQ.zone">
+                        <create_position name="$PlayerOffset" object="player.spacesuit" space="$HQ"/>
+                      </do_if>
+                    </do_if>
+                    <do_else>
+                      <!--TODO @Owen #important player is no longer in a spacesuit. Fly to objective to the HQ?-->
+                    </do_else>
+
+                    <warp object="$HQ" sector="$GrandExchange">
+                      <safepos value="position.[128km, 0m, 198km]"/>
+                    </warp>
+                    <apply_construction_sequence station="$HQ" sequence="'x4ep1_playerheadquarters_base_configuration'" remove="true"/>
+                  </actions>
+                  <delay exact="1.0s"/>
+                  <actions>
+                    <remove_mission cue="$MissionCue"/>
+                    <do_if value="@player.ship.parent.isclass.zone">
+                      <do_if value="$PlayerOffset">
+                        <!--Player ship, just in case they got back into a ship somehow-->
+                        <warp object="player.ship" sector="$HQ.sector">
+                          <position object="$HQ" value="$PlayerOffset"/>
+                        </warp>
+                      </do_if>
+                      <do_else>
+                        <warp object="player.ship" sector="$HQ.sector">
+                          <safepos object="$HQ" z="-1km"/>
+                        </warp>
+                      </do_else>
+                    </do_if>
+                  </actions>
+                  <delay exact="9s"/>
+                  <actions>
+                    <do_if value="player.spacesuit">
+                      <generate_loadout macro="player.spacesuit.macro" macros="[macro.engine_gen_spacesuit_01_mk2_macro]" result="$Loadouts" flags="engines"/>
+                      <apply_loadout object="player.spacesuit" flags="engines" loadout="$Loadouts.{1}"/>
+                    </do_if>
+                    <remove_value name="md.$SuppressChangedSpace"/>
+
+                    <!--Signal the base game HQ mission to take over-->
+                    <set_value name="$HandoverTable" exact="table[$hq = $HQ]"/>
+                    <unlock_achievement name="PLOT_2" comment="That's no moon'"/>
+                    <set_value name="userdata.unlock_x4gamestart_trade" exact="1" />
+                    <set_value name="userdata.unlock_x4gamestart_scientist" exact="1" />
+                    <signal_cue_instantly cue="md.X4Ep1_Mentor_Subscriptions.Phase_Terranborn" param="$HandoverTable"/>
+                  </actions>
+                  <patch sinceversion="2" state="complete">
+                    <set_value name="userdata.unlock_x4gamestart_trade" exact="1" />
+                    <set_value name="userdata.unlock_x4gamestart_scientist" exact="1" />
+                  </patch>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="LockPlayerShipDock" instantiate="true" namespace="this">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$Ship" exact="event.param"/>
+            <find_dockingbay name="$Dock" object="$Ship">
+              <match_dock size="tag.dock_xs"/>
+            </find_dockingbay>
+            <do_if value="$Dock.islocked">
+              <cancel_cue cue="this"/>
+            </do_if>
+            <do_else>
+              <set_room_locked room="$Dock" locked="true"/>
+            </do_else>
+          </actions>
+          <delay exact="10s"/>
+          <actions>
+            <do_if value="$Dock.exists">
+              <set_room_locked room="$Dock" locked="false"/>
+            </do_if>
+          </actions>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+
+</mdscript>

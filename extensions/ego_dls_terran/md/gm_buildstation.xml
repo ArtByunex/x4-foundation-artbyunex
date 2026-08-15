@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+
+  <!-- Adding additional GM set up for the Terran variant that references DLC wares directly -->
+  <add sel="/mdscript/cues/library[@name='Setup_BuildFactory']/actions/do_if[@value='$TargetSector']/do_any/do_all[@comment='refined-metals']/do_elseif[@value='md.$TerranFactions.indexof.{$Faction}']">
+    <set_value name="$ware" exact="ware.metallicmicrolattice"/>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Setup_BuildFactory']/actions/do_if[@value='$TargetSector']/do_any/do_all[@comment='hullparts']/do_if[@value='md.$TerranFactions.indexof.{$Faction}']">
+    <set_value name="$ware" exact="ware.computronicsubstrate"/>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Setup_BuildFactory']/actions/do_if[@value='$TargetSector']/do_any/do_all[@comment='graphene']/do_if[@value='md.$TerranFactions.indexof.{$Faction}']">
+    <set_value name="$ware1" exact="ware.proteinpaste"/>
+    <set_value name="$ware2" exact="ware.stimulants"/>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Setup_BuildFactory']/actions/do_if[@value='$TargetSector']/do_any/do_all[@comment='engineparts']/do_if[@value='md.$TerranFactions.indexof.{$Faction}']">
+    <set_value name="$ware1" exact="ware.siliconcarbide"/>
+  </add>
+
+</diff>

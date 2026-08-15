@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  
+  <replace sel="//patch[@comment='yakiAllyLicencePatchMarker']">
+    <patch sinceversion="5" comment="yakiAllyLicencePatchMarker">
+      <do_if value="not @md.$FactionData.{faction.yaki}.$PromotionActive">
+        <do_if value="(not faction.player.haslicence.ceremonyally.{faction.yaki}) and (faction.player.canholdlicence.ceremonyally.{faction.yaki})">
+          <add_licence faction="faction.player" licencefaction="faction.yaki" type="ceremonyally"/>
+        </do_if>
+      </do_if>
+    </patch>
+  </replace>
+ 
+  <replace sel="//do_if[@value='@$AccessGrantedCoHPatchMarker']">
+    <do_if value="($licence.type == 'innercore_access') and ($Faction == faction.terran)" comment="Get permission to enter the Sol Inner Core">
+      <unlock_achievement name="COH_ACCESS_GRANTED"/>
+    </do_if>
+  </replace>
+
+</diff>

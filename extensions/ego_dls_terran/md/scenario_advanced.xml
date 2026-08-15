@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <!-- swap base info -->
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial2']/actions/set_value[@name='$cpufaction']/@exact">faction.terran</replace>
+
+  <!-- swap ships -->
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/set_value[@name='$TradersSetup']">
+    <debug_text text="'Replacing traders'"/>
+    <set_value name="$TradersSetup"   exact="[
+                   [ macro.ship_ter_l_trans_container_01_a_macro, faction.player, $StationTable.$trading,   [20204, 501], [ware.foodrations, ware.energycells, ware.microchips, ware.siliconwafers, ware.medicalsupplies]],
+                   [ macro.ship_ter_l_trans_container_01_a_macro, $cpufaction,    $StationTable.$trading,   [20204, 501], [ware.foodrations, ware.energycells, ware.microchips, ware.siliconwafers, ware.medicalsupplies]],
+                   [ macro.ship_ter_l_trans_container_01_a_macro, $cpufaction,    $StationTable.$trading,   [20204, 1701], [ware.foodrations, ware.medicalsupplies]],
+                   [ macro.ship_ter_l_trans_container_01_a_macro, $cpufaction,    $StationTable.$microchip, [20204, 401], [ware.microchips, ware.siliconwafers]],
+                   [ macro.ship_ter_l_trans_container_01_a_macro, $cpufaction,    $StationTable.$spp,       [20204, 101], [ware.energycells]],
+                   [ macro.ship_ter_l_trans_container_01_a_macro, $cpufaction,    $StationTable.$spp,       [20204, 101], [ware.energycells]],
+                   ]" />
+  </replace>
+
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/set_value[@name='$MinersSetup']">
+    <debug_text text="'Replacing Miners'"/>
+    <set_value name="$MinersSetup"   exact="[
+                   [ macro.ship_ter_l_miner_solid_01_a_macro,     faction.player, $StationTable.$mining, [20204, 5801], [ware.silicon], true],
+                   [ macro.ship_ter_l_miner_solid_01_a_macro,     faction.player, null, [20204, 5801], [ware.silicon], false],
+                   [ macro.ship_ter_l_miner_solid_01_a_macro,     $cpufaction,    $StationTable.$mining, [20204, 5801], [ware.silicon], true],
+                   ]" />
+  </replace>
+
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/set_value[@name='$BuildersSetup']">
+    <set_value name="$BuildersSetup"   exact="[
+                   [ macro.ship_ter_xl_builder_01_a_macro, $cpufaction, $StationTable.$playerhq,  [30179,130], [ware.silicon], true],
+                   ]" />
+  </replace>
+
+  <!-- swap ship crew -->
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/do_all[@exact='$TradersSetup.count']/create_ship[@macro='$TradersSetup.{$k}.{1}']/people/@ref">terran_freighter_crew</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/do_all[@exact='$MinersSetup.count']/do_if[@value='$MinersSetup.{$k}.{3} == null']/create_ship[@macro='$MinersSetup.{$k}.{1}']/people/@ref">terran_freighter_crew</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_TradingShips']/actions/do_all[@exact='$MinersSetup.count']/do_else/create_ship[@macro='$MinersSetup.{$k}.{1}']/people/@ref">terran_freighter_crew</replace>
+
+  <!-- swap stations -->
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'scenario2_silicon_refinery'&quot; or @constructionplan=&quot;'scenario2_split_silicon_refinery'&quot;]/@constructionplan">'scenario2_terran_silicon_refinery'</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'scenario2_microchip_factory'&quot; or @constructionplan=&quot;'scenario2_split_microchip_factory'&quot;]/@constructionplan">'scenario2_terran_microchip_factory'</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'scenario2_spp'&quot; or @constructionplan=&quot;'scenario2_split_spp'&quot;]/@constructionplan">'scenario2_terran_spp'</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'arg_tradestation'&quot; or @constructionplan=&quot;'spl_tradestation'&quot;]/@macro">macro.station_ter_tradestation_base_01_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'arg_tradestation'&quot; or @constructionplan=&quot;'spl_tradestation'&quot;]/@constructionplan">'ter_logisticsdock'</replace>
+  <!-- swap player-station -->
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/create_station[@constructionplan=&quot;'scenario2_player_station'&quot; or @constructionplan=&quot;'scenario2_split_player_station'&quot;]/@constructionplan">'scenario2_terran_player_station'</replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_Station']/actions/create_construction_sequence/@macros">[macro.prod_ter_metallicmicrolattice_macro, macro.prod_ter_computronicsubstrate_macro]</replace>
+
+  <!-- remove split patching (if any) -->
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/add_tradeware[@ware='ware.cheltmeat']" silent="true">
+    <add_tradeware object="$station" ware="ware.foodrations" allowsell="true" allowbuy="false"/>
+  </replace>
+  <replace sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/add_cargo[@ware='ware.cheltmeat']" silent="true">
+    <add_cargo object="$station" ware="ware.foodrations" exact="100000"/>
+  </replace>
+  <remove sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/add_tradeware[@ware='ware.scruffinfruits']" silent="true"/>
+  <remove sel="/mdscript/cues//cue[@name='Scenario2_SetupStations']/actions/add_cargo[@ware='ware.scruffinfruits']" silent="true"/>
+
+
+</diff>

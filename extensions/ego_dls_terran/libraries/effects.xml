@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="utf-8"?>
+<effects xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../libraries/effects.xsd">
+
+  <!-- Various story effects -->
+  <effect name="spacesuit_blocking_radiation">
+    <elements>
+      <element id="1" ref="effect_dummy_macro"   duration="0" >
+        <areadamage range="100" falloff="0.5" duration="1.0" >
+          <damagedeffects shield="dmgfx_cockpit_impact_inside_lightning_01"/>
+        </areadamage>
+      </element>
+      <!-- Rumble -->
+      <element id="9" ref="effect_dummy_macro"   duration="1.8" >
+        <force range="150" falloff="1.0">
+          <rumble>
+            <camera>
+              <component frequency="20" attackduration="0.15" sustainduration="0" releaseduration="0.85">
+                <amplitude randomize="true">
+                  <position x="0.01" y="0.01" z="0.01"/>
+                </amplitude>
+              </component>
+            </camera>
+            <!-- deactivated because its annyoing during testing
+              <controller>
+                <low startvalue="0.0" sustainvalue="1.0" endvalue="0.0" attackduration="0.5" sustainduration="0.3" releaseduration="0.2"/>
+              </controller>-->
+          </rumble>
+        </force>
+      </element>
+    </elements>
+  </effect>
+  <effect name="steam_slow_v1_xenon"  alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="steam_slow_v1_gravity" duration="-1" minscale="40.0" maxscale="50.0" emitterspace="zone"  alignment="object" forklod="mediumeffect"/>
+    </elements>
+  </effect>
+  <effect name="steam_slow_v2_xenon" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="steam_slow_v1_ascending" duration="-1" minscale="40.0" maxscale="50.0" emitterspace="zone" alignment="object"  forklod="mediumeffect"/>
+    </elements>
+  </effect>
+  <effect name="steam_slow_v3_xenon" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="steam_fast_v1_gravity" duration="-1" minscale="140.0" maxscale="170.0" emitterspace="zone" alignment="object" forklod="mediumeffect"/>
+    </elements>
+  </effect>
+  <effect name="sparks_3deg_bursts_v1_xenon" alignment="object" emitterspace="zone" >
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="sparks_3deg_bursts_v1" duration="-1" minscale="15.0" maxscale="25.0" emitterspace="zone" alignment="object" forklod="tinyeffect"/>
+    </elements>
+  </effect>
+  <effect name="sparks_90deg_bursts_v1_xenon" alignment="object" emitterspace="zone" >
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="sparks_90deg_bursts_v1" duration="-1" minscale="15.0" maxscale="25.0" emitterspace="zone" alignment="object" forklod="tinyeffect"/>
+    </elements>
+  </effect>
+
+  <!-- ============== -->
+  <!-- Weapon effects -->
+  <!-- ============== -->
+
+  <!-- ter s laser | bullet_ter_s_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_s_laser_base" alignment="object">
+    <elements>
+      <element id="2" ref="impact_light_blue_macro"   duration="0.15"  fadeout="0.05"/>
+      <element id="4" ref="effect_dummy_macro"        duration="1.5" >
+        <sound ref="weapon_ter_s_laser_01_muzzle"/>
+      </element>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_s_laser_01_mk1" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_s_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk1_macro"   duration="0.4" minscale="0.7" maxscale="0.7"/>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_s_laser_01_mk2" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_s_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk2_macro"   duration="0.4" minscale="0.7" maxscale="0.7"/>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_laser_01_mk1_base" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_gen_s_laser_01_mk1_macro" duration="1.0" minscale="1.5" maxscale="1.5" fadein="0.1" fadeout="0.1" alignment="normal"/>
+      <element id="2" ref="impact_light_blue_macro"         duration="0.2" fadeout="0.5"/>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_laser_01_mk1" alignment="normal">
+    <references>
+      <reference effect="impact_ter_s_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" forkeffect="none" duration="1.5" >
+        <sound ref="small_energy_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_laser_01_mk1_inside" alignment="normal">
+    <references>
+      <reference effect="impact_ter_s_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" forkeffect="none" duration="1.5" >
+        <sound ref="small_energy_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_laser_01_mk1_bigobject" alignment="normal">
+    <references>
+      <reference effect="impact_ter_s_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" forkeffect="none" duration="1.5" >
+        <sound ref="small_energy_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_laser_01_mk1_bigobject_inside" alignment="normal">
+    <references>
+      <reference effect="impact_ter_s_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" forkeffect="none" duration="1.5" >
+        <sound ref="small_energy_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter m laser | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_m_laser_base" alignment="object">
+    <elements>
+      <element id="2" ref="impact_light_blue_macro"   duration="0.15"  fadeout="0.05"/>
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_m_laser_01_muzzle"/>
+      </element>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_m_laser_01_mk1" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_m_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk1_macro"   duration="0.4" minscale="1.7" maxscale="1.7"/>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_m_laser_01_mk2" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_m_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk2_macro"   duration="0.4" minscale="1.7" maxscale="1.7"/>
+    </elements>
+  </effect>
+
+  <!-- ter l laser | bullet_ter_l_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_l_laser_base" alignment="object">
+    <elements>
+      <element id="2" ref="impact_light_blue_macro"   duration="0.15"  fadeout="0.05"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_m_laser_01_muzzle"/>
+      </element>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_l_laser_01_mk1" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_l_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk1_macro"   duration="0.4" minscale="3.7" maxscale="3.7"/>
+    </elements>
+  </effect>
+  <effect name="muzzle_ter_l_laser_01_mk2" alignment="object">
+    <references>
+      <reference effect="muzzle_ter_l_laser_base"/>
+    </references>
+    <elements>
+      <element id="3" ref="muzzle_ter_s_laser_01_mk2_macro"   duration="0.4" minscale="3.7" maxscale="3.7"/>
+    </elements>
+  </effect>
+
+  <!-- ter s beam | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_s_beam_01_mk1" alignment="object">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="railgun_muzzle_smoke_01" alignment="object" duration="1.0"/>
+      <element id="2" ref="muzzle_ter_s_beam_01_mk1_macro"   duration="0.1" minscale="0.50" maxscale="0.50"/>
+      <element id="3" ref="impact_light_cyan_macro"   duration="0.5" minscale="0.7" maxscale="0.7" fadeout="0.5"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_s_beam_loop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_s_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_s_beam_start"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_s_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_s_beam_stop"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter m beam | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_m_beam_01_mk1" alignment="object">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="railgun_muzzle_smoke_01" alignment="object" duration="1.0"/>
+      <element id="2" ref="muzzle_ter_s_beam_01_mk1_macro"   duration="0.1" minscale="1.50" maxscale="1.50"/>
+      <element id="3" ref="impact_light_cyan_macro"   duration="0.5" minscale="0.7" maxscale="0.7" fadeout="0.5"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_m_beam_loop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_m_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_s_beam_start"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_m_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_s_beam_stop"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter l beam | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_l_beam_01_mk1" alignment="object">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="railgun_muzzle_smoke_01" alignment="object" duration="1.0"/>
+      <element id="2" ref="muzzle_ter_s_beam_01_mk1_macro"   duration="0.1" minscale="3.50" maxscale="3.50"/>
+      <element id="3" ref="impact_light_cyan_macro"   duration="0.5" minscale="0.7" maxscale="0.7" fadeout="0.5"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_atf_xl_battleship_01_mk1_loop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_l_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="wpn_impulse_player_startshooting"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_l_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="wpn_impulse_player_stopshooting"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter xl beam | bullet_atf_xl_beam_01_mk1_macro -->
+  <effect name="muzzle_atf_xl_beam_01_mk1" alignment="object">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="railgun_muzzle_smoke_01" alignment="object" duration="1.0"/>
+      <element id="2" ref="muzzle_ter_s_beam_01_mk1_macro"   duration="0.1" minscale="3.50" maxscale="3.50"/>
+      <element id="3" ref="impact_light_cyan_macro"   duration="0.5" minscale="0.7" maxscale="0.7" fadeout="0.5"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_atf_xl_battleship_01_mk1_loop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_atf_xl_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_atf_xl_battleship_01_mk1_start_01"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_atf_xl_beam_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_atf_xl_battleship_01_mk1_stop_01"/>
+      </element>
+    </elements>
+  </effect>
+  <!-- To rename references to XL beam, it's not laser impacts! -->
+  <effect name="impact_ter_xl_laser_01_mk1_base" alignment="normal">
+    <elements>
+      <element id="1" ref="dummyemitter_macro" forkeffect="laser_impact_smoke_03" duration="2.0" minscale="4.0"  maxscale="4.0"                alignment="normal"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="laser_impact_fire_01"  duration="1.0" minscale="2.3"  maxscale="2.3"  fadeout="0.5" alignment="normal"/>
+      <element id="3" ref="impact_light_blue_macro"                               duration="0.3" minscale="10.0" maxscale="10.0" fadeout="0.5"/>
+    </elements>
+  </effect>
+  <effect name="impact_ter_xl_laser_01_mk1" alignment="normal">
+    <references>
+      <reference effect="impact_ter_xl_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0" minscale="15.0" maxscale="15.0"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="plasma_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_xl_laser_01_mk1_inside" alignment="normal">
+    <references>
+      <reference effect="impact_ter_xl_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0" minscale="5.0" maxscale="5.0"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="plasma_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_xl_laser_01_mk1_bigobject" alignment="normal">
+    <references>
+      <reference effect="impact_ter_xl_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0" minscale="15.0" maxscale="15.0"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="plasma_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_xl_laser_01_mk1_bigobject_inside" alignment="normal">
+    <references>
+      <reference effect="impact_ter_xl_laser_01_mk1_base"/>
+    </references>
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0" minscale="5.0" maxscale="5.0"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="plasma_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter s gatling | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_s_gatling_01_mk1" alignment="object">
+    <elements>
+      <element id="2" ref="dummyemitter_up_macro" forkeffect="gatling_muzzle_smoke_01" alignment="object" duration="0.5" minscale="0.2" maxscale="0.20"/>
+      <element id="3" ref="muzzle_ter_s_gatling_01_mk1_macro"   duration="0.05" minscale="0.1" maxscale="0.20"/>
+      <element id="4" ref="impact_light_blue_macro"   duration="0.1"  fadeout="0.0"/>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+      <!-- Sound -->
+      <element id="6" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_s_gatling_01_mk1_muzzle"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_s_gatling_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_gatling_01_start"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_s_gatling_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_gatling_01_stop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_gatling_01_mk1" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro" alignment="normal"   duration="0.20"  minscale="1.0" maxscale="1.25"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_gatling_01_mk1_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_gatling_01_mk1_bigobject" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="1.0" maxscale="1.25"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_s_gatling_01_mk1_bigobject_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter m gatling | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_m_gatling_01_mk1" alignment="object">
+    <elements>
+      <element id="2" ref="dummyemitter_up_macro" forkeffect="gatling_muzzle_smoke_01" alignment="object" duration="0.5" minscale="0.72" maxscale="0.720"/>
+      <element id="3" ref="muzzle_ter_s_gatling_01_mk1_macro"   duration="0.05" minscale="0.41" maxscale="0.420"/>
+      <element id="4" ref="impact_light_blue_macro"   duration="0.1"  fadeout="0.0"/>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+      <!-- Sound -->
+      <element id="6" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_m_gatling_01_mk1_muzzle"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_m_gatling_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_gatling_01_start"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_m_gatling_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="weapon_ter_gatling_01_stop"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_m_gatling_01_mk1" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro" alignment="normal"   duration="0.20"  minscale="2.0" maxscale="2.25"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_m_gatling_01_mk1_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_m_gatling_01_mk1_bigobject" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="2.0" maxscale="2.25"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_m_gatling_01_mk1_bigobject_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="small_hull_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter l gatling | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_l_gatling_01_mk1" alignment="object">
+    <elements>
+      <element id="2" ref="dummyemitter_up_macro" forkeffect="gatling_muzzle_smoke_01" alignment="object" duration="0.5" minscale="3.2" maxscale="3.20"/>
+      <element id="3" ref="muzzle_ter_s_gatling_01_mk1_macro"   duration="0.05" minscale="0.1" maxscale="0.20"/>
+      <element id="4" ref="impact_light_blue_macro"   duration="0.1"  fadeout="0.0"/>
+      <element id="5" ref="effect_dummy_macro"   delay="0" duration="0.2" >
+        <force range="35" falloff="0.0">
+          <rumble>
+            <camera>
+              <component frequency="2" attackduration="0.1" sustainduration="0" releaseduration="0.1">
+                <amplitude randomize="false">
+                  <position x="0.002" y="0.002" z="0.002"/>
+                </amplitude>
+              </component>
+            </camera>
+            <controller>
+              <low startvalue="0.0" sustainvalue="0.025" endvalue="0.0" attackduration="0.1" sustainduration="0.0" releaseduration="0.1"/>
+            </controller>
+          </rumble>
+        </force>
+      </element>
+      <!-- Sound -->
+      <element id="6" ref="effect_dummy_macro"   duration="1.5" >
+        <sound ref="weapon_ter_l_destroyer_01_mk1_muzzle"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_l_gatling_01_mk1" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro" alignment="normal"   duration="0.20"  minscale="10.0" maxscale="10.25"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="large_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_l_gatling_01_mk1_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="large_hull_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_l_gatling_01_mk1_bigobject" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="10.0" maxscale="10.25"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="large_hull_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_ter_l_gatling_01_mk1_bigobject_inside" alignment="normal">
+    <elements>
+      <element id="1" ref="impact_ter_s_gatling_01_mk1_macro"   duration="1.0"  minscale="0.5" maxscale="0.5"/>
+      <element id="2" ref="dummyemitter_macro" forkeffect="gatling_impact_sparkles_01" alignment="normal" duration="2.0" minscale="0.5" maxscale="0.5"/>
+      <element id="3" ref="impact_light_blue_macro"   duration="0.2"  fadeout="0.2"/>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro"   duration="1.0" >
+        <sound ref="large_hull_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+
+  <!-- ter l mining | bullet_ter_m_laser_01_mk1_macro -->
+  <effect name="muzzle_ter_l_mining_01_mk1" alignment="object">
+    <elements>
+      <element id="1" ref="dummyemitter_up_macro" forkeffect="railgun_muzzle_smoke_01" alignment="object" duration="1.0"/>
+      <element id="2" ref="muzzle_ter_s_beam_01_mk1_macro"   duration="0.1" minscale="0.50" maxscale="0.50"/>
+      <element id="3" ref="impact_light_cyan_macro"   duration="0.5" minscale="0.7" maxscale="0.7" fadeout="0.5"/>
+    </elements>
+  </effect>
+  <effect name="startshooting_ter_l_mining_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="wpn_impulse_player_startshooting"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="stopshooting_ter_l_mining_01_mk1" alignment="object" emitterspace="zone">
+    <elements>
+      <element id="1" ref="effect_dummy_macro" duration="1">
+        <sound ref="wpn_impulse_player_stopshooting"/>
+      </element>
+    </elements>
+  </effect>
+</effects>

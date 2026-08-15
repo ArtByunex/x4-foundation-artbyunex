@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="RML_ClaimPlot" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!--
+    This RML is intended for use in Master-Missions. 
+    It handles checking if the player built a plot of the specified size in the specified location.
+    It cannot fail with an error, because either the player did claim the plot, or he did not yet claim it (and the RML keeps running waiting for a valid plot to be built)
+    
+    $feedbackvalue:
+    -105 $PlotSector left undefined
+    -104 $Faction parameter left undefined
+    -103 $PlotSize is incorrectly defined.
+    -102 $PlotOffset is incorrectly defined.
+    -101 Cue parameters not defined
+    -100: Undefined failure. Defaulted to -100
+    1: Plot claimed
+    -->
+    <library name="ClaimPlot">
+      <params>
+        <param name="EndSignalCue"/>
+        <param name="MissionCue"/>
+        <param name="StartStep" default="1" comment="Briefing step to start the mission on"/>
+        <param name="UpdateBriefing" default="true" comment="Update the briefing objective step when the objective is updated"/>
+        <param name="DebugChance" default="0" />
+
+        <param name="ObjectiveText"                       comment="The text for the mission objective."/>
+        <param name="ObjectiveAppendSize" default="true"  comment="Appends required plot dimensions to the objective text in ' (%skm x %skm x %skm)'-format"/>
+        <param name="PlotSector"                          comment="Location in which to claim a plot"/>
+        <param name="PlotOffset"                          comment="Location in which to claim a plot"/>
+        <param name="PlotRange"           default="null"  comment="Maximum distance from the location; null for infinite"/>
+        <param name="PlotSize"                            comment="x/y/z minimum plot size"/>
+        <param name="Faction"                             comment="The faction to which it needs to be delivered"/>
+      </params>
+      <actions>
+        <set_value name="$feedbackvalue" exact="0"/>
+        <create_list name="$ErrorList"/>
+
+        <do_if value="not $EndSignalCue or not $MissionCue">
+          <append_to_list name="$ErrorList" exact="-101"/>
+        </do_if>
+        <do_if value="not $PlotOffset">
+          <append_to_list name="$ErrorList" exact="-102"/>
+        </do_if>
+        <do_if value="not $PlotSize">
+          <append_to_list name="$ErrorList" exact="-103"/>
+        </do_if>
+        <do_if value="not $Faction">
+          <append_to_list name="$ErrorList" exact="-104"/>
+        </do_if>
+        <do_if value="not $PlotSector">
+          <append_to_list name="$ErrorList" exact="-105"/>
+        </do_if>
+
+        <do_if value="$ObjectiveAppendSize">
+          <substitute_text text="$PlotSizeText" source="{30004, 2011}" comment="($X$ x $Y$ x $Z$ km)">
+            <replace string="'$X$'"     with="$PlotSize.x / 1km"/>
+            <replace string="'$Y$'"     with="$PlotSize.y / 1km"/>
+            <replace string="'$Z$'"     with="$PlotSize.z / 1km"/>
+          </substitute_text>
+          <set_value name="$ObjectiveText" exact="$ObjectiveText + ' ' + $PlotSizeText"/>
+        </do_if>
+
+      </actions>
+      <cues>
+
+        <cue name="Signal_Cleanup" onfail="cancel">
+          <conditions>
+            <check_value value="$ErrorList.count" min="1"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="Cleanup"/>
+          </actions>
+        </cue>
+
+        <cue name="StartMission" onfail="cancel" version="3">
+          <conditions>
+            <check_value value="$ErrorList.count" min="0"/>
+          </conditions>
+          <actions>
+            <set_value name="$EndSignalCue.$StationBuilt" exact="null"/>
+            <signal_cue cue="UpdateBriefing"/>
+          </actions>
+          <patch sinceversion="2">
+            <do_if value="(parent.name == 'Ch_4_Build_Station_Claim_Plot_Ref') and (CheckMissionStatus.state == cuestate.waiting) and ($EndSignalCue.state == cuestate.complete)">
+              <reset_cue cue="$EndSignalCue" comment="custom fix for story_covert_operations Ch4"/>
+            </do_if>
+          </patch>
+          <patch sinceversion="3">
+            <signal_cue cue="UpdateBriefing"/>
+          </patch>
+          <cues>
+
+            <cue name="CheckExistingPlots">
+              <actions>
+                <find_station_by_true_owner name="this.$Stations" faction="faction.player" multiple="true" space="$PlotSector" checkoperational="false"/>
+                <do_for_each in="this.$Stations" name="$currentStation">
+                  <run_actions ref="CheckPlotConstraints_Location" result="$ClaimPlotLocationSuccess">
+                    <param name="Station"     value="$currentStation"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                    <param name="PlotSector"  value="$PlotSector"/>
+                    <param name="PlotOffset"  value="$PlotOffset"/>
+                    <param name="PlotRange"   value="$PlotRange"/>
+                  </run_actions>
+                  <run_actions ref="CheckPlotConstraints_Dimensions" result="$ClaimPlotDimensionsSuccess">
+                    <param name="Station"     value="$currentStation"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                    <param name="PlotSize"    value="$PlotSize"/>
+                  </run_actions>
+                  <do_if value="$ClaimPlotLocationSuccess and $ClaimPlotDimensionsSuccess">
+                    <!-- accept only empty plots -->
+                    <find_module name="$AnyModules" multiple="true" object="$currentStation"/>
+                    <do_if value="not $AnyModules.count">
+                      <debug_text text="'Found preexisting plot ' + $currentStation"/>
+                      <set_value name="$EndSignalCue.$StationBuilt" exact="$currentStation" comment="return value out of RML into GM"/>
+                      <set_value name="$feedbackvalue" exact="1" comment="ClaimPlot completed"/>
+                      <signal_cue cue="Cleanup" />
+                      <break/>
+                    </do_if>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="CheckMissionStatus" instantiate="true">
+              <conditions>
+                <event_player_paid_build_plot_changed/>
+              </conditions>
+              <actions>
+
+                <set_value name="$Station" exact="event.param"/>
+                <set_value name="$ExtentsOld" exact="event.param2" comment="Old Plot size"/>
+                <set_value name="$ExtentsNew" exact="$Station.paidbuildplot.max" comment="New Plot size"/>
+                <set_value name="$PlotCenter" exact="event.param3"/>
+
+                <!-- Check if plot is close enough to specified location. 
+                Note: Could make this more accurate by using $PlotCenter (relative to $Station.offset) and check if plot-bbox is in range of specified sphere ($PlotSector,$PlotOffset), $PlotRange.
+                -->
+                <run_actions ref="CheckPlotConstraints_Location" result="$ClaimPlotLocationSuccess">
+                  <param name="Station"     value="$Station"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                  <param name="PlotSector"  value="$PlotSector"/>
+                  <param name="PlotOffset"  value="$PlotOffset"/>
+                  <param name="PlotRange"   value="$PlotRange"/>
+                </run_actions>
+                <run_actions ref="CheckPlotConstraints_Dimensions" result="$ClaimPlotDimensionsSuccess">
+                  <param name="Station"     value="$Station"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                  <param name="PlotSize"    value="$PlotSize"/>
+                </run_actions>
+
+                <do_if value="$ClaimPlotLocationSuccess and $ClaimPlotDimensionsSuccess">
+                  <set_value name="$EndSignalCue.$StationBuilt" exact="$Station" comment="return value out of RML into GM"/>
+                  <set_value name="$feedbackvalue" exact="1" comment="ClaimPlot completed"/>
+                  <signal_cue cue="Cleanup" />
+                </do_if>
+              </actions>
+            </cue>
+
+            <library name="CheckPlotConstraints_Location" purpose="run_actions" comment="library used externally, i.e. rml_buildstation">
+              <params>
+                <param name="Station"/>
+                <param name="DebugChance"/>
+                <param name="PlotSector"                          comment="Location in which to claim a plot"/>
+                <param name="PlotOffset"                          comment="Location in which to claim a plot"/>
+                <param name="PlotRange"                           comment="Maximum distance from the location"/>
+              </params>
+              <actions>
+                <set_value name="$PlotExtents"            exact="$Station.paidbuildplot.max" comment="Station Plot size"/>
+                <!-- sector -->
+                <do_if value="$Station.sector != $PlotSector">
+                  <debug_text text="'ClaimPlot: ignoring, not in requested sector'" chance="$DebugChance"/>
+                  <return value="false"/>
+                </do_if>
+                <!-- position -->
+                <do_if value="$PlotRange" comment="null used for no range constraints">
+                  <do_if value="$Station.distanceto.[$PlotSector, $PlotOffset]" min="$PlotRange + $PlotExtents.length">
+                    <debug_text text="'ClaimPlot: ignoring ' + $Station.name + ', too far away (dist=' + $Station.distanceto.[$PlotSector, $PlotOffset]+' max-range: ' + $PlotRange + ')'" chance="$DebugChance"/>
+                    <return value="false"/>
+                  </do_if>
+                </do_if>
+                <!-- all checks passed, return true -->
+                <return value="true"/>
+              </actions>
+            </library>
+            <library name="CheckPlotConstraints_Dimensions" purpose="run_actions" comment="library used externally, i.e. rml_buildstation">
+              <params>
+                <param name="Station"/>
+                <param name="DebugChance"/>
+                <param name="PlotSize"                            comment="x/y/z minimum plot size"/>
+              </params>
+              <actions>
+                <set_value name="$PlotExtents"            exact="$Station.paidbuildplot.max" comment="Station Plot size"/>
+                <set_value name="$PlotExtents_Dimensions" exact="[$PlotExtents.x * 2, $PlotExtents.y * 2, $PlotExtents.z * 2]"/>
+                <set_value name="$PlotSize_Dimensions"    exact="[$PlotSize.x, $PlotSize.y, $PlotSize.z]" comment="requested Plot size"/>
+                <!-- size -->
+                <!-- Check if the plot has a sufficient size even if x, y and z are not exactly mapped to the request -->
+                <sort_list list="$PlotExtents_Dimensions" sortdescending="true"/>
+                <sort_list list="$PlotSize_Dimensions"    sortdescending="true"/>
+                <do_all exact="3" comment="3 dimensions" counter="$i">
+                  <debug_text text="'Comparing %s from %s GE %s from %s'.[$PlotExtents_Dimensions.{$i}, $PlotExtents_Dimensions, $PlotSize_Dimensions.{$i}, $PlotSize_Dimensions]" chance="$DebugChance"/>
+                  <do_if value="$PlotExtents_Dimensions.{$i} lt $PlotSize_Dimensions.{$i}">
+                    <debug_text text="'ClaimPlot: ignoring, plot too small (%s,%s,%s required %s,%s,%s)'.[$PlotExtents.x*2, $PlotExtents.y*2, $PlotExtents.z*2, $PlotSize.x, $PlotSize.y, $PlotSize.z]" chance="$DebugChance"/>
+                    <return value="false"/>
+                  </do_if>
+                </do_all>
+                <!-- all checks passed, return true -->
+                <return value="true"/>
+              </actions>
+            </library>
+
+          </cues>
+        </cue>
+
+        <cue name="UpdateBriefing" instantiate="true" comment="Called each time a briefing-update is needed">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="$UpdateBriefing"/>
+          </conditions>
+          <actions>
+            <run_actions ref="Update_Briefing_ClaimPlot">
+              <param name="MissionCue"    value="$MissionCue"/>
+              <param name="Step"          value="$StartStep"/>
+              <param name="ObjectiveText" value="$ObjectiveText"/>
+              <param name="PlotSector"    value="$PlotSector"/>
+              <param name="PlotRange"     value="$PlotRange"/>
+              <param name="PlotOffset"    value="$PlotOffset"/>
+            </run_actions>
+            <set_objective_from_briefing cue="$MissionCue" step="$StartStep"/>
+          </actions>
+        </cue>
+
+        <library name="Update_Briefing_ClaimPlot" purpose="run_actions">
+          <params>
+            <param name="MissionCue"/>
+            <param name="Step"/>
+            <param name="ObjectiveText"/>
+            <param name="PlotSector"/>
+            <param name="PlotRange"/>
+            <param name="PlotOffset"/>
+          </params>
+          <actions>
+            <update_mission cue="$MissionCue">
+              <briefing>
+                <objective step="$Step" action="objective.custom" customaction="$ObjectiveText"
+                           object="$PlotSector" encyclopedia="$PlotSector"
+                           offset="if $PlotRange then $PlotOffset else $PlotSector.coreposition"
+                           radius="if $PlotRange then [$PlotRange, 0].max else ($PlotSector.coresize / 2)" />
+              </briefing>
+            </update_mission>
+          </actions>
+        </library>
+
+        <cue name="Cleanup">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!--TODO remove_objective-->
+
+            <do_if value="$feedbackvalue" exact="0">
+              <do_if value="$ErrorList.count" exact="0">
+                <debug_text text="'ERROR: Feedback value is 0 and no error values were set. Defaulting to -100'"/>
+                <set_value name="$feedbackvalue" exact="-100"/>
+              </do_if>
+              <do_else>
+                <set_value name="$feedbackvalue" exact="$ErrorList.{1}"/>
+
+                <do_if value="md.$RML_Debugging">
+                  <do_all exact="$ErrorList.count" counter="$Counter">
+                    <do_if value="$ErrorList.{$Counter}" exact="-105">
+                      <set_value name="$FeedbackText" exact="'$PlotSector parameter left undefined'"/>
+                    </do_if>
+                    <do_elseif value="$ErrorList.{$Counter}" exact="-104">
+                      <set_value name="$FeedbackText" exact="'$Faction parameter left undefined'"/>
+                    </do_elseif>
+                    <do_elseif value="$ErrorList.{$Counter}" exact="-103">
+                      <set_value name="$FeedbackText" exact="'$PlotSize parameter left undefined'"/>
+                    </do_elseif>
+                    <do_elseif value="$ErrorList.{$Counter}" exact="-102">
+                      <set_value name="$FeedbackText" exact="'$PlotOffset parameter left undefined'"/>
+                    </do_elseif>
+                    <do_elseif value="$ErrorList.{$Counter}" exact="-101">
+                      <set_value name="$FeedbackText" exact="'Cue parameters not defined'"/>
+                    </do_elseif>
+                    <do_elseif value="$ErrorList.{$Counter}" exact="-100">
+                      <set_value name="$FeedbackText" exact="'Undefined failure. Defaulted to -100'"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$FeedbackText" exact="'Error: Unknown error value'"/>
+                    </do_else>
+
+                    <debug_text text="'Mission Error. Feedback id: ' + $ErrorList.{$Counter} + ' - ' + $FeedbackText" filter="error"/>
+                  </do_all>
+                </do_if>
+              </do_else>
+            </do_if>
+            <do_else>
+
+              <do_if value="$feedbackvalue" exact="1">
+                <set_value name="$FeedbackText" exact="'ClaimPlot success'"/>
+              </do_if>
+
+              <do_if value="$feedbackvalue" min="1">
+                <debug_text text="'Mission Successful. Feedback id: ' + $feedbackvalue + ' - ' + $FeedbackText" chance="md.$RML_Debugging * $DebugChance"/>
+              </do_if>
+              <do_elseif value="@$FeedbackText">
+                <set_value name="$EndSignalCue.$EndFeedbackText" exact="$FeedbackText"/>
+                <debug_text text="'Mission Failed. Feedback id: ' + $feedbackvalue + ' - ' + $FeedbackText" chance="md.$RML_Debugging * $DebugChance"/>
+              </do_elseif>
+              <do_else>
+                <debug_text text="'WARNING: Unhandled feedback value ' + $feedbackvalue" chance="$DebugChance"/>
+              </do_else>
+
+            </do_else>
+
+            <set_value name="$EndSignalCue.$FinalStep" exact="$StartStep" chance="if $EndSignalCue.$FinalStep? then 0 else 100" comment="UpdateBriefing can overide"/>
+            <set_value name="$EndSignalCue.$EndFeedbackValue" exact="$feedbackvalue"/>
+            <signal_cue cue="$EndSignalCue"/>
+            <cancel_cue cue="ClaimPlot"/>
+          </actions>
+        </cue>
+      </cues>
+    </library>
+  </cues>
+</mdscript>

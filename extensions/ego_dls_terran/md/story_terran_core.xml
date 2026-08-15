@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Terran_Core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy"/>
+        <check_value value="true" comment="prevent savegame compatibility issues during development"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+      </actions>
+      <cues>
+        <cue name="Setup">
+          <actions>
+            <find_sector name="$MoonSector" macro="macro.cluster_104_sector002_macro"/>
+            <find_sector name="$VenusSector" macro="macro.cluster_102_sector001_macro"/>
+            <find_sector name="$AsteroidBeltSector" macro="macro.cluster_100_sector001_macro"/>
+            <find_sector name="$MarsSector" macro="macro.cluster_101_sector001_macro"/>
+            <find_sector name="$EarthSector" macro="macro.cluster_104_sector001_macro"/>
+            <!-- find mars-asteroidbelt accelerator -->
+            <find_gate name="this.$Accelerators" space="$MarsSector" accelerator="true" required="true" multiple="true"/>
+            <do_for_each name="$Accelerator" in="this.$Accelerators">
+              <do_if value="$Accelerator.exit.sector == $AsteroidBeltSector">
+                <set_value name="$MarsAsteroidBeltAccelerator" exact="$Accelerator"/>
+                <set_value name="$AsteroidBeltMarsAccelerator" exact="$Accelerator.exit"/>
+              </do_if>
+            </do_for_each>
+            <!-- find moon-venus accelerator -->
+            <find_gate name="this.$Accelerators" space="$MoonSector" accelerator="true" required="true" multiple="true"/>
+            <do_for_each name="$Accelerator" in="this.$Accelerators">
+              <do_if value="$Accelerator.exit.sector == $VenusSector">
+                <set_value name="$MoonVenusAccelerator" exact="$Accelerator"/>
+                <set_value name="$VenusMoonAccelerator" exact="$Accelerator.exit"/>
+              </do_if>
+            </do_for_each>
+            <!-- setup special events for these sector-transitions -->
+            <signal_cue_instantly cue="RestrictedCore" param="[$MarsSector, 'terran_destroyer_patrol_l_mars', $MarsAsteroidBeltAccelerator, 1]"/>
+            <signal_cue_instantly cue="RestrictedCore" param="[$MoonSector, 'terran_battleship_patrol_xl_luna', $MoonVenusAccelerator, 1]"/>
+            <signal_cue_instantly cue="RestrictedCore" param="[$AsteroidBeltSector, null, $AsteroidBeltMarsAccelerator, 2]" comment="license warning"/>
+            <signal_cue_instantly cue="RestrictedCore" param="[$VenusSector, null, $VenusMoonAccelerator, 2]" comment="license warning"/>
+          </actions>
+        </cue>
+
+        <cue name="RestrictedCore_Earth">
+          <conditions>
+            <event_object_changed_sector object="player.entity" sector="$EarthSector"/>
+            <check_value value="($EarthSector.accesslicence != null) and (not faction.player.haslicence.{$EarthSector.accesslicence}.{faction.terran})" />
+          </conditions>
+          <delay exact="2s"/>
+          <actions>
+            <unlock_achievement name="COH_ACCESS_DENIED"/>
+          </actions>
+        </cue>
+
+        <!-- input: [Sector-To-Observe, Job (or null), specific accelerator, reaction 1=JobAI 2=Vocal-Warning] -->
+        <cue name="RestrictedCore" instantiate="true" namespace="this">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$DebugChance" exact="0" comment="due to new namespace"/>
+            <set_value name="$Sector" exact="event.param.{1}"/>
+            <set_value name="$JobName" exact="event.param.{2}"/>
+            <set_value name="$Accelerator" exact="event.param.{3}"/>
+            <set_value name="$ReactionType" exact="event.param.{4}" comment="1=fleet-agro 2=warning-broadcast"/>
+            <set_value name="$JobCommander" exact="null"/>
+            <set_value name="$WasNear" exact="player.entity.distanceto.{$Accelerator} lt 80km" comment="approached from far to near accelerator"/>
+            <set_value name="$WasVeryNear" exact="player.entity.distanceto.{$Accelerator} lt 40km" comment="approached from far to near accelerator"/>
+            <set_value name="$EnterNear" exact="false" comment="exit with the accelerator we are observing"/>
+            <set_value name="$ApproachWarning" exact="player.age"/>
+            <set_value name="$ApproachWarningFirm" exact="player.age"/>
+            <set_value name="$TrespassingWarning" exact="player.age"/>
+            <create_position name="$AcceleratorPosition" space="$Sector" object="$Accelerator" x="0km" y="-1km" z="4km"/>
+            <create_group groupname="$JobGroup" comment="commander + all subordinates (for objectives), you might want to prefer using $JobCommander.allsubordinates for giving orders"/>
+            <create_group groupname="$JobCommanderGroup" comment="group containing only the commander"/>
+          </actions>
+          <cues>
+            
+            <cue name="RestrictedCore_Setup">
+              <actions>
+                <do_if value="player.entity.sector == $Sector" comment="new gamestart in sector">
+                  <signal_cue cue="RestrictedCore_Sector_Refresh"/>
+                </do_if>
+                <signal_cue cue="RestrictedCore_SetupCommander"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_SetupActor">
+              <actions>
+                <!-- fixed speaker per area -->
+                <do_any>
+                  <create_cue_actor name="$WarningActor" cue="namespace" group="terran.marine.male">
+                    <page exact="10155"/>
+                    <owner exact="faction.terran"/>
+                    <name name="'{30286,101}'"/>
+                    <skills>
+                      <skill type="management"  exact="8"/>
+                      <skill type="morale"      exact="9"/>
+                      <skill type="piloting"    exact="7"/>
+                      <skill type="engineering" exact="2"/>
+                      <skill type="boarding"    exact="11"/>
+                    </skills>
+                  </create_cue_actor>
+                  <create_cue_actor name="$WarningActor" cue="namespace" group="terran.marine.female">
+                    <page exact="10154"/>
+                    <owner exact="faction.terran"/>
+                    <name name="'{30286,101}'"/>
+                    <skills>
+                      <skill type="management"  exact="8"/>
+                      <skill type="morale"      exact="9"/>
+                      <skill type="piloting"    exact="7"/>
+                      <skill type="engineering" exact="2"/>
+                      <skill type="boarding"    exact="11"/>
+                    </skills>
+                  </create_cue_actor>
+                </do_any>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_SetupCommander" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="$JobName != null"/>
+              </conditions>
+              <actions>
+                <!-- find the 1 commander (as specified in the job) and issue "protectposition near the accelerator" -->
+                <find_ship name="$JobCommander" groupname="$JobCommanderGroup" space="player.galaxy" owner="faction.terran" job="$JobName"/>
+                <do_if value="$JobCommander.isoperational">
+                  <debug_text text="'Sector=%s job=%s Commander=%s(%s) subordinates=#%s/%s'.[$Sector.knownname, $JobName, $JobCommander, $JobCommander.knownname, $JobCommander.subordinates.count, $JobCommander.allsubordinates.count]" chance="$DebugChance"/>
+                  <add_to_group groupname="$JobGroup" object="$JobCommander" replace="true"/>
+                  <do_for_each name="$locsub" in="$JobCommander.allsubordinates">
+                    <do_if value="$locsub.isoperational">
+                      <add_to_group groupname="$JobGroup" object="$locsub"/>
+                    </do_if>
+                  </do_for_each>
+
+                  <!-- order commander (destroyer) -->
+                  <include_actions ref="RestrictedCore_ProtectPosition_JobCommander"/>
+                  <!-- order direct subordinates (fighter wings) -->
+                  <include_actions ref="RestrictedCore_DisperseSubordinates"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Sector=%s job=%s Commander for job not found!'.[$Sector.knownname, $JobName]" chance="$DebugChance"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="RestrictedCore_ProtectPosition_JobCommander">
+              <actions>
+                <do_if value="$JobCommander.isoperational">
+                  <debug_text text="'object=%s(%s) order=%s'.[$JobCommander, $JobCommander.knownname, 'ProtectPosition']" chance="$DebugChance"/>
+                  <create_order id="'ProtectPosition'" name="$BorderPatrol" object="$JobCommander" default="true">
+                    <param name="destination" value="[$Sector, $AcceleratorPosition]"/>
+                    <param name="radius" value="$Accelerator.distanceto.[$Sector, $AcceleratorPosition] / 2m"/>
+                  </create_order>
+                </do_if>
+                <do_else>
+                  <debug_text text="'RestrictedCore_ProtectPosition_JobCommander called with no operational JobCommander.'" filter="error"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="RestrictedCore_DisperseSubordinates">
+              <actions>
+                <do_if value="@$JobCommander.allsubordinates.count">
+                  <do_for_each name="$locship" in="$JobCommander.allsubordinates" counter="$i">
+                    <!-- capital ships stay together close to the gate, fighter wings disperse -->
+                    <do_if value="$locship.isoperational and not $locship.iscapitalship and $locship.subordinates.count">
+                      <set_value name="$loccommander" exact="$locship.commander"/>
+                      <debug_text text="'object=%s(%s) order=%s'.[$locship, $locship.knownname, 'ProtectPosition']" chance="$DebugChance"/>
+                      <set_value name="$locx" min="-8km" max="8km"/>
+                      <set_value name="$locy" min="-4km" max="4km"/>
+                      <set_value name="$locz" min="4km" max="8km"/>
+                      <create_position name="this.$AcceleratorPositionFar" space="$Sector" object="$Accelerator" x="$locx" y="$locy" z="$locz"/>
+                      <debug_text text="'ordering %s %s %s with pilot %s %s to protect position at sector %s'.[@$locship.idcode, @$locship.knownname, $locship, @$locship.pilot.knownname, $locship.pilot, @$Sector.knownname]" chance="$DebugChance"/>
+
+                      <debug_text text="'pre. %s: subordinategroup: %s, assignment: %s'.[$i, $locship.subordinategroupid, $locship.assignment]" chance="0"/>
+                      <set_value name="$subordinategroupid" exact="($i%10)+1"/>
+                      <debug_text text="'%s %s%s%s%s'.[$i%10, ($i != $locship.subordinategroupid), ($loccommander.activesubordinategroupids.count lt 10), $loccommander.activesubordinategroupids.indexof.{$subordinategroupid}, (@$loccommander.subordinategroupassignment.{$subordinategroupid} != assignment.positiondefence)]" chance="$DebugChance"/>
+                      <do_while value="($i != $locship.subordinategroupid) and ($loccommander.activesubordinategroupids.count lt 10) and $loccommander.activesubordinategroupids.indexof.{$subordinategroupid} and ($loccommander.subordinategroupassignment.{$subordinategroupid} != assignment.positiondefence)">
+                        <set_value name="$subordinategroupid" exact="$subordinategroupid+1%10+1"/>
+                      </do_while>
+                      <do_if value="not $loccommander.activesubordinategroupids.indexof.{$subordinategroupid} or $loccommander.subordinategroupassignment.{$subordinategroupid} != assignment.positiondefence">
+                        <set_subordinate_group_assignment object="$locship" commander="$loccommander" subordinategroupid="$subordinategroupid" assignment="assignment.positiondefence"/>
+                        <set_value name="$changedassignment"/>
+                      </do_if>
+                      <set_object_commander object="$locship" commander="$loccommander" subordinategroupid="$subordinategroupid"/>
+                      <do_if value="$changedassignment?">
+                        <set_subordinate_group_protected_sector commander="$loccommander" subordinategroupid="$subordinategroupid" sector="$Sector"/>
+                        <set_subordinate_group_protected_position commander="$loccommander" subordinategroupid="$subordinategroupid" value="this.$AcceleratorPositionFar"/>
+                        <remove_value name="$changedassignment"/>
+                      </do_if>
+                      <set_value name="$destination" exact="[$locship.subordinategroupprotectedsector, $locship.subordinategroupprotectedposition]"/>
+                      <debug_text text="'post. subordinategroup: %s, assignment: %s'.[$locship.subordinategroupid, $locship.assignment]" chance="0"/>
+
+                      <create_order id="'ProtectPosition'" object="$locship" default="true">
+                        <param name="destination" value="$destination"/>
+                        <!-- NB: radius can be reduced. radius need not reach the gate since we'll be issuing manual attack orders. -->
+                        <param name="radius" value="$Accelerator.distanceto.{$destination}"/>
+                        <param name="reinforcefleet" value="true"/>
+                        <param name="attackonsight" value="true"/>
+                      </create_order>
+                      <remove_value name="$destination"/>
+                      <remove_value name="$subordinategroupid"/>
+                      <remove_value name="$loccommander"/>
+                      <remove_value name="$locz"/>
+                      <remove_value name="$locy"/>
+                      <remove_value name="$locx"/>
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+                <do_else>
+                  <debug_text text="'RestrictedCore_DisperseSubordinates called with either no operational JobCommander or no subordinates.'" filter="error"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <cue name="RestrictedCore_CommanderPromoted" instantiate="true">
+              <conditions>
+                <event_object_subordinate_promoted group="$JobCommanderGroup"/>
+              </conditions>
+              <actions>
+                <do_if value="(event.param.isoperational) and (not event.param.commander)">
+                  <set_value name="$JobCommander" exact="event.param"/>
+                  <add_to_group groupname="$JobCommanderGroup" object="$JobCommander"/>
+                  <add_to_group groupname="$JobGroup" object="$JobCommander"/>
+                  <debug_text text="'new JobCommander: %s %s %s'.[$JobCommander.idcode, $JobCommander.knownname, $JobCommander]" chance="$DebugChance"/>
+                  <!-- Note: the new commander might be the very last one to be updated, in which case this won't work (will never trigger) -->
+                  <debug_text text="'setcommander new-toplevel-commander o=' + event.object" chance="$DebugChance"/>
+                  <include_actions ref="RestrictedCore_ProtectPosition_JobCommander"/>
+                </do_if>
+                <debug_text text="'setcommander for object=%s(%s) newcmd=%s(%s) oldcmdr=%s(%s) assignment=%s'.[event.object, event.object.knownname, event.param, if event.param.exists then event.param.knownname else '-', event.param2, if event.param2.exists then event.param2.knownname else '-', event.param3]" chance="$DebugChance"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_CommanderKilled" instantiate="true">
+              <conditions>
+                <!-- $JobGroup is wiped out -->
+                <event_object_destroyed group="$JobCommanderGroup"/>
+                <check_value value="not @$JobGroup.count"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <!-- commander was destroyed, one of the subordinate took over the role and now needs the protectposition default-order (otherwise it would default to patrol) -->
+                <debug_text text="'Finding new commander'" chance="$DebugChance"/>
+                <signal_cue cue="RestrictedCore_SetupCommander"/>
+              </actions>
+            </cue>
+
+
+            <cue name="RestrictedCore_SubordinateKilled" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$JobGroup"/>
+                <check_value value="event.object != $JobCommander" comment="filter out commander, handled seperately"/>
+              </conditions>
+              <actions>
+                <debug_text text="'died %s(%s) job=%s'.[event.object, event.object.knownname, event.object, event.object.job]" chance="$DebugChance"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_NewJobShip" instantiate="true">
+              <conditions>
+                <event_job_ship_activated/>
+                <check_value value="event.param.job == $JobName"/>
+                <check_value value="event.param.isoperational"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Sector=%s job=%s Ship=%s(%s) JobActivated'.[$Sector.knownname, event.param.job, event.param, event.param.knownname]" chance="$DebugChance"/>
+                <set_value name="$JobCommander" exact="event.param"/>
+                <add_to_group groupname="$JobCommanderGroup" object="$JobCommander"/>
+                <add_to_group groupname="$JobGroup" object="event.param"/>
+                <include_actions ref="RestrictedCore_ProtectPosition_JobCommander"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_Sector_Enter" instantiate="true">
+              <conditions>
+                <event_object_changed_sector object="player.entity" sector="$Sector"/>
+              </conditions>
+              <actions>
+                <set_value name="$EnterNear" exact="player.entity.distanceto.{$Accelerator} lt 100km" comment="we entered space via the accelerator we are observing"/>
+                <debug_text text="'EnterNear = ' + $EnterNear" chance="$DebugChance"/>
+                <signal_cue cue="RestrictedCore_Sector_Refresh"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_Sector_Exit" instantiate="true">
+              <conditions>
+                <event_object_changed_sector object="player.entity" previous="$Sector"/>
+              </conditions>
+              <actions>
+                <reset_cue cue="RestrictedCore_Sector_Refresh"/>
+              </actions>
+            </cue>
+
+            <cue name="RestrictedCore_Sector_Refresh">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Signalled for ' + $Sector.knownname" chance="$DebugChance"/>
+              </actions>
+              <cues>
+                <cue name="RestrictedCore_Sector_Refresh_Interval" checkinterval="1s" instantiate="true">
+                  <conditions>
+                    <check_all>
+                      <check_value value="not (player.entity.coverowner? and (player.entity.coverowner == faction.terran))" comment="allow sneaking into terran space when covered as terran"/>
+                      <check_value value="player.ship and (player.ship.owner == faction.player)" comment="allow the player sneaking into terran space aboard nonplayer-owned ships"/>
+                    </check_all>
+                  </conditions>
+                  <actions>
+                    <!--debug_text text="'Sector=%s refresh (distance=%s wasnear=%s)'.[$Sector.knownname, player.entity.distanceto.{$Accelerator}, $WasNear]" chance="$DebugChance"/-->
+
+                    <!-- approaching/leaving secure area (80km range) -->
+                    <do_if value="not $WasNear and player.entity.distanceto.{$Accelerator} lt 80km">
+
+                      <debug_text text="'80km - EnterNear=%s reactionType=%s license=%s distance=%s'.[$EnterNear, $ReactionType, $Accelerator.exit.sector.accesslicence, player.entity.distanceto.{$Accelerator}]" chance="$DebugChance"/>
+
+                      <!-- entering secure area (80km range) -->
+                      <do_if value="$ReactionType == 1 and $Sector.accesslicence" comment="military action">
+                        <set_value name="$AccessDenied" exact="not faction.player.haslicence.{$Sector.accesslicence}.{faction.terran}"/>
+                        <do_if value="$AccessDenied">
+                          <do_if value="(($TrespassingWarning == 0) or (($ApproachWarning + 120) lt player.age))">
+                            <signal_cue_instantly cue="RestrictedCore_TrespassingWarning" param="RestrictedCore_Patrol_Relation"/>
+                          </do_if>
+                        </do_if>
+                      </do_if>
+                      <do_elseif value="$ReactionType == 2 and $Accelerator.exit.sector.accesslicence" comment="approach warning">
+                        <do_if value="not faction.player.haslicence.{$Accelerator.exit.sector.accesslicence}.{faction.terran}">
+
+                          <!-- one-time official warning email -->
+                          <do_if value="($Accelerator.exit.sector.accesslicence == 'innercore_access') and (not $MailSent_innercore?)">
+                            <!-- Inner Core warning Mail -->
+                            <set_value name="$mail_message"   exact="{30286,10202}"/>
+                            <set_value name="$mail_signature" exact="{30286,10002}"/>
+                            <write_incoming_message source="{30286,10001}" highpriority="true"
+                                                    title="{30286,10201}" comment="Access Restriction: Inner Core"
+                                                    text="$mail_message + $mail_signature"/>
+                            <set_value name="$MailSent_innercore" exact="true"/>
+                          </do_if>
+                          <do_elseif value="($Accelerator.exit.sector.accesslicence == 'outercore_access') and (not $MailSent_outercore?)">
+                            <!-- Outer Core warning Mail -->
+                            <set_value name="$mail_message"   exact="{30286,10102}"/>
+                            <set_value name="$mail_signature" exact="{30286,10002}"/>
+                            <write_incoming_message source="{30286,10001}" highpriority="true"
+                                                    title="{30286,10101}" comment="Access Restriction: Outer Core"
+                                                    text="$mail_message + $mail_signature"/>
+                            
+                            <set_value name="$MailSent_outercore" exact="true"/>
+                          </do_elseif>
+
+                          <!-- warning speaks -->
+                          <do_if value="(not $EnterNear) and (($ApproachWarning == 0) or (($ApproachWarning + 120) lt player.age))">
+                            <signal_cue cue="RestrictedCore_ApproachWarning"/>
+                            <set_value name="$ApproachWarning" exact="player.age"/>
+                          </do_if>
+                        </do_if>
+                      </do_elseif>
+                      <set_value name="$WasNear" exact="true"/>
+                    </do_if>
+                    <do_elseif value="$WasNear and player.entity.distanceto.{$Accelerator} ge 80km">
+                      <!-- leaving secure area -->
+                      <do_if value="$ReactionType == 1">
+                        <!-- reaction 1 = military -->
+                        <!--signal_cue cue="RestrictedCore_Patrol_AbortPersuit"/-->
+                      </do_if>
+                      <do_elseif value="$ReactionType == 2">
+                        <!-- reaction 2 = voicewarnings -->
+                      </do_elseif>
+                      <set_value name="$WasNear" exact="false"/>
+                      <set_value name="$EnterNear" exact="false"/>
+                    </do_elseif>
+                    
+                    <!-- more firm reaction when verynear (but not if we exited from the accelerator to within that area) -->
+                    <do_if value="not $WasVeryNear and player.entity.distanceto.{$Accelerator} lt 40km">
+                      <debug_text text="'40km - EnterNear=%s reaction=%s license=%s distance=%s'.[$EnterNear, $ReactionType, $Accelerator.exit.sector.accesslicence, player.entity.distanceto.{$Accelerator}]" chance="$DebugChance"/>
+                      <do_if value="$ReactionType == 2 and $Accelerator.exit.sector.accesslicence" comment="approach warning">
+                        <do_if value="not faction.player.haslicence.{$Accelerator.exit.sector.accesslicence}.{faction.terran}">
+                          <do_if value="(not $EnterNear) and (($ApproachWarningFirm == 0) or (($ApproachWarningFirm + 120) lt player.age))">
+                            <signal_cue cue="RestrictedCore_ApproachWarningFirm"/>
+                            <set_value name="$ApproachWarningFirm" exact="player.age"/>
+                          </do_if>
+                        </do_if>
+                      </do_if>
+                      <set_value name="$WasVeryNear" exact="true"/>
+                    </do_if>
+                    <do_elseif value="$WasVeryNear and player.entity.distanceto.{$Accelerator} ge 40km">
+                      <set_value name="$WasVeryNear" exact="false"/>
+                      <!--set_value name="$EnterNear" exact="false"/-->
+                    </do_elseif>
+                    
+
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="RestrictedCore_Patrol">
+              <cues>
+
+                <cue name="RestrictedCore_Patrol_FindJob_DEBUG" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <find_ship name="this.$TmpCommander" space="player.galaxy" owner="faction.terran" job="$JobName"/>
+                    <do_if value="this.$TmpCommander.exists">
+                      <debug_text text="'Found-Commander=%s(%s) subordinates=#%s/%s'.[this.$TmpCommander, this.$TmpCommander.knownname, this.$TmpCommander.subordinates.count, this.$TmpCommander.allsubordinates.count]" chance="$DebugChance"/>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'No ship for job %s found'.[$JobName]" chance="$DebugChance"/>
+                    </do_else>
+
+                    <do_if value="$JobCommander.exists">
+                      <debug_text text="'Job-Commander=%s(%s) subordinates=#%s/%s'.[$JobCommander, $JobCommander.knownname, $JobCommander.subordinates.count, $JobCommander.allsubordinates.count]" chance="$DebugChance"/>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'No current $JobCommander for job %s found'.[$JobName]" chance="$DebugChance"/>
+                    </do_else>
+
+                  </actions>
+                </cue>
+                
+                <cue name="RestrictedCore_Patrol_DestroyCommander_DEBUG" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$JobCommander.exists"/>
+                  </conditions>
+                  <actions>
+                    <destroy_object object="$JobCommander" explosion="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="RestrictedCore_Patrol_DestroyFleetRandom_DEBUG" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Destroy #' + $JobGroup.count" chance="$DebugChance"/>
+                    <do_for_each name="this.$JobShip" in="$JobGroup">
+                      <debug_text text="'Destroying ' + this.$JobShip.knownname" chance="$DebugChance"/>
+                      <destroy_object object="this.$JobShip" explosion="true" chance="33"/>
+                    </do_for_each>
+                    <debug_text text="'Destroy after #' + $JobGroup.count" chance="$DebugChance"/>
+                  </actions>
+                </cue>
+                
+                <cue name="RestrictedCore_Patrol_Relation" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Sector=%s job=%s jobgroup=#%s relation-kill'.[$Sector.knownname, $JobName, $JobGroup.count]" chance="$DebugChance"/>
+                    <do_for_each name="this.$JobShip" in="$JobGroup" reverse="true">
+                      <!--debug_text text="'- Jobship: ' + this.$JobShip + ' name=' + this.$JobShip.knownname + ' enemy'" chance="$DebugChance"/-->
+                      <set_relation_boost object="this.$JobShip" otherobject="player.ship" value="faction.terran.relation.kill.min" delay="20min" decay="1" />
+                    </do_for_each>
+                    <signal_objects object="player.galaxy" param="'ship_in_distress'" param2="$JobCommander" param3="player.ship" delay="10ms"/>
+                    <do_if value="$JobCommander.sector">
+                      <signal_objects object="$JobCommander.sector" param="'ship_in_distress'" param2="$JobCommander" param3="player.ship" delay="10ms"/>
+                    </do_if>
+                    <signal_cue cue="RestrictedCore_Patrol_Engage"/>
+                  </actions>
+                </cue>
+
+                <cue name="RestrictedCore_Patrol_Engage" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Restricted sector=' + $Sector.knownname + ' engage'" chance="$DebugChance"/>
+
+                    <do_if value="$JobGroup.count">
+                      <do_for_each name="$locship" in="$JobGroup">
+                        <create_order id="'Attack'" object="$locship" immediate="true">
+                          <param name="primarytarget" value="player.ship"/>
+                          <param name="checkrelation" value="false"/>
+                          <param name="allowothertargets" value="false"/>
+                        </create_order>
+                      </do_for_each>
+                    </do_if>
+                    
+                  </actions>
+                  <!-- @Roger: following maybe not necessary? ships will disengage when the target gets beyond radar range. implicit in attack order with 'pursuetargets' kept at default (false) -->
+                  <!--<cues>
+                    <cue name="RestrictedCore_Patrol_AbortPersuit_Timeout">
+                      <delay exact="5min"/>
+                      <actions>
+                        <signal_cue cue="RestrictedCore_Patrol_AbortPersuit"/>
+                        <reset_cue cue="RestrictedCore_Patrol_Engage"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="RestrictedCore_Patrol_AbortPersuit_Sector" checkinterval="10s" instantiate="true">
+                      <conditions>
+                        <event_object_changed_sector object="player.entity" sector="$Sector"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="RestrictedCore_Patrol_AbortPersuit"/>
+                        <reset_cue cue="RestrictedCore_Patrol_Engage"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="RestrictedCore_Patrol_AbortPersuit">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Restricted sector=' + $Sector.knownname + ' abort persuit'" chance="$DebugChance"/>
+                        <create_position name="$AcceleratorPosition" space="$Sector" object="$Accelerator" x="0km" y="0km" z="5km"/>
+                        <debug_text text="'- Jobship: ' + $JobCommander + ' name=' + $JobCommander.knownname" chance="$DebugChance"/>
+                        <create_order id="'ProtectPosition'" name="$BorderPatrol" object="$JobCommander" immediate="true">
+                          <param name="destination" value="[$Sector, $AcceleratorPosition]"/>
+                          <param name="radius" value="100km"/>
+                        </create_order>
+                        <reset_cue cue="RestrictedCore_Patrol_Engage"/>
+                      </actions>
+                    </cue>
+
+                  </cues>-->
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="RestrictedCore_Broadcasts">
+              <cues>
+                <cue name="RestrictedCore_ApproachWarning" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="RestrictedCore_ApproachWarning_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$WarningActor"/>
+                      <param name="CutsceneKey"       value="table[ $key = 'ShowCharacter']"/>
+                      <param name="Lines"             value="[[30286101],[30286111], [30286120]]"/>
+                      <param name="IsInMission"       value="false"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="RestrictedCore_ApproachWarningFirm" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="RestrictedCore_ApproachWarningFirm_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$WarningActor"/>
+                      <param name="CutsceneKey"       value="table[ $key = 'ShowCharacter']"/>
+                      <param name="Lines"             value="[[30286103],[30286122], [30286121]]"/>
+                      <param name="IsInMission"       value="false"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="RestrictedCore_TrespassingWarning" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$endsignalcue" exact="if (typeof event.param == datatype.cue) then event.param else null"/>
+                  </actions>
+                  <cues>
+                    <cue name="RestrictedCore_TrespassingWarning_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$WarningActor"/>
+                      <param name="CutsceneKey"       value="table[ $key = 'ShowCharacter']"/>
+                      <param name="Lines"             value="[[30286102], [30286131], [30286132]]"/>
+                      <param name="IsInMission"       value="false"/>
+                      <param name="EndSignalCue"      value="parent.$endsignalcue"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="RestrictedCore_AbortPersuit" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="RestrictedCore_AbortPersuit_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$WarningActor"/>
+                      <param name="CutsceneKey"       value="table[ $key = 'ShowCharacter']"/>
+                      <param name="Lines"             value="[[30286102],[30286130]]"/>
+                      <param name="IsInMission"       value="false"/>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!--cue name="RestrictedCore_Refresh" checkinterval="61s" instantiate="true">
+              <conditions>
+                <check_value value="$Sector.owner == faction.terran"/>
+              </conditions>
+              <actions>
+                <do_if value="($JobName != null) and (not $JobCommander.exists)">
+                  <find_ship name="$JobCommander" space="player.galaxy" owner="faction.terran" job="$JobName" comment="only 1 toplevel-commander specified for this job!"/>
+                  <do_if value="$JobCommander.exists">
+                    <add_to_group groupname="$JobGroup" object="$JobCommander" replace="true"/>
+                    <add_to_group groupname="$JobGroup" list="$JobCommander.allsubordinates."/>
+                  </do_if>
+                  <debug_text text="'refresh jobs sector=' + $Sector.knownname + ' patrol#=' + $JobGroup.count + ' for job ' + $JobName" chance="$DebugChance"/>
+                </do_if>
+              </actions>
+            </cue-->
+            
+            <cue name="RestrictedCore_Mission_DEBUG" comment="mission so we can easily find that group">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_mission cue="namespace" name="'Gate Patrol: ' +  $Sector.knownname" faction="faction.player" type="missiontype.plot" difficulty="level.easy" description="'Find patrol'" icon="'briefing_boso_ta_01'" iconcaption="'The Boso'">
+                  <briefing>
+                    <objective step="1" action="objective.survive" text="'Escape from persuing patrol'" group="$JobGroup"/>
+                  </briefing>
+                </create_mission>
+                <set_objective cue="namespace" step="1" action="objective.survive" text="'Escape from persuing patrol'" group="$JobGroup"/>
+              </actions>
+              <cues>
+                <cue name="RestrictedCore_Mission_KeepAlive" comment="avoids CreateMission-cue from being auto-removed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+              </cues>
+            </cue>
+          
+          </cues>
+        </cue>
+        
+
+      </cues>
+    </cue>
+
+    
+    <!-- 
+      This needs to be on root-level, to catch event_universe_generated at the appropriate time. Access licenses can be set by the mapdefaults.
+      By default a sector is ownerless, sector.accesslicense returns null when ownerless. 
+      Note that setting an owner via mapdefaults is ignored, because the code will check if there is a valid claim to the sector (which there isn't) and then ignore it.
+      During "universe generation" stations are placed and sectors are claimed by a faction, and so we have to wait for that before we can search for sectors having a specific licence
+      
+      If during the game... 
+      - the sector becomes ownerless, the license is 'still there but hidden behind ownerless (querying it will return null)
+      - another faction takes over, it can have a different accesslicense, so it needs to reset (it doesn't automatically become an inner/outer-core license for the new faction!).
+      - the Terrans lost control, and then regain control, we need to manually restore the access licence.
+    -->
+    <cue name="RestrictedCore_Core_Access" mapeditor="false">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <!-- store inner/outer core sectors -->
+        <find_sector groupname="$TerranInnerCoreSectors" multiple="true" required="true" comment="earth, moon">
+          <match_requires_licence requireslicence="faction.terran.licence.innercore_access"/>
+        </find_sector>
+        <find_sector groupname="$TerranOuterCoreSectors" multiple="true" required="true" comment="mercury, venus, mars" >
+          <match_requires_licence requireslicence="faction.terran.licence.outercore_access"/>
+        </find_sector>
+        <add_to_group groupname="$TerranCoreSectors" group="$TerranInnerCoreSectors"/>
+        <add_to_group groupname="$TerranCoreSectors" group="$TerranOuterCoreSectors"/>
+      </actions>
+      <cues>
+        <cue name="RestrictedCore_Core_Ownerchange" instantiate="true">
+          <conditions>
+            <event_object_changed_owner group="$TerranCoreSectors"/>
+          </conditions>
+          <actions>
+            <!-- 
+            -->
+            <do_if value="event.param == faction.terran">
+              <!-- terrans (re)gained control of a terran core-sector (either innercore or outercore), re-add access license -->
+              <do_if value="$TerranInnerCoreSectors.indexof.{event.object}">
+                <set_object_access_licence object="event.object" licence="innercore_access"/>
+              </do_if>
+              <do_elseif value="$TerranOuterCoreSectors.indexof.{event.object}">
+                <set_object_access_licence object="event.object" licence="outercore_access"/>
+              </do_elseif>
+            </do_if>
+            <do_else>
+              <!-- terrans lost control of a terran core sector (either innercore or outercore), remove access license (not really needed) -->
+              <clear_object_access_licence object="event.object"/>
+            </do_else>
+          </actions>
+        </cue>
+
+        <cue name="RestrictedCore_Core_Ownerchange_LoseControl_DEBUG" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <find_station name="this.$stations" space="$TerranInnerCoreSectors.{1}" multiple="true"/>
+            <debug_text text="'Switching %s stations in %s to Argon'.[this.$stations.count, $TerranInnerCoreSectors.{1}]"/>
+          </actions>
+          <cues>
+            <cue name="RestrictedCore_Core_Ownerchange_LoseControl_Takeover" ref="md.LIB_Generic.TakeoverStations">
+              <param name="Stations" value="parent.$stations"/>
+              <param name="TargetFaction" value="faction.argon"/>
+              <param name="Delay" value="[1s]"/>
+              <param name="SuccessSignalCue" value="RestrictedCore_Core_Ownerchange_LoseControl_Takeover_Success"/>
+            </cue>
+            <cue name="RestrictedCore_Core_Ownerchange_LoseControl_Takeover_Success">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Done, license=%s'.[$TerranInnerCoreSectors.{1}.accesslicence]"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="RestrictedCore_Core_Ownerchange_GainControl_DEBUG" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Switching %s to Terran'.[$TerranInnerCoreSectors.{1}]"/>
+            <find_station name="this.$stations" space="$TerranInnerCoreSectors.{1}" multiple="true"/>
+            <debug_text text="'Switching %s stations in %s to Terran'.[this.$stations.count, $TerranInnerCoreSectors.{1}]"/>
+          </actions>
+          <cues>
+            <cue name="RestrictedCore_Core_Ownerchange_GainControl_Takeover" ref="md.LIB_Generic.TakeoverStations">
+              <param name="Stations" value="parent.$stations"/>
+              <param name="TargetFaction" value="faction.terran"/>
+              <param name="Delay" value="[1s]"/>
+              <param name="SuccessSignalCue" value="RestrictedCore_Core_Ownerchange_GainControl_Takeover_Success"/>
+            </cue>
+            <cue name="RestrictedCore_Core_Ownerchange_GainControl_Takeover_Success">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Done, license=%s'.[$TerranInnerCoreSectors.{1}.accesslicence]"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+    
+  </cues>
+</mdscript>

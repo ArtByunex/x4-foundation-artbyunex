@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-02-12 11:34:20-->
+<components>
+  <component name="dockingbay_gen_s_showroom_01" class="dockingbay">
+    <source geometry="assets\structures\dock\dockingbay_gen_s_showroom_01_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="xu_omni_01" shadow="0" r="191" g="254" b="255" intensity="0.6999999" specularintensity="1" range="2" shadowrange="2" lighteffect="1" trigger="0">
+            <offset>
+              <position x="-0.02553368" y="1.399844" z="25.89056" />
+              <quaternion qx="8e-10" qy="-0.9961947" qz="0.08715575" qw="-3.152e-07" />
+            </offset>
+          </omni>
+          <omni name="xu_omni_02" shadow="0" r="255" g="219" b="123" intensity="1" specularintensity="1" range="1.1" shadowrange="1.1" lighteffect="1" trigger="0">
+            <offset>
+              <position x="-0.3779862" y="1.314328" z="25.80821" />
+              <quaternion qx="8e-10" qy="-0.9961947" qz="0.08715575" qw="-3.152e-07" />
+            </offset>
+          </omni>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="dockingbay" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="ConnectionForanim_dbdoors_01" group="dockingbay_01" tags="allow_nongroup_triggers anim_fence animation detail_l forceoutline part platformcollision ">
+        <offset>
+          <position x="-0.02580685" y="-0.2126666" z="25.18705" />
+        </offset>
+        <animations>
+          <animation name="dockingbay_fence_closed" start="1" end="2" />
+          <animation name="dockingbay_fence_opening" start="2" end="30" />
+          <animation name="dockingbay_fence_open" start="30" end="31" />
+          <animation name="dockingbay_fence_closing" start="31" end="60" />
+        </animations>
+        <parts>
+          <part name="anim_dbdoors_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="2" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="2.337363" y="0.9780642" z="0.1618443" />
+              <center x="-5.03e-08" y="0.1151456" z="-0.03914833" />
+            </size>
+            <offset>
+              <position x="-3.7e-09" y="-2.98e-08" z="3.8147e-06" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_main" group="dockingbay_01" tags="iklink ikrotation part walk_dockingbay ">
+        <restrictions>
+          <restriction type="rotation_y">
+            <limits>
+              <min value="-360" />
+              <max value="360" />
+            </limits>
+          </restriction>
+        </restrictions>
+        <parts>
+          <part name="part_main" wreck="part_main_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                  <material id="4" ref="p2generic.gen_p2_hullpattern_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                  <material id="4" ref="p2generic.gen_p2_hullpattern_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                  <material id="4" ref="p2generic.gen_p2_hullpattern_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="24.77939" y="0.2756066" z="24.77939" />
+              <center x="0" y="-0.2787868" z="1.14441e-05" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_dockpos" tags="dockpos " parent="part_main">
+        <offset>
+          <quaternion qx="0" qy="-3.4e-09" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="con_dockpos_pivot" tags="dockpos_pivot " parent="part_main">
+        <offset>
+          <quaternion qx="0" qy="-3.4e-09" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="con_launchpos" tags="launchpos " parent="part_main">
+        <offset>
+          <position x="0" y="27.12235" z="18.98565" />
+          <quaternion qx="0" qy="-3.4e-09" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="con_todock" tags="todock " parent="part_main">
+        <offset>
+          <position x="0" y="28.20724" z="18.98565" />
+          <quaternion qx="0" qy="-3.4e-09" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForfx_l_main" tags="detail_l forceoutline fx nocollision part " parent="part_main">
+        <offset>
+          <position x="0" y="0.6961352" z="0" />
+          <quaternion qx="0" qy="-3.4e-09" qz="0" qw="-1" />
+        </offset>
+        <parts>
+          <part name="fx_l_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2argon.arg_p2_decal_01" />
+                  <material id="3" ref="p2generic.gen_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="5" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="6" ref="p2fx.fx_p2_lightcones_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="23.89353" y="0.4764255" z="23.69948" />
+              <center x="0" y="-0.506887" z="-0.04543495" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForcollisiononly_walls" tags="collisiononly part ">
+        <parts>
+          <part name="collisiononly_walls">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_wreck_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="24.80344" y="2.126119" z="26.2663" />
+              <center x="4.768e-07" y="1.88047" z="1.439052" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_static0013052350576832" group=" dockingbay_01" tags="part ">
+        <offset>
+          <position x="-0.08652712" y="1.236397" z="25.82898" />
+          <quaternion qx="8e-10" qy="-0.9961948" qz="0.08715576" qw="-3.152e-07" />
+        </offset>
+        <parts>
+          <part name="fx_static001" ref="props_gen_standard_shipconsole_01.fx_static">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_hudframework_02_a" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.5033097" y="0.2497653" z="0.09032202" />
+              <center x="9.537e-07" y="0.00590682" z="0.002735142" />
+            </size>
+            <offset>
+              <position x="-1.49e-08" y="-4.768e-07" z="0" />
+              <quaternion qx="1.49e-08" qy="0" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_text0013052350577728" group=" dockingbay_01" tags="part ">
+        <offset>
+          <position x="0.09094976" y="0.6080312" z="25.82866" />
+          <quaternion qx="8e-10" qy="-0.9961948" qz="0.08715576" qw="-3.152e-07" />
+        </offset>
+        <parts>
+          <part name="fx_text001" ref="props_gen_standard_shipconsole_01.fx_text">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_hudframework_02_a" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.3121195" y="0.1970513" z="0.07396536" />
+              <center x="9.537e-07" y="0.05096327" z="0.01630373" />
+            </size>
+            <offset>
+              <position x="0" y="0" z="-1.9073e-06" />
+              <quaternion qx="1.49e-08" qy="0" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_main0023052350580032" group=" shipconsole" tags="part ">
+        <offset>
+          <position x="-0.02553364" y="-0.08334589" z="25.98445" />
+          <quaternion qx="8e-10" qy="-0.9961948" qz="0.08715576" qw="-3.152e-07" />
+        </offset>
+        <parts>
+          <part name="part_main002" ref="props_gen_standard_shipconsole_01.part_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.3341897" y="0.5889605" z="0.3233465" />
+              <center x="-3.73e-08" y="0.5885138" z="-0.06675705" />
+            </size>
+            <offset>
+              <position x="-7.5e-09" y="0" z="0" />
+              <quaternion qx="1.49e-08" qy="0" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

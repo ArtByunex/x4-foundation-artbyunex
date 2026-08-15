@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+
+  <add sel="//library[@name='Start']/patch[@sinceversion='4']">
+    <do_if value="md.$TerranFactions.indexof.{$Faction}" comment="remove macro from mission specs">
+      <do_all exact="$Fleet.count" counter="$i">
+        <set_value name="$Ship_Def" exact="$Fleet.{$i}"/>
+        <do_if value="$Ship_Def.$macro == macro.ship_ter_xl_carrier_01_a_macro">
+          <do_if value="$Ship_Def.$equipment?">
+            <set_value name="$Ship_Def.$equipment" exact="[macro.engine_ter_xl_allround_01_mk1_macro, macro.shield_ter_xl_standard_01_mk1_macro, macro.thruster_gen_xl_allround_01_mk2_macro, macro.turret_ter_m_beam_02_mk1_macro]" comment="remove the impossible macro from the list of equipment"/>
+          </do_if>
+        </do_if>
+        <do_if value="$Ship_Def.$macro == macro.ship_ter_m_frigate_01_a_macro">
+          <do_if value="$Ship_Def.$equipment?">
+            <set_value name="$Ship_Def.$equipment" exact="[macro.weapon_ter_m_laser_01_mk1_macro]"/>
+          </do_if>
+        </do_if>
+      </do_all>
+      <run_actions ref="ConstructFleetRequirementsText" result="$FleetText">
+        <param name="Fleet" value="$Fleet"/>
+      </run_actions>
+      <substitute_text text="$TextTable.$description" source="readtext.{30216}.{120002}">
+        <replace string="'$SECTOR$'"    with="$TargetSector.knownname"/>
+        <replace string="'$FLEET$'"     with="$FleetText"/>
+      </substitute_text>
+      <update_mission cue="$MissionCue" description="$TextTable.$description"/>
+      <update_offer cue="$MissionCue" description="$TextTable.$description"/>
+    </do_if>
+  </add>
+
+</diff>

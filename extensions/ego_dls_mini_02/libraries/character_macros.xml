@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+
+  <!-- GS Player Narration Teladi Character -->
+  <macro name="character_player_mini_02_male_macro" class="player">
+    <component ref="character_player_teladi_01" />
+    <properties>
+      <identification name="{1021,2002}" race="teladi" faction="player" female="false" image="briefing_ysandreis_seminoros_borealisas_ix_01" />
+      <spacesuit macro="ship_tel_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head" ref="assets/characters/teladi/heads/char_tel_head_a_01" />
+        <model type="torso" ref="assets/characters/teladi/bodies/char_tel_body_a_01" />
+        <model type="props1" ref="assets/characters/teladi/props/te_prop_arm_02_01" />
+        <model type="props2" ref="assets/characters/teladi/props/te_prop_head_04_01" />
+        <model type="props3" ref="assets/characters/teladi/props/ch_tel_x_pants_gen_01" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+  
+  <macro name="character_player_mini_02_male_macro_testnpc" class="npc">
+    <component ref="character_teladi_01" />
+    <properties>
+      <identification name="{1021,2002}" race="teladi" female="false" />
+      <models>
+        <model type="head" ref="assets/characters/teladi/heads/char_tel_head_a_01" />
+        <model type="torso" ref="assets/characters/teladi/bodies/char_tel_body_a_01" />
+        <model type="props1" ref="assets/characters/teladi/props/te_prop_arm_02_01" />
+        <model type="props2" ref="assets/characters/teladi/props/te_prop_head_04_01" />
+        <model type="props3" ref="assets/characters/teladi/props/ch_tel_x_pants_gen_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_player_mini_02_female_macro" class="player">
+    <component ref="character_player_teladi_01" />
+    <properties>
+      <identification name="{1021,2002}" race="teladi" faction="player" female="true" image="briefing_ysandreis_seminoros_borealisas_ix_02" />
+      <spacesuit macro="ship_tel_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head" ref="assets/characters/teladi/heads/te_face_01" />
+        <model type="torso" ref="assets/characters/teladi/bodies/te_body_02_01" />
+        <model type="props1" ref="assets/characters/teladi/props/te_prop_head_03_01" />
+        <model type="props2" ref="assets/characters/teladi/props/te_prop_arm_01_02" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+
+  <macro name="character_player_mini_02_female_macro_testnpc" class="npc">
+    <component ref="character_teladi_01" />
+    <properties>
+      <identification name="{1021,2002}" race="teladi" female="true"/>
+      <models>
+        <model type="head" ref="assets/characters/teladi/heads/te_face_01" />
+        <model type="torso" ref="assets/characters/teladi/bodies/te_body_02_01" />
+        <model type="props1" ref="assets/characters/teladi/props/te_prop_head_03_01" />
+        <model type="props2" ref="assets/characters/teladi/props/te_prop_arm_01_02" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- STORY CHARACTERS -->
+
+  <!-- Brend Sobert -->
+  <macro name="character_story_mini_02_courier_macro" class="npc">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="{30255,101}" race="argon" female="false" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" exact="0.0"/>
+        <!--vertical "+" is up-->
+        <eyeposition type="y" exact="-0.08"/>
+        <!--horizontal "+" is wide-->
+        <eyeposition type="z" exact="0.0"/>
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"                                    exact="1.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_race_cau"/>
+            <target name="Ter_m_beard_cau.mt_race_cau"/>
+            <target name="Ter_m_hair_cau.mt_cau"/>
+          </targets>
+        </facemod>
+        <facemod type="age"                                         exact="1.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_age"/>
+            <target name="Ter_m_beard_cau.mt_age"/>
+            <target name="Ter_m_hair_cau.mt_age"/>
+          </targets>
+        </facemod>
+        <facemod type="kylo"                                        exact="0.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_kylo"/>
+            <target name="Ter_m_beard_cau.mt_kylo"/>
+            <target name="Ter_m_hair_cau.mt_kylo"/>
+          </targets>
+        </facemod>
+        <facemod type="cena"                                        exact="0.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_cena"/>
+            <target name="Ter_m_beard_cau.mt_cena"/>
+            <target name="Ter_m_hair_cau.mt_cena"/>
+          </targets>
+        </facemod>
+        <facemod type="cheek_width"                                 exact="-1.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_cheek_width"/>
+            <target name="Ter_m_beard_cau.mt_cheek_width"/>
+          </targets>
+        </facemod>
+        <facemod type="face_depth"                                  exact="0.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_face_depth"/>
+            <target name="Ter_m_beard_cau.mt_face_depth"/>
+          </targets>
+        </facemod>
+        <facemod type="chin_length"                                 exact="0.5" >
+          <targets>
+            <target name="Ter_m_cau.mt_chin_length"/>
+            <target name="Ter_m_beard_cau.mt_chin_length"/>
+          </targets>
+        </facemod>
+        <facemod type="brow_height"                                 exact="0.01" >
+          <targets>
+            <target name="Ter_m_cau.mt_brow_height"/>
+            <target name="Ter_m_beard_cau.mt_brow_height"/>
+          </targets>
+        </facemod> 
+        <facemod type="chin_square"                                 exact="0.5" >
+          <targets>
+            <target name="Ter_m_cau.mt_chin_square"/>
+            <target name="Ter_m_beard_cau.mt_chin_square"/>
+          </targets>
+        </facemod>
+        <facemod type="mouth_pos_vert"                              exact="1.0" >
+          <targets>
+            <target name="Ter_m_cau.mt_mouth_pos_vert"/>
+            <target name="Ter_m_beard_cau.mt_mouth_pos_vert"/>
+          </targets>
+        </facemod>
+        <facemod type="brow_curve"        name="Ter_m_cau.mt_brow_curve"          exact="-1.0"/>
+        <facemod type="brow_thickness"    name="Ter_m_cau.mt_brow_thickness"      exact="1.0"/>
+        <facemod type="brow_width"        name="Ter_m_cau.mt_brow_width"          exact="-1.0"/>
+        <facemod type="brow_height"       name="Ter_m_cau.mt_brow_height"         exact="1.0"/>
+        <facemod type="eye_rotation"      name="Ter_m_cau.mt_eye_rotation"        exact="0.0"/>
+        <facemod type="eye_squint"        name="Ter_m_cau.mt_eye_squint"          exact="1.0"/>
+        <facemod type="lid_angle"         name="Ter_m_cau.mt_lid_angle"           exact="1.0"/>
+        <facemod type="eyesocket_squint"  name="Ter_m_cau.mt_eyesocket_squint"    exact="1.0"/>
+        <facemod type="eyebags"           name="Ter_m_cau.mt_eyebags"             exact="1.0"/>
+        <facemod type="eyesocket_roll"    name="Ter_m_cau.mt_eyesocket_roll"      exact="1.0"/>
+        <facemod type="nose_width"        name="Ter_m_cau.mt_nose_width"          exact="-1.0"/>
+        <facemod type="nose_size"         name="Ter_m_cau.mt_nose_size"           exact="-0.2"/>
+        <facemod type="lip_lower_thick"                                           exact="-1.0">
+          <targets>
+            <target name="Ter_m_cau.mt_lip_lower_thick"/>
+            <target name="Ter_m_beard_cau.mt_lip_lower_thick"/>
+          </targets>
+        </facemod>
+        <facemod type="lip_upper_thick"                                           exact="-1.0">
+          <targets>
+            <target name="Ter_m_cau.mt_lip_upper_thick"/>
+            <target name="Ter_m_beard_cau.mt_lip_upper_thick"/>
+          </targets>
+        </facemod>
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" ref="assets/characters/argon/heads/char_arg_m_dyn_blend_head" />
+        <model type="torso" ref="assets/characters/argon/bodies/char_arg_m_uniform_crew_02" />
+        <model type="props" ref="assets/characters/argon/props/Ter_m_hair_cau_white_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- Teladi Relief Pilot -->
+  <macro name="character_story_mini_02_relief_pilot_macro" class="npc">
+    <component ref="character_teladi_01" />
+    <properties>
+      <identification name="{30255,102}" race="teladi" female="false" />
+      <models>
+        <model type="head" ref="assets/characters/teladi/heads/te_face_01" />
+        <model type="torso" ref="assets/characters/teladi/bodies/te_body_02_01" />
+        <model type="props" ref="assets/characters/teladi/props/te_prop_head_01_01" />
+        <model type="props2" ref="assets/characters/teladi/props/te_prop_arm_03_01" />
+        <model type="props3" ref="assets/characters/teladi/props/te_prop_torso_03_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- Hostile Squadron Leader -->
+  <macro name="character_story_mini_02_hostile_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="{30255,103}" race="argon" female="true" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" exact="0.04"/>
+        <!--vertical "+" is up-->
+        <eyeposition type="y" exact="-0.06"/>
+        <!--horizontal "+" is wide-->
+        <eyeposition type="z" exact="-0.02"/>
+      </eyepositions>
+      <facemods>
+        <facemod type="brow_height"         name="Ter_f_cau.mt_brow_height"           exact="-0.85"/>
+        <facemod type="brow_inner"          name="Ter_f_cau.mt_brow_inner"            exact="0.2" />
+        <facemod type="brow_outer"          name="Ter_f_cau.mt_brow_outer"            exact="0.7" />
+        <facemod type="age"                 name="Ter_f_cau.mt_age"                   exact="0.4"/>
+        <facemod type="eye_roundness"       name="Ter_f_cau.mt_eye_roundness"         exact="0.7"/>
+        <facemod type="eye_rotation"        name="Ter_f_cau.mt_eye_rotation"          exact="0.0"/>
+        <facemod type="eyelid_height"       name="Ter_f_cau.mt_eyelid_height"         exact="-1.0"/>
+        <facemod type="mouth_size"          name="Ter_f_cau.mt_mouth_size"            exact="-1.0"/>
+        <facemod type="mouth_width"         name="Ter_f_cau.mt_mouth_width"           exact="0.6"/>
+        <facemod type="cheek_width"         name="Ter_f_cau.mt_cheek_width"           exact="-0.85"/>
+        <facemod type="nose_roll"           name="Ter_f_cau.mt_nose_roll"             exact="-1.0"/>
+      </facemods>
+      <models>
+        <model type="head" ref="assets/characters/argon/heads/char_arg_f_dyn_blend_head" />
+        <model type="torso" ref="assets/characters/argon/bodies/char_arg_f_uniform_crew_01" />
+        <model type="props1" ref="assets/characters/argon/props/Ter_f_hair_bun_black_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- npc aliases for spawning them in presentation cutscene -->
+  <macro name="character_npc_player_mini_02_customgamestart_teladi_male_macro" class="npc" ref="character_player_mini_02_male_macro" />
+  <macro name="character_npc_player_mini_02_customgamestart_teladi_female_macro" class="npc" ref="character_player_mini_02_female_macro" />
+</macros>

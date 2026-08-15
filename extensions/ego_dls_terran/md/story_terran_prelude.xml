@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Terran_Prelude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this">
+      <conditions>
+        <event_cue_completed cue="md.Setup_DLC_Terran.X4ep1_Prelude_Setup" />
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance"                exact="0"/>
+        <set_value name="$DeepDebugChance"            exact="0"     comment="for AI scripts and similar external code"/>
+        <set_value name="$MissionCue"                 exact="this"/>
+        <set_value name="$Page"                       exact="30283"/>
+      </actions>
+      <cues>
+        
+        <cue name="Setup">
+          <actions>
+            <find_sector name="$AsteroidBeltSector" macro="macro.cluster_100_sector001_macro"/>
+            <find_sector name="$SavageSpurSector" macro="macro.cluster_112_sector002_macro"/>
+            <find_sector name="$MarsSector" macro="macro.cluster_101_sector001_macro"/>
+
+            <create_cue_actor name="$TerranActor" cue="namespace" group="terran.pilot.male">
+              <page exact="10155 " comment="Same terran actor for both gate-events (commander) + teladi-trespassing"/>
+              <owner exact="faction.terran"/>
+            </create_cue_actor>
+
+          </actions>
+        </cue>
+
+        <!-- Started on the terran side -->
+
+        <cue name="Prelude_Terran_Gate">
+          <conditions>
+            <event_cue_completed cue="md.Setup_DLC_Terran.Terran_Prelude_Approached_Gate" />
+            <check_value value="md.Setup_DLC_Terran.X4ep1_Prelude_Setup.$Gate.extension == 'ego_dlc_terran'"/>
+          </conditions>
+          <actions>
+            <debug_text text="'Gate approached from Terran side'" chance="$DebugChance"/>
+            <set_value name="$Gate" exact="md.Setup_DLC_Terran.X4ep1_Prelude_Setup.$Gate" comment="will need for cutscene"/>
+
+            <append_to_list name="md.$MissionDND" exact="Prelude_Terran_Gate"/>
+            
+          </actions>
+          <cues>
+            <cue name="Prelude_Terran_Setup">
+              <actions>
+                <create_ship name="$XenonShip" macro="macro.ship_xen_xl_destroyer_01_a_macro" zone="$Gate.zone" commandeerable="false" capturable="false">
+                  <owner exact="faction.xenon" overridenpc="true" />
+                  <pilot>
+                    <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <loadout ref="story_xenon_gateship"/>
+                  <orientation orientation="look_away" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                  <position x="0km" y="0km" z="1.5km" object="$Gate" />
+                </create_ship>
+
+                <set_object_shield object="$XenonShip" exact="15"/>
+                <set_object_hull object="$XenonShip" exact="85"/>
+
+                <!-- attack anything -->
+
+                <!-- Terran battlegroup -->
+
+                <create_group groupname="$Terran1Fleet"/>
+                <create_group groupname="$Terran1FighterGroup"/>
+
+                <create_ship name="$Terran1Ship" macro="macro.ship_ter_l_destroyer_01_a_macro" zone="$Gate.zone" commandeerable="false" capturable="false">
+                  <owner exact="faction.terran" overridenpc="true" />
+                  <loadout ref="story_terran_destroyer"/>
+                  <pilot>
+                    <select faction="faction.terran" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <!--people ref="argon_freighter_crew"/-->
+                  <!--orientation orientation="look_at" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                  <position x="-10km" y="4200m" z="8km" object="$Gate" /-->
+                  <!--position x="15921.821" y="-27.48" z="-32095.004"/>
+                  <rotation yaw="35.24213deg" pitch="-0.133461deg" roll="6.191deg"/-->
+                  <safepos x="14000" y="500m" z="-32095.004"/>
+                  <rotation yaw="56.68265deg" pitch="-7.52884deg" roll="-1.7793deg"/>
+                </create_ship>
+                <set_object_name object="$Terran1Ship" page="30283" line="103" comment="Terran Border Patrol"/>
+                <set_object_min_hull object="$Terran1Ship" exact="7"/>
+                <add_to_group groupname="$Terran1Fleet" object="$Terran1Ship"/>
+                <set_alert_level object="$Terran1Ship" level="green"/>
+
+                <!-- prepare orders for battle -->
+                <find_station name="$Station" space="$AsteroidBeltSector"/>
+                <create_order object="$XenonShip" id="'Attack'" immediate="true">
+                  <param name="primarytarget" value="$Terran1Ship"/>
+                  <param name="secondarytargets" value="[$Station]"/>
+                  <param name="pursuetargets" value="true"/>
+                </create_order>
+                
+                <create_order object="$Terran1Ship" id="'Wait'" default="true"/>
+
+                <!-- precache graphics -->
+                <precache_hint target="$XenonShip"/>
+                <precache_hint target="$Terran1Ship"/>
+              </actions>
+              <delay exact="4s"/>
+              <actions>
+                <!-- and go! -->
+                <signal_cue cue="Prelude_Terran_Cutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="Prelude_Terran_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <force_player_speed speed="0"/>
+                <stop_player_autopilot/>
+                <play_cutscene result="this.$CutsceneID" key="'Story_Terran_Gate_2'">
+                  <param name="target_gate" object="$Gate"/>
+                  <param name="target_ship" object="$XenonShip"/>
+                  <param name="target_ship2" object="$Terran1Ship"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Terran_VoiceOver">
+                  <delay exact="19s" comment="added duration of first 3 shots"/>
+                  <actions>
+                    <speak actor="$TerranActor" priority="99">
+                      <text line="30283101"/>
+                      <text line="30283102" delay="1s"/>
+                      <text line="30283103" delay="1s"/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Terran_CutsceneSignal">
+                  <conditions>
+                    <event_cutscene_signal name="'Story_Terran_Gate_2_Sequence1_Started'"/>
+                  </conditions>
+                  <actions>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Terran_Prepare">
+                  <conditions>
+                    <check_any>
+                      <event_speak_line_finished actor="$TerranActor" line="30283101" comment="unreliable, Xenon detected"/>
+                      <event_speak_finished actor="$TerranActor" line="30283101" comment="reliable, in case line-speak was skiped"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_alert_level object="$Terran1Ship" level="red"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Terran_LaunchFighters">
+                  <delay exact="16s" comment="opening dock takes a while, so start a bit early (so we get to see the launching)"/>
+                  <actions>
+                    <!-- docked fighter -->
+                    <set_value name="$TerranFighterMacro" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+                    <find_dockingbay name="$TerranShip1InternalDock" object="$Terran1Ship">
+                      <match_dock storage="true" size="$TerranFighterMacro.docksize"/>
+                    </find_dockingbay>
+                    <do_if value="$TerranShip1InternalDock.exists">
+                      <do_all counter="$i" exact="8">
+                        <create_ship name="$TerranFighter" macro="$TerranFighterMacro" dock="$TerranShip1InternalDock" capturable="false">
+                          <owner exact="faction.terran" overridenpc="true" />
+                          <loadout ref="story_terran_heavyfighter" />
+                          <pilot>
+                            <select faction="faction.terran" tags="tag.fighterpilot"/>
+                          </pilot>
+                        </create_ship>
+                        <add_to_group groupname="$Terran1FighterGroup" object="$TerranFighter"/>
+                      </do_all>
+                    </do_if>
+
+                    <do_all exact="$Terran1FighterGroup.count" counter="$i">
+                      <debug_text text="'Attacking'" chance="$DebugChance"/>
+                      <create_order object="$Terran1FighterGroup.{$i}" id="'Attack'" immediate="true">
+                        <param name="primarytarget" value="$XenonShip"/>
+                      </create_order>
+                    </do_all>
+                  </actions>
+                  <cues>
+                    <cue name="Prelude_Terran_LaunchFighters_done" instantiate="true">
+                      <conditions>
+                        <event_object_undocked group="$Terran1FighterGroup" dock="$Terran1Ship"/>
+                      </conditions>
+                      <actions>
+                        <add_to_group groupname="$TerranLaunchedFighterGroup" object="event.object"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                
+                </cue>
+                  
+                <cue name="Prelude_Terran_EndCutscene">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Gate Cutscene ended'" chance="$DebugChance"/>
+
+                    <cancel_all_orders object="$Terran1Ship"/>
+                    <create_order object="$Terran1Ship" id="'Attack'" immediate="true">
+                      <param name="primarytarget" value="$XenonShip"/>
+                    </create_order>
+
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Terran_Victory">
+                  <conditions>
+                    <event_object_destroyed object="$XenonShip"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'done'" chance="$DebugChance"/>
+
+                    <remove_from_list name="md.$MissionDND" exact="Prelude_Terran_Gate"/>
+
+                    <speak actor="$TerranActor" priority="99">
+                      <text line="30283110" delay="3s" comment="Well done everyone!"/>
+                      <text line="30283111" delay="1s" comment="Return to base"/>
+                    </speak>
+                    <!-- order fighters to dock at destroyed (we postpone 'MoveDie' the destroyer, otherwise docking is not possible!) -->
+                    <!-- Note: Possibly not all fighters were launched, but the ones which weren't also get the DockAndWait order -->
+                    <do_all exact="$Terran1FighterGroup.count" counter="$i">
+                      <cancel_all_orders object="$Terran1FighterGroup.{$i}"/>
+                      <create_order object="$Terran1FighterGroup.{$i}" name="$DockOrder" id="'DockAndWait'" immediate="true">
+                        <param name="destination" value="$Terran1Ship"/>
+                      </create_order>
+                    </do_all>
+                  </actions>
+                  <cues>
+
+                    <cue name="Prelude_Terran_FighterRemaining">
+                      <actions>
+                        <do_if value="$Terran1FighterGroup.count == 0">
+                          <signal_cue cue="Prelude_Terran_Cleanup" check="false"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+                      
+                    <cue name="Prelude_Terran_FighterDocked" instantiate="true">
+                      <conditions>
+                        <event_object_docked group="$Terran1FighterGroup" dock="$Terran1Ship"/>
+                      </conditions>
+                      <actions>
+                        <remove_from_group group="$TerranLaunchedFighterGroup" object="event.object"/>
+                        <debug_text text="'Launched fighters: ' + $TerranLaunchedFighterGroup.count + ' total fighters: ' + $Terran1FighterGroup.count" chance="$DebugChance"/>
+                        <do_if value="$TerranLaunchedFighterGroup.count == 0">
+                          <signal_cue cue="Prelude_Terran_Cleanup" check="false"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+                    
+                    <cue name="Prelude_Terran_Cleanup">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Cleanup after cutscene'" chance="$DebugChance"/>
+                        <cancel_all_orders object="$Terran1Ship"/>
+                        <create_order object="$Terran1Ship" id="'MoveDie'" immediate="true" comment=".order.name show 'Patrol', .order.id shows 'MoveDie'"/>
+                      </actions>
+                    </cue>
+                    
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!-- Started on the X-universe side -->
+
+        <cue name="Prelude_NonTerran_Gate">
+          <conditions>
+            <event_cue_completed cue="md.Setup_DLC_Terran.Terran_Prelude_Approached_Gate" />
+            <check_value value="md.Setup_DLC_Terran.X4ep1_Prelude_Setup.$Gate.extension == ''" comment="base-game"/>
+          </conditions>
+          <actions>
+            <debug_text text="'Gate approached from non-Terran side'" chance="$DebugChance"/>
+            <set_value name="$Gate" exact="md.Setup_DLC_Terran.X4ep1_Prelude_Setup.$Gate" comment="will need for cutscene"/>
+
+            <append_to_list name="md.$MissionDND" exact="Prelude_NonTerran_Gate"/>
+
+          </actions>
+          <cues>
+            <cue name="Prelude_NonTerran_Setup">
+              <actions>
+                <find_gate name="$DestinationGate" space="$Gate.destination" destination="$Gate.sector"/>
+
+                <create_ship name="$Terran2Ship" macro="macro.ship_ter_l_destroyer_01_a_macro" zone="$Gate.zone" commandeerable="false" capturable="false">
+                  <owner exact="faction.terran" overridenpc="true" />
+                  <loadout>
+                    <level exact="1.0"/>
+                  </loadout>
+                  <pilot>
+                    <select faction="faction.terran" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <!--people ref="argon_freighter_crew"/-->
+                  <orientation orientation="look_away" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                  <position x="0km" y="0km" z="1km" object="$Gate" />
+                </create_ship>
+                <set_object_name object="$Terran2Ship" page="30283" line="101" comment="Terran Battlegroup"/>
+                <set_alert_level object="$Terran2Ship" level="red"/>
+
+                <!-- medium escort -->
+                <do_all exact="2">
+                  <create_ship name="$MediumEscortShip" macro="macro.ship_ter_m_corvette_01_a_macro" zone="$DestinationGate.zone">
+                    <owner exact="faction.terran" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.terran" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <orientation orientation="look_at" refobject="$DestinationGate"/>
+                    <safepos x="0km" y="800m" z="-2km" object="$DestinationGate" />
+                  </create_ship>
+                  <!--<set_object_name object="$MediumEscortShip" page="30283" line="101" comment="Terran Battle Group"/>-->
+                  <create_order id="'AssignCommander'" object="$MediumEscortShip" immediate="true">
+                    <param name="commander" value="$Terran2Ship"/>
+                    <param name="assignment" value="assignment.defence"/>
+                  </create_order>
+                </do_all>
+
+                <!-- interceptors -->
+                <do_all exact="2">
+                  <create_ship name="$CurrentInterceptor" macro="macro.ship_ter_s_heavyfighter_01_a_macro" zone="$DestinationGate.zone">
+                    <owner exact="faction.terran" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.terran" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <orientation orientation="look_at" refobject="$DestinationGate"/>
+                    <safepos x="0km" y="-800m" z="-2km" object="$DestinationGate" />
+                  </create_ship>
+                  <!--<set_object_name object="$CurrentInterceptor" page="30283" line="101" comment="Terran Battle Group"/>-->
+                  <create_order id="'AssignCommander'" object="$CurrentInterceptor" immediate="true">
+                    <param name="commander" value="$Terran2Ship"/>
+                    <param name="assignment" value="assignment.interception"/>
+                  </create_order>
+
+                  <!-- interceptor subordinates -->
+                  <do_all exact="4">
+                    <create_ship name="$InterceptorSubordinate" macro="macro.ship_ter_s_fighter_01_a_macro" sector="$CurrentInterceptor.sector">
+                      <owner exact="faction.terran" overridenpc="true"/>
+                      <pilot>
+                        <select faction="faction.terran" tags="tag.fighterpilot"/>
+                      </pilot>
+                      <loadout>
+                        <level exact="1.0"/>
+                      </loadout>
+                      <safepos object="$CurrentInterceptor"/>
+                    </create_ship>
+                    <!--<set_object_name object="$InterceptorSubordinate" page="30283" line="101" comment="Terran Battle Group"/>-->
+                    <create_order id="'AssignCommander'" object="$InterceptorSubordinate" immediate="true">
+                      <param name="commander" value="$CurrentInterceptor"/>
+                      <param name="assignment" value="assignment.attack"/>
+                    </create_order>
+                  </do_all>
+                </do_all>
+
+                <!-- move away from gate -->
+                <get_safe_pos result="$zonepos" sector="$Gate.sector" space="$Gate.sector" object="$Gate" z="8km" radius="$Terran2Ship.size" direction="quadrant.front" directionobject="$Gate"/>
+                <debug_text text="'adding movement order to %s in %s, %sm away.'.[$zonepos, $Gate.sector, $Terran2Ship.distanceto.[$Gate.sector, $zonepos]]"  chance="$DebugChance"/>
+
+                <!--create_order object="$Terran2Ship" id="'MoveWait'" name="$order">
+                  <param name="destination" value="[$Gate.sector, $zonepos]"/>
+                  <param name="precise" value="true"/>
+                </create_order-->
+
+                <create_order object="$Terran2Ship" id="'MoveGeneric'" name="$order">
+                  <param name="destination" value="$Gate.sector" />
+                  <param name="position" value="$zonepos" />
+                </create_order>
+                
+                <!-- and after that explore (coincidentally the Yaki sector) -->
+
+                <create_order object="$Terran2Ship" id="'Patrol'" default="true">
+                  <param name="space" value="$SavageSpurSector"/>
+                </create_order>
+
+                <signal_cue cue="Prelude_NonTerran_Cutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="Prelude_NonTerran_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <force_player_speed speed="0"/>
+                <stop_player_autopilot/>
+                <play_cutscene result="this.$CutsceneID" key="'Story_Terran_Gate_1'">
+                  <param name="target_gate" object="$Gate"/>
+                  <param name="target_ship" object="$Terran2Ship"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_NonTerran_VoiceOver">
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="$SavageSpurSector.owner == faction.xenon">
+                      <speak actor="$TerranActor" priority="99">
+                        <text line="30283201"/>
+                        <text line="30283202" delay="1s"/>
+                        <text line="30283203" delay="1s"/>
+                        <text line="30283204" delay="1s"/>
+                        <text line="30283206" delay="1s"/>
+                      </speak>
+                    </do_if>
+                    <do_else>
+                      <speak actor="$TerranActor" priority="99" comment="fallback">
+                        <text line="30283201"/>
+                        <text line="30283205" delay="2s"/>
+                        <text line="30283206" delay="2s"/>
+                      </speak>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <!-- Cutscene: 11s gate shot
+                               15s rotating ship shot
+                               11s ship dock shot -->
+                <cue name="Prelude_NonTerran_RetrieveFighter" onfail="cancel">
+                  <delay exact="13s"/>
+                  <actions>
+                    <!-- docked fighter -->
+                    <set_value name="$TerranFighterMacro" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+                    <find_dockingbay name="$TerranShip2InternalDock" object="$Terran2Ship">
+                      <match_dock storage="true" size="$TerranFighterMacro.docksize"/>
+                    </find_dockingbay>
+                    <do_if value="$TerranShip2InternalDock.exists">
+                      <create_ship name="$TerranFighter" macro="$TerranFighterMacro" dock="$TerranShip2InternalDock" capturable="false">
+                        <owner exact="faction.terran" overridenpc="true" />
+                        <loadout ref="story_terran_heavyfighter" />
+                        <pilot>
+                          <select faction="faction.terran" tags="tag.fighterpilot"/>
+                        </pilot>
+                      </create_ship>
+                      <set_object_name object="$TerranFighter" page="30283" line="101" comment="Terran Battle Group"/>
+                    </do_if>
+
+                    <!-- retrieve docked fighter -->
+                    <!-- Commented out because the MoveGeneric order already undocks, and requesting another retrieval results in the ship teleporting away  -->
+                    <!--<do_if value="$TerranFighter.isoperational and $TerranFighter.dock and $TerranFighter.dock.isstorage">
+                      <request_retrieval queuedresult="$QueuedResult1" grantedresult="$GrantedResult1" ship="$TerranFighter" />
+                      <debug_text text="'qr1='+$QueuedResult1 + ' gr1=' + $GrantedResult1 " chance="$DebugChance"/>
+                    </do_if>-->
+                    <get_safe_pos result="$zoneposfighter" sector="$Gate.sector" space="$Gate.sector" object="$Gate" z="20km" radius="$TerranFighter.size" direction="quadrant.front" directionobject="$Gate"/>
+                    <debug_text text="'adding movement order to %s in %s, %sm away.'.[$zoneposfighter, $Gate.sector, $TerranFighter.distanceto.[$Gate.sector, $zoneposfighter]]" chance="$DebugChance"/>
+                    
+                    <create_order object="$TerranFighter" id="'MoveGeneric'">
+                      <param name="destination" value="$Gate.sector"/>
+                      <param name="position" value="$zoneposfighter"/>
+                      <!--param name="debugchance" value="$DebugChance"/-->
+                    </create_order>
+
+                    <create_order id="'AssignCommander'" object="$TerranFighter" immediate="true">
+                      <param name="commander" value="$Terran2Ship"/>
+                      <param name="assignment" value="assignment.defence"/>
+                    </create_order>
+
+                  </actions>
+                </cue>
+                <cue name="Prelude_NonTerran_EndCutscene">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Gate Cutscene ended'" chance="$DebugChance"/>
+                    <remove_from_list name="md.$MissionDND" exact="Prelude_NonTerran_Gate"/>
+
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!-- Additional Teladi vs Terran trade-official bickering mini-scene -->
+
+        <cue name="Prelude_Teladi_Trespassing">
+          <actions>
+
+            <create_cue_actor name="$TeladiActor" cue="namespace" group="teladi.trader">
+              <page exact="10557"/>
+              <owner exact="faction.terran"/>
+            </create_cue_actor>
+
+            <find_gate name="$Accelerators" space="$AsteroidBeltSector" accelerator="true" required="true" multiple="true"/>
+
+            <do_for_each name="$Accelerator" in="$Accelerators">
+              <do_if value="$Accelerator.exit.sector == $MarsSector">
+                <set_value name="$MarsAccelerator" exact="$Accelerator"/>
+              </do_if>
+            </do_for_each>
+
+          </actions>
+          <cues>
+            <cue name="Prelude_Setup">
+              <actions>
+                <!-- teladi trader -->
+                <create_ship name="$TeladiShip" macro="macro.ship_tel_xl_resupplier_01_b_macro" zone="$MarsAccelerator.zone" commandeerable="false" capturable="false">
+                  <owner exact="faction.teladi" overridenpc="true" />
+                  <loadout ref="story_teladi_gateship"/>
+                  <pilot>
+                    <select faction="faction.teladi" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <!--people ref="argon_freighter_crew"/-->
+                  <orientation orientation="look_at" refobject="$MarsAccelerator" comment="requires create_ship using zone='$MarsAccelerator.zone' "/>
+                  <position x="-5km" y="0km" z="14km" object="$MarsAccelerator" />
+                </create_ship>
+                <set_object_name object="$TeladiShip" page="30283" line="102" comment="Profitable Opportunities"/>
+                <create_order object="$TeladiShip" id="'Wait'" default="true"/>
+
+                <!-- terran official ship-->
+                <create_ship name="$Terran3Ship" macro="macro.ship_ter_m_corvette_01_a_macro" zone="$MarsAccelerator.zone" commandeerable="false" capturable="false">
+                  <owner exact="faction.terran" overridenpc="true" />
+                  <loadout ref="story_terran_corvette"/>
+                  <pilot>
+                    <select faction="faction.terran" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <!--people ref="argon_freighter_crew"/-->
+                  <orientation orientation="look_away" refobject="$MarsAccelerator" comment="requires create_ship using zone='$MarsAccelerator.zone' "/>
+                  <position x="-4km" y="-100m" z="12km" object="$MarsAccelerator" />
+                </create_ship>
+                <set_object_name object="$Terran3Ship" page="30283" line="103" comment="Terran Border Patrol"/>
+                <create_order object="$Terran3Ship" id="'Wait'" default="true"/>
+
+              </actions>
+            </cue>
+
+            <cue name="Prelude_Teladi_Trespassing_Check">
+              <conditions>
+                <event_object_changed_sector object="player.entity" sector="$AsteroidBeltSector"/>
+                <check_value value="$MarsAccelerator.exists" comment="should exist, but still check it"/>
+                <check_value value="md.Story_Terraforming.Ch5_Evade_Patrols.state != cuestate.complete"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Reached ' + $AsteroidBeltSector.name" chance="$DebugChance"/>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Approach_MarsAccelerator_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                  <param name="ApproachTarget"    value="$MarsAccelerator"/>
+                  <param name="ApproachDistance"  value="125km"/>
+                  <param name="SuccessSignalCue"  value="Prelude_Approach_Cutscene"/>
+                </cue>
+
+                <cue name="Prelude_Approach_Cutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+
+                    <append_to_list name="md.$MissionDND" exact="Prelude_Teladi_Trespassing"/>
+
+                    <force_player_speed speed="0"/>
+                    <stop_player_autopilot/>
+                    <play_cutscene result="this.$CutsceneID" key="'Story_Terran_Teladi'">
+                      <param name="target_ship1" object="$TeladiShip"/>
+                      <param name="target_ship2" object="$Terran3Ship"/>
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="Prelude_Approach_Cutscene_Started">
+                      <conditions>
+                        <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <!--actions>
+                        <speak actor="$TerranActor" priority="99">
+                          <text line="30283351"/>
+                          <text line="30283301"/>
+                          <text line="30283352"/>
+                          <text line="30283302"/>
+                          <text line="30283353"/>
+                          <text line="30283303"/>
+                          <text line="30283354"/>
+                          <text line="30283304"/>
+                          <text line="30283305"/>
+                        </speak>
+                      </actions-->
+                      <cues>
+
+                        <!--cue name="Prelude_Bickering_Ref" ref="md.LIB_Dialog.Speak_Actors">
+                          <param name="Actor"             value="[$TerranActor, $TeladiActor, $TerranActor, $TeladiActor, $TerranActor, $TeladiActor, $TerranActor]"/>
+                          <param name="Lines"             value="[[[30285351]], [[30285301]], [[30285352]], [[30285302]], [[30285353]], [[30285303]], [[30285354]], [[30285304]], [[30285305]] ]"/>
+                          <param name="EndSignalCue"      value="[null, Second_Wave_Update_Objective_Dal_Boso_Speak_Finished]"/>
+                        </cue-->
+                        <!--
+                          <t id="30283301">\033MWe are looking for mutual opportunities to earn credits</t>
+                          <t id="30283302">\033M... but we can surely achieve mutual benefit from...(next speaker interrupts us)</t>
+                          <t id="30283303">\033MWe have information about...</t>
+                          <t id="30283304">\033MOk ok, acknowledged... changing course.</t>
+                          <t id="30283305">\033MThis is everyones' unfortunate loss of trade opportunities.</t>
+                          <t id="30283351">\033MUnidentified Vessel you are approaching the Terran restricted area, please divert your course!</t>
+                          <t id="30283352">\033MWe are not interested, we insist you divert your course.(interrupting previous speaker, emphasize NOT and INSIST)</t>
+                          <t id="30283353">\033MNegative, we demand that you change your course immediately(emphasize demand and immediately)</t>
+                          <t id="30283354">\033MWe order you to change your course immediately, or we will be obliged to take measures to protect the safety and security of this system!(emphasize ORDER, DEMAND, WILL)</t>
+                        -->
+
+                        <cue name="Prelude_Approach_Cutscene_Speak1">
+                          <actions>
+                            <speak actor="$TerranActor" priority="99">
+                              <text line="30283351" delay="2s"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak2">
+                          <conditions>
+                            <event_speak_finished actor="$TerranActor" line="30283351"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence1Done'"/>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence2Start'"/>
+                            <speak actor="$TeladiActor" priority="99">
+                              <text line="30283306"/>
+                              <text line="30283301"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak3">
+                          <conditions>
+                            <event_speak_finished actor="$TeladiActor" line="30283306"/>
+                          </conditions>
+                          <actions>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence2Done'"/>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence3Start'"/>
+                            <speak actor="$TerranActor" priority="99">
+                              <text line="30283352"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak4">
+                          <conditions>
+                            <event_speak_finished actor="$TerranActor" line="30283352"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <speak actor="$TeladiActor" priority="99">
+                              <text line="30283302"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak5">
+                          <conditions>
+                            <event_speak_finished actor="$TeladiActor" line="30283302"/>
+                          </conditions>
+                          <actions>
+                            <speak actor="$TerranActor" priority="99">
+                              <text line="30283353"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak6">
+                          <conditions>
+                            <event_speak_finished actor="$TerranActor" line="30283353"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <speak actor="$TeladiActor" priority="99">
+                              <text line="30283303"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak7">
+                          <conditions>
+                            <event_speak_finished actor="$TeladiActor" line="30283303"/>
+                          </conditions>
+                          <actions>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence3Done'"/>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence4Start'"/>
+                            <speak actor="$TerranActor" priority="99">
+                              <text line="30283354"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speak8">
+                          <conditions>
+                            <event_speak_finished actor="$TerranActor" line="30283354"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <signal_cue cue="Prelude_Approach_MoveDie"/>
+                            <speak actor="$TeladiActor" priority="99">
+                              <text line="30283304"/>
+                              <text line="30283305"/>
+                            </speak>
+                          </actions>
+                        </cue>
+
+                        <cue name="Prelude_Approach_Cutscene_Speaks_Done" version="2">
+                          <conditions>
+                            <event_speak_finished actor="$TeladiActor" line="30283304"/>
+                          </conditions>
+                          <delay exact="3s"/>
+                          <actions>
+                            <remove_from_list name="md.$MissionDND" exact="Prelude_Teladi_Trespassing"/>
+                            <cutscene_event key="'Story_Terran_Teladi'" event="'TriggerSequence4Done'"/>
+                          </actions>
+                          <patch sinceversion="2">
+                            <do_if value="md.$MissionDND.indexof.{Prelude_Teladi_Trespassing}">
+                              <remove_from_list name="md.$MissionDND" exact="Prelude_Teladi_Trespassing"/>
+                            </do_if>
+                          </patch>
+                        </cue>
+
+                        <cue name="Prelude_Approach_MoveDie">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <find_station name="$TeladiStation" space="player.galaxy" owner="faction.teladi"/>
+                            <cancel_all_orders object="$TeladiShip"/>
+                            <do_if value="$TeladiStation.exists">
+                              <!-- Move to target station first. -->
+                              <create_order object="$TeladiShip" id="'MoveToObject'">
+                                <param name="destination" value="$TeladiStation"/>
+                                <param name="noattackresponse" value="true"/>
+                              </create_order>
+                              <!-- And queue MoveDie, so that it docks once it arrives. -->
+                              <create_order object="$TeladiShip" id="'MoveDie'">
+                                <param name="atstation" value="$TeladiStation"/>
+                                <param name="byidle" value="false"/>
+                                <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                              </create_order>
+                            </do_if>
+                            <do_else>
+                              <create_order object="$TeladiShip" id="'MoveDie'"/>
+                            </do_else>
+                            <!-- Terran escorts Teladi for a while -->
+                            <!--create_order object="$Terran3Ship" id="'Follow'">
+                              <param name="target" value="$TeladiShip"/>
+                              <param name="debugchance" value="$DebugChance"/> ,
+                            </create_order-->
+                            <create_order object="$Terran3Ship" id="'ProtectShip'">
+                              <param name="target" value="$TeladiShip"/>
+                              <param name="pursuedistance" value="5km"/>
+                            </create_order>
+                          </actions>
+                          <cues>
+                            <cue name="Prelude_Approach_MoveDie2">
+                              <delay exact="600s"/>
+                              <actions>
+                                <debug_text text="'Escort ends'" chance="$DebugChance"/>
+                                <find_station name="$TerranStation" space="player.galaxy" owner="faction.terran"/>
+                                <cancel_all_orders object="$Terran3Ship"/>
+                                <do_if value="$TerranStation.exists">
+                                  <!-- Move to target station first. -->
+                                  <create_order object="$Terran3Ship" id="'MoveToObject'">
+                                    <param name="destination" value="$TerranStation"/>
+                                    <param name="noattackresponse" value="true"/>
+                                  </create_order>
+                                  <!-- And queue MoveDie, so that it docks once it arrives. -->
+                                  <create_order object="$Terran3Ship" id="'MoveDie'">
+                                    <param name="atstation" value="$TerranStation"/>
+                                    <param name="byidle" value="false"/>
+                                    <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                                  </create_order>
+                                </do_if>
+                                <do_else>
+                                  <create_order object="$Terran3Ship" id="'MoveDie'"/>
+                                </do_else>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                      </cues>
+                    </cue>
+                    <cue name="Prelude_Approach_Cutscene_Ended">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Gate Cutscene ended'" chance="$DebugChance"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+  </cues>
+
+</mdscript>

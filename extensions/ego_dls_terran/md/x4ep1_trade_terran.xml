@@ -1,0 +1,1248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="X4Ep1_Trade_Terran" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+
+  <cues>
+    <!-- DLC - This is dependent on the base game X4Ep1_Trade_Subscriptions.Start cue-->
+    <cue name="Start" checkinterval="1s">
+      <conditions>
+        <cue_is_complete cue="md.X4Ep1_Trade_Subscriptions.Start"/>
+      </conditions>
+      <cues>
+        <!--
+        ############################
+        SEGARIS PIONEER TRADE
+        ############################-->
+
+        <cue name="PIONEERS_GUILD" namespace="this">
+          <actions>
+            <!--Common values-->
+            <set_value name="$ManagerCue" exact="md.X4Ep1_Trade_Subscriptions.Start"/>
+            <set_value name="$Faction" exact="faction.pioneers"/>
+            <set_value name="$MissionGroup" exact="missiongroup.pioneers_trade_guild"/>
+            <set_value name="$Mission_Contact" exact="null"/>
+            <set_value name="$Page" exact="30208" comment="Segaris Pioneers trade guild page"/>
+            <set_value name="$ManagerCue.$MissionGroupCues.{$MissionGroup}" exact="this"/>
+            <set_value name="$JoinFee" exact="40000Cr"/>
+            <set_value name="$SubscriptionMinRel" exact="$Faction.relation.friend.min"/>
+            <set_value name="$DebugChance" exact="$ManagerCue.$DebugChance"/>
+
+            <!--Status-->
+            <set_value name="$SubscriptionStatus" exact="null"/>
+            <set_value name="$Invited" exact="false"/>
+            <set_value name="$IntroducedToContact" exact="false"/>
+            <set_value name="$JobsDescribed" exact="false"/>
+            <set_value name="$ConflictDescribed" exact="false"/>
+            <set_value name="$CooldownTime" exact="-1s"/>
+
+            <!--Stats-->
+            <set_value name="$ThreadsCompleted" exact="0"/>
+            <set_value name="$ThreadsFailed" exact="0"/>
+
+            <set_value name="$MissionsCompleted" exact="0"/>
+            <set_value name="$MissionsFailed" exact="0"/>
+          </actions>
+          <cues>
+            <cue name="PIONEERS_GUILD_Init">
+              <actions>
+                <set_value name="$ContactCreatorCue" exact="PIONEERS_GUILD_Create_Contact"/>
+                <set_value name="$IntroMissionCue" exact="PIONEERS_GUILD_Introduction"/>
+
+                <!--$SubscriptionStatus:
+                - 'unsubscribed'
+                - 'probation'
+                - 'subscribed'
+                - 'cooldown'-->
+                <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'unsubscribed'"/>
+              </actions>
+            </cue>
+
+            <!--
+            ####################
+            DEBUG
+            ####################-->
+            <cue name="PIONEERS_GUILD_Debug_Reset">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_all exact="$ManagerCue.$Threads.count" counter="$i" reverse="true">
+                  <do_if value="$ManagerCue.$Threads.{$i}.$ThreadCue.$Definition.$MissionGroup == $MissionGroup">
+                    <signal_cue_instantly cue="$ManagerCue.$Threads.{$i}.$CleanupCue"/>
+                  </do_if>
+                </do_all>
+                <set_value name="$DefinitionKeys" exact="$ManagerCue.$ThreadDefinitions.keys.list"/>
+                <do_all exact="$DefinitionKeys.count" counter="$i" reverse="true">
+                  <do_if value="$ManagerCue.$ThreadDefinitions.{$DefinitionKeys.{$i}}.$MissionGroup == $MissionGroup">
+                    <remove_value name="$ManagerCue.$ThreadDefinitions.{$DefinitionKeys.{$i}}"/>
+                  </do_if>
+                </do_all>
+                <do_if value="$Mission_Contact.isclass.npc">
+                  <destroy_object object="$Mission_Contact"/>
+                </do_if>
+                <set_value name="$Mission_Contact" exact="null"/>
+                <reset_cue cue="namespace"/>
+                <reset_cue cue="md.X4Ep1_Trade_Subscriptions.Gamestart" comment="Trigger CalculateThreads again"/>
+              </actions>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Debug_Subscribe" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'subscribed'"/>
+              </actions>
+            </cue>
+
+            <!--
+            ####################
+            SUBSCRIPTION
+            ####################-->
+
+            <!--event.param == new status-->
+            <cue name="PIONEERS_GUILD_Set_Subscription_Status" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="
+                       event.param == 'unsubscribed' or
+                       event.param == 'probation' or
+                       event.param == 'subscribed' or
+                       event.param == 'cooldown'">
+
+                  <debug_text text="'Changing subscription status from ' + $SubscriptionStatus + ' to ' + event.param" chance="$DebugChance"/>
+                  <set_value name="$SubscriptionStatus" exact="event.param"/>
+
+                  <!--Be careful with state change handlers here if the requested state was the same as the previous one-->
+                  <do_if value="event.param == 'subscribed' and md.X4Ep1_Trade_Subscriptions.Gamestart.state == cuestate.complete">
+                    <signal_cue_instantly cue="md.X4Ep1_Trade_Subscriptions.Player_Subscribed_To_Guild" param="$MissionGroup"/>
+                    <signal_cue cue="md.X4Ep1_Trade_Subscriptions.CalculateThreads"/>
+                  </do_if>
+                  <do_elseif value="event.param == 'cooldown'">
+                    <!--TODO @Owen balance cooldown. Have a harsher cooldown in certain situations?-->
+                    <set_value name="$CooldownTime" exact="player.age + 5min"/>
+                  </do_elseif>
+                  <!-- update global missiongroup-registry -->
+                  <do_if value="$SubscriptionStatus == 'subscribed'">
+                    <assert value="not md.$SubscribedMissionGroups.indexof.{$MissionGroup}" />
+                    <do_if value="not md.$SubscribedMissionGroups.indexof.{$MissionGroup}">
+                      <append_to_list name="md.$SubscribedMissionGroups" exact="$MissionGroup"/>
+                    </do_if>
+                  </do_if>
+                  <do_else>
+                    <remove_from_list name="md.$SubscribedMissionGroups" exact="$MissionGroup"/>
+                  </do_else>
+                </do_if>
+                <do_else>
+                  <assert value="false" text="'Unknown subscription status: ' + event.param + ' [Owen]'"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Check_Cooldown" instantiate="true" checkinterval="5s">
+              <conditions>
+                <check_value value="$SubscriptionStatus == 'cooldown' and player.age gt $CooldownTime"/>
+              </conditions>
+              <actions>
+                <debug_text text="player.age + ' Ending  cooldown'" chance="$DebugChance"/>
+                <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'subscribed'"/>
+              </actions>
+            </cue>
+
+            <!--
+            ####################
+            CONTACT
+            ####################-->
+
+            <!--event.param == Cloned list of the local host sectors to search for a placement object (or null to fallback to any owned space in the galaxy)-->
+            <cue name="PIONEERS_GUILD_Create_Contact">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="$Faction.isactive"/>
+              </conditions>
+              <actions>
+                <set_value name="$PlacementObject" exact="$Faction.headquarters"/>
+                <do_if value="$PlacementObject">
+                  <check_object result="this.$Result" object="$PlacementObject">
+                    <match_content class="class.walkablemodule" checkoperational="true" haswalkableroom="true"/>
+                  </check_object>
+                  <do_if value="not this.$Result">
+                    <set_value name="$PlacementObject" exact="null"/>
+                  </do_if>
+                </do_if>
+                <do_if value="not $PlacementObject.exists">
+                  <!--As we're not pointing the player to these stations for the intro mission, only find important stations-->
+                  <find_station_by_true_owner name="$PlacementObject" faction="$Faction" space="player.sector">
+                    <match_content class="class.walkablemodule" checkoperational="true" haswalkableroom="true"/>
+                    <match_any>
+                      <match shipyard="true"/>
+                      <match equipmentdock="true"/>
+                      <match tradestation="true"/>
+                    </match_any>
+                  </find_station_by_true_owner>
+                </do_if>
+
+                <do_if value="$PlacementObject">
+                  <do_if value="not $Mission_Contact.isclass.npc">
+                    <create_cue_actor name="$Mission_Contact" cue="namespace" group="terran.factionrepresentative.female">
+                      <page exact="10108"/>
+                      <owner exact="$Faction"/>
+                      <skills>
+                        <skill type="management"  min="12"  max="15"/>
+                        <skill type="morale"      min="9"  max="15"/>
+                        <skill type="piloting"    min="3"   max="15"/>
+                        <skill type="engineering" min="3"   max="15"/>
+                        <skill type="boarding"    min="3"   max="15"/>
+                      </skills>
+                    </create_cue_actor>
+                    <do_if value="$Mission_Contact">
+                      <set_entity_type entity="$Mission_Contact" type="entitytype.crowd"/>
+                      <set_entity_traits entity="$Mission_Contact" missionactor="true" remote="false" customhandler="true" />
+                      <set_entity_overrides entity="$Mission_Contact" title="'{30208,201}'"/>
+                      <debug_text text="'Created mission contact ' + $Mission_Contact + ' ' + $Mission_Contact.knownname + ' for placement on ' + $PlacementObject + ' ' + $PlacementObject.knownname" chance="$DebugChance"/>
+
+                      <set_value name="$HQ" exact="$PlacementObject"/>
+                      <set_value name="$Mission_Contact.$HQ" exact="$PlacementObject"/>
+                    </do_if>
+                  </do_if>
+                </do_if>
+
+                <do_if value="not $Mission_Contact.isclass.npc or not $PlacementObject.exists">
+                  <reset_cue cue="this"/>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="PIONEERS_GUILD_Place_Contact_Init">
+                  <actions>
+                    <do_if value="$PlacementObject.attention ge attention.nearby">
+                      <signal_cue cue="PIONEERS_GUILD_Place_Contact_Create_Interior"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="PIONEERS_GUILD_Place_Contact_Create_Interior">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <check_all>
+                        <event_object_changed_attention object="$PlacementObject"/>
+                        <check_value value="event.param ge attention.nearby"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Attempting to create dynamic interior to place NPC'" chance="$DebugChance"/>
+                    <get_room_definition macro="$StartCorridorMacro" tags="tag.corridor" race="$Faction.primaryrace" />
+                    <get_room_definition macro="$StartRoomMacro" doors="$RoomDoors" tags="tag.office" race="$Faction.primaryrace" />
+
+                    <create_dynamic_interior object="$PlacementObject" corridor="$StartCorridorMacro" room="$StartRoomMacro" name="'{30208,3}'" interiorname="$DynamicInterior" corridorname="$DynamicCorridor" roomname="$DynamicRoom" />
+                    <assert value="$DynamicInterior" text="'Unable to create dynamic interior for contact ' + $Mission_Contact + ' ' + $Mission_Contact.knownname + ' [Owen]'"/>
+                    <do_if value="$DynamicInterior">
+                      <find_npc_slot name="$NPC_Slot" object="$DynamicRoom" tags="tag.control"/>
+                      <do_if value="not $NPC_Slot">
+                        <find_npc_slot name="$NPC_Slot" object="$DynamicRoom"/>
+                      </do_if>
+                      <assert value="$NPC_Slot" text="'Can not find slot for mission contact in ' + $DynamicInterior + ' ' + $DynamicInterior.knownname + ' [Owen]'"/>
+                      <do_if value="$NPC_Slot">
+                        <add_actor_to_room actor="$Mission_Contact" slot="$NPC_Slot"/>
+                        <debug_text text="'Added mission contact ' + $Mission_Contact + ' ' + $Mission_Contact.knownname + ' to ' + $PlacementObject + ' ' + $PlacementObject.knownname" chance="$DebugChance"/>
+                      </do_if>
+                    </do_if>
+                  </actions>
+                  <cues>
+                    <cue name="PIONEERS_GUILD_Place_Contact_WithinDynamicInterior_Destroy">
+                      <conditions>
+                        <event_object_interiors_despawning object="$PlacementObject"/>
+                      </conditions>
+                      <actions>
+                        <remove_actor_from_room actor="$Mission_Contact"/>
+                        <include_actions ref="md.X4Ep1_Trade_Subscriptions.Remove_Dynamic_Interior"/>
+                        <do_if value="$Faction.isactive">
+                          <reset_cue cue="PIONEERS_GUILD_Place_Contact_Create_Interior"/>
+                        </do_if>
+                        <do_else>
+                          <debug_text text="'Faction is now inactive. Deactivating contact handling.'"/>
+                          <reset_cue cue="$ContactCreatorCue"/>
+                        </do_else>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="PIONEERS_GUILD_Contact_Killed">
+                  <conditions>
+                    <event_object_destroyed object="$Mission_Contact"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Mission_Contact" exact="null"/>
+                    <reset_cue cue="PIONEERS_GUILD_Create_Contact"/>
+                  </actions>
+                </cue>
+
+                <cue name="PIONEERS_GUILD_Placement_Object_Destroyed">
+                  <conditions>
+                    <event_object_destroyed object="$PlacementObject"/>
+                  </conditions>
+                  <actions>
+                    <include_actions ref="md.X4Ep1_Trade_Subscriptions.Remove_Dynamic_Interior"/>
+                    <set_value name="$PlacementObject" exact="null"/>
+                    <reset_cue cue="$ContactCreatorCue"/>
+                  </actions>
+                </cue>
+
+                <cue name="PIONEERS_GUILD_Contact__Faction_Deactivated">
+                  <conditions>
+                    <event_faction_deactivated faction="$Faction"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="PIONEERS_GUILD_Place_Contact_Create_Interior.state == cuestate.waiting">
+                      <debug_text text="'Faction is now inactive. Deactivating contact handling.'"/>
+                      <reset_cue cue="$ContactCreatorCue"/>
+                    </do_if>
+                    <!--else, the depawning of the interior must happen-->
+                  </actions>
+                </cue>
+
+                <cue name="PIONEERS_GUILD_Contact_Conversation_Started" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_conversation_started actor="$Mission_Contact" />
+                      <event_conversation_returned_to_section actor="$Mission_Contact" />
+                    </check_any>
+                    <check_value value="event.param == 'default' and $Faction.isactive" />
+                  </conditions>
+                  <actions>
+                    <do_if value="event.name == 'event_conversation_started'">
+                      <substitute_text text="$JoinPlayerChoiceText" source="{1002,3020704}" comment="Join... \($CREDITS${1001,101}\)">
+                        <replace string="'$CREDITS$'" with="$JoinFee.formatted.default"/>
+                      </substitute_text>
+                      <do_if value="$SubscriptionStatus == 'unsubscribed' or $SubscriptionStatus == 'cooldown'">
+                        <do_if value="player.entity.isfemale">
+                          <add_npc_line speaker="$Mission_Contact" line="3007" comment="Pilot. (female)"/>
+                        </do_if>
+                        <do_else>
+                          <add_npc_line speaker="$Mission_Contact" line="3006" comment="Pilot. (male)"/>
+                        </do_else>
+                      </do_if>
+                      <do_else>
+                        <!--More familiar greeting-->
+                        <add_npc_line speaker="$Mission_Contact" line="3003" comment="Captain."/>
+                      </do_else>
+                    </do_if>
+
+                    <include_actions ref="PIONEERS_GUILD_Contact_Player_Lines"/>
+                  </actions>
+                </cue>
+
+                <library name="PIONEERS_GUILD_Contact_Player_Lines">
+                  <actions>
+                    <!--Specific sections-->
+                    <do_if value="event.name == 'event_conversation_next_section' and (event.param == 'subscribe_request' or event.param == 'subscribe_request_2')">
+                      <add_player_choice text="{1002,3000401}" section="subscribe_ask_info" comment="What kind of jobs can I expect?"/>
+                      <add_player_choice text="$JoinPlayerChoiceText" section="subscribe_start" position="top_right" comment="Let's get started."/>
+                    </do_if>
+                    <do_elseif value="event.name == 'event_conversation_next_section' and event.param == 'subscribe_ask_info'">
+                      <add_player_choice text="$JoinPlayerChoiceText" section="subscribe_start" position="top_right" comment="Let's get started."/>
+                    </do_elseif>
+
+                    <!--Start or other sections-->
+                    <do_else>
+                      <do_if value="$SubscriptionStatus == 'unsubscribed'">
+                        <do_if value="not $Invited">
+                          <!--Intro mission is not in a state where the player was told to come.-->
+                          <add_player_choice text="{1002,3000406}" section="subscribe_request_2" comment="Is there some work going?"/>
+                        </do_if>
+                        <do_elseif value="$IntroducedToContact">
+                          <add_player_choice text="{1002,3000403}" section="subscribe_start" position="top_right" comment="Shall I get started?"/>
+                          <do_if value="not $JobsDescribed">
+                            <add_player_choice text="{1002,3000401}" section="subscribe_ask_info" comment="What kind of jobs can I expect?"/>
+                          </do_if>
+                        </do_elseif>
+                        <do_else>
+                          <add_player_choice text="{1002,3020401}" section="subscribe_request" comment="I'm here about the trade guild."/>
+                        </do_else>
+                      </do_if>
+                      <do_elseif value="$SubscriptionStatus == 'probation'">
+                        <add_player_choice text="{1002,3000405}" section="abort_intro" comment="I would like to stop."/>
+                      </do_elseif>
+                    </do_else>
+                  </actions>
+                </library>
+
+                <cue name="PIONEERS_GUILD_Contact_NextSection" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$Mission_Contact"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$AddPlayerChoices" exact="true"/>
+                    <do_if value="event.param == 'subscribe_request'">
+                      <set_value name="$IntroducedToContact" exact="true"/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204003" hidechoices="true" comment="Ah, I'm glad you came. Our guild is currently seeking to increase our presence in the market."/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204004" hidechoices="true" comment="To compete with the Teladi, we're offering membership to a select number of trusted individuals."/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204005" hidechoices="true" comment="This is a one-time investment, after which you will have access to a number of job listings."/>
+                    </do_if>
+                    <do_elseif value="event.param == 'subscribe_ask_info'">
+                      <set_value name="$JobsDescribed" exact="true"/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204006" hidechoices="true" comment="As you can expect, most jobs will involve shifting wares between stations but we're also looking for combat pilots."/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204007" hidechoices="true" comment="We have to protect our interests and seek out new opportunities. I believe you can help us do that."/>
+                      <add_npc_line speaker="$Mission_Contact" line="30204008" hidechoices="true" comment="It's a competitive market and we need skilled partners. You just so happened to catch our attention."/>
+                    </do_elseif>
+                    <do_elseif value="event.param == 'subscribe_request_2'">
+                      <!--This section is for when the intro mission is not currently active for the player to accept it. Either reject the player or signal the intro mission to activate.-->
+                      <include_actions ref="PIONEERS_GUILD_Can_Join_Subscription"/>
+                      <do_if value="$CanJoin">
+                        <!--Player shouldn't usually get access to this section as that would mean unlocking the interior while not triggering the intro mission.-->
+                        <add_npc_line speaker="$Mission_Contact" line="30204003" hidechoices="true" comment="Ah, I'm glad you came. Our guild is currently seeking to increase our presence in the market."/>
+                        <add_npc_line speaker="$Mission_Contact" line="30204004" hidechoices="true" comment="To compete with the Teladi, we're offering membership to a select number of trusted individuals."/>
+                        <add_npc_line speaker="$Mission_Contact" line="30204005" hidechoices="true" comment="This is a one-time investment, after which you will have access to a number of job listings."/>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$AddPlayerChoices" exact="false"/>
+                        <add_npc_line speaker="$Mission_Contact" line="30204009" hidechoices="true" comment="(reject)Sorry. You'll need to become a member of our guild first."/>
+                      </do_else>
+                    </do_elseif>
+                    <do_elseif value="event.param == 'subscribe_start'">
+                      <set_value name="$AddPlayerChoices" exact="false"/>
+                      <signal_cue cue="PIONEERS_GUILD_Player_Requested_Subscription"/>
+                      <do_if value="player.money ge $JoinFee">
+                        <do_if value="PIONEERS_GUILD_Introduction.hasmission">
+                          <remove_mission cue="PIONEERS_GUILD_Introduction" type="completed"/>
+                          <signal_cue cue="PIONEERS_GUILD_Cancel_Intro_Talkto"/>
+                          <reset_cue cue="PIONEERS_GUILD_Introduction"/>
+                        </do_if>
+                        <reward_player money="-$JoinFee"/>
+                        <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'subscribed'"/>
+                        <add_npc_line speaker="$Mission_Contact" line="30204010" hidechoices="true" comment="Great. I'll update our database right away. You should now be able to see jobs on offer in the areas where we operate."/>
+                        <add_npc_line speaker="$Mission_Contact" line="30204011" hidechoices="true" comment="We expect good things from you."/>
+                      </do_if>
+                      <do_else>
+                        <add_npc_line speaker="$Mission_Contact" line="30204012" hidechoices="true" comment="Sorry, it appears you don't have the necessary funds available."/>
+                      </do_else>
+                    </do_elseif>
+                    <do_elseif value="event.param == 'abort_intro'">
+                      <set_value name="$AddPlayerChoices" exact="false"/>
+                      <signal_cue cue="PIONEERS_GUILD_Player_Requests_Intro_Abort"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$AddPlayerChoices" exact="false"/>
+                    </do_else>
+
+                    <do_if value="$AddPlayerChoices">
+                      <include_actions ref="PIONEERS_GUILD_Contact_Player_Lines"/>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+
+            <!--event.param = table[
+            $cue                = thread cue namespace,
+            $completedmissions  = number of completed missions,
+            $failedmissions     = number of failed missions]-->
+            <cue name="PIONEERS_GUILD_Thread_Finished" instantiate="true">
+              <conditions>
+                <event_cue_signalled cue="md.X4Ep1_Trade_Subscriptions.Cleanup_Thread"/>
+                <check_value value="event.param.$cue.$Definition.$MissionGroup == $MissionGroup"/>
+                <check_any>
+                  <!--Depending on if Cleanup_Thread already ran or not, $cue is either in $ActiveThreads or flagged with $WasActiveThread-->
+                  <check_value value="$ManagerCue.$ActiveThreads.indexof.{event.param.$cue}"/>
+                  <check_value value="@event.param.$cue.$WasActiveThread"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!--TODO @Owen spoken feedback?-->
+                <debug_text text="'player finished ' + event.param.$cue + ' for ' + $MissionGroup + '. Completed missions: ' + event.param.$completedmissions + ' - Failed missions: ' + event.param.$failedmissions" chance="$DebugChance"/>
+
+                <set_value name="$MissionsCompleted" operation="add" exact="event.param.$completedmissions"/>
+                <set_value name="$MissionsFailed" operation="add" exact="event.param.$completedmissions"/>
+
+                <do_if value="event.param.$failed">
+                  <set_value name="$ThreadsFailed" operation="add"/>
+                  <do_if value="not event.param.$interrupted">
+                    <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'cooldown'"/>
+                  </do_if>
+                </do_if>
+                <do_else>
+                  <set_value name="$ThreadsCompleted" operation="add"/>
+                  <signal_cue cue="md.X4Ep1_Trade_Subscriptions.CalculateThreads"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <!--
+            ####################
+            INTRODUCTION
+            ####################-->
+
+            <cue name="PIONEERS_GUILD_Player_Requested_Subscription" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Player_Requests_Intro_Abort" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+            </cue>
+
+            <library name="PIONEERS_GUILD_Can_Join_Subscription">
+              <actions>
+                <!--TODO @Owen other conditions based on if they failed a previous intro mission and need a cooldown-->
+                <set_value name="$CanActivateIntro" exact="false"/>
+                <do_if value="$Faction.relationto.{faction.player} ge $SubscriptionMinRel">
+                  <set_value name="$CanActivateIntro" exact="true"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'player does not meet minimum relationship requirement'"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <cue name="PIONEERS_GUILD_Introduction">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="$Faction.isactive"/>
+              </conditions>
+              <actions>
+                <set_value name="$Invited" exact="false"/>
+                <do_if value="not $Mission_Contact.isclass.npc or not $PlacementObject.isoperational">
+                  <debug_text text="'Mission contact was not yet created for ' + $MissionGroup + '. Triggering creation now. [Owen]'" filter="error"/>
+                  <signal_cue_instantly cue="$ContactCreatorCue"/>
+                </do_if>
+                <do_if value="$Mission_Contact.isclass.npc and $PlacementObject.isoperational">
+                  <debug_text text="'Starting intro mission handling for ' + $MissionGroup" chance="$DebugChance"/>
+                  <set_value name="$MissionIntroCue" exact="this"/>
+                  <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'unsubscribed'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Unable to start intro mission as there is no placement object'"/>
+                  <reset_cue cue="PIONEERS_GUILD_Introduction"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="PIONEERS_GUILD_Introduction_Station_Destroyed">
+                  <conditions>
+                    <event_object_destroyed object="$PlacementObject"/>
+                    <!--Once landed, the DisconnectedActorObjectiveLibrary will handle the station being destroyed-->
+                    <check_value value="PIONEERS_GUILD_Introduction_Player_Landed.state == cuestate.waiting"/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="$MissionIntroCue"/>
+                  </actions>
+                </cue>
+                <cue name="PIONEERS_GUILD_Introduction_Player_Landed">
+                  <conditions>
+                    <check_any>
+                      <check_all>
+                        <event_player_teleport_successful comment="with level 27+ you can teleport to npc-owned stations"/>
+                        <check_value value="player.entity.hascontext.{$PlacementObject}"/>
+                      </check_all>
+                      <check_all>
+                        <event_object_docked_at container="$PlacementObject"/>
+                        <check_value value="player.ship == event.param"/>
+                      </check_all>
+                    </check_any>
+                    <check_value value="not md.$Disable_PIO_Invite?"/>
+                  </conditions>
+                  <delay exact="5s"/>
+                  <actions>
+                    <do_if value="player.entity.hascontext.{$PlacementObject} and $Mission_Contact.hascontext.{$PlacementObject}" comment="check if player didn't undock/teleport-away within the delay, check if MissionContact is on the station (which is not yet the case yet when teleport triggered)">
+                      <speak actor="$Mission_Contact" priority="90">
+                        <text line="30204001" comment="Greetings, pilot. I represent the business interests of several Sol-based organisations, and I may have a lucrative proposition for you."/>
+                        <text line="30204002" comment="If you're interested, come find me."/>
+                      </speak>
+                    </do_if>
+                    <do_else>
+                      <reset_cue cue="PIONEERS_GUILD_Introduction_Player_Landed"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+
+                    <!--TODO @Owen - remove when player flies away? Put on cooldown?-->
+                    <cue name="PIONEERS_GUILD_Introduction_Offer">
+                      <conditions>
+                        <event_speak_finished actor="$Mission_Contact" line="30204001" comment="the line passed as the event.param2 is always the first spoken line"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Player has passed the conditions for the intro mission to be available for group: ' + $MissionGroup" chance="$DebugChance"/>
+                        <set_value name="$Invited" exact="true"/>
+                        <create_mission cue="$MissionIntroCue" type="missiontype.fight" name="{30208,1}" description="{30208,2}" difficulty="level.trivial" faction="$Faction" group="$MissionGroup" activate="false" comment="don't auto-activate, player is currently on the mission to the factionrep">
+                          <briefing>
+                            <objective step="1" action="objective.talkto" object="$Mission_Contact"/>
+                          </briefing>
+                        </create_mission>
+                        <!-- Guild Notification Mail -->
+                        <run_actions ref="md.X4Ep1_War_Subscriptions.SendSubscriptionMail">
+                          <param name="Page" value="30208"/>
+                          <param name="Faction" value="$Faction"/>
+                          <param name="Mission_Contact" value="$Mission_Contact"/>
+                        </run_actions>
+                        <signal_cue_instantly cue="md.GenericMissions.DisconnectedActorObjectiveLibrary" param="table[
+                                              $actor = $Mission_Contact,
+                                              $object = $PlacementObject,
+                                              $missioncue = $MissionIntroCue,
+                                              $cancelcue = PIONEERS_GUILD_Cancel_Intro_Talkto,
+                                              $libfailedcue = PIONEERS_GUILD_Intro_Abort,
+                                              $objective = objective.talkto,
+                                              $debugchance = $DebugChance]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="PIONEERS_GUILD_Intro_Abort">
+                      <conditions>
+                        <check_any>
+                          <event_mission_aborted cue="$MissionIntroCue"/>
+                          <event_cue_signalled cue="PIONEERS_GUILD_Player_Requests_Intro_Abort"/>
+                          <event_cue_signalled/>
+                          <event_object_destroyed object="$Mission_Contact"/>
+                          <event_object_destroyed object="$PlacementObject"/>
+                          <event_faction_deactivated faction="$Faction"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Aborting due to ' + event.name" chance="$DebugChance"/>
+                        <set_value name="$Invited" exact="false"/>
+                        <do_if value="$MissionIntroCue.hasmission">
+                          <remove_mission cue="$MissionIntroCue" type="aborted"/>
+                        </do_if>
+                        <signal_cue_instantly cue="PIONEERS_GUILD_Set_Subscription_Status" param="'unsubscribed'"/>
+                        <reset_cue cue="PIONEERS_GUILD_Introduction"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="PIONEERS_GUILD_Patch_Check_Talkto_Lib" onfail="cancel">
+                      <conditions>
+                        <check_value value="@$Patch_CheckLibraryInstance"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="not @md.GenericMissions.DisconnectedActorObjectiveLibrary.$Patch_ActiveMissionCues.indexof.{$MissionIntroCue}">
+                          <debug_text text="'Talkto helper instance no longer exists for ' + $MissionIntroCue + ' - aborting intro mission'" filter="savegame"/>
+                          <signal_cue cue="PIONEERS_GUILD_Intro_Abort"/>
+                        </do_if>
+                        <remove_value name="$Patch_CheckLibraryInstance"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="PIONEERS_GUILD_Cancel_Intro_Talkto" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <!--
+            ####################
+            THREADS
+            ####################-->
+            <cue name="PIONEERS_GUILD_Remove_Obstacles">
+              <cues>
+                <cue name="PIONEERS_GUILD_Remove_Obstacles_Register">
+                  <actions>
+                    <!--Antigone - Remove Obstacles-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_remove_obstacles'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.medium,
+                           $SubMissionLib = PIONEERS_GUILD_Remove_Obstacles_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Remove_Obstacles_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Remove_Obstacles_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Remove_Obstacles_Construct_Reward,
+                           $MinMissions = 1,
+                           $MaxMissions = 3,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Remove_Obstacles_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$clear_explosives"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Destroy_Objects__Clear_Explosives,  $MissionType = missiontype.destroy, $Page = 30208, $TextOffset = [101000, 101100, 101200, 101600], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$rescue_ship1"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Rescue_Ship__Standard,              $MissionType = missiontype.rescue, $Page = 30208, $TextOffset = [108000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$rescue_ship2"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Rescue_Ship_2__Standard,            $MissionType = missiontype.rescue, $Page = 30208, $TextOffset = [108100], $Sequence = -1 ]"/>
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Remove_Obstacles_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,3000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Remove_Obstacles_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,3101}"/>
+                      <set_value name="this.$Description" exact="{30208,3102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,3111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,3112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Remove_Obstacles_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_tuningsoftware, ware.modpart_shieldgeneratorcoil_t1, ware.modpart_shieldgeneratorcoil_t2].random]" weight="12" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[ware.modpart_tuningsoftware, [ware.modpart_shieldgeneratorcoil_t1, ware.modpart_shieldgeneratorcoil_t2].random]" weight="12" comment="complete mod"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_nividiumcrystallite, ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="12" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[ware.modpart_nividiumcrystallite, [ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="12" comment="complete mod"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_shieldgeneratorcoil_t3,ware.modpart_shipnanoweave_t3].random]" weight="5" comment="rare modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2, ware.inv_seminar_piloting_3, ware.inv_seminar_piloting_3, ware.inv_seminar_management_3].random]" weight="7"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_4, ware.inv_seminar_management_4].random]" weight="1"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Increase_Portfolio">
+              <cues>
+                <cue name="PIONEERS_GUILD_Increase_Portfolio_Register">
+                  <actions>
+                    <!--Antigone - Increase Portfolio-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Increase_Portfolio'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.medium,
+                           $SubMissionLib = PIONEERS_GUILD_Increase_Portfolio_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Increase_Portfolio_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Increase_Portfolio_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Increase_Portfolio_Construct_Reward,
+                           $MinMissions = 4,
+                           $MaxMissions = 5,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Increase_Portfolio_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$assisted_task"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Assisted_Task__Standard,    $MissionType = missiontype.find,    	  $Page = 30231, $TextOffset = [30000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$hack_panel"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.HackPanel__Standard,        $MissionType = missiontype.trade,       $Page = 30208, $TextOffset = [107000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$exact_fleet"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Get_Exact_Fleet__Standard,  $MissionType = missiontype.destroy,     $Page = 30208, $TextOffset = [102000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$find_resources"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Find_Resources__Standard,   $MissionType = missiontype.trade,       $Page = 30208, $TextOffset = [100000, 100100], $Sequence = -1 ]"/>
+                    <!--<set_value name="$Submissions.$retrieve_dead_drop"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Retrieve_Dead_Drop__Standard,   $MissionType = missiontype.transport,   $Page = 30232, $TextOffset = [10100], $Sequence = 1 ]"/>
+                    -->
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Increase_Portfolio_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,4000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Increase_Portfolio_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,4101}"/>
+                      <set_value name="this.$Description" exact="{30208,4102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,4111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,4112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Increase_Portfolio_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_nividiumcrystallite, ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="15" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[ware.modpart_nividiumcrystallite, [ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="15" comment="complete mod"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_shipnanoweave_t3].random]" weight="5" comment="rare modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="15"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_3, ware.inv_seminar_piloting_3, ware.inv_seminar_management_3].random]" weight="4"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_4, ware.inv_seminar_management_4].random]" weight="1"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Help_Trade_Operation">
+              <cues>
+                <cue name="PIONEERS_GUILD_Help_Trade_Operation_Register">
+                  <actions>
+                    <!--Antigone - Help Trade Operation-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Help_Trade_Operation'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.medium,
+                           $SubMissionLib = PIONEERS_GUILD_Help_Trade_Operation_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Help_Trade_Operation_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Help_Trade_Operation_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Help_Trade_Operation_Construct_Reward,
+                           $MinMissions = 4,
+                           $MaxMissions = 5,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Help_Trade_Operation_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$assisted_task"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Assisted_Task__Standard,    $MissionType = missiontype.find,      $Page = 30231, $TextOffset = [30000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$get_item"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Bring_Item__Standard,       $MissionType = missiontype.trade,     $Page = 30208, $TextOffset = [109000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$find_resources"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Find_Resources__Standard, $MissionType = missiontype.trade, $Page = 30208, $TextOffset = [100000, 100100], $Sequence = -1, $NextMission = '$achieve_coverage' ]"/>
+                    <set_value name="$Submissions.$achieve_coverage"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Achieve_Coverage__Standard,  $MissionType = missiontype.intelligence, $Page = 30208, $TextOffset = [103000], $FollowUp = true ]"/>
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Help_Trade_Operation_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,5000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Help_Trade_Operation_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,5101}"/>
+                      <set_value name="this.$Description" exact="{30208,5102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,5111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,5112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Help_Trade_Operation_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_nividiumcrystallite, ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="18" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[ware.modpart_nividiumcrystallite, [ware.modpart_shipnanoweave_t1, ware.modpart_shipnanoweave_t2].random]" weight="18" comment="complete mod"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="18"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_3, ware.inv_seminar_piloting_3, ware.inv_seminar_management_3].random]" weight="5"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Price_Dumping">
+              <cues>
+                <cue name="PIONEERS_GUILD_Price_Dumping_Register">
+                  <actions>
+                    <!--Antigone - Price Dumping-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Price_Dumping'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.veryeasy,
+                           $SubMissionLib = PIONEERS_GUILD_Price_Dumping_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Price_Dumping_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Price_Dumping_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Price_Dumping_Construct_Reward,
+                           $MinMissions = 4,
+                           $MaxMissions = 5,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Price_Dumping_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$find_resources"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Find_Resources__Standard,  $MissionType = missiontype.trade, $Page = 30208, $TextOffset = [100000, 100100], $Sequence = -1 ]"/>
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Price_Dumping_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,6000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Price_Dumping_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,6101}"/>
+                      <set_value name="this.$Description" exact="{30208,6102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,6111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,6112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Price_Dumping_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_extendedfuelcontainer, ware.modpart_nividiumoxide, ware.modpart_enginefuelinjector_t1, ware.modpart_enginefuelinjector_t2].random]" weight="15" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[ware.modpart_extendedfuelcontainer, ware.modpart_nividiumoxide, [ware.modpart_enginefuelinjector_t1, ware.modpart_enginefuelinjector_t2].random]" weight="15" comment="complete mod"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_enginefuelinjector_t3].random]" weight="5" comment="rare modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="15"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_3, ware.inv_seminar_piloting_3, ware.inv_seminar_management_3].random]" weight="4"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_4, ware.inv_seminar_management_4].random]" weight="1"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Setup_Satellites">
+              <cues>
+                <cue name="PIONEERS_GUILD_Setup_Satellites_Register">
+                  <actions>
+                    <!--Antigone - Setup satellites-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Setup_Satellites'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.veryeasy,
+                           $SubMissionLib = PIONEERS_GUILD_Setup_Satellites_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Setup_Satellites_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Setup_Satellites_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Setup_Satellites_Construct_Reward,
+                           $MinMissions = 4,
+                           $MaxMissions = 5,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Setup_Satellites_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$achieve_coverage"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Achieve_Coverage__Standard, $MissionType = missiontype.intelligence, $Page = 30208, $TextOffset = [103000], $Sequence = -1 ]"/>
+                    <set_value name="$Submissions.$deploy_satellite"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.DeployInPlace__Standard,    $MissionType = missiontype.intelligence, $Page = 30208, $TextOffset = [104000], $Sequence = -1 ]"/>
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Setup_Satellites_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,7000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Setup_Satellites_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,7101}"/>
+                      <set_value name="this.$Description" exact="{30208,7102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,7111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,7112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Setup_Satellites_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_nividiumcrystallite, ware.modpart_shipnanoweave_t1].random]" weight="18" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_extendedfuelcontainer, ware.modpart_nividiumoxide, ware.modpart_enginefuelinjector_t1].random]" weight="18" comment="modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="18"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_3, ware.inv_seminar_piloting_3, ware.inv_seminar_management_3].random]" weight="5"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Maintain_Satellites">
+              <cues>
+                <cue name="PIONEERS_GUILD_Maintain_Satellites_Register">
+                  <actions>
+                    <!--Antigone - Maintain satellites-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Maintain_Satellites'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Always],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.veryeasy,
+                           $SubMissionLib = PIONEERS_GUILD_Maintain_Satellites_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Maintain_Satellites_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Maintain_Satellites_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Maintain_Satellites_Construct_Reward,
+                           $MinMissions = 2,
+                           $MaxMissions = 3,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Maintain_Satellites_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$repair_object"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.RepairObject__Standard, $MissionType = missiontype.repair, $Page = 30208, $TextOffset = [105000], $Sequence = -1 ]"/>
+                    <!--<set_value name="$Submissions.$repair_dataleak"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.RepairObject__Standard, $MissionType = missiontype.repair, $Page = 30208, $TextOffset = [105100], $Sequence = -1 ]"/>-->
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Maintain_Satellites_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,8000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Maintain_Satellites_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,8101}"/>
+                      <set_value name="this.$Description" exact="{30208,8102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,8111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,8112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Maintain_Satellites_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_extendedfuelcontainer, ware.modpart_nividiumoxide, ware.modpart_nividiumcrystallite].random]" weight="45" comment="common modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="45"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="PIONEERS_GUILD_Danger_Area">
+              <cues>
+                <cue name="PIONEERS_GUILD_Danger_Area_Register">
+                  <actions>
+                    <!--Antigone - Danger Area-->
+                    <set_value name="$ThreadID" exact="'$PIONEERS_GUILD_Danger_Area'"/>
+                    <set_value name="$Thread" exact="table[
+                           $ID = $ThreadID,
+                           $Faction = $Faction,
+                           $MissionGroup = $MissionGroup,
+                           $ThreadConditionLibs = [md.X4Ep1_Trade_Subscriptions.Situation__Dangerous_Area],
+                           $ThreadType = 'sequential',
+                           $MissionType = missiontype.trade,
+                           $Difficulty = level.medium,
+                           $SubMissionLib = PIONEERS_GUILD_Danger_Area_Get_Submissions,
+                           $NameLib = PIONEERS_GUILD_Danger_Area_Construct_Name,
+                           $DescriptionLib = PIONEERS_GUILD_Danger_Area_Construct_Description,
+                           $RewardLib = PIONEERS_GUILD_Danger_Area_Construct_Reward,
+                           $MinMissions = 4,
+                           $MaxMissions = 5,
+                           $ThreadAbortRelation = -0.00064]"/>
+
+                    <assert value="not $ManagerCue.$ThreadDefinitions.{$ThreadID}?" text="'Thread definition ' + $ThreadID + ' already exists in this table [Owen]'"/>
+                    <set_value name="$ManagerCue.$ThreadDefinitions.{$ThreadID}" exact="$Thread"/>
+                  </actions>
+                </cue>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Danger_Area_Get_Submissions">
+                  <actions>
+                    <set_value name="$Submissions" exact="table[]"/>
+                    <set_value name="$Submissions.$assisted_task"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.Assisted_Task__Standard, $MissionType = missiontype.find, $Page = 30231, $TextOffset = [30100] ]"/>
+                    <set_value name="$Submissions.$find_object"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.FindObject__Standard, $MissionType = missiontype.find, $Page = 30208, $TextOffset = [106000] ]"/>
+                    <set_value name="$Submissions.$resource_lasertowers"
+                                 exact="table[$Cue = md.X4Ep1_Trade_Subscriptions.DeployInPlace__Standard,    $MissionType = missiontype.intelligence, $Page = 30208, $TextOffset = [104100] ]"/>
+
+                    <set_value name="$New_Thread.$Submissions" exact="$Submissions"/>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Danger_Area_Construct_Name">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Name" exact="{30208,9000}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <!--Called from CalculateThreads where several values are set to help decide the briefing text. Result saved to $New_Thread. Namespace is not this parent.-->
+                <library name="PIONEERS_GUILD_Danger_Area_Construct_Description">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Description" exact="{30208,9101}"/>
+                      <set_value name="this.$Description" exact="{30208,9102}"/>
+                    </do_any>
+
+                    <do_any>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,9111}"/>
+                      <set_value name="this.$Description" operation="add" exact="'\n' + {30208,9112}"/>
+                    </do_any>
+                  </actions>
+                </library>
+
+                <library name="PIONEERS_GUILD_Danger_Area_Construct_Reward">
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0113]" weight="15" comment="special pioneers trade subscription paint"/>
+                      <set_value name="this.$RewardObject" exact="[ware.paintmod_0122]" weight="15" comment="basic pioneers faction paint"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_nividiumcrystallite, ware.modpart_shipnanoweave_t1].random]" weight="25" comment="low modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.modpart_extendedfuelcontainer, ware.modpart_nividiumoxide, ware.modpart_enginefuelinjector_t1].random]" weight="25" comment="low modpart"/>
+                      <set_value name="this.$RewardObject" exact="[[ware.inv_seminar_piloting_2, ware.inv_seminar_piloting_2, ware.inv_seminar_management_2].random]" weight="25"/>
+                    </do_any>
+                    <run_actions ref="md.LIB_Generic.GenerateRewardText" result="this.$RewardText">
+                      <param name="RewardObject" value="this.$RewardObject"/>
+                    </run_actions>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+
+          </cues>
+        </cue>
+
+
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

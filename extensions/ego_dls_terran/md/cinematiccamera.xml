@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="//cue[@name='StationPeaceful_Dockarea']/actions/do_elseif[@value='@$DockareaMacroPatchMarker']" pos="after">
+    <do_elseif value="$DockingArea.macro.ismacro.[macro.dockarea_ter_m_station_01_hightech_macro]">
+      <do_any>
+        <do_all>
+          <set_value name="$PositionBox" exact="table[
+                                      $neg_x = 218m,
+                                      $pos_x = 233m,
+                                      $neg_y = 69m,
+                                      $pos_y = 104m,
+                                      $neg_z = -161m,
+                                      $pos_z = 168m,
+                                      ]"/>
+          <set_value name="$LookAtTargetTypes" exact="['npc', class.ship_s, 'dockingbay']"/>
+        </do_all>
+        <do_all>
+          <set_value name="$PositionBox" exact="table[
+                                      $neg_x = 34m,
+                                      $pos_x = 60m,
+                                      $neg_y = 30m,
+                                      $pos_y = 40m,
+                                      $neg_z = 62m,
+                                      $pos_z = 93m,
+                                      ]"/>
+          <set_value name="$LookAtTargetTypes" exact="['npc', class.ship_s, 'dockingbay']"/>
+        </do_all>
+        <do_all>
+          <set_value name="$PositionBox" exact="table[
+                                      $neg_x = -122m,
+                                      $pos_x = 112m,
+                                      $neg_y = 87m,
+                                      $pos_y = 156m,
+                                      $neg_z = 529m,
+                                      $pos_z = 573m,
+                                      ]"/>
+          <set_value name="$LookAtTargetTypes" exact="[class.ship_m, 'dockingbay']"/>
+        </do_all>
+      </do_any>
+    </do_elseif>
+    <do_elseif value="$DockingArea.macro.ismacro.[macro.buildmodule_ter_ships_m_dockarea_01_macro, macro.buildmodule_ter_equip_m_dockarea_01_macro]">
+      <do_any>
+        <do_all>
+          <set_value name="$PositionBox" exact="table[
+                                      $neg_x = -202m,
+                                      $pos_x = 180m,
+                                      $neg_y = -26m,
+                                      $pos_y = -12m,
+                                      $neg_z = -135m,
+                                      $pos_z = -126m,
+                                      ]"/>
+          <set_value name="$LookAtTargetTypes" exact="['npc', class.ship_s, class.ship_m, 'dockingbay']"/>
+        </do_all>
+        <do_all>
+          <set_value name="$PositionBox" exact="table[
+                                      $neg_x = -11m,
+                                      $pos_x = 2m,
+                                      $neg_y = -75m,
+                                      $pos_y = -61m,
+                                      $neg_z = -111m,
+                                      $pos_z = 107m,
+                                      ]"/>
+          <set_value name="$LookAtTargetTypes" exact="['npc', class.ship_m, 'dockingbay']"/>
+        </do_all>
+      </do_any>
+    </do_elseif>
+  </add>
+  <add sel="//cue[@name='CinematicCameraManager']/actions/do_if[@value='@$HomeSystemsPatchMarker']" pos="after">
+    <append_list_elements name="$HomeSystems" other="[
+               table[$Owner = faction.pioneers, $System = macro.cluster_113_macro, $RaceSystem = false],
+               table[$Owner = faction.terran, $System = macro.cluster_104_macro, $RaceSystem = true],
+               ]"/>
+  </add>
+
+</diff>

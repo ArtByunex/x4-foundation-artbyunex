@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2025-07-24 15:20:45-->
+<components>
+  <component name="room_gen_crewquarter_01" class="room">
+    <source geometry="assets\interiors\rooms\room_gen_crewquarter_01_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="ego_point_01_01" shadow="0" r="148" g="200" b="255" intensity="1.642141" specularintensity="1" range="2.57" shadowrange="2.57" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="0" y="1.527102" z="-1.461226" />
+            </offset>
+          </omni>
+          <omni name="ego_point_02_01" shadow="0" r="255" g="182" b="148" intensity="1.164824" specularintensity="1" range="2.57" shadowrange="2.57" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="-2.465724" y="0.9915888" z="-2.059328" />
+            </offset>
+          </omni>
+          <arealight name="ego_area_01_01" areax="2.2674" areay="0.2303" radius="0" spotattenuation="0.5855" shadow="0" r="160" g="215" b="255" intensity="1.790654" specularintensity="1" range="4" shadowrange="4" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="0" y="2.567955" z="-1.461226" />
+              <quaternion qx="0" qy="-0.7071068" qz="0" qw="-0.7071067" />
+            </offset>
+          </arealight>
+          <arealight name="ego_area_02_01" areax="1.5275" areay="0.2376" radius="0" spotattenuation="0.7355" shadow="0" r="255" g="220" b="197" intensity="1.790654" specularintensity="1" range="4" shadowrange="4" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="2.351495" y="2.578469" z="-2.004184" />
+            </offset>
+          </arealight>
+          <arealight name="ego_area_02_02" areax="1.5275" areay="0.2376" radius="0" spotattenuation="0.7355" shadow="0" r="255" g="220" b="197" intensity="1.790654" specularintensity="1" range="4" shadowrange="4" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="-2.351494" y="2.578469" z="-2.004184" />
+            </offset>
+          </arealight>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_room_snap_01" group=" " tags="component room_snap " />
+      <connection name="ConnectionForanim_door_01" group="anim_door_01" tags="animation detail_l forceoutline part platformcollision trigger_nearby walk_exclude walk_ignoreanimation ">
+        <offset>
+          <position x="1.198594" y="1.119609" z="-2.002625" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_door_01_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_door_01_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_door_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.03000855" y="1.116656" z="1.033135" />
+              <center x="0" y="0" z="-0.4970617" />
+            </size>
+            <sounds>
+              <sound name="sfx_door_01_close" ref="diplomacy_ship_doors_crewquarters_close">
+                <offset>
+                  <position x="-0.005429387" y="0.4140526" z="-0.01589084" />
+                </offset>
+              </sound>
+              <sound name="sfx_door_01_open" ref="diplomacy_ship_doors_crewquarters_open">
+                <offset>
+                  <position x="-0.005429387" y="0.4440526" z="-0.01589084" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_door_02" group="anim_door_02" tags="animation detail_l forceoutline part platformcollision trigger_nearby walk_exclude walk_ignoreanimation ">
+        <offset>
+          <position x="-1.198594" y="1.119609" z="-2.012971" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_door_02_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_door_02_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_door_02">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.03000855" y="1.116656" z="1.027979" />
+              <center x="0" y="0" z="-0.4919059" />
+            </size>
+            <sounds>
+              <sound name="sfx_door_02_close" ref="diplomacy_ship_doors_crewquarters_close">
+                <offset>
+                  <position x="0.01041007" y="0.3194431" z="0.01407266" />
+                </offset>
+              </sound>
+              <sound name="sfx_door_02_open" ref="diplomacy_ship_doors_crewquarters_open">
+                <offset>
+                  <position x="0.01041007" y="0.2894431" z="0.01407266" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_locker_01" group="anim_locker_01" tags="animation detail_l forceoutline part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="1.104493" y="1.184488" z="-0.2810912" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_01" />
+              <sound ref="sfx_locker_01_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_02" />
+              <sound ref="sfx_locker_02_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_locker_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.02102387" y="0.8078626" z="0.2124812" />
+              <center x="0.006052613" y="-0.0001665354" z="-0.2102719" />
+            </size>
+            <sounds>
+              <sound name="sfx_locker_01_open" ref="diplomacy_ship_doors_crewquarters_locker_open">
+                <offset>
+                  <position x="-0.003317595" y="0.05832505" z="-0.2199199" />
+                </offset>
+              </sound>
+              <sound name="sfx_locker_02_close001" ref="diplomacy_ship_doors_crewquarters_locker_close">
+                <offset>
+                  <position x="-0.003317595" y="0.02832508" z="-0.2199199" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_locker_02" group="anim_locker_02" tags="animation detail_l forceoutline part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="1.104493" y="1.186558" z="-0.8474441" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_02_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_02_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_locker_02">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.02102387" y="0.8078626" z="0.2124812" />
+              <center x="0.006052613" y="-0.0001665354" z="-0.210272" />
+            </size>
+            <sounds>
+              <sound name="sfx_locker_02_close" ref="diplomacy_ship_doors_crewquarters_locker_close">
+                <offset>
+                  <position x="-0.003296733" y="0.02910101" z="-0.2058102" />
+                </offset>
+              </sound>
+              <sound name="sfx_locker_02_open" ref="diplomacy_ship_doors_crewquarters_locker_open">
+                <offset>
+                  <position x="-0.003296733" y="0.06910098" z="-0.2058102" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_locker_03" group="anim_locker_03" tags="animation detail_l forceoutline part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-1.104493" y="1.186558" z="-0.8474437" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_03_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_03_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_locker_03">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.02102387" y="0.8078626" z="0.2124812" />
+              <center x="-0.006052613" y="-0.0001665354" z="-0.210272" />
+            </size>
+            <sounds>
+              <sound name="sfx_locker_03_close" ref="diplomacy_ship_doors_crewquarters_locker_close">
+                <offset>
+                  <position x="0.003312945" y="0.0202086" z="-0.1835204" />
+                </offset>
+              </sound>
+              <sound name="sfx_locker_03_open" ref="diplomacy_ship_doors_crewquarters_locker_open">
+                <offset>
+                  <position x="0.003312945" y="0.04020858" z="-0.1835204" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_locker_04" group="anim_locker_04" tags="animation detail_l forceoutline part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-1.104493" y="1.184488" z="-0.2810909" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_04_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_04_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_locker_04">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.02102387" y="0.8078626" z="0.2124812" />
+              <center x="-0.006052613" y="-0.0001665354" z="-0.2102719" />
+            </size>
+            <sounds>
+              <sound name="sfx_locker_04_close" ref="diplomacy_ship_doors_crewquarters_locker_close">
+                <offset>
+                  <position x="0.003302574" y="0.03668499" z="-0.179417" />
+                </offset>
+              </sound>
+              <sound name="sfx_locker_04_open" ref="diplomacy_ship_doors_crewquarters_locker_open">
+                <offset>
+                  <position x="0.003302574" y="0.05668497" z="-0.179417" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_shower" group="anim_shower" tags="animation geometryinvisible nocollision part ">
+        <offset>
+          <position x="-6.212e-07" y="0.1301033" z="-3.814971" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="32" startsound="1">
+            <sounds>
+              <sound ref="sfx_shower_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="32" end="33" />
+          <animation name="deactivating" start="33" end="61" startsound="1">
+            <sounds>
+              <sound ref="sfx_shower_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_shower">
+            <lods>
+              <lod index="0">
+                <materials />
+              </lod>
+            </lods>
+            <size>
+              <max x="0.3145543" y="1.116074" z="0.3145542" />
+              <center x="2.04e-07" y="1.003798" z="0" />
+            </size>
+            <sounds>
+              <sound name="sfx_shower_close" ref="diplomacy_ship_doors_crewquarters_shower_close">
+                <offset>
+                  <position x="-0.04668595" y="1.254017" z="1.002628" />
+                </offset>
+              </sound>
+              <sound name="sfx_shower_open" ref="diplomacy_ship_doors_crewquarters_shower_open">
+                <offset>
+                  <position x="-0.04668595" y="1.224017" z="1.002628" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_showerButton" group="anim_shower" tags="detail_xl forceoutline part platformcollision trigger_interact ui ">
+        <offset>
+          <position x="-0.6377267" y="1.235499" z="-2.919507" />
+        </offset>
+        <parts>
+          <part name="anim_showerButton">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.1336331" y="0.2196687" z="0.1636677" />
+              <center x="-0.01865904" y="0.0330185" z="-0.1031868" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_l_main" tags="detail_l nocollision part ">
+        <offset>
+          <position x="-3.232e-07" y="1.228483" z="-1.987236" />
+          <quaternion qx="0" qy="-0.7071068" qz="0" qw="-0.7071067" />
+        </offset>
+        <parts>
+          <part name="detail_l_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                  <material id="3" ref="p2paint.pnt_p2_logo_01" />
+                  <material id="4" ref="p2argon.arg_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.744627" y="1.075533" z="3.80718" />
+              <center x="0.01538959" y="-0.1314545" z="0" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_main" tags="detail_m nocollision part ">
+        <offset>
+          <position x="-3.232e-07" y="1.228483" z="-1.987236" />
+          <quaternion qx="0" qy="-0.7071068" qz="0" qw="-0.7071067" />
+        </offset>
+        <parts>
+          <part name="detail_m_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_decal_01" />
+                  <material id="2" ref="p2argon.arg_p2_decal_01" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                  <material id="4" ref="p2paint.pnt_p2_logo_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.866923" y="1.326312" z="3.825217" />
+              <center x="0.1184824" y="0.04116172" z="3.576e-07" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_s_main" tags="detail_s nocollision part ">
+        <offset>
+          <position x="-3.232e-07" y="1.228483" z="-1.987236" />
+          <quaternion qx="0" qy="-0.7071068" qz="0" qw="-0.7071067" />
+        </offset>
+        <parts>
+          <part name="detail_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_glassinterior_01" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                  <material id="4" ref="p2natural.nat_p2_foliage_01" />
+                  <material id="5" ref="p2paint.pnt_p2_logo_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.939815" y="0.2990479" z="3.310384" />
+              <center x="0.03428227" y="-0.3124957" z="-0.04905462" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_main" tags="forceoutline part platformcollision ">
+        <offset>
+          <position x="-3.232e-07" y="1.228483" z="-1.987236" />
+        </offset>
+        <parts>
+          <part name="part_main" wreck="part_main_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="4" ref="p2generic.gen_p2_woodplanks_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="4" ref="p2generic.gen_p2_woodplanks_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="4" ref="p2generic.gen_p2_woodplanks_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.834736" y="1.401818" z="1.987236" />
+              <center x="-5.96e-08" y="0.07430547" z="0" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_showerR_01" group="anim_shower" tags="animation detail_xl forceoutline iklink part platformcollision walk_ignoreanimation " parent="anim_shower">
+        <offset>
+          <position x="0" y="-1.49e-08" z="4.768e-07" />
+        </offset>
+        <parts>
+          <part name="anim_showerR_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.1761787" y="1.140093" z="0.1256274" />
+              <center x="-0.5260304" y="0.9797789" z="0.8211949" />
+            </size>
+            <offset>
+              <position x="0" y="0" z="2.384e-07" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_showerL" group="anim_shower" tags="animation detail_l detail_xl forceoutline iklink part platformcollision walk_ignoreanimation " parent="anim_shower">
+        <offset>
+          <position x="0" y="-1.49e-08" z="4.768e-07" />
+        </offset>
+        <parts>
+          <part name="anim_showerL">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.1830354" y="1.140094" z="0.08747494" />
+              <center x="0.3949629" y="0.9797794" z="0.886647" />
+            </size>
+            <offset>
+              <position x="0" y="0" z="2.384e-07" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_showerR_02" group="anim_shower" tags="animation detail_xl forceoutline iklink part platformcollision walk_ignoreanimation " parent="anim_showerR_01">
+        <parts>
+          <part name="anim_showerR_02">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_02_e" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02_c" />
+                  <material id="3" ref="p2multimat.p2_multimat_01" />
+                  <material id="4" ref="p2argon.arg_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.2887186" y="1.140094" z="0.05165124" />
+              <center x="-0.07664997" y="0.9797795" z="0.9601555" />
+            </size>
+            <offset>
+              <position x="0" y="-1.49e-08" z="0" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_npc_sit_03" group=" " tags="npc npc_generic sit " value="-1">
+        <offset>
+          <position x="2.242548" y="-0.05711222" z="-2.573919" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForpart_shadowcatcher" tags="detail_xs fx nocollision part ">
+        <parts>
+          <part name="part_shadowcatcher">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.863986" y="1.452061" z="1.990975" />
+              <center x="0.002925634" y="1.291892" z="-2.000975" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

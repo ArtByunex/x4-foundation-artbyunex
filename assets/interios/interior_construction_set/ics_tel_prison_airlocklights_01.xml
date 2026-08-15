@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ics_tel_prison_airlocklights_01" class="destructible">
+		<properties>
+			<hull max="0"/>
+		</properties>
+		<source geometry="assets\interiors\interior_construction_set\ics_tel_prison_airlocklights_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part nocollision forceoutline ">
+				<offset/>
+				<parts>
+					<part name="part_holder">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.163029E-02" y="0.2097806" z="1.921461"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation nocollision forceoutline ">
+				<offset/>
+				<animations>
+					<animation name="deactivated" start="0" end="30"/>
+					<animation name="activating" start="30" end="31"/>
+					<animation name="active" start="31" end="60"/>
+					<animation name="deactivating" start="60" end="61"/>
+				</animations>
+				<parts>
+					<part name="part_lightbulb">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.163029E-02" y="0.2097805" z="1.864771"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="2.163029E-02" y="0.2097805" z="1.864771"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="30" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="31" value="-0.79" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="60" value="-0.79" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="61" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

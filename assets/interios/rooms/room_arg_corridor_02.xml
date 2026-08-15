@@ -1,0 +1,502 @@
+<?xml version="1.0"?>
+<components>
+	<component name="room_arg_corridor_02" class="room">
+		<source geometry="assets\interiors\rooms\room_arg_corridor_02_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni_001" shadow="0" r="255" g="189" b="156" range="6" shadowrange="6" lighteffect="1" trigger="1" intensity="1.3" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0.6921411" y="1.788748" z="8.182025E-02"/>
+							<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni_002" shadow="0" r="193" g="231" b="255" range="8" shadowrange="8" lighteffect="1" trigger="1" intensity="1.5" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="-3.603062" y="4.805407" z="6.573346"/>
+							<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni_003" shadow="0" r="255" g="189" b="156" range="6" shadowrange="6" lighteffect="1" trigger="1" intensity="1.3" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0.6921411" y="1.788748" z="-8.552523"/>
+							<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni_004" shadow="0" r="255" g="189" b="156" range="10" shadowrange="10" lighteffect="1" trigger="1" intensity="0.6" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="-3.337044" y="1.365253" z="-4.758614"/>
+							<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+						</offset>
+					</omni>
+					<arealight name="XU AreaLight_001" areax="0.1" areay="10" radius="0" r="188" g="223" b="255" lighteffect="1" range="8" spotattenuation="0.5" specularintensity="1" trigger="1" intensity="1.2">
+						<lightanimations/>
+						<offset>
+							<position x="-4.949908" y="5.926731" z="3.745217"/>
+							<quaternion qx="-0" qy="-0" qz="0.3420202" qw="-0.9396926"/>
+						</offset>
+					</arealight>
+					<arealight name="XU AreaLight_002" areax="0.1" areay="10" radius="0" r="188" g="223" b="255" lighteffect="1" range="8" spotattenuation="0.5" specularintensity="1" trigger="1" intensity="1.2">
+						<lightanimations/>
+						<offset>
+							<position x="-2.593973" y="5.926731" z="3.745217"/>
+							<quaternion qx="-0" qy="-0" qz="-0.3420201" qw="-0.9396926"/>
+						</offset>
+					</arealight>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="room">
+				<offset/>
+			</connection>
+			<connection name="Connection01" group="transporter_02 " tags="part optional  ">
+				<offset>
+					<position x="1.242528" y="1.094456" z="-5.013546"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="1.947072E-07"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.part_main" name="part_main_01"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part iklink  " parent="part_main_01">
+				<offset>
+					<position x="0" y="5.153775E-02" z="3.353643E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals" name="detail_m_decals"/>
+				</parts>
+			</connection>
+			<connection name="Connection03" group="transporter_02" tags="part animation  ">
+				<offset>
+					<position x="0.6845566" y="1.087612" z="-6.158687"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="1.947072E-07"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.anim_door_left" name="anim_door_left"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection04" tags="part iklink  " parent="anim_door_left">
+				<offset>
+					<position x="-0.4329364" y="3.161669E-03" z="-8.512211E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals_left" name="detail_m_decals_left"/>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part nocollision iklink  " parent="anim_door_left">
+				<offset>
+					<position x="6.043839E-02" y="9.536743E-07" z="-2.48909E-04"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_light_left" name="detail_m_light_left"/>
+				</parts>
+			</connection>
+			<connection name="Connection06" group="transporter_02" tags="part animation  ">
+				<offset>
+					<position x="1.778613" y="1.08722" z="-6.158688"/>
+					<quaternion qx="-1.702184E-14" qy="-1" qz="-8.742278E-08" qw="1.947072E-07"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.anim_door_right" name="anim_door_right"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection07" tags="part iklink  " parent="anim_door_right">
+				<offset>
+					<position x="0.4321223" y="3.553152E-03" z="-8.512211E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals_right" name="detail_m_decals_right"/>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part nocollision iklink  " parent="anim_door_right">
+				<offset>
+					<position x="-6.110048E-02" y="3.926754E-04" z="-2.503395E-04"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_light_right" name="detail_m_light_right"/>
+				</parts>
+			</connection>
+			<connection name="Connection09" group="transporter_02" tags="part detail_l  ">
+				<offset>
+					<position x="2.308333E-02" y="1.120867" z="-4.920154"/>
+					<quaternion qx="-0" qy="-0.7071066" qz="-0" qw="-0.7071069"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_l_button" name="detail_l_button"/>
+				</parts>
+			</connection>
+			<connection name="Connection10" group="transporter_02" tags="part  ">
+				<offset>
+					<position x="1.230104" y="2.230586" z="-5.903327"/>
+					<quaternion qx="-1.271071E-07" qy="-0.7098361" qz="-0.7043669" qw="1.481711E-07"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.dummy_sound_animation" name="dummy_sound_animation"/>
+				</parts>
+			</connection>
+			<connection name="Connection11" group="transporter_01 " tags="part animation  ">
+				<offset>
+					<position x="-4.278507" y="4.079657" z="10.75494"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="3.139165E-07"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.anim_door_left" name="anim_door_left001"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection12" tags="part iklink  " parent="anim_door_left001">
+				<offset>
+					<position x="-0.4329357" y="3.16143E-03" z="-8.512211E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals_left" name="detail_m_decals_left001"/>
+				</parts>
+			</connection>
+			<connection name="Connection13" tags="part nocollision iklink  " parent="anim_door_left001">
+				<offset>
+					<position x="6.043863E-02" y="9.536743E-07" z="-2.48909E-04"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_light_left" name="detail_m_light_left001"/>
+				</parts>
+			</connection>
+			<connection name="Connection14" group="transporter_01 " tags="part animation  ">
+				<offset>
+					<position x="-3.18445" y="4.079265" z="10.75494"/>
+					<quaternion qx="-2.744345E-14" qy="-1" qz="-8.742278E-08" qw="3.139165E-07"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.anim_door_right" name="anim_door_right001"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection15" tags="part iklink  " parent="anim_door_right001">
+				<offset>
+					<position x="0.4321229" y="3.553391E-03" z="-8.512402E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals_right" name="detail_m_decals_right001"/>
+				</parts>
+			</connection>
+			<connection name="Connection16" tags="part nocollision iklink  " parent="anim_door_right001">
+				<offset>
+					<position x="-6.110048E-02" y="3.929138E-04" z="-2.498627E-04"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_light_right" name="detail_m_light_right001"/>
+				</parts>
+			</connection>
+			<connection name="Connection17" group="transporter_01 " tags="part detail_l  ">
+				<offset>
+					<position x="-4.93998" y="4.112911" z="11.99117"/>
+					<quaternion qx="-0" qy="-0.7071066" qz="-0" qw="-0.7071069"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_l_button" name="detail_l_button001"/>
+				</parts>
+			</connection>
+			<connection name="Connection18" group="transporter_01 " tags="part  ">
+				<offset>
+					<position x="-3.732959" y="5.222631" z="11.0103"/>
+					<quaternion qx="-2.114007E-07" qy="-0.7098361" qz="-0.7043669" qw="2.324662E-07"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.dummy_sound_animation" name="dummy_sound_animation001"/>
+				</parts>
+			</connection>
+			<connection name="Connection19" group="transporter_01 " tags="part optional  ">
+				<offset>
+					<position x="-3.720535" y="4.086501" z="11.90009"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="3.139165E-07"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.part_main" name="part_main_02"/>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection20" tags="part iklink  " parent="part_main_02">
+				<offset>
+					<position x="0" y="5.153751E-02" z="3.353691E-02"/>
+				</offset>
+				<parts>
+					<part ref="interiors_arg_airlock_01_body.detail_m_decals" name="detail_m_decals001"/>
+				</parts>
+			</connection>
+			<connection name="Connection21" group="door_02 " tags="part animation nocollision detail_xl walk_exclude door trigger_nearby ">
+				<offset>
+					<position x="3.248886" y="1.3" z="0"/>
+					<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+				</offset>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="20"/>
+					<animation name="active" start="20" end="20"/>
+					<animation name="deactivating" start="20" end="40" startsound="1"/>
+				</animations>
+				<parts>
+					<part name="fx_decals_door_002">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.8488881" y="2.399045" z="0.2120931"/>
+							<center x="0" y="1.265308" z="0"/>
+						</size>
+						<size_raw>
+							<max x="0.8488881" y="1.10986" z="0.2120931"/>
+							<center x="0" y="-2.387691E-02" z="0"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter_airlock_close_002" ref="anim_airlock_close_01">
+								<offset>
+									<position x="0.1217437" y="1.430511E-06" z="-4.044241E-02"/>
+									<quaternion qx="-0.7071068" qy="-3.062662E-07" qz="-0.7071068" qw="3.062661E-07"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection22" group="door_02 " tags="part animation platformcollision detail_xl walk_exclude door trigger_nearby ">
+				<offset>
+					<position x="3.248886" y="1.3" z="0"/>
+					<quaternion qx="1.125737E-14" qy="0.7071066" qz="1.125737E-14" qw="-0.7071069"/>
+				</offset>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="20" startsound="1"/>
+					<animation name="active" start="20" end="20"/>
+					<animation name="deactivating" start="20" end="40"/>
+				</animations>
+				<parts>
+					<part name="detail_xl_door_02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.062187" y="2.603653" z="0.2560349"/>
+							<center x="0" y="1.263386" z="-1.192093E-07"/>
+						</size>
+						<size_raw>
+							<max x="1.062187" y="1.314468" z="0.2560348"/>
+							<center x="0" y="-2.579939E-02" z="0"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter_airlock_open_002" ref="anim_airlock_open_01">
+								<offset>
+									<position x="0" y="0" z="9.35544E-15"/>
+									<quaternion qx="1.125737E-14" qy="0.7071067" qz="1.125737E-14" qw="-0.7071068"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection23" tags="part iklink detail_xl nocollision animation textureanimation forceoutline  " group="door_02 " parent="detail_xl_door_02">
+				<animations>
+					<animation name="unlocked" start="1" end="1"/>
+					<animation name="locking" start="1" end="20"/>
+					<animation name="locked" start="20" end="20"/>
+					<animation name="unlocking" start="20" end="40"/>
+				</animations>
+				<parts>
+					<part name="anim_door_light_02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+									<material id="2" ref="p1.multimat"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.3257906" y="1.47912" z="9.754157E-02"/>
+							<center x="0" y="1.293042" z="0"/>
+						</size>
+						<size_raw>
+							<max x="0.3257906" y="0.1860772" z="9.754141E-02"/>
+							<center x="0" y="3.857136E-03" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="20" value="-0.3" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="40" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection24" tags="part platformcollision  ">
+				<offset>
+					<position x="-1.709104" y="3.051864" z="0"/>
+				</offset>
+				<parts>
+					<part name="part_corridor" wreck="part_corridor_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+									<material id="2" ref="generic.generic_p1_fx"/>
+									<material id="3" ref="generic.generic_p1_int_lights_01"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+									<material id="2" ref="generic.generic_p1_fx"/>
+									<material id="3" ref="generic.generic_p1_int_lights_01"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+									<material id="2" ref="generic.generic_p1_fx"/>
+									<material id="3" ref="generic.generic_p1_int_lights_01"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.76344" y="3.148135" z="10.60057"/>
+							<center x="-2.384186E-07" y="0" z="0.155684"/>
+						</size>
+						<sounds>
+							<sound name="room_arg_corridor_02_console_01" ref="arg_corridor_04_console">
+								<offset>
+									<position x="-5.290896" y="-2.051864" z="-4.499807"/>
+								</offset>
+							</sound>
+							<sound name="room_arg_corridor_02_console_02" ref="arg_corridor_04_console">
+								<offset>
+									<position x="1.709104" y="-2.051864" z="-5"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection25" tags="part detail_m nocollision  ">
+				<offset>
+					<position x="-3.7125" y="1.147975" z="0.7175906"/>
+				</offset>
+				<parts>
+					<part name="detail_m_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1natural.p1_foliage_02"/>
+									<material id="2" ref="p1effects.fx_p1_holo_01"/>
+									<material id="3" ref="p1interiors.p1_glass_interior_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.661023" y="1.078723" z="5.558357"/>
+							<center x="0" y="0" z="-2.384186E-07"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection26" tags="part platformcollision  ">
+				<offset>
+					<position x="-1.709104" y="3.051864" z="0"/>
+				</offset>
+				<parts>
+					<part name="part_shadwocaster">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.676867" y="3.699527" z="11.99286"/>
+							<center x="-0.1206473" y="4.868031E-03" z="1.581304"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection27" tags="part nocollision detail_m ">
+				<offset>
+					<position x="-2.034803" y="2.981736" z="-2.893429E-02"/>
+				</offset>
+				<parts>
+					<part name="fx_decals">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+									<material id="2" ref="generic.generic_p1_int_lights_01"/>
+									<material id="3" ref="p1.multimat"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.044607" y="3.012547" z="9.989444"/>
+							<center x="1.192093E-06" y="0" z="-1.918525E-07"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_player01" value="-1" tags="player">
+				<offset>
+					<position x="0" y="6.352682" z="0"/>
+					<quaternion qx="0.5" qy="0.5" qz="0.5" qw="-0.5000001"/>
+				</offset>
+			</connection>
+			<connection name="con_npc_stand_001" group="transporter_02 " tags="npc_waypoint stand npctransport ">
+				<offset>
+					<position x="1.230223" y="1.107062E-02" z="-5.007096"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="-4.887621E-07"/>
+				</offset>
+			</connection>
+			<connection name="con_npc_stand_002" group="transporter_01 " tags="npc_waypoint stand npctransport ">
+				<offset>
+					<position x="-3.769865" y="3.003116" z="11.99301"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="-4.887621E-07"/>
+				</offset>
+			</connection>
+			<connection name="con_room_01" group="door_02" tags="room_snap ">
+				<offset>
+					<position x="3.752736" y="0" z="0"/>
+					<quaternion qx="-0" qy="0.7071068" qz="-0" qw="-0.7071067"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

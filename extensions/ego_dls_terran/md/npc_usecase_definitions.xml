@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  
+  <!--*** Story_Covert_Operations_Final_Briefing ***-->
+
+  <add sel="/mdscript/cues/library[@name='AddUseCaseDefs']/actions">
+    
+    <!-- Covert Ops Briefing Scene 1 -->
+    <signal_cue_instantly cue="AddUseCaseDef" param="table[ $name = '$CovOps_Briefing_Scene_1',
+            $priority = 100, $chance = 100, $voiceover = true,
+            $locations = [ '$Bridge' ],
+            $actors = [
+              table[ $name = '$SecretServiceActor', $location = '$Bridge' ],
+              table[ $name = '$ScalePlateActor', $location = '$Bridge' ],
+            ],
+            $script = [
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227501, $lookat = 'player' ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227502 ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227503 ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227504 ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227505 ],
+              1s,
+              table[ $actor = '$SecretServiceActor',  $recipient = '$ScalePlateActor', $speak = 30227506, $lookat = '$ScalePlateActor' ],
+              table[ $actor = '$SecretServiceActor',  $recipient = '$ScalePlateActor', $speak = 30227507, ],
+              1s,
+              table[ $actor = '$ScalePlateActor',  $recipient = '$SecretServiceActor', $speak = 30227501, $lookat = '$SecretServiceActor' ],
+              table[ $actor = '$ScalePlateActor',  $recipient = '$SecretServiceActor', $speak = 30227502, $lookat = 'player' ],
+              1s,
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227508, $lookat = 'player' ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227509 ],
+              table[ $actor = '$SecretServiceActor',  $recipient = '$ScalePlateActor', $speak = 30227510, $lookat = '$ScalePlateActor' ],
+              table[ $actor = '$ScalePlateActor',  $recipient = 'player', $speak = 30227503, ],
+              table[ $actor = '$ScalePlateActor',  $recipient = 'player', $speak = 30227504, ],
+              table[ $actor = '$ScalePlateActor',  $recipient = 'player', $speak = 30227505, ],
+              table[ $actor = '$ScalePlateActor',  $recipient = 'player', $speak = 30227506, ],
+              table[ $actor = '$ScalePlateActor',  $recipient = 'player', $speak = 30227507, ],
+              1.5s, 
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227511, $lookat = 'player' ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227512 ],
+              table[ $actor = '$SecretServiceActor',  $recipient = 'player', $speak = 30227513 ],
+              1.5s,
+            ]
+          ]" />
+    
+  </add>
+</diff>

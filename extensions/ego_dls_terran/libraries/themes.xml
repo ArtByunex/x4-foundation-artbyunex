@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- default theme for factions -->
+  <add sel="/themes/theme[@id='painttheme_race_default']">
+    <group faction="pioneers" paintmod="paintmod_0122" />
+    <group faction="terran" paintmod="paintmod_0117" />
+    <group faction="yaki" paintmod="paintmod_0123" />
+  </add>
+
+  <!-- ship variation theme for all factions -->
+  <add sel="/themes/theme[@id='painttheme_race_ship']">
+    <group faction="pioneers" selection="random" paintmod="">
+      <select paintmod="paintmod_0122" weight="5" />
+      <select paintmod="paintmod_0121" weight="1" />
+      <select paintmod="paintmod_0120" weight="1" />
+    </group>
+    <group faction="terran" selection="random" paintmod="">
+      <select paintmod="paintmod_0117" weight="5" />
+      <select paintmod="paintmod_0118" weight="1" />
+      <select paintmod="paintmod_0119" weight="1" />
+    </group>
+    <group faction="yaki" selection="random" paintmod="">
+      <select paintmod="paintmod_0123" weight="5" />
+      <select paintmod="paintmod_0124" weight="1" />
+      <select paintmod="paintmod_0125" weight="1" />
+    </group>
+  </add>
+
+  <!-- faction themes available to the player when ALLY -->
+  <add sel="/themes">
+    <theme id="painttheme_player_pioneers_0122" default="error_theme" name="{20116,10251}" tags="hidden noblueprint permit">
+      <group faction="pioneers" paintmod="" />
+      <group faction="player" paintmod="paintmod_0122" />
+    </theme>
+    <theme id="painttheme_player_terran_0117" default="error_theme" name="{20116,10261}" tags="hidden noblueprint permit">
+      <group faction="terran" paintmod="" />
+      <group faction="player" paintmod="paintmod_0117" />
+    </theme>
+    <theme id="painttheme_player_yaki_0123" default="error_theme" name="{20116,10271}" tags="hidden noblueprint permit">
+      <group faction="yaki" paintmod="" />
+      <group faction="player" paintmod="paintmod_0123" />
+    </theme>
+  </add>
+</diff>
+
+

@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Terran" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false" version="12">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="global.$smugglercoverfactions?">
+          <do_if value="not global.$smugglercoverfactions.indexof.{faction.terran}">
+            <append_to_list name="global.$smugglercoverfactions" exact="faction.terran"/>
+          </do_if>
+        </do_if>
+
+        <create_list name="md.$TerranGateDND" comment="Set to silence terran gate events, during specific sections of the story"/>
+
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <!--Disable certain game events from happening in certain Solar System sectors (not necessarily all)-->
+          <set_value name="$SectorTable" exact="table[]"/>
+
+          <find_sector name="$SectorTable.$Mercury"      macro="macro.cluster_106_sector001_macro"/>
+          <find_sector name="$SectorTable.$Venus"        macro="macro.cluster_102_sector001_macro"/>
+          <find_sector name="$SectorTable.$Earth"        macro="macro.cluster_104_sector001_macro"/>
+          <find_sector name="$SectorTable.$Moon"         macro="macro.cluster_104_sector002_macro"/>
+          <find_sector name="$SectorTable.$Mars"         macro="macro.cluster_101_sector001_macro"/>
+          <find_sector name="$SectorTable.$AsteroidBelt" macro="macro.cluster_100_sector001_macro"/>
+          <find_sector name="$SectorTable.$Jupiter"      macro="macro.cluster_107_sector001_macro"/>
+          <find_sector name="$SectorTable.$Saturn"       macro="macro.cluster_108_sector001_macro"/>
+          <find_sector name="$SectorTable.$Titan"        macro="macro.cluster_108_sector002_macro"/>
+          <find_sector name="$SectorTable.$Saturn2"      macro="macro.cluster_108_sector003_macro"/>
+          <find_sector name="$SectorTable.$Uranus"       macro="macro.cluster_109_sector001_macro"/>
+          <find_sector name="$SectorTable.$Neptune"      macro="macro.cluster_110_sector001_macro"/>
+          <find_sector name="$SectorTable.$Pluto"        macro="macro.cluster_111_sector001_macro"/>
+          <find_sector name="$SectorTable.$OortCloud"    macro="macro.cluster_116_sector001_macro"/>
+
+          <!--No encounters in the Solar System-->
+          <!--TODO @Owen if we do want encounters in the Solar System, make sure that the individual encounter entries work with suitable ships.-->
+          <append_to_list exact="$SectorTable.$Mercury"      name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Venus"        name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Earth"        name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Moon"         name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Mars"         name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$AsteroidBelt" name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Jupiter"      name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Saturn"       name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Saturn2"      name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Titan"        name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Uranus"       name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Neptune"      name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$Pluto"        name="md.Encounters.Manager.$IgnoredSectors"/>
+          <append_to_list exact="$SectorTable.$OortCloud"    name="md.Encounters.Manager.$IgnoredSectors"/>
+
+          <!--Limit Kha'ak stations spawning in Sol-->
+          <add_to_group object="$SectorTable.$Mercury"      groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Venus"        groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Earth"        groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Moon"         groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Mars"         groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$AsteroidBelt" groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Jupiter"      groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Saturn"       groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Saturn2"      groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Titan"        groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Uranus"       groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Neptune"      groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <add_to_group object="$SectorTable.$Pluto"        groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+          <!--Oort Cloud allowed-->
+
+          <remove_value name="$SectorTable"/>
+
+          <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides.{faction.terran}" exact="[faction.pioneers]"/>
+
+          <!-- Set vars for use in other dlcs -->
+          <find_sector name="$EarthSector"    macro="macro.cluster_104_sector001_macro"/>
+          <find_sector name="$AsteroidBelt"   macro="macro.cluster_100_sector001_macro"/>
+          <set_value name="$FalxShipMacro"    exact="macro.ship_ter_m_frigate_01_a_macro"/>
+          <set_value name="$GladiusShipMacro" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+          <set_value name="$TokyoShipMacro"   exact="macro.ship_ter_xl_carrier_01_a_macro"/>
+          <set_value name="$OsakaShipMacro"   exact="macro.ship_ter_l_destroyer_01_a_macro"/>
+        </do_if>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.terran}"    exact="table[$DiplomatAvailable = ['yes', tag.group_07],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.pioneers}"  exact="table[$DiplomatAvailable = ['yes', tag.group_16],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.yaki}"      exact="table[$DiplomatAvailable = ['conditional', tag.group_02],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_spacedyepizza}" other="[faction.terran, faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_microbrewdrink}" other="[faction.terran]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.yaki]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_harmonicresonator}" other="[faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_nividiumjewel}" other="[faction.yaki]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_rareartefact}" other="[faction.terran, faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.terran, faction.pioneers]" create="true"/>
+
+        <!-- Remove the old reason why Arg and Ant cannot change relations -->
+        <do_if value="faction.argon.isdiplomacyexcluded.{faction.antigone}">
+          <clear_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.antigone" flags="base_3"/>
+        </do_if>
+
+        <!-- Set the faction pairings that are initially non-interacteable 
+        base_3: Integrated Faction
+        dlc2_1: CovOps Story-->
+        <set_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.antigone" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.antigone" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.argon" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.pioneers" flags="base_3"/>
+
+        <!-- Terran DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="md.$DLCBoronFactions.{1}" flags="dlc4_1"/>
+          <reset_cue cue="md.Setup_DLC_Boron.Herald_Missions_Complete_Check"/>
+        </do_if>
+      </actions>
+      <patch sinceversion="2">
+        <create_list name="md.$TerranGateDND"/>
+      </patch>
+      <patch sinceversion="3">
+        <do_if value="not md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides?">
+          <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides" exact="table[]"/>
+        </do_if>
+        <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides.{faction.terran}" exact="[faction.pioneers]"/>
+      </patch>
+      <patch sinceversion="4" comment="sector got added later">
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <find_sector name="$Saturn2"         macro="macro.cluster_108_sector003_macro"/>
+          <append_to_list exact="$Saturn2"     name="md.Encounters.Manager.$IgnoredSectors"/>
+          <add_to_group object="$Saturn2"      groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="5" comment="dlc4 vars">
+        <!-- Set vars for use in other dlcs -->
+        <find_sector name="$EarthSector"    macro="macro.cluster_104_sector001_macro"/>
+        <set_value name="$FalxShipMacro"    exact="macro.ship_ter_m_frigate_01_a_macro"/>
+        <set_value name="$GladiusShipMacro" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+        <set_value name="$TokyoShipMacro"   exact="macro.ship_ter_xl_carrier_01_a_macro"/>
+      </patch>
+      <patch sinceversion="6" comment="dlc4 vars">
+        <find_sector name="$AsteroidBelt"   macro="macro.cluster_100_sector001_macro"/>
+      </patch>
+      <patch sinceversion="7" comment="dlc4 vars">
+        <set_value name="$OsakaShipMacro"  exact="macro.ship_ter_l_destroyer_01_a_macro"/>
+      </patch>
+      <patch sinceversion="8">
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.terran}"    exact="table[$DiplomatAvailable = ['yes', tag.group_07],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.pioneers}"  exact="table[$DiplomatAvailable = ['yes', tag.group_16],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.yaki}"      exact="table[$DiplomatAvailable = ['yes', tag.group_02],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_spacedyepizza}" other="[faction.terran, faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_microbrewdrink}" other="[faction.terran]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.yaki]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_harmonicresonator}" other="[faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_nividiumjewel}" other="[faction.yaki]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_rareartefact}" other="[faction.terran, faction.pioneers]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.terran, faction.pioneers]" create="true"/>
+        <!-- Remove the old reason why Arg and Ant cannot change relations -->
+        <do_if value="faction.argon.isdiplomacyexcluded.{faction.antigone}">
+          <clear_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.antigone" flags="base_3"/>
+        </do_if>
+
+        <!-- Set the faction pairings that are initially non-interacteable 
+        base_3: Integrated Faction
+        dlc2_1: CovOps Story-->
+        <set_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.antigone" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.antigone" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.argon" flags="dlc2_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="faction.pioneers" flags="base_3"/>
+
+        <!-- Terran DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <set_faction_diplomacy_exclusion faction="faction.terran" otherfaction="md.$DLCBoronFactions.{1}" flags="dlc4_1"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="9">
+        <include_actions ref="AppendExcludedWeldingNPCMacros"/>
+      </patch>
+      <patch sinceversion="10">
+        <!-- Terran DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <reset_cue cue="md.Setup_DLC_Boron.Herald_Missions_Complete_Check"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="11">
+        <!-- In a previous update the exclusion  between Ant and ARG could be reset, so we clear it once again -->
+        <clear_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.antigone" flags="base_3"/>
+      </patch>
+
+      <cues>
+
+        <cue name="Setup_Terran_NeptuneGate" onfail="cancel">
+          <conditions>
+            <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}"/>
+          </conditions>
+          <actions>
+            <find_sector name="this.$SolNeptune" macro="macro.cluster_110_sector001_macro" comment="Neptune" required="true"/>
+            <find_object name="this.$SolNeptuneGate" class="class.gate" accelerator="false" active="true" space="this.$SolNeptune" required="true"/>
+            <set_object_description object="this.$SolNeptuneGate" page="20103" line="2502" comment="Terran functional gate"/>
+          </actions>
+        </cue>
+
+        <cue name="Setup_Terran_MarsGate" onfail="cancel">
+          <conditions>
+            <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}"/>
+          </conditions>
+          <delay exact="1s" comment="TODO: small delay as a workaround for events firing in different order when loading an existing savegame"/>
+          <actions>
+            <find_sector name="this.$SolMars" macro="macro.cluster_101_sector001_macro" comment="Mars" required="true"/>
+            <find_object name="this.$SolMarsGate" class="class.object" macro="macro.props_ter_gate_01_destroyed_macro" space="this.$SolMars" required="true"/>
+            <set_object_name object="this.$SolMarsGate" page="20001" line="701" comment="Jump Gate (actually an object, but just name it like a jump gate)"/>
+            <set_object_description object="this.$SolMarsGate" page="20103" line="2402" comment="Mars destroyed gate"/>
+          </actions>
+        </cue>
+
+        <cue name="Setup_PersistentCharacters_Pioneers_ChiefScientistActor" instantiate="true" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_if value="not md.$PersistentCharacters.$ChiefScientistActor?">
+              <create_cue_actor name="$ChiefScientistActor" cue="namespace" macro="character_pioneer_male_plot_head_scientist_macro">
+                <page exact="10156"/>
+                <owner exact="faction.pioneers"/>
+                <skills>
+                  <skill type="management"  exact="15"/>
+                  <skill type="morale"      exact="15"/>
+                  <skill type="piloting"    exact="5"/>
+                  <skill type="engineering" exact="7"/>
+                  <skill type="boarding"    exact="2"/>
+                </skills>
+              </create_cue_actor>
+              <set_entity_traits entity="$ChiefScientistActor" missionactor="true" customhandler="true" subtitlename="true"/>
+              <set_entity_overrides entity="$ChiefScientistActor" icon="'factionrepresentative'" title="'{30285,151}'"/>
+              <set_value name="md.$PersistentCharacters.$ChiefScientistActor" exact="$ChiefScientistActor"/>
+              <set_value name="$AddStoryMentors_ChiefScientistActor"/>
+            </do_if>
+          </actions>
+          <patch sinceversion="2">
+            <set_value name="$AddStoryMentors_ChiefScientistActor"/>
+          </patch>
+          <cues>
+            <cue name="PATCH_AddStoryMentors_ChiefScientistActor" onfail="cancel">
+              <conditions>
+                <check_value value="$AddStoryMentors_ChiefScientistActor?"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=namespace, $actor=$ChiefScientistActor]"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Setup_PersistentCharacters_Terran_SecretServiceActor" instantiate="true" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_if value="not md.$PersistentCharacters.$SecretServiceActor?">
+              <create_cue_actor name="$SecretServiceActor" cue="namespace" macro="character_terran_female_plot_secret_service_contact_macro">
+                <page exact="10157"/>
+                <owner exact="faction.terran"/>
+                <skills>
+                  <skill type="management"  exact="15"/>
+                  <skill type="morale"      exact="12"/>
+                  <skill type="piloting"    exact="6"/>
+                  <skill type="engineering" exact="3"/>
+                  <skill type="boarding"    exact="3"/>
+                </skills>
+              </create_cue_actor>
+              <set_entity_traits entity="$SecretServiceActor" missionactor="true" customhandler="true" subtitlename="true"/>
+              <set_value name="md.$PersistentCharacters.$SecretServiceActor" exact="$SecretServiceActor"/>
+              <set_value name="$AddStoryMentors_SecretServiceActor"/>
+              <set_object_name object="$SecretServiceActor" page="30225" line="108" comment="(Delilah Shiratori)Mission Command"/>
+            </do_if>
+          </actions>
+          <patch sinceversion="2">
+            <set_value name="$AddStoryMentors_SecretServiceActor"/>
+          </patch>
+          <cues>
+            <cue name="PATCH_AddStoryMentors_SecretServiceActor" onfail="cancel">
+              <conditions>
+                <check_value value="$AddStoryMentors_SecretServiceActor?"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=namespace, $actor=$SecretServiceActor]"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this" version="2">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+      <patch sinceversion="2" state="complete">
+        <do_if value="not md.$TerranYakiFactions.indexof.{faction.yaki}">
+          <append_list_elements name="md.$TerranYakiFactions" other="[faction.yaki]"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="2" state="cancelled">
+        <do_if value="not md.$TerranYakiFactions.indexof.{faction.yaki}">
+          <append_list_elements name="md.$TerranYakiFactions" other="[faction.yaki]"/>
+        </do_if>
+      </patch>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+        <do_if value="not md.$EquipmentTable?">
+          <set_value name="md.$EquipmentTable" exact="table[]"/>
+        </do_if>
+        <get_ware_definition result="md.$EquipmentTable.{faction.terran}" faction="faction.terran" flags="equipment" />
+        <get_ware_definition result="md.$EquipmentTable.{faction.pioneers}" faction="faction.pioneers" flags="equipment" />
+        <do_if value="not md.$FactionData?">
+          <set_value name="md.$FactionData" exact="table[]"/>
+        </do_if>
+        <!-- Set up empty tables to track faction HQs and representatives throughout the game -->
+        <do_if value="not md.$FactionData.{faction.terran}?">
+          <set_value name="md.$FactionData.{faction.terran}" exact="table[]" />
+        </do_if>
+        <do_if value="not md.$FactionData.{faction.yaki}?">
+          <set_value name="md.$FactionData.{faction.yaki}" exact="table[]" />
+        </do_if>
+        <do_if value="not md.$FactionData.{faction.pioneers}?">
+          <set_value name="md.$FactionData.{faction.pioneers}" exact="table[]" />
+        </do_if>
+        <!-- Terran DLC FactionLists (Prevent tables being set multiple times) -->
+        <do_if value="not md.$TerranFactions?">
+          <set_value name="md.$TerranFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$TerranFactions" other="[faction.terran, faction.pioneers]"/>
+
+        <do_if value="not md.$TerranEarthFactions?">
+          <set_value name="md.$TerranEarthFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$TerranEarthFactions" other="[faction.terran]"/>
+
+        <do_if value="not md.$TerranOtherFactions?">
+          <set_value name="md.$TerranOtherFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$TerranOtherFactions" other="[faction.pioneers]"/>
+
+        <do_if value="not md.$DLCPirateFactions?">
+          <set_value name="md.$DLCPirateFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCPirateFactions" other="[faction.yaki]"/>
+
+        <do_if value="not md.$TerranYakiFactions?">
+          <set_value name="md.$TerranYakiFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$TerranYakiFactions" other="[faction.yaki]"/>
+        <include_actions ref="AppendExcludedWeldingNPCMacros"/>
+        <!-- PILOT -->
+      </actions>
+    </library>
+
+    <library name="AppendExcludedWeldingNPCMacros" purpose="include_actions">
+      <actions>
+        <do_if value="not md.$ExcludedWeldingNPCMacros?">
+          <set_value name="md.$ExcludedWeldingNPCMacros" exact="[]"/>
+        </do_if>
+        <append_list_elements name="md.$ExcludedWeldingNPCMacros" other="[
+                              macro.character_yki_m_diplomat_01_macro,
+                              macro.character_yki_f_diplomat_01_macro,
+                              macro.character_yaki_male_cau_crew_01_macro,
+                              macro.character_yaki_male_afr_crew_01_macro,
+                              macro.character_yaki_male_asi_crew_01_macro,
+                              macro.character_yaki_female_cau_crew_01_macro,
+                              macro.character_yaki_female_afr_crew_01_macro,
+                              macro.character_yaki_female_asi_crew_01_macro,
+                              macro.character_yaki_male_cau_marine_01_macro,
+                              macro.character_yaki_male_afr_marine_01_macro,
+                              macro.character_yaki_male_asi_marine_01_macro,
+                              macro.character_yaki_female_cau_marine_01_macro,
+                              macro.character_yaki_female_afr_marine_01_macro,
+                              macro.character_yaki_female_asi_marine_01_macro,
+                              macro.character_yaki_male_cau_civilian_01_macro,
+                              macro.character_yaki_male_afr_civilian_01_macro,
+                              macro.character_yaki_male_asi_civilian_01_macro,
+                              macro.character_yaki_female_cau_civilian_01_macro,
+                              macro.character_yaki_female_afr_civilian_01_macro,
+                              macro.character_yaki_female_asi_civilian_01_macro,
+                              macro.character_yaki_female_cau_pilot_01_macro,
+                              macro.character_yaki_female_afr_pilot_01_macro,
+                              macro.character_yaki_female_asi_pilot_01_macro,
+                              macro.character_yaki_male_cau_manager_01_macro,
+                              macro.character_yaki_male_afr_manager_01_macro,
+                              macro.character_yaki_male_asi_manager_01_macro,
+                              macro.character_yaki_female_cau_manager_01_macro,
+                              macro.character_yaki_female_afr_manager_01_macro,
+                              macro.character_yaki_female_asi_manager_01_macro,
+                              ]"/>
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- TODO station init, gate activation... -->
+
+    <cue name="X4ep1_Prelude_Setup" mapeditor="false" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+
+        <find_sector name="$AsteroidBeltSector" macro="macro.cluster_100_sector001_macro"/>
+        <find_sector name="$GetsuFuneSector" macro="macro.cluster_48_sector001_macro"/>
+
+        <!-- find list of gates from Terran DLC into base-game-->
+        <find_sector name="$TerranSectors" extension="'ego_dlc_terran'" multiple="true"/>
+        <find_sector name="$BaseSectors" extension="''" multiple="true"/>
+        <find_gate name="$Gates" multiple="true" space="player.galaxy"/>
+        <create_list name="$TerranDLCGates"/>
+        <create_list name="$TerranDLCGatesCutscene"/>
+
+        <do_for_each in="$Gates" name="$g">
+          <do_if value="$TerranSectors.indexof.{$g.sector} and $g.exit.exists and $BaseSectors.indexof.{$g.exit.sector}">
+            <append_to_list name="$TerranDLCGates" exact="$g"/>
+            <append_to_list name="$TerranDLCGates" exact="$g.exit"/>
+            <!-- AB-GF gate -->
+            <do_if value="($g.sector == $AsteroidBeltSector) and ($g.exit.sector == $GetsuFuneSector)">
+              <append_to_list name="$TerranDLCGatesCutscene" exact="$g"/>
+              <append_to_list name="$TerranDLCGatesCutscene" exact="$g.exit"/>
+            </do_if>
+          </do_if>
+
+
+        </do_for_each>
+        <remove_value name="$Gates"/>
+      </actions>
+      <cues>
+
+        <cue name="Terran_Prelude_Start_Handlers" onfail="cancel">
+          <conditions>
+            <check_value value="$TerranDLCGatesCutscene.count"/>
+          </conditions>
+          <actions>
+            <create_list name="$ApproachHandlers"/>
+            <do_for_each in="$TerranDLCGatesCutscene" name="$gate">
+              <signal_cue_instantly cue="Terran_Prelude_Approach_Handler" param="$gate"/>
+            </do_for_each>
+          </actions>
+        </cue>
+
+        <cue name="Terran_Prelude_Approach_Handler" instantiate="true">
+          <conditions>
+            <event_cue_signalled comment="event.param is a gate"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$GateApproach" exact="event.param"/>
+            <append_to_list name="$ApproachHandlers" exact="this"/>
+          </actions>
+          <cues>
+            <cue name="Terran_Prelude_Player_Approach_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget"    value="parent.$GateApproach"/>
+              <param name="ApproachDistance"  value="20km"/>
+              <param name="SuccessSignalCue"  value="Terran_Prelude_Approached_Gate_Handler"/>
+              <param name="CancelOnSuccess"   value="false"/>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- story_terran_prelude.xml is waiting for this cue to be completed -->
+        <cue name="Terran_Prelude_Approached_Gate_Handler" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+            <debug_text text="'signalled'"/>
+            <check_value value="md.$TerranGateDND.count == 0"/>
+          </conditions>
+          <actions>
+            <set_value name="$Gate" exact="event.param"/>
+            <signal_cue_instantly cue="Terran_Prelude_Approached_Gate" param="$Gate"/>
+          </actions>
+          <cues>
+          </cues>
+        </cue>
+
+        <cue name="Terran_Prelude_Approached_Gate">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!-- Abort all other Gate listeners -->
+            <do_all exact="$ApproachHandlers.count" counter="$ah">
+              <do_if value="$ApproachHandlers.{$ah}.exists">
+                <cancel_cue cue="$ApproachHandlers.{$ah}"/>
+              </do_if>
+            </do_all>
+            <remove_value name="$ApproachHandlers"/>
+          </actions>
+        </cue>
+
+        <cue name="InitialiseShadyGuys" checkinterval="1s" version="2">
+          <conditions>
+            <cue_is_waiting cue="md.NPC_ShadyGuy.EvaluateSectors"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$DebugChance" exact="0"/>
+            <append_to_list name="md.NPC_ShadyGuy.GameStarted.$MatchProductsList" exact="ware.stimulants"/>
+            <set_value name="this.$PreviousCount" exact="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count"/>
+            <debug_text text="'Attempting to trigger shady guy spawns in Terran DLC space'" chance="this.$DebugChance"/>
+            <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="$TerranSectors"/>
+            <do_all chance="this.$DebugChance">
+              <do_if value="this.$PreviousCount == md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" chance="this.$DebugChance">
+                <debug_text text="'no shady guys added'"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'added: ' + (md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count - this.$PreviousCount)"/>
+                <do_for_each name="$TestStation" in="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup">
+                  <set_value name="$TestShadyGuy" exact="$TestStation.shadyguy"/>
+                  <do_if value="$TestStation.shadyguy">
+                    <debug_text text="'Shady Guy: ' + $TestShadyGuy.name + ' is aboard ' + $TestStation.knownname + ' in ' + $TestStation.sector.knownname + '. Unlocked status is: ' + $TestShadyGuy.tradesvisible" />
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$TestShadyGuy"/>
+              </do_else>
+            </do_all>
+          </actions>
+          <patch sinceversion="2">
+            <do_if value="not md.NPC_ShadyGuy.GameStarted.$MatchProductsList?">
+              <set_value name="md.NPC_ShadyGuy.GameStarted.$MatchProductsList" exact="[]"/>
+            </do_if>
+            <append_to_list name="md.NPC_ShadyGuy.GameStarted.$MatchProductsList" exact="ware.stimulants"/>
+          </patch>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="TerranGateDND">
+      <cues>
+        <cue name="TerranGateDND_on" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <append_to_list name="md.$TerranGateDND" exact="TerranGateDND"/>
+          </actions>
+        </cue>
+        <cue name="TerranGateDND_off" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <remove_from_list name="md.$TerranGateDND" exact="TerranGateDND"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="PIO_tug_jobs" checktime="10s" onfail="cancel">
+      <conditions>
+        <count_stations godstationentry="'pio_processing'" space="player.galaxy"/>
+      </conditions>
+      <actions>
+        <set_job_active job="'pioneers_scavenger_free_tug_m'"/>
+      </actions>
+    </cue>
+
+  </cues>
+</mdscript>

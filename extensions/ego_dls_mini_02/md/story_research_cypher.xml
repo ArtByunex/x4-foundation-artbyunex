@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Research_Cypher" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+      </actions>
+      <cues>
+        <cue name="Cypher_Claimed">
+          <conditions>
+            <event_player_owned_claimed_object/>
+            <check_value value="event.param.macro.ismacro.{macro.ship_gen_m_corvette_02_macro}"/>
+          </conditions>
+          <actions>
+            <substitute_text text="$EmailText" source="{30005,14210}">
+              <replace string="'$RESEARCH$'" with="macro.ship_gen_m_corvette_02_macro.name"/>
+            </substitute_text>
+            <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+            <set_value name="$ShipClaimed" exact="1"/>
+          </actions>
+          <cues>
+            <cue name="Cypher_Reasearch" ref="Research_Unlock">
+              <param name="ShipClaimed" value="$ShipClaimed"/>
+              <param name="ResearchItem" value="'research_ship_gen_m_corvette_02'"/>
+              <param name="ResearchWare" value="ware.research_ship_gen_m_corvette_02"/>
+              <param name="Blueprints" value="[ware.ship_gen_m_corvette_02,
+                                               ware.turret_gen_m_gatling_01_mk1]"/>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Libraries -->
+        <library name="Research_Unlock">
+          <params>
+            <param name="ShipClaimed"/>
+            <param name="ResearchItem"/>
+            <param name="ResearchWare"/>
+            <param name="Blueprints"/>
+          </params>
+          <cues>
+            <cue name="Check_Research_Unlocked" onfail="cancel">
+              <conditions>
+                <cue_is_complete cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+              </conditions>
+            </cue>
+
+            <cue name="Research_Unlocked">
+              <conditions>
+                <check_any>
+                  <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+                  <event_cue_completed cue="Check_Research_Unlocked"/>
+                </check_any>
+              </conditions>
+              <!--Delay to allow any further initialisation of the HQ and mentors-->
+              <delay exact="1s"/>
+              <actions>
+                <set_value name="$CharacterCutsceneTable" exact="table[]"/>
+                <do_if value="md.X4Ep1_Mentor_Subscriptions.Start.$BoronMet?" comment="only if we already met with Boso">
+                  <do_if value="not $Boso?">
+                    <set_value name="$Boso" exact="@md.$PersistentCharacters.$BosoTa"/>
+                    <do_if value="$Boso">
+                      <set_value name="$CharacterCutsceneTable.{$Boso}" exact="table[$key = 'ShowCharacterBoron']"/>
+                    </do_if>
+                  </do_if>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Research_Unlocked_Wait">
+                  <conditions>
+                    <event_cue_completed cue="Research_Unlocked"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Unhide_Research" checkinterval="1min">
+                      <conditions>
+                        <check_value value="$ShipClaimed ge 1"/>
+                      </conditions>
+                      <actions>
+                        <add_encyclopedia_entry type="researchables" item="$ResearchItem"/>
+                        <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Research_Entry_Selected" instantiate="true">
+                      <conditions>
+                        <event_object_signalled object="player.entity" param="'research_selected_no_speak'"/>
+                        <check_value value="player.age gt $LastResearchDescriptionTime + 30s"/>
+                        <check_any>
+                          <check_value value="event.param2 == $ResearchWare"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+                        <speak actor="$Boso" line="30201162" priority="85" recipient="player.entity" comment="{10201,30201162}"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Research_Finished" instantiate="true">
+                      <conditions>
+                        <event_player_research_unlocked ware="$ResearchWare"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="this.$Dialog_Lines" exact="[[30201174]]" comment="{10201,30201174}"/>
+                        <add_blueprints wares="$Blueprints"/>
+                      </actions>
+                      <cues>
+                        <cue name="Research_Finished_LastMentorSpeak" checkinterval="10s">
+                          <conditions>
+                            <check_value value="player.age ge (md.$LastMentorSpeak + 10min)"/>
+                          </conditions>
+                          <cues>
+                            <cue name="Research_Finished_Speak_Ref_v2" ref="md.LIB_Dialog.Speak_Actor">
+                              <param name="Actor"             value="$Boso"/>
+                              <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                              <param name="DelayInitial"      value="2s"/>
+                              <param name="Lines"             value="parent.parent.$Dialog_Lines"/>
+                              <param name="IsInMission"       value="false"/>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </library>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

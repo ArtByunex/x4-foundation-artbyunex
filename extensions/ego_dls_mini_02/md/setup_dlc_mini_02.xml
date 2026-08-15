@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Mini_02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="player.galaxy.macro == macro.xu_ep2_universe_macro"  comment="only in main-galaxy" >
+          <find_sector name="$Cluster725Sector1" macro="macro.cluster_725_sector001_macro" required="true" comment="Supernova Neighbour Sector"/>
+          <find_sector name="$Cluster740Sector1" macro="macro.cluster_740_sector001_macro" required="true" comment="Supernova Sector"/>
+        </do_if>
+
+        <!-- Set vars for use in other dlcs -->
+        <set_value exact="macro.ship_gen_m_corvette_01_macro"         name="$ShipMacroEnvoy"/>
+        <set_value exact="macro.ship_gen_m_corvette_02_macro"         name="$ShipMacroEnvoyPirate"/>
+
+        <set_value exact="ware.paintmod_0218"                         name="$PaintArgonShip"      comment="Mornington Crescent"/>
+        <set_value exact="ware.paintmod_0288"                         name="$PaintMinistryShip"   comment="Ochre Mutation"/>
+
+        <!-- Some actions can steal blueprints. This blacklist will be temporarily filled with blueprint wares that we don't want the player to allow access to -->
+        <do_if value="not md.Setup_DLC_Mini_02.Activate_Envoy.$BlueprintStealingAllowed?">
+          <append_list_elements name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                other="[ware.ship_gen_m_corvette_01,
+                                      ware.engine_arg_m_corvette_01_mk1,
+                                      ware.engine_arg_m_corvette_01_mk2,
+                                      ware.engine_tel_m_corvette_01_mk1,
+                                      ware.engine_tel_m_corvette_01_mk2,
+                                      ware.shield_gen_m_corvette_01_mk1,
+                                      ware.weapon_gen_m_disabler_01_mk1,
+                                      ware.weapon_gen_m_shieldpierce_01_mk1
+                                      ]" create="true"/>
+        </do_if>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <cue name="Mini_02_States" namespace="this" mapeditor="false">
+      <conditions>
+        <event_universe_generated />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <find_sector name="$Cluster740Sector1" macro="macro.cluster_740_sector001_macro" required="true" comment="Supernova Sector" extension="'ego_dlc_mini_02'"/>
+        <find_gate name="$Cluster740Gate" space="$Cluster740Sector1" required="true"/>
+        <do_if value="not gamestart.storystate.story_envoy">
+          <set_object_active object="$Cluster740Gate" activate="false"/>
+        </do_if>
+        <set_space_faction_logic_allowed space="$Cluster740Sector1" allow="false" />
+        <append_list_elements name="md.Encounters.Manager.$IgnoredSectors" other="[$Cluster740Sector1]" comment="no Khaak/Xenon"/>
+      </actions>
+      <cues>
+        <cue name="Scarlet_Star_Unlock_Sector">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_object_active object="$Cluster740Gate" activate="true"/>
+            <signal_cue_instantly cue="md.Story_Unbihexium.Setup_DataVault" check="false"/>
+          </actions>
+        </cue>
+
+        <cue name="Scarlet_Star_Unlock_FactionLogic">
+          <conditions>
+            <event_object_known_to_player object="$Cluster740Sector1"/>
+          </conditions>
+          <delay exact="60min"/>
+          <actions>
+            <set_space_faction_logic_allowed space="$Cluster740Sector1" allow="true"/>
+            <set_space_jobs_allowed space="$Cluster740Sector1" allow="true"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$Cluster740Sector1"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="Envoy_Activation" onfail="cancel">
+      <conditions>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro"  comment="only in main-galaxy"/>
+      </conditions>
+      <cues>
+        <cue name="Activate_Envoy">
+          <conditions>
+            <event_cue_signalled/>
+            <!-- ? todo: get_ware_definition $EquipmentTable (new guns etc.) -->
+          </conditions>
+          <cues>
+            <cue name="Clear_Diplomacy_Stealing_Blacklist">
+              <actions>
+                <set_value name="md.Setup_DLC_Mini_02.Activate_Envoy.$BlueprintStealingAllowed"/>
+                <remove_from_list name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                  list="[ware.ship_gen_m_corvette_01,
+                                         ware.engine_arg_m_corvette_01_mk1,
+                                         ware.engine_arg_m_corvette_01_mk2,
+                                         ware.engine_tel_m_corvette_01_mk1,
+                                         ware.engine_tel_m_corvette_01_mk2,
+                                         ware.shield_gen_m_corvette_01_mk1,
+                                         ware.weapon_gen_m_disabler_01_mk1,
+                                         ware.weapon_gen_m_shieldpierce_01_mk1]"/>
+              </actions>
+            </cue>
+
+            <cue name="Envoy_Licences">
+              <actions>
+                <add_licence faction="faction.player" licencefaction="faction.ministry" type="envoy_access"/>
+                <add_licence faction="faction.player" licencefaction="faction.argon"    type="envoy_access"/>
+              </actions>
+            </cue>
+
+            <cue name="Envoy_Jobs">
+              <actions>
+                <!--jobs-->
+                <set_job_active activate="true" job="'argon_envoy'"/>
+                <set_job_active activate="true" job="'antigone_envoy'"/>
+                <set_job_active activate="true" job="'teladi_envoy'"/>
+                <set_job_active activate="true" job="'ministry_envoy'"/>
+                <set_job_active activate="true" job="'scaleplate_cypher'"/>
+                <!-- mission jobs -->
+                <set_job_active activate="true" job="'argon_envoy_mission'"/>
+                <set_job_active activate="true" job="'teladi_envoy_mission'"/>
+              </actions>
+              <cues>
+                <cue name="DLC_Jobs_Activate_Immediately">
+                  <actions>
+                    <signal_cue cue="DLC_Enabled_Split"       check="false"/>
+                    <signal_cue cue="DLC_Enabled_Terran"      check="false"/>
+                    <signal_cue cue="DLC_Enabled_Pirate"      check="false"/>
+                    <signal_cue cue="DLC_Enabled_Boron"       check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Paranid_Faction_State">
+                  <actions>
+                    <!-- BUC active regardless of story state-->
+                    <set_job_active activate="true" job="'buccaneers_envoy'"/>
+                    <set_job_active activate="true" job="'buccaneers_envoy_mission'"/>
+                  </actions>
+                  <cues>
+                    <cue name="Paranid_Faction_State_Trinity_Not_Active" onfail="cancel">
+                      <conditions>
+                        <check_value value="not faction.trinity.isactive"/>
+                      </conditions>
+                      <actions>
+                        <set_job_active activate="true" job="'paranid_envoy'"/>
+                        <set_job_active activate="true" job="'holyorder_envoy'"/>
+                        <set_job_active activate="true" job="'paranid_envoy_mission'"/>
+                        <set_job_active activate="true" job="'holyorder_envoy_mission'"/>
+                      </actions>
+                      <cues>
+                        <cue name="Paranid_Faction_State_Trinity_Activates">
+                          <conditions>
+                            <event_faction_activated faction="faction.trinity"/>
+                          </conditions>
+                          <actions>
+                            <!-- activate new jobs -->
+                            <set_job_active activate="true" job="'trinity_envoy'"/>
+                            <set_job_active activate="true" job="'trinity_envoy_mission'"/>
+
+                            <!-- deactivate old jobs -->
+                            <set_job_active activate="false" job="'paranid_envoy'"            successor="'trinity_envoy'"/>
+                            <set_job_active activate="false" job="'holyorder_envoy'"          successor="'trinity_envoy'"/>
+                            <set_job_active activate="false" job="'paranid_envoy_mission'"    successor="'trinity_envoy_mission'" />
+                            <set_job_active activate="false" job="'holyorder_envoy_mission'"  successor="'trinity_envoy_mission'" />
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Paranid_Faction_State_Trinity_Active" onfail="cancel">
+                      <conditions>
+                        <check_value value="faction.trinity.isactive"/>
+                      </conditions>
+                      <actions>
+                        <set_job_active activate="true" job="'trinity_envoy'"/>
+                        <set_job_active activate="true" job="'trinity_envoy_mission'"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="DLC_Enabled_Split">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_cue_signalled cue="md.Setup.Start"/>
+                    </check_any>
+                    <check_value value="md.$SplitFactions?"/>
+                    <check_value value="md.$SplitFactions.count"/>
+                  </conditions>
+                  <actions>
+                    <set_job_active activate="true" job="'split_envoy'"/>
+                    <set_job_active activate="true" job="'freesplit_envoy'"/>
+                    <set_job_active activate="true" job="'split_envoy_mission'"/>
+                  </actions>
+                  <cues>
+                    <cue name="DLC_Enabled_Split_Curbs_Immediately">
+                      <actions>
+                        <signal_cue cue="DLC_Enabled_Split_Curbs" check="false"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="DLC_Enabled_Split_Curbs">
+                      <conditions>
+                        <check_any>
+                          <event_faction_activated faction="md.$SplitCurbFactions.{1}"/>
+                          <check_all>
+                            <event_cue_signalled/>
+                            <check_value value="md.$SplitCurbFactions.{1}.isactive"/>
+                          </check_all>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <set_job_active activate="true" job="'court_envoy'"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="DLC_Enabled_Terran">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_cue_signalled cue="md.Setup.Start"/>
+                    </check_any>
+                    <check_value value="md.$TerranEarthFactions?"/>
+                    <check_value value="md.$TerranEarthFactions.count"/>
+                  </conditions>
+                  <actions>
+                    <set_job_active activate="true" job="'terran_envoy'"/>
+                    <set_job_active activate="true" job="'pioneers_envoy'"/>
+                    <set_job_active activate="true" job="'terran_envoy_mission'"/>
+                    <set_job_active activate="true" job="'pioneers_envoy_mission'"/>
+                  </actions>
+                </cue>
+
+                <cue name="DLC_Enabled_Pirate">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_cue_signalled cue="md.Setup.Start"/>
+                    </check_any>
+                    <check_value value="md.$RiptideScavengersFaction?"/>
+                    <check_value value="md.$RiptideScavengersFaction.count"/>
+                  </conditions>
+                  <actions>
+                    <set_job_active activate="true" job="'scavenger_envoy'"/>
+                  </actions>
+                </cue>
+
+                <cue name="DLC_Enabled_Boron">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_cue_signalled cue="md.Setup.Start"/>
+                    </check_any>
+                    <check_value value="md.$DLCBoronFactions?"/>
+                    <check_value value="md.$DLCBoronFactions.count"/>
+                  </conditions>
+                  <cues>
+                    <cue name="DLC_Boron_KE_Active" onfail="cancel">
+                      <conditions>
+                        <check_value value="md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd.state != cuestate.waiting"/>
+                      </conditions>
+                      <actions>
+                        <set_job_active activate="true" job="'boron_envoy'"/>
+                        <set_job_active activate="true" job="'boron_envoy_mission'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="DLC_Boron_KE_Activation">
+                      <conditions>
+                        <event_cue_signalled cue="md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd"/>
+                      </conditions>
+                      <actions>
+                        <set_job_active activate="true" job="'boron_envoy'"/>
+                        <set_job_active activate="true" job="'boron_envoy_mission'"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

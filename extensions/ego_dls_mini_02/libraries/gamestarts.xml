@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <!-- DLC Mini 02 GS -->
+  <add sel="/gamestarts/groups">
+    <group group="12" name="{1021, 72}" />
+  </add>
+
+  <replace sel="/gamestarts/gamestart[@id='x4ep1_gamestart_dlc_mini_02']">
+    <gamestart id="x4ep1_gamestart_dlc_mini_02" name="{1021,2000}" description="{1021,2001}" image="gamestart_mini_02" group="12">
+      <info>
+        <item name="@playerimage" value="briefing_ysandreis_seminoros_borealisas_ix_01"/>
+        <item name="{1021,8}"   value="{1021,2002}" />
+        <item name="@player" />
+        <item />
+        <item />
+        <item name="{1021,1}"   value="{1021,2003}" />
+        <item />
+        <item name="{1021,2}"   value="{1021,2004}" />
+        <item name="{1021,3}"   value="{1021,2005}" />
+        <item name="{1021,5}"   value="{1021,41}" />
+      </info>
+      <cutscene ref="gamestart_mini_02" voice="gamestart_dlc_mini_02_selected" />
+      <intro ref="gamestart3" voice="gamestart_dlc_mini_02_started" length="12.0" fadeout="2.0" />
+      <type name="{1021,94}" description="{1021,95}" />
+      <location galaxy="xu_ep2_universe_macro" zone="zone003_cluster_05_sector001_macro">
+        <position x="0.0" y="-60.0" z="0.0" />
+        <rotation yaw="-80" pitch="0" roll="0" />
+      </location>
+      <player macro="character_player_mini_02_female_macro" money="120000" name="{1021,2002}">
+        <ship macro="ship_tel_m_bomber_01_b_macro">
+          <loadout ref="gs_mini_dlc_02"/>
+          <modification paint="paintmod_0047"/>
+          <modification>
+            <equipment>
+              <engine ware="mod_engine_travelthrust_02_mk1"/>
+              <shield ware="mod_shield_capacity_01_mk1"/>
+              <shield ware="mod_shield_capacity_01_mk1"/>
+              <shield ware="mod_shield_capacity_01_mk1"/>
+            </equipment>
+          </modification>
+        </ship>
+        <inventory>
+          <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
+          <ware ware="software_scannerobjectmk3" amount="1" />
+        </inventory>
+        <blueprints>
+          <ware ware="clothingmod_0001" />
+          <ware ware="clothingmod_0002" />
+          <ware ware="module_arg_dock_m_01_lowtech" />
+          <ware ware="module_par_pier_l_01" />
+          <ware ware="module_par_stor_container_s_01" />
+          <ware ware="module_par_conn_base_01" />
+          <ware ware="module_par_conn_cross_01" />
+          <ware ware="module_par_conn_vertical_01" />
+          <ware ware="module_gen_prod_energycells_01" />
+          <ware ware="module_par_prod_sojabeans_01" />
+          <ware ware="paintmod_0006"/>
+          <ware ware="paintmod_0048"/>
+          <ware ware="paintmod_0049"/>
+          <ware ware="paintmod_0050"/>
+          <ware ware="paintmod_0097"/>
+          <ware ware="paintmod_0098"/>
+          <ware ware="paintmod_0099"/>
+          <ware ware="paintmod_0100"/>
+        </blueprints>
+        <research>
+          <ware ware="research_radioreceiver" />
+          <ware ware="research_sensorbooster" />
+          <ware ware="research_tradeinterface" />
+        </research>
+        <encyclopedia>
+          <entry type="warebasket" ref="research_gamestart_common"/>
+        </encyclopedia>
+        <theme paint="painttheme_player_01" />
+      </player>
+      <universe>
+        <factions>
+          <relations>
+            <relation faction="ministry" otherfaction="player" relation="0.50"/>
+          </relations>
+        </factions>
+      </universe>
+      <custom>
+        <item value="player" state="standard" list="character_player_mini_02_male_macro character_player_mini_02_female_macro" />
+        <item value="playerfemale" state="standard" />
+        <item value="playername" state="standard" />
+      </custom>
+    </gamestart>
+  </replace>
+
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/custom/item[@value='player']">
+    <extension list="character_npc_player_mini_02_customgamestart_teladi_male_macro
+                     character_npc_player_mini_02_customgamestart_teladi_female_macro"/>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/custom/item[@value='player']">
+    <extension list="character_npc_player_mini_02_customgamestart_teladi_male_macro
+                     character_npc_player_mini_02_customgamestart_teladi_female_macro"/>
+  </add>
+
+  <!--====== Envoy story situation ======-->
+
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_envoy" group="envoy_situation" index="1" name="{1021,13701}" description="{1021,13702}">
+      <states>
+        <state ref="story_envoy"/>
+      </states>
+    </story>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_envoy" group="envoy_situation" index="1" name="{1021,13701}" description="{1021,13702}">
+      <states>
+        <state ref="story_envoy"/>
+      </states>
+    </story>
+  </add>
+
+  <!-- Sector Knowledge -->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/known/parameters/space">
+    <sector sector="cluster_740_sector001_macro" factor="1.2">
+      <dependencies>
+        <dependency>
+          <budget ref="story_envoy"/>
+        </dependency>
+      </dependencies>
+    </sector>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/known/parameters/space">
+    <sector sector="cluster_740_sector001_macro">
+      <dependencies>
+        <dependency>
+          <budget ref="story_envoy"/>
+        </dependency>
+      </dependencies>
+    </sector>
+  </add>
+</diff>

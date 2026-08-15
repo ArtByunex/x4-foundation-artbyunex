@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues">
+
+    <cue name="X4ep1_Gamestart_Terran_Shared">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <debug_text text="'Terran Shared'"/>
+        <set_value name="$DebugChance" exact="0"/>
+
+      </actions>
+      <cues>
+        <cue name="X4Ep1_Gamestart_Terran_HQ" >
+          <actions>
+            <!-- TODO: Change HQ location to terraforming cluster (cluster doesn't exist yet) -->
+            <find_sector name="$HQSector" macro="macro.cluster_114_sector001_macro"/>
+            <find_station name="$HQ" macro="macro.station_pla_headquarters_base_01_macro" space="$HQSector" required="true"/>
+
+            <!--Set to invincible-->
+            <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+              <param name="Object" value="$HQ"/>
+              <param name="RequesterCue" value="md.Setup_Gamestarts.X4Ep1_Gamestart_Terran_HQ"/>
+              <param name="DebugChance" value="$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="md.Signal_Leaks.Manager.$ExcludedObjects" object="$HQ"/>
+            <add_to_group groupname="md.GenericMissions.Manager.$ExcludedOfferObjects" object="$HQ"/>
+            <add_to_group groupname="md.NPC_Instantiation.Instantiation.$ExcludedObjects" object="$HQ"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Terran1" module="x4ep1_gamestart_terran1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!--Set this flag as early as possible on a new game to allow the HQ mission to set itself up in the correct mode-->
+        <set_value name="md.X4Ep1_Mentor_Subscriptions.Start.$TerranVariant" exact="true"/>
+        
+        <!-- trigger setup shared by all terran gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Terran_Shared"/>
+      </actions>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Terran2" module="x4ep1_gamestart_terran2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!--Set this flag as early as possible on a new game to allow the HQ mission to set itself up in the correct mode-->
+        <set_value name="md.X4Ep1_Mentor_Subscriptions.Start.$TerranVariant" exact="true"/>
+        
+        <!-- trigger setup shared by all terran gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Terran_Shared"/>
+      </actions>
+    </cue>
+	
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ArgonShips'][1]" pos="before">
+    <set_value name="$TerranShips" exact="[]"/>
+    <set_value name="$YakiShips" exact="[]"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_corvette_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_frigate_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_miner_liquid_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_miner_solid_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_trans_container_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_gunboat_01_a_macro"/>
+    <append_to_list name="$YakiShips" exact="macro.ship_yak_m_corvette_01_a_macro"/>
+
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_trans_container_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_scout_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_scout_02_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_miner_solid_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_fighter_01_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_fighter_02_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_fighter_03_a_macro"/>
+    <append_to_list name="$YakiShips" exact="macro.ship_yak_s_fighter_01_a_macro"/>
+    <append_list_elements name="$ShipMacros" other="$TerranShips"/>
+    <append_list_elements name="$ShipMacros" other="$YakiShips"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_elseif[@value='$ParanidShips.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$TerranShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.terran" macro="$ShipMacro"/>
+    </do_elseif>
+    <do_elseif value="$YakiShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.yaki" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//set_value[@name='$CapshipMacros']" pos="after">
+    <set_value name="$TerranCapships" exact="[]"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_atf_xl_battleship_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_xl_builder_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_xl_carrier_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_xl_resupplier_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_atf_l_destroyer_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_l_destroyer_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_l_miner_liquid_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_l_miner_solid_01_a_macro"/>
+    <append_to_list name="$TerranCapships" exact="macro.ship_ter_l_trans_container_01_a_macro"/>
+    <append_list_elements name="$CapshipMacros" other="$TerranCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$ParanidCapships.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$TerranCapships.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.terran" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//remove_value[@name='$CapshipMacros']" pos="before">
+    <remove_value name="$TerranCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform_2']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ShipMacros'][1]" pos="before">
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_corvette_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_frigate_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_miner_liquid_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_miner_solid_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_trans_container_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_m_gunboat_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_yak_m_corvette_01_a_macro"/>
+
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_trans_container_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_scout_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_scout_02_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_miner_solid_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_fighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_fighter_02_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_ter_s_fighter_03_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_yak_s_fighter_01_a_macro"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform_2']//do_if[@value='$DockAreas.count']" pos="after">
+    <set_value name="$CapshipMacros" exact="[]"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_atf_xl_battleship_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_xl_builder_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_xl_carrier_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_xl_resupplier_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_atf_l_destroyer_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_l_destroyer_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_l_miner_liquid_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_l_miner_solid_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_ter_l_trans_container_01_a_macro"/>
+    <do_all exact="$CapshipMacros.count" counter="$i">
+      <generate_loadout result="$loadout" faction="faction.terran" macro="$CapshipMacros.{$i}"/>
+      <create_ship name="$Capship" macro="$CapshipMacros.{$i}" sector="$Station.sector">
+        <owner exact="faction.player" overridenpc="true"/>
+        <loadout loadout="$loadout.{1}"/>
+        <pilot>
+          <select race="race.terran"/>
+        </pilot>
+        <drop ref="ship_large_civilian" />
+        <safepos object="$Station" max="5km"/>
+      </create_ship>
+    </do_all>
+    <remove_value name="$CapshipMacros"/>
+  </add>
+
+  <replace sel="//cue[@name='Test_Squadron']//set_value[@name='$shipfaction']/@exact">faction.yaki</replace>
+  <replace sel="//cue[@name='Test_Squadron']//set_value[@name='$leadertags']/@exact">[tag.military, tag.medium]</replace>
+  <replace sel="//cue[@name='Test_Squadron']//set_value[@name='$fightertags']/@exact">tag.fighter</replace>
+
+</diff>

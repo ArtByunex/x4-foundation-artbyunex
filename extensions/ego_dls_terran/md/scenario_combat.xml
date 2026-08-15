@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <replace sel="//create_mission/@name">{1021,5200}</replace>
+  <replace sel="//create_mission/@description">{1021,5201}</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedFaction']/@exact">faction.terran</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$EnemyFaction']/@exact">faction.xenon</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerMacro']/@exact">macro.ship_ter_l_destroyer_01_a_macro</replace>
+  <replace sel="//loadout/@ref[.='scenario_combat_arg_destroyer' or .='scenario_combat_spl_transporter']">scenario_combat_ter_destroyer</replace>
+  
+  <!-- Terran characters -->
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerCaptainMacro']/@exact">macro.character_scenario_combat_ter_captain_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerNavigationMacro']/@exact">macro.character_scenario_combat_ter_navigation_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerHelmMacro']/@exact">macro.character_scenario_combat_ter_helm_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerGunnerMacro']/@exact">macro.character_scenario_combat_ter_gunner_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedDestroyerMarineMacro']/@exact">macro.character_scenario_combat_ter_marine_macro</replace>
+  
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedCarrierMacro']/@exact">macro.ship_ter_xl_carrier_01_a_macro</replace>
+  <replace sel="//create_ship[@name='$AlliedCarrier']/loadout">
+    <loadout/>
+  </replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedCarrierCaptainMacro']/@exact">macro.tutorial_character_commander_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedCrew']/@exact">'terran_military_crew'</replace>
+
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$AlliedBomberMacro']/@exact">macro.ship_ter_m_gunboat_01_a_macro</replace>
+  <replace sel="//loadout/@ref[.='scenario_combat_arg_bomber' or .='scenario_combat_spl_frigate']">scenario_combat_ter_frigate</replace>
+
+  <!-- player ships -->
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$PlayerFighterMacro1']/@exact">macro.ship_ter_s_fighter_01_a_macro</replace>
+  <replace sel="//create_ship[@name='$PlayerFighter1']/loadout">
+    <loadout ref="scenario_combat_ter_heavyfighter"/>
+  </replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$PlayerFighterMacro2']/@exact">macro.ship_ter_s_fighter_01_a_macro</replace>
+  <replace sel="//create_ship[@name='$PlayerFighter2']/loadout">
+    <loadout ref="scenario_combat_ter_heavyfighter"/>
+  </replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$PlayerFighterPaintMod']/@exact">ware.paintmod_0002</replace>
+
+  <!-- enemies -->
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$EnemyMinerMacro']/@exact">macro.ship_xen_m_miner_solid_01_a_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$EnemySquadLeaderMacro']/@exact">macro.ship_xen_m_corvette_02_a_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$EnemySquadWingmanMacro']/@exact">macro.ship_xen_s_fighter_01_a_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$EnemyDestroyerMacro']/@exact">macro.ship_xen_xl_destroyer_01_a_macro</replace>
+  <replace sel="/mdscript/cues//cue[@name='X4ep1_Gamestart_Tutorial1']/actions/set_value[@name='$PlayerAttackerMacro']/@exact">macro.ship_xen_s_fighter_01_a_macro</replace>
+
+  <!-- voices -->
+  <replace sel="//create_ship[@name='$AlliedDestroyer']/pilot/page/@exact">10107</replace>
+  <replace sel="//create_cue_actor[@name='$AlliedDestroyerNavigation']/page/@exact">10109</replace>
+  <replace sel="//create_cue_actor[@name='$AlliedDestroyerHelm']/page/@exact">10101</replace>
+  <replace sel="//create_cue_actor[@name='$AlliedDestroyerGunner']/page/@exact">10102</replace>
+  <replace sel="//create_cue_actor[@name='$AlliedDestroyerMarine']/page/@exact">10110</replace>
+  
+  <!-- various -->
+  <replace sel="//set_entity_page[@entity='$AlliedStationManager']/@page">if $AlliedStationManager.isfemale then 10108 else 10103</replace>
+  <!-- back to default loadout for our Xenon ships -->
+  <replace sel="//pilot/@group[.='split.pilot' or .='argon.pilot']">terran.pilot</replace>
+  <replace sel="//create_ship[@name='$EnemyDestroyer']/loadout/@ref">scenario_combat_xen_destroyer</replace>
+    <replace sel="//create_ship[@name='$EnemyLeader']/loadout">
+    <loadout/> 
+  </replace>
+  <replace sel="//create_ship[@name='$EnemyWingman']/loadout">
+    <loadout/>
+  </replace>
+  <replace sel="//create_ship[@name='$PlayerAttacker']/loadout">
+    <loadout/>
+  </replace>
+</diff>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/library[@name='InitStationActions']/actions/do_if/do_if[@value='$tradestation?']" pos="before">
+    <do_elseif value="$modulesets.indexof.{'tradestation_terran'}">
+      <!-- do not set $tradestation to true so non-terran tradewares are not added -->
+      <!-- food wares -->
+      <add_tradeware object="$controllable" ware="ware.terranmre" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <add_tradeware object="$controllable" ware="ware.proteinpaste" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <!-- common wares -->
+      <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <!-- high end wares -->
+      <add_tradeware object="$controllable" ware="ware.computronicsubstrate" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <add_tradeware object="$controllable" ware="ware.metallicmicrolattice" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <add_tradeware object="$controllable" ware="ware.siliconcarbide" allowbuy="true" allowsell="true" lockavgprice="true" />
+
+      <do_if value="$controllable.owner == faction.pioneers">
+        <!-- Segaris Pioneers don't mind Stimulants that much -->
+        <add_tradeware object="$controllable" ware="ware.stimulants" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_if>
+      <!-- Add Kha'ak Alloy to some Trading Stations-->
+      <do_if value="$controllable.godentry == 'ter_supportstation_cluster_104_sector002'" comment="Terran Protectorate Orbital Support Station in The Moon">
+        <add_tradeware object="$controllable" ware="ware.khaakalloy" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_if>
+      <do_if value="$controllable.godentry == 'pio_tradestation_cluster_114_sector001'" comment="Segaris Pioneers Trading Station in Gaian Prophecy">
+        <add_tradeware object="$controllable" ware="ware.khaakalloy" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_if>
+    </do_elseif>
+  </add>
+
+</diff>

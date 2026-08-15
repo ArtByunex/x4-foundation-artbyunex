@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<influencelistconfigurations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xsi:noNamespaceSchemaLocation="influenceconfigurations.xsd">
+  <!-- applied when envoy changes stance to envoy_cloak -->
+  <influencelist id="envoy_cloak">
+    <influences>
+      <influence type="radarcloak">
+        <profile type="envelope" sustainvalue="0.15" sustainduration="-1"/>
+      </influence>
+      <influence type="radarrange">
+        <profile type="envelope" sustainvalue="1.75" sustainduration="-1"/>
+      </influence>
+
+      <influence type="disableboost">
+        <profile type="envelope" sustainduration="-1"/>
+      </influence>
+      <influence type="disableshooting">
+        <profile type="envelope" sustainduration="-1"/>
+      </influence>
+
+      <!-- bit of a lurch when shifting stances. rapid speed change incidentally throws aim off. -->
+      <influence type="maxforwardspeed">
+        <profile type="envelope" sustainvalue="0.2" sustainduration="0.93"/>
+      </influence>
+      <influence type="reverseacceleration">
+        <profile type="envelope" sustainvalue="10" sustainduration="0.71"/>
+      </influence>
+
+      <!-- slower max speed, but should feel more responsive. -->
+      <influence type="forwardacceleration">
+        <profile type="envelope" sustainvalue="0.65" sustainduration="-1"/>
+      </influence>
+      <influence type="maxforwardspeed">
+        <profile type="envelope" delay="0.93" sustainvalue="0.45" sustainduration="-1"/>
+      </influence>
+
+      <!-- reduction in max reverse speed proportional to forward speed reduction. improved braking. -->
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="0.71" sustainvalue="1.55" sustainduration="-1"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" sustainvalue="0.45" sustainduration="-1"/>
+      </influence>
+
+      <influence type="steeringacceleration">
+        <!-- changing acceleration disproportionate to speed changes how the ship feels -->
+        <profile type="envelope" sustainvalue="1.7" sustainduration="-1"/>
+      </influence>
+      <influence type="maxsteeringspeed">
+        <!-- should make the envoy slightly more maneuverable than the cypher given the same thrusters -->
+        <profile type="envelope" sustainvalue="1.4" sustainduration="-1"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <profile type="envelope" sustainvalue="1.5" sustainduration="-1"/>
+      </influence>
+    </influences>
+  </influencelist>
+
+  <influencelist id="envoy_distortion" name="{20230,2015}" description="{20230,2016}" icon="pulsor_distortion">
+    <influences classes="ship_xs ship_s ship_m">
+      <influence type="disableboost">
+        <!-- regains boost after movement cessation has worn out -->
+        <profile type="continuous" duration="6"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- trail past duration of rest of the effect -->
+        <profile type="continuous" duration="11"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" sustainvalue="0.0" sustainduration="8"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="9"/>
+      </influence>
+
+      <influence type="maxforwardspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="1" sustainvalue="20" sustainduration="2"/>
+      </influence>
+      <influence type="maxstrafespeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+      <influence type="maxsteeringspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="3"/>
+      </influence>
+
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="5" sustainvalue="0.3" sustainduration="3"/>
+      </influence>
+    </influences>
+    <influences classes="ship_l ship_xl">
+      <influence type="disableboost">
+        <!-- regains boost after movement cessation has worn out -->
+        <profile type="continuous" duration="8"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- less pronounced immediate effect for capital ships, but more pronounced effect on travel mode use -->
+        <profile type="continuous" duration="17"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="12"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" sustainvalue="0.0" sustainduration="12"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="12"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="13"/>
+      </influence>
+
+      <!-- allow more time to slow down -->
+      <influence type="maxforwardspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="5"/>
+      </influence>
+      <!-- no forced deceleration -->
+      <influence type="maxstrafespeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="5"/>
+      </influence>
+      <influence type="maxsteeringspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="7"/>
+      </influence>
+
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="7" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+    </influences>
+  </influencelist>
+
+  <influencelist id="envoy_distortion_light" name="{20230,2015}" description="{20230,2016}" icon="pulsor_distortion">
+    <!-- removed rapid deceleration. otherwise identical to envoy_distortion -->
+    <influences classes="ship_xs ship_s ship_m">
+      <influence type="disableboost">
+        <!-- regains boost after movement cessation has worn out -->
+        <profile type="continuous" duration="6"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- trail past duration of rest of the effect -->
+        <profile type="continuous" duration="11"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" sustainvalue="0.0" sustainduration="8"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="9"/>
+      </influence>
+
+      <influence type="maxforwardspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+      <influence type="maxstrafespeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+      <influence type="maxsteeringspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.0" sustainduration="3"/>
+      </influence>
+
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="5" sustainvalue="0.3" sustainduration="3"/>
+      </influence>
+    </influences>
+    <influences classes="ship_l ship_xl">
+      <influence type="disableboost">
+        <!-- regains boost after movement cessation has worn out -->
+        <profile type="continuous" duration="8"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- less pronounced immediate effect for capital ships, but more pronounced effect on travel mode use -->
+        <profile type="continuous" duration="17"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="12"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" sustainvalue="0.0" sustainduration="12"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="12"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <profile type="envelope" sustainvalue="0.7" sustainduration="13"/>
+      </influence>
+
+      <!-- allow more time to slow down -->
+      <influence type="maxforwardspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.05" sustainduration="5"/>
+      </influence>
+      <influence type="maxstrafespeed">
+        <profile type="envelope" delay="1" sustainvalue="0.15" sustainduration="5"/>
+      </influence>
+      <influence type="maxsteeringspeed">
+        <profile type="envelope" delay="1" sustainvalue="0.1" sustainduration="7"/>
+      </influence>
+
+      <influence type="reverseacceleration">
+        <profile type="envelope" delay="7" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+    </influences>
+  </influencelist>
+
+  <!-- deprecated. kept for reference. -->
+  <influencelist id="old_envoy_distortion">
+    <influences classes="ship_xs ship_s ship_m">
+      <influence type="disableboost">
+        <!-- regains ability shortly after acceleration release begins -->
+        <profile type="continuous" duration="6"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- trail past duration of rest of the effect -->
+        <profile type="continuous" duration="11"/>
+      </influence>
+
+      <influence type="maxforwardspeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="3" sustainduration="0" releaseduration="2"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="3" sustainduration="0" releaseduration="2"/>-->
+        <!--<profile type="envelope" delay="3" sustainvalue="0.0" sustainduration="2"/>-->
+        <profile type="envelope" delay="5" sustainvalue="0.0" sustainduration="3"/>
+      </influence>
+      <influence type="maxstrafespeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="3" sustainduration="0" releaseduration="2"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.0" sustainduration="2"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.3" endvalue="1" attackduration="0" sustainduration="5" releaseduration="3"/>-->
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="reverseacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.3" endvalue="1" attackduration="0" sustainduration="5" releaseduration="3"/>-->
+        <!--<profile type="envelope" sustainvalue="0.3" sustainduration="8"/>-->
+        <profile type="envelope" delay="5" sustainvalue="0.3" sustainduration="3"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.3" endvalue="1" attackduration="0" sustainduration="5" releaseduration="3"/>-->
+        <profile type="envelope" sustainvalue="0.3" sustainduration="8"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <!--<profile type="envelope" sustainvalue="0.7" attackduration="5" sustainduration="11" releaseduration="7"/>-->
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.7" endvalue="1" attackduration="3" sustainduration="3" releaseduration="2"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+    </influences>
+    <influences classes="ship_l ship_xl">
+      <influence type="disableboost">
+        <!-- regains ability shortly after acceleration release begins -->
+        <profile type="continuous" duration="4"/>
+      </influence>
+      <influence type="disabletravel">
+        <!-- less pronounced immediate effect for capital ships, but more pronounced effect on travel mode use -->
+        <profile type="continuous" duration="13"/>
+      </influence>
+
+      <influence type="maxforwardspeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="2" sustainduration="0.1" releaseduration="1"/>-->
+        <profile type="envelope" delay="2" sustainvalue="0.0" sustainduration="1"/>
+      </influence>
+      <influence type="maxreversespeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="2" sustainduration="0.1" releaseduration="1"/>-->
+        <profile type="envelope" delay="2" sustainvalue="0.0" sustainduration="1"/>
+      </influence>
+      <influence type="maxstrafespeed">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.0" endvalue="1" attackduration="2" sustainduration="0.1" releaseduration="1"/>-->
+        <profile type="envelope" delay="2" sustainvalue="0.0" sustainduration="1"/>
+      </influence>
+
+      <influence type="forwardacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.7" endvalue="1" attackduration="3" sustainduration="0" releaseduration="5"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+      <influence type="reverseacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.7" endvalue="1" attackduration="3" sustainduration="0" releaseduration="5"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+      <influence type="strafeacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.7" endvalue="1" attackduration="3" sustainduration="0" releaseduration="5"/>-->
+        <profile type="envelope" delay="3" sustainvalue="0.7" sustainduration="5"/>
+      </influence>
+      <influence type="steeringacceleration">
+        <!--<profile type="envelope" startvalue="1" sustainvalue="0.7" endvalue="1" attackduration="5" sustainduration="0" releaseduration="3"/>-->
+        <profile type="envelope" delay="5" sustainvalue="0.7" sustainduration="3"/>
+      </influence>
+    </influences>
+  </influencelist>
+
+</influencelistconfigurations>

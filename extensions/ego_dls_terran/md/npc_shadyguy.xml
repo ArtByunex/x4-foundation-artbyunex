@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <!--TODO @Owen allow some other races to appear for the Pioneers via the character groups-->
+  <add sel="/mdscript/cues/cue[@name='GameStarted']/cues/library[@name='GetShadyGuyOwner']/actions/do_elseif[@value='@$ShadyGuyPatchMarker']" pos="after">
+    <do_elseif value="$Station.owner == faction.terran">
+      <set_value name="$Owner" exact="faction.terran" />
+    </do_elseif>
+    <do_elseif value="$Station.owner == faction.pioneers">
+      <set_value name="$Owner" exact="faction.pioneers" />
+    </do_elseif>
+  </add>
+
+</diff>

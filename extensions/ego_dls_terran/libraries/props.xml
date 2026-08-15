@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <add sel="/props">
+    <!-- CORNERS -->
+    <!-- Corner configuration for shipyards/wharfs and equipment docks -->
+    <prop id="corner_ter_canbuildship_hq_01" group="corner_canbuildship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro, buildmodule_ter_ships_m_dockarea_01_macro]" flags="canbuildships factionrepresentative" />
+      <limits>
+        <limit macro="corner_arg_standard_shipdealer_01_macro" object="1"/>
+      </limits>
+    </prop>
+
+    <prop id="corner_ter_canequipship_hq_01" group="corner_canequipship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro]" flags="cannotbuildships equipmentdock factionrepresentative" />
+      <limits>
+        <limit macro="corner_arg_standard_shipequipment_01_macro" object="1"/>
+      </limits>
+    </prop>
+    
+    <prop id="corner_ter_cannotequipship_hq_01" group="corner_nocanequipship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro]" flags="cannotbuildships cannotequipships factionrepresentative" />
+    </prop>
+
+    <prop id="corner_ter_canbuildship_01" group="corner_canbuildship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro, buildmodule_ter_ships_m_dockarea_01_macro]" flags="canbuildships" />
+      <limits>
+        <limit macro="corner_arg_standard_shipdealer_01_macro" object="1"/>
+      </limits>
+    </prop>
+
+    <prop id="corner_ter_canequipship_01" group="corner_canequipship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro, buildmodule_ter_equip_m_dockarea_01_macro]" flags="cannotbuildships equipmentdock" />
+      <limits>
+        <limit macro="corner_arg_standard_shipequipment_01_macro" object="1"/>
+      </limits>
+    </prop>
+
+    <!-- Corner configuration for everything else -->
+    <prop id="corner_ter_nocanequipship_01" group="corner_nocanequipship_01">
+      <category tags="corner" macro="[dockarea_ter_m_station_01_hightech_macro]" flags="cannotbuildships cannotequipships fallback" />
+    </prop>
+  </add>
+</diff>

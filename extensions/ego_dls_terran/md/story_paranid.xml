@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+  <add sel="//cue[@name='Tri_War_Diplomatic_Change']/actions/create_list" pos="after">
+    <do_if value="$SelectedWarTargets.indexof.{'terran'}">
+      <append_list_elements name="$TranslatedWarTargets" other="[faction.terran]"/>
+    </do_if>
+  </add>
+  <add sel="//library[@name='Find_Trinity_War_Targets']/actions/do_if[@value='$TrinitySectors.count']/do_for_each">
+    <find_sector_in_range groupname="$TerranBorderSectors" object="$CurrentSector" owner="faction.terran" maxdistance="1" multiple="true"/>
+  </add>
+</diff>

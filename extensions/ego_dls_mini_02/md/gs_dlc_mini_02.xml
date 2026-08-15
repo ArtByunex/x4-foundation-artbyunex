@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_DLC_Mini_02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_dlc_mini_02">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_DLC_Mini_02" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="100"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="'none'"/>
+        <!--Have a black screen for a little while, with the following fade-in kicking in shortly-->
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>
+      <!--<delay exact="5s"/>
+      <actions>
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>-->
+      <cues>
+        <cue name="Setup">
+          <cues>
+
+            <cue name="Setup_Map">
+              <actions>
+                <!-- Teladi Basegame Sectors -->
+                <find_sector macro="macro.cluster_05_sector001_macro"  required="true" name="$Path_To_Profit"/>
+                <find_sector macro="macro.cluster_01_sector001_macro"  required="true" name="$Grand_Exchange_I"/>
+                <find_sector macro="macro.cluster_01_sector002_macro"  required="true" name="$Grand_Exchange_III"/>
+                <find_sector macro="macro.cluster_01_sector003_macro"  required="true" name="$Grand_Exchange_IV"/>
+                <find_sector macro="macro.cluster_02_sector001_macro"  required="true" name="$Eighteen_Billion"/>
+                <find_sector macro="macro.cluster_03_sector001_macro"  required="true" name="$Memory_Of_Profit_IX"/>
+                <find_sector macro="macro.cluster_39_sector001_macro"  required="true" name="$Memory_Of_Profit_X"/>
+                <find_sector macro="macro.cluster_09_sector001_macro"  required="true" name="$Bright_Promise"/>
+                <find_sector macro="macro.cluster_15_sector001_macro"  required="true" name="$Ianamus_Zura_IV"/>
+                <find_sector macro="macro.cluster_15_sector002_macro"  required="true" name="$Ianamus_Zura_VII"/>
+                <find_sector macro="macro.cluster_19_sector001_macro"  required="true" name="$Hewas_Twin_I"/>
+                <find_sector macro="macro.cluster_19_sector002_macro"  required="true" name="$Hewas_Twin_II"/>
+                <find_sector macro="macro.cluster_42_sector001_macro"  required="true" name="$Hewas_Twin_III"/>
+                <find_sector macro="macro.cluster_43_sector001_macro"  required="true" name="$Hewas_Twin_V"/>
+                <find_sector macro="macro.cluster_34_sector001_macro"  required="true" name="$Profit_Center_Alpha"/>
+                <find_sector macro="macro.cluster_20_sector001_macro"  required="true" name="$Company_Regard"/>
+                <find_sector macro="macro.cluster_713_sector001_macro" required="true" name="$CEOs_Doubt"/>
+                <!-- pathing -->
+                <find_sector macro="macro.cluster_18_sector001_macro" required="true" name="$Trinity_Sanctum"/> 
+                <!--To uncover a significant amount of space, all Teladi owned sectors-->
+                <set_value name="$InitialMap" exact="[
+                           macro.cluster_05_sector001_macro,
+                           macro.cluster_01_sector001_macro,
+                           macro.cluster_01_sector002_macro,
+                           macro.cluster_01_sector003_macro,
+                           macro.cluster_02_sector001_macro,
+                           macro.cluster_03_sector001_macro,
+                           macro.cluster_39_sector001_macro,
+                           macro.cluster_09_sector001_macro,
+                           macro.cluster_15_sector001_macro,
+                           macro.cluster_15_sector002_macro,
+                           macro.cluster_19_sector001_macro,
+                           macro.cluster_19_sector002_macro,
+                           macro.cluster_42_sector001_macro,
+                           macro.cluster_43_sector001_macro,
+                           macro.cluster_34_sector001_macro,
+                           macro.cluster_20_sector001_macro,
+                           macro.cluster_713_sector001_macro,
+                           macro.cluster_18_sector001_macro
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                  <param name="UncoverShipyardsAndWharfs" value="true" comment="optional"/>
+                  <param name="UncoverTradeStations" value="true" comment="optional"/>
+                  <param name="UncoverHighways" value="true" comment="optional"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>
