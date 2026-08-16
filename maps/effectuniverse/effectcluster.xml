@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<macros xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <macro name="effectcluster_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="sector1_connection" ref="sectors">
+        <macro ref="effectsector_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+				<macro>
+        	<component connection="space" ref="cluster_01" />
+				</macro>
+      </connection>
+    </connections>
+    <properties>
+      <identification name="effectcluster_macro" />
+    </properties>
+  </macro>
+</macros>

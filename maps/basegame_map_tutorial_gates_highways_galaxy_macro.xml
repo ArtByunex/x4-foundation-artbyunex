@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_1944583" ref="gates">
+        <offset>
+          <position z="10000"/>
+          <rotation yaw="180"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+      <connection name="gates_1944562" ref="gates">
+        <offset>
+          <position z="-10000"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_orb_accelerator_01_macro">
+          <properties>
+            <identification description="{20001,1002}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,430011}" description="{20004,430012}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_zone_01_connection" ref="zones">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="tutorial_highways_gates_disable_travel_region"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,430001}" description="{20003,430002}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_35822" ref="regions">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_1947337" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_43"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_1944600" ref="gates">
+        <macro connection="destination" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_005_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_006_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_highway_007_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="-100000" tx="1" weight="0.01"/>
+          <splineposition x="0" tx="1" weight="1.0"/>
+          <splineposition x="100000" tx="1" weight="0.01"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="-5000" z="50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="-5000" z="-50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_highway_008_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition z="120000" y="-500" tz="-1" weight="0.01"/>
+          <splineposition z="0" y="-500" tz="-1" weight="1.0"/>
+          <splineposition z="-120000" y="-500" tz="-1" weight="0.01"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position z="50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position z="-50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,420021}" description="{20004,420022}"/>
+    </properties>
+    <connections>
+      <connection name="tzonecluster_42_sector002shcon7_gatezone_connection" ref="zones">
+        <offset>
+          <position x="-200000" z="50000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_62358" ref="zones">
+        <offset>
+          <position x="-100000" z="-15000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="tzonecluster_42_sector002shcon8_gatezone_connection" ref="zones">
+        <offset>
+          <position x="-20000" z="40000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zone003_cluster_42_sector002_connection" ref="zones">
+        <offset>
+          <position x="20000" z="-120000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_62366" ref="zones">
+        <offset>
+          <position x="-160000" z="40000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_005_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_62415" ref="zones">
+        <offset>
+          <position x="20000" z="120000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_zone_006_macro" connection="sector"/>
+      </connection>
+      <connection name="zonehighways_62378" ref="zonehighways">
+        <offset>
+          <position x="-90000" z="40000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_highway_007_macro" connection="sector">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../zones_62366" connection="highway01connection01_gate"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../zones_62358" connection="highway01connection02_gate"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+      <connection name="zonehighways_62421" ref="zonehighways">
+        <offset>
+          <position x="20000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_highway_008_macro" connection="sector">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../zones_62415" connection="highway01connection01_gate"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../zone003_cluster_42_sector002_connection" connection="highway01connection02_gate"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_002_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_002_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_1744297" ref="gates">
+        <offset>
+          <position x="-30000" z="5000"/>
+          <rotation yaw="90"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_orb_accelerator_01_macro">
+          <properties>
+            <identification description="{20001,1002}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_sector_002_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,420011}" description="{20004,420012}"/>
+    </properties>
+    <connections>
+      <connection name="tzonecluster_42_sector001shcon11_gatezone_connection" ref="zones">
+        <offset>
+          <position x="200000" z="-40000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_002_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="tzonecluster_42_sector001shcon12_gatezone_connection" ref="zones">
+        <offset>
+          <position x="200000" z="-50000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_002_zone_002_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_superhighway_003_macro">
+    <component ref="standardsechighway" connection="cluster"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="56136464" z="44967.176" tx="-1" tz="-0.000801033" weight="0.05" inlength="0" outlength="9356092"/>
+          <splineposition x="28068230" z="22483.588" tx="-1" tz="-0.000801086" weight="1" inlength="9356100" outlength="9356093"/>
+          <splineposition tx="-1" tz="-0.000801033" weight="1" inlength="9356088" outlength="9356093"/>
+          <splineposition x="-28068232" z="-22483.588" tx="-1" tz="-0.000801086" weight="1" inlength="9356093" outlength="9356092"/>
+          <splineposition x="-56136464" z="-44967.176" tx="-1" tz="-0.000801033" weight="0.05" inlength="9356091" outlength="0"/>
+          <size r="1000"/>
+        </boundary>
+      </boundaries>
+      <controls>
+        <linear>
+          <time min="10" max="15" />
+        </linear>
+      </controls>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="56136464" z="44967.176"/>
+          <rotation yaw="-90"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="-56136464" z="-44967.176"/>
+          <rotation yaw="90"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_superhighway_004_macro">
+    <component ref="standardsechighway" connection="cluster"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="-56136464" z="-44884.199" tx="1" tz="0.000799555" weight="0.05" inlength="0" outlength="9356091"/>
+          <splineposition x="-28068232" z="-22442.1" tx="1" tz="0.000799179" weight="1" inlength="9356091" outlength="9356091"/>
+          <splineposition tx="1" tz="0.000799555" weight="1" inlength="9356090" outlength="9356090"/>
+          <splineposition x="28068230" z="22442.1" tx="1" tz="0.000799179" weight="1" inlength="9356089" outlength="9356101"/>
+          <splineposition x="56136464" z="44884.199" tx="1" tz="0.000799555" weight="0.05" inlength="9356088" outlength="0"/>
+          <size r="1000"/>
+        </boundary>
+      </boundaries>
+      <controls>
+        <linear>
+          <time min="10" max="15" />
+        </linear>
+      </controls>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="-56136464" z="-44884.199"/>
+          <rotation yaw="90"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="56136464" z="44884.199"/>
+          <rotation yaw="90"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="tutorial_highways_gates_disable_travel_region"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="tutorial_highways_gates_disable_travel_region"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_002_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,420001}" description="{20003,420002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_42_sector002_connection" ref="sectors">
+        <offset>
+          <position x="112672928"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="cluster_42_sector001_connection" ref="sectors">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_sector_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="superhighway001_cluster_42_connection" ref="sechighways">
+        <offset>
+          <position x="56336464" z="5032.824"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_superhighway_003_macro" connection="cluster">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../cluster_42_sector002_connection/tzonecluster_42_sector002shcon7_gatezone_connection" connection="exitpoint1"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../cluster_42_sector001_connection/tzonecluster_42_sector001shcon11_gatezone_connection" connection="entrypoint1"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+      <connection name="superhighway002_cluster_42_connection" ref="sechighways">
+        <offset>
+          <position x="56336464" z="-5115.801"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_superhighway_004_macro" connection="cluster">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../cluster_42_sector001_connection/tzonecluster_42_sector001shcon12_gatezone_connection" connection="exitpoint1"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../cluster_42_sector002_connection/tzonecluster_42_sector002shcon8_gatezone_connection" connection="entrypoint1"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+      <connection name="regions_35702" ref="regions">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_35695" ref="regions">
+        <offset>
+          <position x="112672928"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_42"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_003_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_5355" ref="gates">
+        <macro connection="destination" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_003_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,390011}" description="{20004,390012}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_zone_01_connection" ref="zones">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_003_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_003_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="tutorial_highways_gates_disable_travel_region"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_003_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,390001}" description="{20003,390002}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_003_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_35819" ref="regions">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_003_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_62331" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_39"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_5361" ref="gates">
+        <offset>
+          <rotation yaw="180"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_sector_001_highway_004_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition z="100000" tz="-1" weight="0.01"/>
+          <splineposition z="0" tz="-1" weight="1.0"/>
+          <splineposition z="-100000" tz="-1" weight="0.01"/>
+          <splineposition z="-1000000" tz="-1" weight="0.01"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="-5000" z="50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="-5000" z="-50000"/>
+          <rotation yaw="180"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,100011}" description="{20004,100012}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_zone_01_connection" ref="zones">
+        <offset>
+          <position z="100000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_62452" ref="zones">
+        <offset>
+          <position z="-1000000"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zonehighways_62451" ref="zonehighways">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_sector_001_highway_004_macro" connection="sector">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../zones_62452" connection="highway01connection01_gate"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../editor_cluster_sector_zone_01_connection" connection="highway01connection02_gate"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="tutorial_highways_gates_disable_travel_region"/>
+    </properties>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_cluster_004_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,100001}" description="{20003,100002}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_35692" ref="regions">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_62348" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_10"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_gates_highways_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_1747560" ref="clusters">
+        <offset>
+          <position z="17320508"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_001_macro" connection="galaxy"/>
+      </connection>
+      <connection name="clusters_1744279" ref="clusters">
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_002_macro" connection="galaxy"/>
+      </connection>
+      <connection name="clusters_1944587" ref="clusters">
+        <offset>
+          <position z="34641016"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_003_macro" connection="galaxy"/>
+      </connection>
+      <connection name="clusters_1944593" ref="clusters">
+        <offset>
+          <position z="-17320508"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_gates_highways_cluster_004_macro" connection="galaxy"/>
+      </connection>
+      <connection name="gateconnection_001" ref="destination" path="../clusters_1747560/editor_cluster_sector_connection/editor_cluster_sector_zone_01_connection/gates_1944583">
+        <macro connection="destination" path="../../../../../clusters_1944587/editor_cluster_sector_connection/editor_cluster_sector_zone_01_connection/gates_5355"/>
+      </connection>
+      <connection name="gateconnection_002" ref="destination" path="../clusters_1747560/editor_cluster_sector_connection/editor_cluster_sector_zone_01_connection/gates_1944562">
+        <macro connection="destination" path="../../../../../clusters_1744279/cluster_42_sector001_connection/tzonecluster_42_sector001shcon12_gatezone_connection/gates_1744297"/>
+      </connection>
+      <connection name="gateconnection_003" ref="destination" path="../clusters_1744279/cluster_42_sector002_connection/zone003_cluster_42_sector002_connection/gates_1944600">
+        <macro connection="destination" path="../../../../../clusters_1944593/editor_cluster_sector_connection/editor_cluster_sector_zone_01_connection/gates_5361"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<macros xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <macro name="editor_zone_macro" class="zone">
+    <component ref="standardzone" />
+  </macro>
+  <macro name="editor_local_highway_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="-5000" z="50000" tz="-1" weight="0.2" inlength="0" outlength="10000"/>
+          <splineposition x="-5000" z="-50000" tz="-1" weight="0.2" inlength="10000" outlength="0"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+      <configuration ref="defaultlocalhighwayconfiguration" />
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="-5000" z="50000"/>
+          <rotation yaw="179.9998"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="-5000" z="-50000"/>
+          <rotation yaw="-179.99954"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="editor_cluster_001_sector_001_macro" class="sector">
+    <component ref="standardsector" />
+    <connections>
+      <connection name="editor_cluster_sector_zone_01_connection" ref="zones">
+        <offset>
+          <position x="0" y="0" z="0" />
+        </offset>
+        <macro ref="editor_zone_macro" connection="sector" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="editor_cluster_001_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <offset>
+          <position x="0" y="0" z="0" />
+        </offset>
+        <macro ref="editor_cluster_001_sector_001_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+        <macro connection="space" ref="tcluster_01_macro" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="editor_galaxy_macro" class="galaxy">
+    <component ref="standardgalaxy" />
+    <connections>
+      <connection name="cluster_connection" ref="clusters">
+        <macro ref="editor_cluster_001_macro" connection="galaxy" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="editor_empty_galaxy_macro" class="galaxy">
+    <component ref="standardgalaxy" />
+  </macro>
+</macros>

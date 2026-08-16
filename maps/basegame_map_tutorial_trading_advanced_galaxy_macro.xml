@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_powerplant"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_station_002_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_refinedmetals"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_32004" ref="stations">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="stations_41111" ref="stations">
+        <offset>
+          <position x="-9987.891" z="-12753.275"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_station_002_macro" connection="space"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_advancedcomposites"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_station_002_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_quantumtube"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_32873" ref="stations">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="stations_40212" ref="stations">
+        <offset>
+          <position x="-14507.08" z="452.203"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_station_002_macro" connection="space"/>
+      </connection>
+      <connection name="lockboxes_77231" ref="lockboxes">
+        <offset>
+          <position x="-11777.413" y="786.323" z="-52.589"/>
+          <rotation yaw="-115.3996" pitch="-3.83196"/>
+        </offset>
+        <macro connection="space" ref="sm_gen_lockbox_rare_01_macro"/>
+      </connection>
+      <connection name="satellites_91451" ref="satellites">
+        <offset>
+          <position x="-2370.209" z="14368.244"/>
+        </offset>
+        <macro connection="space" ref="eq_arg_satellite_02_macro">
+          <properties>
+            <identification owner="player"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_003_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_plasmaconductors"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_39371" ref="stations">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_003_station_001_macro" connection="space"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_004_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_superfluidcoolant"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_42107" ref="stations">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_004_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="satellites_91620" ref="satellites">
+        <offset>
+          <position x="1027.223" z="-21101.008"/>
+        </offset>
+        <macro connection="space" ref="eq_arg_satellite_02_macro">
+          <properties>
+            <identification owner="player"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_foodrations"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_002_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_antimattercells"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_003_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_medicalsupply"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_31058" ref="stations">
+        <offset>
+          <position x="-515.874" z="22019.959"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="stations_33713" ref="stations">
+        <offset>
+          <position x="38982.453" z="-42994.199"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_002_macro" connection="space"/>
+      </connection>
+      <connection name="stations_38463" ref="stations">
+        <offset>
+          <position x="8805.362" z="34898.23"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_station_003_macro" connection="space"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_engineparts"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_002_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_graphene"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_003_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="argon" nameoverride=""/>
+      <plan ref="tutorial_hullparts"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_34648" ref="stations">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="stations_35491" ref="stations">
+        <offset>
+          <position x="15138.906" z="15069.854"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_002_macro" connection="space"/>
+      </connection>
+      <connection name="stations_37416" ref="stations">
+        <offset>
+          <position x="18187.562" z="-3649.355"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_station_003_macro" connection="space"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,300011}" description="{20004,300012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_31998" ref="zones">
+        <offset>
+          <position x="-69128.172" z="1560.116"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_32865" ref="zones">
+        <offset>
+          <position x="-25962.662" z="-66994.453"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_39359" ref="zones">
+        <offset>
+          <position x="37095.723" z="-57945.59"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_42097" ref="zones">
+        <offset>
+          <position x="53711.398" z="72959.555"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_957639" ref="zones">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_005_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_34640" ref="zones">
+        <offset>
+          <position x="68384.258" z="10224.802"/>
+        </offset>
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_zone_006_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,300001}" description="{20003,300002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_30_sector001_connection" ref="sectors">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_30"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="basegame_map_tutorial_trading_advanced_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_957594" ref="clusters">
+        <macro ref="basegame_map_tutorial_trading_advanced_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>
