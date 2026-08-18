@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+  <add sel="//cue[@name='Unification_Stage_3_FactionMerge_Complete']//set_value[@name='$JobSetup']" pos="after">
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_carrier_patrol_xl_cluster_spl', 'trinity_carrier_patrol_xl_cluster_spl']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_corvette_patrol_m_sector_spl', 'trinity_corvette_patrol_m_sector_spl']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_corvette_patrol_m_sector_spl_mission', 'trinity_corvette_patrol_m_sector_spl_mission']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_fighter_patrol_s_zone_spl', 'trinity_fighter_patrol_s_zone_spl']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_carrier_patrol_xl_cluster_phase2_spl', 'trinity_carrier_patrol_xl_cluster_phase2_spl']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_destroyer_patrol_l_sector_phase2_spl', 'trinity_destroyer_patrol_l_sector_phase2_spl']"/>
+    <append_to_list name="$JobSetup" exact="[null, 'paranid_destroyer_patrol_l_sector_exp_phase2_spl', 'trinity_destroyer_patrol_l_sector_exp_phase2_spl']"/>
+  </add>
+
+  <add sel="//cue[@name='Unification_Stage_3_FactionMerge_Complete']/patch[@sinceversion='9']">   
+    <set_job_active job="'paranid_carrier_patrol_xl_cluster_phase2_spl'" activate="false" successor="'trinity_carrier_patrol_xl_cluster_phase2_spl'"/>
+    <set_job_active job="'paranid_destroyer_patrol_l_sector_phase2_spl'" activate="false" successor="'trinity_destroyer_patrol_l_sector_phase2_spl'"/>
+    <set_job_active job="'paranid_destroyer_patrol_l_sector_exp_phase2_spl'" activate="false" successor="'trinity_destroyer_patrol_l_sector_exp_phase2_spl'"/>
+  </add>
+
+  <add sel="//cue[@name='Tri_War_Diplomatic_Change']/actions/create_list" pos="after">
+    <do_if value="$SelectedWarTargets.indexof.{'split'}">
+      <append_list_elements name="$TranslatedWarTargets" other="[faction.split]"/>
+    </do_if>
+  </add>
+
+  <add sel="//library[@name='Find_Trinity_War_Targets']/actions/do_if[@value='$TrinitySectors.count']/do_for_each">
+    <find_sector_in_range groupname="$SplitBorderSectors" object="$CurrentSector" owner="faction.split" maxdistance="1" multiple="true"/>
+  </add>
+
+</diff>

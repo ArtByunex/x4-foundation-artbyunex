@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Spacesuit_2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+
+    <library name="AddRepairTargets" purpose="include_actions">
+      <actions>
+        <do_for_each name="$target" in="$targets" counter="$i">
+          <set_object_hull object="$target" exact="0" comment="will set to minimum hull value defined in the macro"/>
+          <set_known object="$target" known="true"/>
+          <add_to_group groupname="$RepairTargets" object="$target"/>
+          <do_if value="$targetamount? and $i ge $targetamount">
+            <break/>
+          </do_if>
+        </do_for_each>
+      </actions>
+    </library>
+
+    <cue name="Start" namespace="this" module="scenario_spacesuit_2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$MissionActors"     exact="table[]"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+        <set_external_view_allowed allow="false"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <set_value name="$PlayerSpawnZone" exact="player.zone"/>
+        <set_value name="$PlayerSpawnPos" exact="player.ship.relativeposition.{$PlayerSpawnZone}"/>
+
+        <set_value name="$TimeBonusPerSecond" exact="10"/>
+        <set_value name="$ScorePerRepair" exact="100"/>
+        <set_value name="$ScorePerLeak" exact="100"/>
+
+        <find_object name="$Level" macro="macro.landmarks_gen_spacesuit_level_01_repairduty_01_macro" space="player.sector" required="true"/>
+
+        <find_object_component object="$Level" name="$Room1" macro="macro.landmarks_gen_spacesuit_level_01_room_01_macro" multiple="true"/>
+        <find_object_component object="$Level" name="$Room2" macro="macro.landmarks_gen_spacesuit_level_01_room_02_macro" multiple="true"/>
+        <find_object_component object="$Level" name="$Room3" macro="macro.landmarks_gen_spacesuit_level_01_room_03_macro" multiple="true"/>
+        <find_object_component object="$Level" name="$Room4" macro="macro.landmarks_gen_spacesuit_level_01_room_04_macro" multiple="true"/>
+        <find_object_component object="$Level" name="$Room5" macro="macro.landmarks_gen_spacesuit_level_01_room_05_macro" multiple="true"/>
+
+        <find_object_component object="$Level" groupname="$RadiationHazards" macro="macro.scs_gen_hazard_radiation_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Radiation hazards: ' + $RadiationHazards.count"/>
+
+        <find_object_component object="$Level" groupname="$Leaks" macro="macro.dataleak_xs_standard_01_macro" multiple="true"/>
+        <do_for_each name="$leak" in="$Leaks">
+          <set_object_hull object="$leak" exact="95"/>
+        </do_for_each>
+
+        <create_group groupname="$RepairTargets"/>
+        <create_group groupname="$FireHazards"/>
+
+        <find_object_component object="$Level" name="$targets" macro="macro.scs_gen_destructible_hatch_16_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Small hatches: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Level" name="$targets" macro="macro.scs_gen_destructible_hatch_32_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Large hatches: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Level" name="$targets" macro="macro.scs_gen_destructible_hazard_fire_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Fire hazards (small pipes): ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+        <add_to_group groupname="$FireHazards" list="$targets"/>
+
+        <find_object_component object="$Level" name="$targets" macro="macro.scs_gen_destructible_hazard_fire_02_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Fire hazards (large pipes): ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+        <add_to_group groupname="$FireHazards" list="$targets"/>
+
+        <find_object_component object="$Level" name="$targets" macro="macro.scs_gen_prop_oxygenrecharger_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Oxygen generators: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Room1" name="$targets" macro="macro.scs_gen_destructible_generator_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Generators in room 1: ' + $targets.count"/>
+        <shuffle_list list="$targets"/>
+        <set_value name="$targetamount" exact="3"/>
+        <include_actions ref="AddRepairTargets"/>
+        <remove_value name="$targetamount"/>
+
+        <find_object_component object="$Room2" name="$targets" macro="macro.scs_gen_destructible_generator_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Generators in room 2: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Room3" name="$targets" macro="macro.scs_gen_destructible_generator_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Generators in room 3: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Room4" name="$targets" macro="macro.scs_gen_destructible_generator_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Generators in room 4: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <find_object_component object="$Room5" name="$targets" macro="macro.scs_gen_destructible_generator_01_macro" multiple="true" recursive="true"/>
+        <debug_text text="'Generators in room 5: ' + $targets.count"/>
+        <include_actions ref="AddRepairTargets"/>
+
+        <set_value name="$TotalNumLeaks" exact="$Leaks.count"/>
+        <set_value name="$TotalNumRepairTargets" exact="$RepairTargets.count"/>
+
+        <debug_text text="'Total repair targets: ' + $TotalNumRepairTargets"/>
+        <debug_text text="'Total leaks: ' + $TotalNumLeaks"/>
+
+        <debug_text text="'Max repair score: ' + ($ScorePerRepair * $TotalNumRepairTargets + $ScorePerLeak * $TotalNumLeaks)"/>
+
+        <set_value name="$RepairedTargets" exact="0"/>
+        <set_value name="$RepairedLeaks" exact="0"/>
+        <set_value name="$ScannedLeaks" exact="0"/>
+        <set_value name="$Score_Targets" exact="0"/>
+        <set_value name="$Score_Leaks" exact="0"/>
+
+      </actions>
+      <cues>
+
+        <cue name="StopUseCase"/>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Chief" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="IntroCutscene"/>
+                </do_else>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="IntroCutscene">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$CutsceneActors" exact="table[]"/>
+            <set_value name="$CutsceneActors.$Chief" exact="table[ $entity = $Chief ]"/>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Chief', $speak = 306140301, $recipient = 'player', $comment = 'You have a full ledger of work orders for this shift.'],
+                          table [$actor = '$Chief', $speak = 306140302, $recipient = 'player', $comment = 'Maybe you will be the first to earn a performance bonus!'],
+                          table [$actor = '$Chief', $speak = 306140303, $recipient = 'player', $comment = 'But I will be impressed if you fix half the damage...'],
+                        ],
+              $callbackcue = StopCutscene,
+              $abortcallbackcue = StopCutscene,
+              $abortonsignalledcue = StopUseCase
+            ]" />
+            <play_cutscene cinematicmode="true" result="$IntroCutscene" key="'scenario_spacesuit_2_intro_cutscene'">
+              <param name="level" object="$Level"/>
+            </play_cutscene>
+          </actions>
+          <cues>
+            <cue name="StopCutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <stop_cutscene cutscene="$IntroCutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="CutsceneStopped">
+              <conditions>
+                <event_cutscene_stopped cutscene="$IntroCutscene"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="IntroCutscene"/>
+                <signal_cue cue="StopUseCase" check="false"/>
+                <signal_cue cue="Start_Scenario"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <muffle_sound strength="0" duration="0s"/>
+            <blur_screen strength="0" duration="0s"/>
+            <play_music music="'music_soundtrack_timelines_spacesuit_2'" loop="true"/>
+          </actions>
+          <cues>
+            <cue name="MitsunoHack">
+              <delay min="30s" max="90s"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <cue name="WaitForPhysics" checkinterval="1s">
+              <conditions>
+                <debug_text text="'Physics ready? ' + $Level.isphysicsready"/>
+                <check_value value="$Level.isphysicsready"/>
+              </conditions>
+              <cues>
+                <!-- The cues that make up the scenario will go here -->
+
+                <cue name="SetupMission">
+                  <actions>
+                    <set_value name="$MissionDuration" exact="5min"/>
+                    <set_value name="$StartTime" exact="player.age"/>
+                    <!-- Mission Objective -->
+                    <create_mission cue="$MissionCue" abortable="false" name="{30614,2001}" description="{30614,2004}"
+                                    icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                    difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                      <briefing>
+                        <objective step="1" action="objective.repair" group="$RepairTargets"/>
+                      </briefing>
+                    </create_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="1"/>
+                  </actions>
+                </cue>
+
+                <cue name="UpdateTimerDisplay">
+                  <actions>
+                    <set_value name="$textcolour_primary" exact="'text_normal'"/>
+                    <set_value name="$textcolour_secondary" exact="'overlay_scenario_stat_text'"/>
+                  </actions>
+                  <delay exact="1ms"/>
+                  <actions>
+                    <show_overlay_text relwidth="1.0" reloffsetx="0.01" reloffsety="0.05" fromtop="true" >
+                      <row>
+                        <col idx="1"
+                             text="{1001,3404} + {1001,120}"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_secondary"
+                             fontsize="20"
+                             halign="right"
+                             valign="bottom" />
+                        <col idx="2"
+                             text="($MissionDuration - (player.age - $StartTime)).formatted.{'%m:%.3S'}"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_primary"
+                             fontsize="20"
+                             halign="left"
+                             valign="bottom" />
+                        <col idx="6"
+                         text="' '"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="20"
+                         halign="left"
+                         valign="bottom" />
+                      </row>
+                      <row fromtop="true">
+                        <col idx="1"
+                         text="{30614,207} + {1001,120}"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="12"
+                         halign="right"
+                         valign="bottom" />
+                        <col idx="2"
+                             text="'\033#text_normal#' + $RepairedTargets + '\033X/' + $TotalNumRepairTargets"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_secondary"
+                             fontsize="12"
+                             halign="left"
+                             valign="bottom"/>
+                      </row>
+                      <row fromtop="true">
+                        <col idx="1"
+                         text="{30614,208} + {1001,120}"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="12"
+                         halign="right"
+                         valign="bottom" />
+                        <col idx="2"
+                             text="'\033#text_normal#' + $RepairedLeaks + '\033X/' + $TotalNumLeaks"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_secondary"
+                             fontsize="12"
+                             halign="left"
+                             valign="bottom"/>
+                      </row>
+                    </show_overlay_text>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <!--track damage sources, store if we got damaged by fire, electricity and radiation; unlocks achievement at end-->
+                <cue name="PlayerTookFireDamage">
+                  <conditions>
+                    <event_object_took_area_damage object="player.ship"/>
+                    <check_value value="$FireHazards.indexof.{event.param}"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Fire damage'"/>
+                    <set_value name="$FireDamageTaken" exact="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="PlayerTookElectricityDamage">
+                  <conditions>
+                    <event_object_took_area_damage object="player.ship"/>
+                    <check_value value="not $FireHazards.indexof.{event.param}"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Electricity damage'"/>
+                    <set_value name="$ElectricityDamageTaken" exact="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="PlayerTookRadiationDamage">
+                  <conditions>
+                    <event_object_triggered group="$RadiationHazards"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Radiation damage'"/>
+                    <set_value name="$RadiationDamageTaken" exact="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="PlayerDamagedUsecase">
+                  <conditions>
+                    <event_object_hull_damaged group="global.$PlayerControlledGroup"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                      $script = [
+                                  table [$actor = '$Chief', $speak = 306140105, $recipient = 'player', $comment = 'Careful!'],
+                                ],
+                      $abortonsignalledcue = StopUseCase
+                    ]" />
+                  </actions>
+                  <delay exact="5s"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="TargetRepaired" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_object_hull_above_function_threshold group="$RepairTargets"/>
+                      <event_player_repaired_signal_leak/>
+                      <event_player_signal_unlock_finished/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <do_if value="event.name == 'event_object_hull_above_function_threshold'">
+                      <set_value name="$RepairedTargets" exact="$RepairedTargets + 1"/>
+                      <debug_text text="'Player repaired target ' + event.object.knownname" chance="$DebugChance"/>
+                      <remove_from_group group="$RepairTargets" object="event.object"/>
+                    </do_if>
+                    <do_elseif value="event.name == 'event_player_repaired_signal_leak'">
+                      <set_value name="$RepairedLeaks" exact="$RepairedLeaks + 1"/>
+                      <debug_text text="'Player repaired signal leak #' + $RepairedLeaks" chance="$DebugChance"/>
+                      <remove_from_group group="$Leaks" object="event.param"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$ScannedLeaks" exact="$ScannedLeaks + 1"/>
+                      <debug_text text="'Player scanned signal leak #' + $ScannedLeaks" chance="$DebugChance"/>
+                      <remove_from_group group="$RepairTargets" object="event.param"/>
+                    </do_else>
+                    <!--update objective-->
+                    <do_if value="$RepairTargets.count">
+                      <set_objective cue="$MissionCue" step="1" action="objective.repair" group="$RepairTargets" updatebriefing="true"/>
+                    </do_if>
+                    <do_elseif value="$Leaks.count">
+                      <set_objective cue="$MissionCue" step="1" action="objective.custom" customaction="{30614,215}" updatebriefing="true">
+                        <progress progress="$RepairedLeaks" max="$RepairedLeaks + $ScannedLeaks + $Leaks.count"/>
+                      </set_objective>
+                    </do_elseif>
+                    <do_else>
+                      <set_objective cue="$MissionCue" step="1" action="objective.none" updatebriefing="true"/>
+                    </do_else>
+                    <!--check if we're done-->
+                    <do_if value="$Leaks.count + $RepairTargets.count == 0">
+                      <signal_cue cue="Finish"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Timeout">
+                  <delay exact="$MissionDuration"/>
+                  <actions>
+                    <signal_cue cue="Finish"/>
+                  </actions>
+                </cue>
+
+                <library name="CalculateScore" purpose="include_actions">
+                  <actions>
+                    <set_value name="$Duration" exact="player.age - $StartTime"/>
+                    <set_value name="$TimeRemaining" exact="if (player.exists and not $Leaks.count and not $RepairTargets.count) then ($MissionDuration - $Duration) else 0s"/>
+                    <set_value name="$Score_Time" exact="if $TimeRemaining? then $TimeBonusPerSecond * ($TimeRemaining)f else 0"/>
+                    <set_value name="$Score_Targets" exact="$ScorePerRepair * $RepairedTargets"/>
+                    <set_value name="$Score_Leaks" exact="$ScorePerLeak * $RepairedLeaks"/>
+                    <set_value name="$TotalScore" exact="$Score_Time + $Score_Targets + $Score_Leaks"/>
+                    <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$TotalScore}"/>
+                  </actions>
+                </library>
+
+                <cue name="Finish">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!--Calculate score, speak line appropriate to rating-->
+                    <include_actions ref="CalculateScore"/>
+                    <do_if value="$TimeRemaining gt 0s">
+                      <set_value name="$FinalLine" exact="306140117" comment="Well paint my face and call me Petulenas, you finished with time to spare!"/>
+                    </do_if>
+                    <do_elseif value="$Rating == 0">
+                      <set_value name="$FinalLine" exact="[306140108, 306140118].random" comment="Tss. A substandard result. / Do better."/>
+                    </do_elseif>
+                    <do_elseif value="$Rating lt 3">
+                      <set_value name="$FinalLine" exact="306140114" comment="You hit the quota. Well done."/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$FinalLine" exact="[306140115, 306140119].random" comment="Impressive! Most impressive! / Well done!"/>
+                    </do_else>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                      $script = [
+                                  table [$actor = '$Chief', $speak = $FinalLine, $recipient = 'player'],
+                                  table [$actor = '$Chief', $speak = 306140304, $recipient = 'player', $comment = 'Care for a drink? They have a new flavour of Fizz!'],
+                                ],
+                      $callbackcue = ResultWindow,
+                      $abortcallbackcue = ResultWindow,
+                      $abortonsignalledcue = StopUseCase
+                    ]" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="PlayerDied">
+          <conditions>
+            <event_object_destroyed object="player.entity"/>
+          </conditions>
+          <actions>
+            <include_actions ref="CalculateScore"/>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Chief', $speak = 306140106, $recipient = 'player', $comment = 'Rogias? Rogias? ROGIIIAAAAAS!'],
+                        ],
+              $callbackcue = ResultWindow,
+              $abortcallbackcue = ResultWindow,
+              $abortonsignalledcue = StopUseCase
+            ]" />
+          </actions>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <add_scenario_stat id="'targets'" name="{30614,207}" uivalue="$RepairedTargets" score="$Score_Targets" maxscore="$ScorePerRepair * $TotalNumRepairTargets"/>
+            <add_scenario_stat id="'leaks'" name="{30614,208}" uivalue="$RepairedLeaks" description="{30614,211}" score="$Score_Leaks" maxscore="$ScorePerLeak * $TotalNumLeaks"/>
+            <do_if value="$TimeRemaining? and $TimeRemaining gt 0s">
+              <substitute_text text="$timebonushinttext" source="{30614,204}">
+                <replace string="'$SCORE$'" with="$TimeBonusPerSecond"/>
+                <replace string="'$TIME$'" with="$MissionDuration.formatted.default" />
+              </substitute_text>
+              <add_scenario_stat id="'time'" name="{30614,202}" uivalue="$TimeRemaining.formatted.{'%m:%.3S'}" description="$timebonushinttext" score="$Score_Time" maxscore="3000 - ($ScorePerRepair * $TotalNumRepairTargets) - ($ScorePerLeak * $TotalNumLeaks)"/>
+            </do_if>
+            <set_value name="$ResultData.$Score" exact="$TotalScore"/>
+            <do_if value="not $ResultData.$PlayerDied and $FireDamageTaken? and $ElectricityDamageTaken? and $RadiationDamageTaken?">
+              <unlock_achievement name="TL_HAZARD_PAY" scenario="true"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

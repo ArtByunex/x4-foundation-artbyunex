@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<effects xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../libraries/effects.xsd">
+  <!-- par l laser | bullet_par_l_laser_02_mk1_macro -->
+  <effect name="ref_muzzle_par_l_laser_02_mk1_base" alignment="object">
+    <elements>
+      <element id="2" ref="muzzle_par_l_laser_02_mk1_macro" duration="0.1" fadeout="0.07" minscale="1.3"  maxscale="1.4"/>
+      <element id="3" ref="impact_light_purple_macro"       duration="0.1" fadeout="0.0"  minscale="10.0" maxscale="10.0"/>
+    </elements>
+  </effect>
+  <effect name="muzzle_par_l_laser_02_mk1" alignment="object">
+    <references>
+      <reference effect="ref_muzzle_par_l_laser_02_mk1_base"/>
+    </references>
+    <elements>
+      <!-- Sound -->
+      <element id="4" ref="effect_dummy_macro" duration="1.5">
+        <sound ref="weapon_par_l_expeditionary_01_mk1_muzzle"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="ref_impact_par_l_laser_02_mk1_base" alignment="impact">
+    <elements>
+      <element id="3" ref="impact_light_purple_macro"              duration="0.2" fadein="0.0" fadeout="0.2" minscale="5.0"  maxscale="5.0"/>
+    </elements>
+  </effect>
+  <effect name="impact_par_l_laser_02_mk1" alignment="impact">
+    <references>
+      <reference effect="ref_impact_par_l_laser_02_mk1_base"/>
+    </references>
+    <elements>
+      <element id="4" ref="impact_par_l_laser_02_mk1_macro"       duration="0.15" fadeout="0.15 " minscale="0.6"  maxscale="0.6"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" duration="1.0">
+        <sound ref="large_energy_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_par_l_laser_02_mk1_inside" alignment="impact">
+    <references>
+      <reference effect="ref_impact_par_l_laser_02_mk1_base"/>
+    </references>
+    <elements>
+      <element id="4" ref="impact_par_l_laser_02_mk1_macro"       duration="0.15" fadeout="0.15 " minscale="0.4"  maxscale="0.4"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" duration="1.0">
+        <sound ref="large_energy_impact_inside"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_par_l_laser_02_mk1_bigobject" alignment="impact">
+    <references>
+      <reference effect="ref_impact_par_l_laser_02_mk1_base"/>
+    </references>
+    <elements>
+      <element id="4" ref="impact_par_l_laser_02_mk1_macro"       duration="0.15" fadeout="0.15 " minscale="0.6"  maxscale="0.6"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" duration="1.0">
+        <sound ref="large_energy_impact"/>
+      </element>
+    </elements>
+  </effect>
+  <effect name="impact_par_l_laser_02_mk1_bigobject_inside" alignment="impact">
+    <references>
+      <reference effect="ref_impact_par_l_laser_02_mk1_base"/>
+    </references>
+    <elements>
+      <element id="4" ref="impact_par_l_laser_02_mk1_macro"       duration="0.15" fadeout="0.15 " minscale="0.4"  maxscale="0.4"/>
+      <!-- Sound -->
+      <element id="5" ref="effect_dummy_macro" duration="1.0">
+        <sound ref="large_energy_impact_inside_bigobject"/>
+      </element>
+    </elements>
+  </effect>
+</effects>

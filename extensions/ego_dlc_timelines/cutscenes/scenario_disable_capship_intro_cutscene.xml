@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_disable_capship_intro_cutscene" />
+  <!--
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_capitalship" />
+    <object_group name="target_group">
+      <reference object="target_capitalship" />
+      <reference object="target_component" />
+      <reference object="target_playership" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Sequence01" start="0">
+        <shot name="LookAtSquad" environment="scenezone" duration="12000">
+          <camera_orbit reference="target_playership" orient_to="object" interpolation="smooth">
+            <begin angle="80" distance="150" elevation="5" />
+            <end angle="100" distance="160" elevation="5" time="9500"/>
+          </camera_orbit>
+        </shot>
+        
+        <shot name="CapitalRotation" environment="scenezone" duration="14000">
+          <camera_orbit reference="target_capitalship" interpolation="smooth">
+            <begin angle="0" distance="2550" elevation="-15" />
+            <end angle="20" distance="2860" elevation="-15" time="13500"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="StaticCameraShot03" environment="scenezone" duration="6000">
+          <camera>
+            <position>
+              <reference object="target_component" x="-80" y="425" z="160"/>
+            </position>
+            <lookdirection>
+              <reference object="target_component" x="80" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="FlyFrom_Capita_To_PlayerShip" environment="scenezone" duration="10000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_capitalship" distance="110" flyto_reference="target_playership" flyto_distance="125" interpolation="smooth" time_firstobject="2000" time_fly="4000" cycle="none"
+                            orbit1_yaw_start="127" orbit1_yaw_end="130" orbit1_elevation="10"
+                            orbit2_yaw_start="0" orbit2_yaw_end="0" orbit2_pitch="3"/>
+
+        </shot>
+        
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

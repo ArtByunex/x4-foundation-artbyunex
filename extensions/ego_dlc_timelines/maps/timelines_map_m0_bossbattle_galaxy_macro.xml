@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate705to706" ref="gates">
+        <offset>
+          <position x="32564.561" y="500" z="-18029.35"/>
+          <rotation yaw="-50"/>
+        </offset>
+        <macro connection="space" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate705to0b" ref="gates">
+        <offset>
+          <position x="-42857.699" y="500" z="-13633.59"/>
+          <rotation yaw="89.99995"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate705to0a" ref="gates">
+        <offset>
+          <position x="-44681.449" y="500" z="-39865.012"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7960011}" description="{20004,7960012}"/>
+    </properties>
+    <connections>
+      <connection name="zone002_cluster_705_sector001_connection" ref="zones">
+        <offset>
+          <position x="130142" z="-16349.69"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zone004_cluster_705_sector001_connection" ref="zones">
+        <offset>
+          <position x="-127517.797" z="34255.371"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zone003_cluster_705_sector001_connection" ref="zones">
+        <offset>
+          <position x="105554.398" z="-127903.797"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_117972" ref="zones">
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_705_sector_001_asteroids_3"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_m0_bossbattle_cluster_001_sector_001_asteroids_1"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_705_sector_001_nebula_1"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_705_sector_001_asteroids_2"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_region_005_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_m0_bossbattle_cluster_001_sector_001_nebula_1"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7960001}" description="{20003,7960002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_705_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c705s01_region03_connection" ref="regions">
+        <offset>
+          <position x="82769.383" y="-10000" z="-172442.547"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c705s01_region01_connection" ref="regions">
+        <offset>
+          <position x="48293.371" y="-10000" z="108539.633"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="c705s01_region04_connection" ref="regions">
+        <offset>
+          <position y="-20000"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="c705s01_region02_connection" ref="regions">
+        <offset>
+          <position x="-150000" y="-15000" z="-100000"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_119894" ref="regions">
+        <offset>
+          <position x="79662.195" z="79342.289"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_region_005_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_705_v1"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate706to014" ref="gates">
+        <offset>
+          <position x="32564.561" y="500" z="-18029.35"/>
+          <rotation yaw="-120"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate706to705" ref="gates">
+        <offset>
+          <position x="-28407.439" y="500" z="2193.848"/>
+          <rotation yaw="135"/>
+        </offset>
+        <macro connection="space" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate706to0a" ref="gates">
+        <offset>
+          <position x="-474.838" y="500" z="45248.859"/>
+          <rotation yaw="-179.99989"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7970011}" description="{20004,7970012}"/>
+    </properties>
+    <connections>
+      <connection name="zone002_cluster_706_sector001_connection" ref="zones">
+        <offset>
+          <position x="130142" z="48135.102"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zone004_cluster_706_sector001_connection" ref="zones">
+        <offset>
+          <position x="-127517.797" z="34255.371"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zone001_cluster_706_sector001_connection" ref="zones">
+        <offset>
+          <position x="85.554" z="115545.398"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_706_sector_001_asteroids_1"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_cluster_002_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7970001}" description="{20003,7970002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_706_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c706s01_region01_connection" ref="regions">
+        <offset>
+          <position x="15000" y="-15000" z="80000"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_706_v2"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_m0_bossbattle_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="cluster_705_connection" ref="clusters">
+        <offset>
+          <position x="-75000000" z="25980000"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_001_macro" connection="galaxy"/>
+      </connection>
+      <connection name="cluster_706_connection" ref="clusters">
+        <offset>
+          <position x="-60000000" z="17320000"/>
+        </offset>
+        <macro ref="timelines_map_m0_bossbattle_cluster_002_macro" connection="galaxy"/>
+      </connection>
+      <connection name="gateconnection_001" ref="destination" path="../cluster_705_connection/cluster_705_sector001_connection/zone002_cluster_705_sector001_connection/connection_clustergate705to706">
+        <macro connection="destination" path="../../../../../cluster_706_connection/cluster_706_sector001_connection/zone004_cluster_706_sector001_connection/connection_clustergate706to705"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

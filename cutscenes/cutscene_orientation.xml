@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_orientation" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="testseq" start="0">
+
+        <!-- Camera locked into object space -->
+        <shot name="shot0" environment="scenezone" duration="8000">
+          <camera_flyto orient_to="object" distance="3000" fillspace="80" reference="@playership" time="5000" />
+        </shot>
+
+        <!-- Camera locked into ecliptic orientation -->
+        <shot name="shot1" environment="scenezone" duration="8000">
+          <camera_flyto orient_to="ecliptic"  distance="3000" fillspace="80" reference="@playership" time="5000" />
+        </shot>
+
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

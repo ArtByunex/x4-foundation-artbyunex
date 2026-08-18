@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="lib.boost.relations" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd">
+  <interrupts>
+    <library>
+      <!-- requires variables:
+            $_boostobject
+            and either $_otherboostobject or $_boostfaction -->
+      <!-- optional variables:
+            $_desiredrelation - defaults to $_boostobject.trueowner.relation.kill.min
+            $_boostreason - defaults to null
+            $_boostdelay - defaults to 10min
+            $_boostdecay - defaults to 1
+            $_boostsilent - defaults to false -->
+      <actions name="BoostRelations">
+        <do_if value="not @$_boostobject">
+          <debug_text text="'BoostRelations called with no valid $_boostobject defined'" filter="error"/>
+          <return/>
+        </do_if>
+        <do_if value="not @$_otherboostobject and not @$_boostfaction">
+          <debug_text text="'BoostRelations called with no valid $_otherboostobject and no $_boostfaction defined'" filter="error"/>
+          <return/>
+        </do_if>
+        <do_if value="$_boostobject.isplayerowned and not @$_otherboostobject">
+          <!-- relation boosts are always either object-to-faction or faction-to-faction. when faction.player is concerned, the boost must always apply to the entire player faction, otherwise, player-owned objects will engage other objects but not appear hostile to the player and other player-owned objects will not engage the hostile object. -->
+          <debug_text text="'BoostRelations called where $_boostobject is player-owned and no $_otherboostobject was defined. Either provide an $_otherboostobject or define faction.player as $_boostfaction with a different object as $_boostobject.'" filter="error"/>
+          <return/>
+        </do_if>
+        <!--<do_if value="not @$_boostreason">
+          <debug_text text="'BoostRelations called with no valid $_boostreason defined'" filter="error"/>
+          <return/>
+        </do_if>-->
+
+        <do_if value="not @$_desiredrelation">
+          <set_value name="$_desiredrelation" exact="$_boostobject.trueowner.relation.kill.min"/>
+        </do_if>
+        <do_elseif value="$_desiredrelation lt -1.0 or $_desiredrelation gt 1.0">
+          <debug_text text="'desiredrelation: %s is out of range. capping.'.[$_desiredrelation]"/>
+          <do_if value="$_desiredrelation lt -1.0">
+            <set_value name="$_desiredrelation" exact="-1.0"/>
+          </do_if>
+          <do_elseif value="$_desiredrelation gt 1.0">
+            <set_value name="$_desiredrelation" exact="1.0"/>
+          </do_elseif>
+        </do_elseif>
+        <do_if value="not @$_boostreason">
+          <set_value name="$_boostreason" exact="null"/>
+        </do_if>
+        <do_if value="not @$_boostdelay">
+          <set_value name="$_boostdelay" exact="10min"/>
+        </do_if>
+        <do_if value="not @$_boostdecay">
+          <set_value name="$_boostdecay" exact="1"/>
+        </do_if>
+        <do_if value="not @$_boostsilent">
+          <set_value name="$_boostsilent" exact="false"/>
+        </do_if>
+
+        <do_if value="@$_otherboostobject">
+          <do_if value="$_boostobject.isplayerowned">
+            <set_value name="$_locobject" exact="$_otherboostobject"/>
+            <set_value name="$_otherboostobject" exact="$_boostobject"/>
+            <set_value name="$_boostobject" exact="$_locobject"/>
+            <remove_value name="$_locobject"/>
+          </do_if>
+
+          <set_value name="$_locobject" exact="$_boostobject"/>
+          <do_if value="not $_locobject.isclass.defensible and $_locobject.defensible">
+            <set_value name="$_locobject" exact="$_locobject.defensible"/>
+          </do_if>
+          <do_if value="$_locobject.coverowner">
+            <signal_objects object="$_locobject" param="'LoseCover'"/>
+          </do_if>
+
+          <set_value name="$_locobject" exact="$_otherboostobject"/>
+          <do_if value="not $_locobject.isclass.defensible and $_locobject.defensible">
+            <set_value name="$_locobject" exact="$_locobject.defensible"/>
+          </do_if>
+          <do_if value="$_locobject.coverowner">
+            <signal_objects object="$_locobject" param="'LoseCover'"/>
+          </do_if>
+          <set_value name="$_boostfaction" exact="$_locobject.trueowner"/>
+          <remove_value name="$_locobject"/>
+        </do_if>
+
+        <set_relation_boost object="$_boostobject" faction="$_boostfaction" value="$_desiredrelation" reason="$_boostreason" delay="$_boostdelay" decay="$_boostdecay" silent="$_boostsilent"/>
+
+        <remove_value name="$_boostsilent"/>
+        <remove_value name="$_boostdecay"/>
+        <remove_value name="$_boostdelay"/>
+        <remove_value name="$_boostreason"/>
+        <remove_value name="$_desiredrelation"/>
+        <remove_value name="$_boostfaction"/>
+        <remove_value name="$_otherboostobject"/>
+        <remove_value name="$_boostobject"/>
+      </actions>
+    </library>
+  </interrupts>
+</aiscript>

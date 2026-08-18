@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues">
+
+    <cue name="X4ep1_Gamestart_Boron_Shared">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <debug_text text="'Boron Shared'"/>
+        <set_value name="$DebugChance" exact="0"/>
+      </actions>
+      <cues>
+      </cues>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Boron1" module="x4ep1_gamestart_boron1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- trigger setup shared by all gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Boron_Shared"/>
+      </actions>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Boron2" module="x4ep1_gamestart_boron2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- trigger setup shared by all gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Boron_Shared"/>
+      </actions>
+    </cue>
+  </add>
+
+  <add sel="//cue[@name='X4ep1_Gamestart_Workshop']/actions">
+    <do_if value="userdatasigned.story_queendom_returned?">
+      <add_blueprints wares="ware.welfare_bor_artacademy_01"/>
+    </do_if>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ArgonShips'][1]" pos="before">
+    <set_value name="$BoronShips" exact="[]"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_fighter_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_trans_container_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_miner_solid_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_scout_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_s_scout_02_a_macro"/>
+
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_corvette_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_corvette_02_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_gunboat_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_miner_liquid_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_miner_solid_01_a_macro"/>
+    <append_to_list name="$BoronShips" exact="macro.ship_bor_m_trans_container_01_a_macro"/>
+    <append_list_elements name="$ShipMacros" other="$BoronShips"/>
+  </add>
+  <add sel="//cue[@name='Test_Platform']//set_value[@name='$CapshipMacros']" pos="after">
+    <set_value name="$BoronCapships" exact="[]"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_xl_carrier_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_xl_resupplier_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_xl_builder_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_l_destroyer_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_l_trans_container_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_l_miner_solid_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_l_miner_liquid_01_a_macro"/>
+    <append_to_list name="$BoronCapships" exact="macro.ship_bor_l_carrier_01_a_macro"/>
+    <append_list_elements name="$CapshipMacros" other="$BoronCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_elseif[@value='$ParanidShips.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$BoronShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.boron" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$ParanidCapships.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$BoronCapships.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.boron" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+</diff>

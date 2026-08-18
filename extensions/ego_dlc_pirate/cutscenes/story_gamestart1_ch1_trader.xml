@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Cutscene showing the VIG Enforcers and then moving to the trader, to give the player a better understanding of who's where. -->
+  <director key="Story_Gamestart1_Ch1_Trader" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:EnforcerShip" />
+    <object_group name="target_group">
+      <reference object="EnforcerShip" />
+      <reference object="TraderShip" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="ShowEscort" environment="scenezone" duration="onevent:Trigger_Sequence2">
+          <camera>
+            <position>
+              <reference object="EnforcerShip" x="-1500" y="100" z="-300" />
+            </position>
+            <lookdirection>
+              <reference object="EnforcerShip" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:Trigger_Sequence2">
+        <shot name="ShowEnforcerPilot" environment="scenezone" duration="onevent:Trigger_Sequence3">
+          <camera>
+            <position>
+              <reference object="EnforcerShip" x="-15" y="10" z="30" />
+            </position>
+            <lookdirection>
+              <reference object="EnforcerShip" x="-8" y="-3" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:Trigger_Sequence3">
+        <shot name="ShowTrader" environment="scenezone" duration="onevent:stopscene">
+          <camera_orbit reference="TraderShip" orient_to="object">
+            <begin angle="100" distance="1300" elevation="20" />
+            <end angle="140" distance="1000" elevation="-20" time="15000" />
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

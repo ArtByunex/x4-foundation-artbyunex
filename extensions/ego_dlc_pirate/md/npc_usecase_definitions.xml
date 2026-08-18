@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  
+  <!--*** Story_Criminal_Final_Briefing ***-->
+
+  <add sel="/mdscript/cues/library[@name='AddUseCaseDefs']/actions">
+    
+    <!-- Criminal Story Briefing Scene 1 -->
+    <signal_cue_instantly cue="AddUseCaseDef" param="table[ $name = '$Story_Criminal_Briefing_Scene_1',
+            $priority = 100, $chance = 100, $voiceover = true,
+            $locations = [ '$Bridge' ],
+            $actors = [
+              table[ $name = '$MaestroActor', $location = '$Bridge' ],
+              table[ $name = '$AxiomActor', $location = '$Bridge' ],
+              table[ $name = '$AceActor', $location = '$Bridge' ],
+              table[ $name = '$SecondSpeakActor', $location = '$Bridge' ],
+            ],
+            $script = [
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252701, $lookat = 'player' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252702 ],
+              1s,
+              table[ $actor = '$SecondSpeakActor',  $recipient = 'player', $speak = 30252701, $lookat = 'player' ],
+              1s,
+              table[ $actor = '$MaestroActor',  $recipient = '$SecondSpeakActor', $speak = 30252703, $lookat = '$SecondSpeakActor' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252704, $lookat = 'player' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252705 ],
+              1s,
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252706 ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252707 ],
+              1s,
+              table[ $actor = '$AceActor',  $recipient = 'player', $speak = 30252702, $lookat = '$MaestroActor' ],
+              1.5s, 
+              table[ $actor = '$MaestroActor',  $recipient = '$AceActor', $speak = 30252708, $lookat = '$AceActor' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252709 ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252710, $lookat = 'player' ],
+              1.5s,
+              table[ $actor = '$AxiomActor',  $recipient = 'player', $speak = 30252702, $lookat = '$MaestroActor' ],
+              table[ $actor = '$AxiomActor',  $recipient = 'player', $speak = 30252703 ],
+              1s,
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252711, $lookat = 'player' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252712, $lookat = '$AxiomActor' ],
+              table[ $actor = '$MaestroActor',  $recipient = 'player', $speak = 30252713, $lookat = 'player' ],
+            ]
+          ]" />
+    
+  </add>
+</diff>

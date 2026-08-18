@@ -1,0 +1,1175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Trading_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Adrian Hamm"/>
+  </documentation>
+  <cues>
+    <cue name="Start" namespace="this" module="scenario_trading_3">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30610"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.paranid"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+        <set_value name="md.Signal_Leaks.Manager.$SuppressSignalLeakGeneration" exact="true"/>
+
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <create_group groupname="$PlayerAssets" comment="needed for tracking trading efficiency"/>
+
+        <set_value name="$StationCoordinationTable" exact="table[]"/>
+        <set_value name="$RequiredCr" exact="50000Cr"/>
+        <set_value name="$PlayerWareTable" exact="table[]"/>
+        <set_value name="$LargestProfitSale" exact="0Cr"/>
+        <fade_screen fadeout="0s" holdtime="3s" fadein="1.2s" realtime="true"/>
+        <set_value name="$HostileFaction"     exact="faction.holyorder"/>
+        <create_group groupname="$SinglePatrolGroup"/>
+        <set_value name="$PatrolShipCoordinationTable" exact="table[]"/>
+        <set_value name="$PatrolPositionTable" exact="table[
+                                                      $DefendPosition1 = position.[-37019.886719m, 0.000000m, 18917.445313m],
+                                                      $DefendPosition2 = position.[21908.359375m, 0.000000m, 36025.488281m],
+                                                      $DefendPosition3 = position.[-4635.598145m, 0.000000m, -40687.445313m],
+                                                      $DefendPosition4 = position.[-15186.658203m, 0.000000m, 103021.500000m],
+                                                      $DefendPosition5 = position.[-38019.886719m, 0.000000m, 17917.445313m],
+                                                      $DefendPosition6 = position.[22908.359375m, 0.000000m, 34025.488281m],
+                                                      $DefendPosition7 = position.[-4535.598145m, 0.000000m, -41687.445313m],
+                                                      $DefendPosition8 = position.[-14186.658203m, 0.000000m, 113021.500000m],
+                                                      ]"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_FactionRelations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_NPCActor" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_UniverseStations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Competition" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_EnemyPresence" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_EnemyMines" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_FriendlySectorPatrol" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_ScriptedConflict" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerSatelliteNetwork" chance="if $HasError then 0 else 100"/>
+
+                <!--TEMP: TODO @Adrian Remove once Missions have been disabled for timelines-->
+                <cancel_cue cue="md.GenericMissions.Manager"/>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+                  <set_emergency_eject_active active="false"/>
+                  <set_faction_identity faction="faction.player" image="'race_paranid'" />
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <create_group groupname="$PlayerFleet"/>
+
+                <!--spawn player-owned ships-->
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <!-- The player only has one ship in this scenario, so make it Mission Relevant -->
+                <add_to_group groupname="$MissionRelevantObjects" object="player.ship"/>
+                <add_to_group groupname="$PlayerAssets" object="player.ship" />
+                <set_object_name object="player.ship" page="30610" line="205"/>
+              </actions>
+            </library>
+
+            <library name="Setup_NPCActor">
+              <actions>
+                <create_cue_actor name="$ParanidActor" cue="namespace" macro="character_paranid_generic_01_macro">
+                  <page exact="10364"/>
+                  <owner exact="faction.paranid"/>
+                  <skills>
+                    <skill type="management"  exact="6"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="8"/>
+                    <skill type="engineering" exact="5"/>
+                    <skill type="boarding"    exact="2"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits    entity="$ParanidActor" missionactor="true" customhandler="true" subtitlename="true"/>
+
+                <!-- NPC Usecase Setup -->
+                <do_if value="not $MissionActors?">
+                  <set_value name="$MissionActors" exact="table[]"/>
+                </do_if>
+                <set_value name="$MissionActors.$ParanidActor" exact="table[
+                                              $entity = $ParanidActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+              </actions>
+            </library>
+
+            <library name="Setup_FactionRelations">
+              <actions>
+                <!-- Set up the relations between the enemy faction and the player/MissionFaction -->
+                <set_faction_relation faction="$MissionFaction" otherfaction="$HostileFaction" value="$MissionFaction.relation.kill.max"/>
+                <set_faction_relation faction="faction.player" otherfaction="$HostileFaction" value="faction.player.relation.kill.max"/>
+              </actions>
+            </library>
+
+            <library name="Setup_UniverseStations">
+              <actions>
+                <!-- Place the relevant stations to be able to trade -->
+                <set_value name="$StationCoordinationTable" exact="table[{ware.claytronics}          = table[$position = position.[-2026.414917m, 0.000000m, 23272.896484m]],
+                                                                        {ware.antimattercells}      = table[$position = position.[-22247.630859m, 1200.000000m, -25071.597656m]],
+                                                                        {ware.superfluidcoolant}        = table[$position = position.[16725.332031m, 0.000000m, -30789.445313m]],
+                                                                        {ware.dronecomponents}        = table[$position = position.[35130.203125m, -1300.000000m, -3309.715332m]],
+                                                                        {ware.graphene}             = table[$position = position.[31789.123047m, 1200.000000m, 15541.522461m]],
+                                                                        {ware.microchips}    = table[$position = position.[-48671.382813m, 0.000000m, -382.119446m]],
+                                                                        {ware.missilecomponents}          = table[$position = position.[-39802.933594m, -1300.000000m, 42149.843750m]],
+                                                                        {ware.advancedcomposites}           = table[$position = position.[-2870.085205m, 0.000000m, -64499.253906m]],
+                                                                        {ware.scanningarrays}       = table[$position = position.[20906.138672m, 2280.000000m, 62567.156250m]],
+                                                                        {ware.hullparts}   = table[$position = position.[68413.914063m, 0.000000m, 7975.563965m]],
+                                                                        {ware.turretcomponents}            = table[$position = position.[56719.359375m, 1060.000000m, 43171.511719m]],
+                                                                        {ware.advancedelectronics}         = table[$position = position.[59735.882813m, -1100.000000m, -39049.128906m]],
+                                                                        {ware.shieldcomponents}     = table[$position = position.[-61058.238281m, 0.000000m, -39068.238281m]],
+                                                                        {ware.weaponcomponents}           = table[$position = position.[-73190.554688m, 1200.000000m, 31294.644531m]],
+                                                                        {ware.antimatterconverters} = table[$position = position.[-19098.228516m, 0.000000m, 79921.570313m]],
+                                                                        {ware.quantumtubes}  = table[$position = position.[44124.550781m, 1180.000000m, -78195.578125m]],
+                                                                        {ware.smartchips}    = table[$position = position.[-63755.570313m, 0.000000m, 68289.023438m]],
+                                                                        {ware.energycells}     = table[$position = position.[15415.564453m, -2100.000000m, 109022.335938m]],
+                                                                        {ware.fieldcoils}           = table[$position = position.[-95706.953125m, 0.000000m, -6835.902344m]],
+                                                                        {ware.refinedmetals}      = table[$position = position.[90529.445313m, 1180.000000m, 40638.949219m]],
+                                                                        {ware.siliconwafers}     = table[$position = position.[78485.531250m, 1400.000000m, -25176.900391m]],
+                                                                        {ware.engineparts}          = table[$position = position.[-46960.039063m, -1200.000000m, 105534.101563m]],
+                                                                        {ware.plasmaconductors}     = table[$position = position.[-56087.023438m, 0.000000m, -84116.179688m]],
+                                                                        ]"/>
+
+                <set_value name="$wares" exact="$StationCoordinationTable.keys.list"/>
+                <!-- sort list of wares so that the stations closest to the player start location are created first - this helps with navoctree generation -->
+                <sort_list list="$wares" sortbyvalue="player.entity.distanceto.[player.sector, $StationCoordinationTable.{loop.element}.$position]"/>
+
+                <do_for_each name="$ProductionWare" in="$wares">
+                  <set_value name="$StationCoordinates" exact="$StationCoordinationTable.{$ProductionWare}.$position"/>
+                  <get_module_definition reference="$ResultRef" faction="$MissionFaction" ware="$ProductionWare"/>
+                  <do_if value="$ResultRef">
+                    <create_factory name="$SpawnedFactory" ref="$ResultRef" modules="$Modules" resultbasesequence="$BaseSequence" sector="player.sector" race="race.paranid" owner="$MissionFaction" originalproduct="$ProductionWare" state="componentstate.operational" seed="1234">
+                      <compatibilities>
+                        <limits storage="6" habitation="3" production="4" dock="2"/>
+                      </compatibilities>
+                      <!--<select ware="$ProductionWare" faction="$MissionFaction"/>-->
+                      <position value="$StationCoordinates"/>
+                    </create_factory>
+                    <find_object_component groupname="$TargetComponents" object="$SpawnedFactory" class="[class.turret]" multiple="true"/>
+                    <!-- destroy most turrets that come on these stations -->
+                    <do_all exact="($TargetComponents.count * 0.7)i" counter="$k">
+                      <destroy_object object="$TargetComponents" explosion="false"/>
+                    </do_all>
+
+                    <add_to_group groupname="$MissionRelevantObjects" object="$SpawnedFactory"/>
+                    <set_value name="$StationCoordinationTable.{$ProductionWare}.$station" exact="$SpawnedFactory"/>
+                    <set_known object="$SpawnedFactory" known="true"/>
+
+                    <signal_cue_instantly cue="md.FinaliseStations.NewStation_GenerateFactory_Signal" param="table[
+                                                  $station = $SpawnedFactory,
+                                                  $plannedmodules = $Modules,
+                                                  $moduleset = $SpawnedFactory.modulesets.{1},
+                                                  $addbuild = false,
+                                                  $reportcue = StationInitialisationReportCue,
+                                                  $debugoutput = if $DebugChance == 100 then true else false
+                                                  ]"/>
+
+                  </do_if>
+                </do_for_each >
+
+                <!-- Add a special Trade Station to be able to dump high-end wares -->
+                <create_station name="$TradeStation" macro="macro.station_arg_tradestation_base_01_macro" owner="$MissionFaction" sector="player.sector" state="componentstate.operational" constructionplan="'par_tradestation'">
+                  <safepos space="player.sector" value="position.[2175.173584m, 0.000000m, -6974.416016m]"/>
+                </create_station>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$TradeStation" param3="false"/>
+
+                <do_for_each name="$ware" in="$wares">
+                  <add_tradeware object="$TradeStation" ware="$ware" allowbuy="true" allowsell="false" lockavgprice="true" />
+                </do_for_each>
+
+                <!-- Add a scenario-specific Hostile Stations that spawn enemy ships -->
+                <set_value name="$EnemyStationCoordinationTable" exact="table[{position.[51063.453125m, 0.000000m, 90860.156250m]}  = table[$constructionplan = 'par_defence'],
+                                                                        {position.[119558.453125m, 0.000000m, -27777.789063m]}      = table[$constructionplan = 'par_defence'],
+                                                                        {position.[123092.109375m, 0.000000m, 23128.785156m]}       = table[$constructionplan = 'par_wharf'],
+                                                                        ]"/>
+                <set_value name="$Coordinates" exact="$EnemyStationCoordinationTable.keys.list"/>
+
+                <do_all exact="$Coordinates.count" counter="$i">
+                  <set_value name="$StationCoordinates" exact="$Coordinates.{$i}"/>
+                  <set_value name="$ConstructionPlan" exact="$EnemyStationCoordinationTable.{$Coordinates.{$i}}.$constructionplan"/>
+                  <create_station name="$EnemyStation" macro="macro.station_gen_factory_base_01_macro" owner="$HostileFaction" sector="player.sector" state="componentstate.operational" constructionplan="$ConstructionPlan">
+                    <safepos space="player.sector" value="$StationCoordinates"/>
+                  </create_station>
+                  <signal_cue_instantly cue="StationInitialisationReportCue" param="['finished', null, null, $EnemyStation]"/>
+                  <do_if value="$ConstructionPlan == 'par_wharf'">
+                    <set_value name="$EnemyWharf" exact="$EnemyStation"/>
+                  </do_if>
+                  <do_else>
+                    <add_to_group groupname="$HostileDefenceStations" object="$EnemyStation"/>
+                  </do_else>
+                </do_all>
+
+                <!-- Deactivate Criminal MT to avoid reward exploits -->
+                <set_job_active activate="false" job="'masstraffic_paranid_criminal'" />
+
+              </actions>
+            </library>
+
+            <!-- Since trades are reserved, they will not have a big impact on player experience, but they can serve as a nice bit of background noise -->
+            <library name="Setup_Competition">
+              <actions>
+                <create_group groupname="$CompetitionGroup"/>
+                <set_value name="$WareBasket" exact="[ware.energycells,ware.antimattercells,ware.siliconwafers,ware.refinedmetals,ware.graphene,ware.superfluidcoolant,ware.engineparts,ware.microchips]"/>
+                <do_all exact="$WareBasket.count" counter="$i">
+                  <do_all exact="1" comment="tweak after playtesting">
+                    <set_value name="$StartEntry" exact="$StationCoordinationTable.keys.random"/>
+                    <set_value name="$ProximityStation" exact="$StationCoordinationTable.{$WareBasket.{$i}}.$station"/>
+                    <get_ship_definition reference="$ArgonTradeRef" size="class.ship_s" faction="$MissionFaction" tags="tag.trader"/>
+                    <create_ship name="$ship" ref="$ArgonTradeRef" sector="player.sector" groupname="$CompetitionGroup" capturable="false">
+                      <owner exact="$MissionFaction"/>
+                      <pilot>
+                        <select faction="$MissionFaction" tags="tag.pilot"/>
+                      </pilot>
+                      <loadout>
+                        <quantity exact="1.0" comment="fill completely">
+                          <variation exact="0"/>
+                        </quantity>
+                        <quality exact="0.5"/>
+                      </loadout>
+                      <safepos space="player.sector" object="$ProximityStation" radius="2km"/>
+                    </create_ship>
+                    <set_allow_drop object="$ship" allow="false"/>
+                    <create_order object="$ship" id="'TradeRoutine'" default="true">
+                      <param name="warebasket" value="[$WareBasket.{$i}]"/>
+                    </create_order>
+                    <remove_value name="$RandomEntry"/>
+                    <remove_value name="$ProximityStation"/>
+                  </do_all>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_FriendlySectorPatrol">
+              <actions>
+                <set_value name="$PoliceCoordinationList" exact="[position.[-6462.345703m, 0.000000m, 58767.359375m],
+                                                                  position.[55188.781250m, 0.000000m, -23416.400391m],
+                                                                  position.[-68133.515625m, 0.000000m, -19701.257813m]]"/>
+                <do_all exact="$PoliceCoordinationList.count" counter="$i">
+                  <do_all exact="2" counter="$j">
+                    <get_ship_definition reference="$PoliceRef" size="class.ship_s" faction="$MissionFaction" tags="tag.military"/>
+                    <create_ship name="$policeship" ref="$PoliceRef" sector="player.sector" groupname="$PoliceGroup" capturable="false">
+                      <owner exact="$MissionFaction"/>
+                      <pilot>
+                        <select faction="$MissionFaction" tags="tag.pilot"/>
+                      </pilot>
+                      <loadout>
+                        <quantity exact="1.0" comment="fill completely">
+                          <variation exact="0"/>
+                        </quantity>
+                        <quality min="0.5" max="0.8"/>
+                      </loadout>
+                      <safepos value="$PoliceCoordinationList.{$i}" space="player.sector"/>
+                    </create_ship>
+                    <set_allow_drop object="$policeship" allow="false"/>
+                    <do_if value="$j == 1">
+                      <set_value name="$Commander" exact="$policeship"/>
+                      <create_order object="$policeship" id="'Patrol'" default="true">
+                        <param name="space" value="player.sector"/>
+                        <param name="targetclasses" value="[class.ship_s, class.ship_m, class.satellite]"/>
+                        <param name="targetpurposes" value="[purpose.fight]"/>
+                      </create_order>
+                    </do_if>
+                    <do_else>
+                      <create_order id="'AssignCommander'" object="$policeship">
+                        <param name="commander" value="$Commander"/>
+                        <param name="assignment" value="assignment.interception"/>
+                        <param name="cancelorders" value="true"/>
+                      </create_order>
+                    </do_else>
+                  </do_all>
+                </do_all>
+              </actions>
+            </library>
+
+            <!-- mostly added for immediate effect. Two ships fighting in view of the player. No need to add any respawn-handling -->
+            <library name="Setup_ScriptedConflict">
+              <actions>
+                <get_ship_definition reference="$EnemyScoutRef" size="class.ship_m" faction="$HostileFaction" tags="tag.corvette"/>
+                <create_ship name="$EnemyScout" ref="$EnemyScoutRef" sector="player.sector" capturable="false">
+                  <owner exact="$HostileFaction"/>
+                  <pilot>
+                    <select faction="$HostileFaction" tags="tag.pilot"/>
+                  </pilot>
+                  <loadout>
+                    <quantity exact="1.0" comment="fill completely">
+                      <variation exact="0"/>
+                    </quantity>
+                    <quality min="0.5" max="0.8"/>
+                  </loadout>
+                  <safepos value="position.[1599.83m, 200.00m, 5380.36m]" space="player.sector"/>
+                </create_ship>
+                <set_allow_drop object="$EnemyScout" allow="false"/>
+
+                <do_all exact="2" counter="$k">
+                  <get_ship_definition reference="$PoliceRef" size="class.ship_s" faction="$MissionFaction" tags="tag.military"/>
+                  <create_ship name="$policeship" ref="$PoliceRef" sector="player.sector" groupname="$PoliceGroup" capturable="false">
+                    <owner exact="$MissionFaction"/>
+                    <pilot>
+                      <select faction="$MissionFaction" tags="tag.pilot"/>
+                    </pilot>
+                    <loadout>
+                      <quantity exact="1.0" comment="fill completely">
+                        <variation exact="0"/>
+                      </quantity>
+                      <quality min="0.5" max="0.8"/>
+                    </loadout>
+                    <safepos value="position.[-4212.58m, 200.00m, 5708.84m]" space="player.sector"/>
+                  </create_ship>
+                  <set_allow_drop object="$policeship" allow="false"/>
+                  <!--Orders to attack the Enemy Scout -->
+                  <create_order id="'Attack'" object="$policeship">
+                    <param name="primarytarget"     value="$EnemyScout"/>
+                    <param name="pursuetargets"     value="true"/>
+                    <param name="allowothertargets" value="false"/>
+                    <param name="debugchance" value="0"/>
+                  </create_order>
+                  <create_order object="$policeship" id="'Patrol'" default="true">
+                    <param name="space" value="player.sector"/>
+                    <param name="targetclasses" value="[class.ship_s, class.ship_m]"/>
+                    <param name="targetpurposes" value="[purpose.fight]"/>
+                  </create_order>
+                  <do_if value="$k == 2">
+                    <set_object_hull object="$policeship" exact="40"/>
+                  </do_if>
+                </do_all>
+
+                <!--Orders to attack the Police Patrol -->
+                <create_order id="'Attack'" object="$EnemyScout">
+                  <param name="primarytarget"     value="$policeship"/>
+                  <param name="pursuetargets"     value="true"/>
+                  <param name="allowothertargets" value="false"/>
+                  <param name="debugchance" value="0"/>
+                </create_order>
+                <create_order object="$EnemyScout" id="'Patrol'" default="true">
+                  <param name="space" value="player.sector"/>
+                  <param name="targetclasses" value="[class.ship_s, class.ship_m, class.satellite]"/>
+                  <param name="targetpurposes" value="[purpose.fight]"/>
+                </create_order>
+              </actions>
+            </library>
+
+            <library name="Setup_EnemyPresence">
+              <actions>
+                <find_station_by_true_owner name="$EnemyStations" faction="$HostileFaction" space="player.sector" multiple="true"/>
+                <!-- Set up defensive fleet around stations -->
+                <do_for_each name="$station" in="$EnemyStations">
+                  <!-- Add extra security to the Enemy Wharf -->
+                  <do_if value="$station.iswharf">
+                    <do_all exact="2" counter="$j">
+                      <get_ship_definition reference="$TempShipDef" size="class.ship_l" faction="$HostileFaction" tags="tag.destroyer"/>
+                      <create_ship name="$EnemyCapitalShip" ref="$TempShipDef" sector="player.sector" groupname="$EnemyWharfGroup" capturable="false">
+                        <owner exact="$HostileFaction" overridenpc="true"/>
+                        <pilot>
+                          <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                        </pilot>
+                        <loadout>
+                          <quantity exact="1.0" comment="fill completely">
+                            <variation exact="0"/>
+                          </quantity>
+                          <quality min="0.5" max="0.8"/>
+                        </loadout>
+                        <orientation refobject="$TradeStation" orientation="look_at"/>
+                        <safepos object="$station" space="$station.sector" min="10km" max="20km"/>
+                      </create_ship>
+                      <set_allow_drop object="$EnemyCapitalShip" allow="false"/>
+                      <do_all exact="6">
+                        <get_ship_definition reference="$TempShipDef" size="class.ship_s" faction="$HostileFaction" tags="tag.military"/>
+                        <create_ship name="$EnemyShip" ref="$TempShipDef" sector="player.sector" groupname="$EnemyDefenceGroup" capturable="false">
+                          <owner exact="$HostileFaction" overridenpc="true"/>
+                          <pilot>
+                            <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                          </pilot>
+                          <loadout>
+                            <quantity exact="1.0" comment="fill completely">
+                              <variation exact="0"/>
+                            </quantity>
+                            <quality min="0.5" max="0.8"/>
+                          </loadout>
+                          <safepos object="$EnemyCapitalShip" space="$EnemyCapitalShip.sector" min="10km" max="15km"/>
+                        </create_ship>
+                        <set_allow_drop object="$EnemyShip" allow="false"/>
+                        <create_order id="'AssignCommander'" object="$EnemyShip">
+                          <param name="commander" value="$EnemyCapitalShip"/>
+                          <param name="assignment" value="assignment.attack"/>
+                          <param name="cancelorders" value="true"/>
+                        </create_order>
+                      </do_all>
+                      <do_if value="$j == 1">
+                        <create_order id="'AssignCommander'" object="$EnemyCapitalShip">
+                          <param name="commander" value="$station"/>
+                          <param name="assignment" value="assignment.defence"/>
+                          <param name="cancelorders" value="true"/>
+                        </create_order>
+                      </do_if>
+                      <do_else>
+                        <create_order object="$EnemyCapitalShip" id="'MoveGeneric'" name="$order" immediate="true">
+                          <param name="destination" value="player.sector"/>
+                          <param name="position" value="position.[-119.285210m, 0.000000m, 12619.759766m]"/>
+                        </create_order>
+                        <create_order object="$EnemyCapitalShip" id="'Patrol'" default="true">
+                          <param name="space" value="player.sector"/>
+                          <param name="targetclasses" value="[class.ship_s, class.ship_m, class.satellite]"/>
+                          <param name="targetpurposes" value="[purpose.trade]"/>
+                        </create_order>
+                      </do_else>
+                    </do_all>
+                  </do_if>
+                  <do_all exact="2" counter="$j">
+                    <do_if value="$j == 1">
+                      <set_value name="$size" exact="[class.ship_m]"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$size" exact="[class.ship_s]"/>
+                    </do_else>
+                    <do_all exact="3">
+                      <get_ship_definition reference="$TempShipDef" size="$size" faction="$HostileFaction" tags="tag.military"/>
+                      <create_ship name="$EnemyShip" ref="$TempShipDef" sector="player.sector" groupname="$EnemyDefenceGroup" capturable="false">
+                        <owner exact="$HostileFaction" overridenpc="true"/>
+                        <pilot>
+                          <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                        </pilot>
+                        <loadout>
+                          <quantity exact="1.0" comment="fill completely">
+                            <variation exact="0"/>
+                          </quantity>
+                          <quality min="0.5" max="0.8"/>
+                        </loadout>
+                        <safepos object="$station" space="$station.sector" min="10km" max="15km"/>
+                      </create_ship>
+                      <set_allow_drop object="$EnemyShip" allow="false"/>
+                      <create_order id="'AssignCommander'" object="$EnemyShip">
+                        <param name="commander" value="$station"/>
+                        <param name="assignment" value="assignment.defence"/>
+                        <param name="cancelorders" value="true"/>
+                      </create_order>
+                    </do_all>
+                  </do_all>
+                </do_for_each>
+
+                <do_all exact="6" counter="$i">
+                  <do_if value="$i == 1">
+                    <get_ship_definition reference="$TempShipDef" size="class.ship_m" faction="$HostileFaction" tags="tag.military"/>
+                    <create_ship name="$EnemyCommander" ref="$TempShipDef" sector="player.sector" groupname="$EnemyPatrols" capturable="false">
+                      <owner exact="$HostileFaction" overridenpc="true"/>
+                      <pilot>
+                        <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                      </pilot>
+                      <loadout>
+                        <quantity exact="1.0" comment="fill completely">
+                          <variation exact="0"/>
+                        </quantity>
+                        <quality min="0.5" max="0.8"/>
+                      </loadout>
+                      <safepos space="player.sector" value="position.[133644.078125m, -1.086180m, -2628.703125m]"/>
+                    </create_ship>
+                    <set_allow_drop object="$EnemyCommander" allow="false"/>
+                    <create_order object="$EnemyCommander" id="'Patrol'" default="true">
+                      <param name="space" value="player.sector"/>
+                      <param name="targetclasses" value="[class.ship_s, class.ship_m, class.satellite]"/>
+                      <param name="targetpurposes" value="[purpose.trade]"/>
+                    </create_order>
+                    <create_order object="$EnemyCommander" id="'MoveGeneric'" name="$order" immediate="true">
+                      <param name="destination" value="player.sector"/>
+                      <param name="position" value="position.[51353m, 0m, 16298m]"/>
+                    </create_order>
+
+                  </do_if>
+                  <get_ship_definition reference="$TempShipDef" size="class.ship_s" faction="$HostileFaction" tags="tag.military"/>
+                  <create_ship name="$EnemyShip" ref="$TempShipDef" sector="player.sector" groupname="$EnemyPatrols" capturable="false">
+                    <owner exact="$HostileFaction" overridenpc="true"/>
+                    <pilot>
+                      <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                    </pilot>
+                    <loadout>
+                      <quantity exact="1.0" comment="fill completely">
+                        <variation exact="0"/>
+                      </quantity>
+                      <quality min="0.5" max="0.8"/>
+                    </loadout>
+                    <safepos object="$EnemyCommander" space="$EnemyCommander.sector" min="3km" max="6km"/>
+                  </create_ship>
+                  <set_allow_drop object="$EnemyShip" allow="false"/>
+                  <create_order id="'AssignCommander'" object="$EnemyShip">
+                    <param name="commander" value="$EnemyCommander"/>
+                    <param name="assignment" value="assignment.attack"/>
+                    <param name="cancelorders" value="true"/>
+                  </create_order>
+
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_EnemyMines">
+              <actions>
+                <set_value name="$EnemyMineFieldPosList" exact="[position.[85631.429688m, 0.000000m, 7727.130371m],
+                                                                position.[27733.503906m, 0.000000m, -53503.976563m],
+                                                                position.[26132.466797m, 0.000000m, 95842.367188m],
+                                                                position.[102427.101563m, -0.006869m, 23699.970703m],
+                                                                position.[36923.726563m, 0.000000m, -50425.308594m],
+                                                                position.[89641.343750m, 0.000000m, 22168.062500m],
+                                                                position.[27958.859375m, 0.000000m, -48262.222656m],
+                                                                position.[176.078125m, 0.000000m, 82457.585938m]]"/>
+
+                <do_for_each name="$pos" in="$EnemyMineFieldPosList">
+                  <get_zone_at_position name="$zone" value="$pos" sector="player.sector"/>
+                  <run_actions ref="md.LIB_Generic.PlaceMinefield">
+                    <param name="SelectedTarget" value="$zone"/>
+                    <param name="MinSpawn" value="38"/>
+                    <param name="MaxSpawn" value="42"/>
+                    <param name="MaxDistance" value="9km"/>
+                    <param name="ExplosiveOwner" value="$HostileFaction"/>
+                  </run_actions>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerSatelliteNetwork">
+              <actions>
+                <set_value name="$PlayerSatPositionList" exact="[position.[48219.679m, 0m, -12581.406m],
+                                                                position.[-13562.758m, 0m, 63573.550m],
+                                                                position.[-51310.207m, 0m, -23875.107m]]"/>
+
+                <do_all exact="$PlayerSatPositionList.count" counter="$i">
+                  <create_object name="$Satellite" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="player.sector">
+                    <safepos x="$PlayerSatPositionList.{$i}.x" y="$PlayerSatPositionList.{$i}.y" z="$PlayerSatPositionList.{$i}.z"/>
+                  </create_object>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_FillStations" purpose="run_actions">
+              <params>
+                <param name="TargetStation" comment="station which is going to be filled up"/>
+                <param name="DebugChance" default="100" comment="station which is going to be filled up"/>
+              </params>
+              <actions>
+                <debug_text text="'Station Manager ' + $TargetStation.controlentity.{controlpost.manager}.knownname" chance="$DebugChance"/>
+
+                <set_value name="$storagewareslist" exact="$TargetStation.resources.list"/>
+                <set_value name="$productionslist" exact="$TargetStation.products.list"/>
+                <add_workforce object="$TargetStation" race="race.paranid"  exact="$TargetStation.workforce.optimal + 10"/>
+
+                <find_buy_offer result="$buyoffers" multiple="true" buyer="$TargetStation" usereservations="true" excludeempty="false"/>
+                <debug_text text="$TargetStation.name + ' Finding these offers on the ProductionStation: ' + $buyoffers" chance="$DebugChance"/>
+                <do_for_each name="$offer" in="$buyoffers">
+                  <do_if value="not $offer.ware.illegal">
+                    <debug_text text="'Adding ware: ' + $offer.ware" chance="$DebugChance"/>
+                    <do_if value="$offer.ware == ware.foodrations or $offer.ware == ware.medicalsupplies">
+                      <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount/1.1)i"/>
+                    </do_if>
+                    <do_else>
+                      <do_if value="$offer.ware.hastag.container">
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount * 0.3)i"/>
+                      </do_if>
+                      <do_elseif value="$offer.ware.hastag.liquid">
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="$offer.desiredamount"/>
+                      </do_elseif>
+                      <do_else>
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount * 0.6)i"/>
+                      </do_else>
+                    </do_else>
+                  </do_if>
+                </do_for_each>
+                <do_for_each name="$production" in="$productionslist">
+                  <add_cargo object="$TargetStation" ware="$production" exact="($TargetStation.cargo.{$production}.free * 0.4)i"/>
+                </do_for_each>
+                <add_cargo object="$TargetStation" ware="ware.foodrations" exact="300"/>
+
+                <do_if value="$TargetStation.owner.relationto.{faction.player} ge 0">
+                  <set_object_scanned object="$TargetStation"/>
+                  <set_object_radar_visible object="$TargetStation" visible="true"/>
+                  <set_known object="$TargetStation" known="true" updatesnapshot="true"/>
+                </do_if>
+                <set_tradeoffers_enabled object="$TargetStation" comment="TODO: Temporary hack to force an immediate map UI update" />
+              </actions>
+            </library>
+
+            <!-- We can only initiate stations after they have completed their building-->
+            <cue name="StationInitialisationReportCue" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$TargetStation" exact="event.param.{4}"/>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$TargetStation" param3="false"/>
+
+                <run_actions ref="Setup_FillStations">
+                  <param name="TargetStation" value="$TargetStation"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <!-- All stations have been Initialised, proceed -->
+                <set_value name="parent.$InstantiationNumber" operation="add" exact="1"/>
+                <do_if value="parent.$InstantiationNumber ge $StationCoordinationTable.keys.count ">
+
+                  <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                  <do_if value="$HasError">
+                    <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                    <signal_cue cue="Start_Scenario"/>
+                  </do_else>
+                </do_if>
+              </actions>
+            </cue>
+
+            <!-- Track the cause of death to be able to display it in the debrief menu, if applicable -->
+            <cue name="Add_Stat_Cause_Of_Death" ref="md.LIB_Scenario.Track_Cause_Of_Death">
+              <param name="SpecifyWeapon" value="true"/>
+            </cue>
+
+            <cue name="Debug">
+              <actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!--<fade_screen fadein="0s" holdtime="1s" fadeout="1s"/>-->
+            <warp object="player.ship" sector="player.sector">
+              <safepos x="1905.569458m" y="0" z="-907.258606m"/>
+            </warp>
+
+            <!-- Turn off trade filters -->
+            <raise_lua_event name="'mapfilter'" param="'layer_trade;false'"/>
+
+            <!-- Make player invulnerable temporarily -->
+            <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+              <param name="Object" value="player.ship"/>
+              <param name="RequesterCue" value="namespace"/>
+              <param name="MinHull" value="33"/>
+              <param name="DebugChance" value="$DebugChance"/>
+            </run_actions>
+          </actions>
+          <cues>
+
+            <cue name="Trading_Cutscene">
+              <actions>
+                <play_cutscene letterbox="true" movesoundcamera="true" result="this.$Cutscene" key="'scenario_trading_3_intro_cutscene'" abortable="true">
+                  <param name="target_station" object="$TradeStation"/>
+                  <param name="target_targetship_1" object="$policeship"/>
+                  <param name="target_targetship_2" object="$EnemyScout"/>
+                  <param name="target_targetship_3" object="$EnemyCapitalShip"/>
+                  <param name="target_playership" object="player.ship"/>
+                </play_cutscene>
+              </actions>
+            </cue>
+
+            <!-- Intro Conversation Cues go here  -->
+            <cue name="Introduction_Dialogue">
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                                                              $abortonsignalledcue = IntroDialogue_NPCUsecase_Abort,
+                                                                              $script = [
+                                                                                      7.5s,
+                                                                                      table[ $actor = '$ParanidActor', $speak = 306100301, $recipient = 'player', $comment = 'Calling on all traders in Holy Vision!' ],
+                                                                                      1.5s,
+                                                                                      table[ $actor = '$ParanidActor', $speak = 306100302, $recipient = 'player', $comment = 'The wretched forces of the pretender have started their full-scale attack on our system.' ],
+                                                                                      1.5s,
+                                                                                      table[ $actor = '$ParanidActor', $speak = 306100303, $recipient = 'player', $comment = 'It is your duty as a loyal subject of the Godrealm to keep our factories supplied so that our warriors are sufficiently well-equipped to eventually triumph.' ],
+                                                                                      1s,                                                
+                                                                                      table[ $actor = '$ParanidActor', $speak = 306100304, $recipient = 'player', $comment = 'This is not your fight.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$ParanidActor', $speak = 306100305, $recipient = 'player', $comment = 'Keep clear of the enemy forces. Keep your head down.' ],
+                                                                              ]
+                                                                            ]" />
+              </actions>
+            </cue>
+
+            <cue name="IntroDialogue_NPCUsecase_Abort">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+            </cue>
+
+            <cue name="Start_Gameplay">
+              <conditions>
+                <event_cutscene_stopped key="'scenario_trading_3_intro_cutscene'"/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <signal_cue cue="IntroDialogue_NPCUsecase_Abort"/>
+                <fade_screen fadeout="0s" fadein="0.5s" realtime="true"/>
+              </actions>
+              <delay exact="0.5s"/>
+              <actions>
+                <!-- Make playership vulnerable again -->
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="player.ship"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <!-- Mission Objective -->
+                <set_value name="$MissionStep" exact="1"/>
+                <create_mission cue="$MissionCue" comment="Mission: Deliver Ore" abortable="false"
+                                name="{30610,3001}" description="{30610,3006}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction" showelapsedtime="true">
+                  <briefing>
+                    <objective step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}"/>
+                  </briefing>
+                </create_mission>
+                <activate_mission cue="$MissionCue"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}">
+                  <progress text="{30178,1096}" progress="(player.money)/100" max="($RequiredCr)/100"/>
+                </set_objective>
+                <set_value name="$StartTime" exact="player.age"/>
+                <set_value name="$AmountOfTrades" exact="0"/>
+              </actions>
+            </cue>
+
+            <cue name="Call_MitsunoHack">
+              <actions>
+                <set_value name="$RandomDelay" min="5min" max="10min" profile="bell"/>
+              </actions>
+              <delay exact="$RandomDelay"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <!-- This cue keeps track of single ships that are created and dispatched to specific locations, and replaces them if necessary -->
+            <cue name="Spawn_SingleShips" checkinterval="15s">
+              <conditions>
+                <check_any>
+                  <check_any exact="$PatrolShipCoordinationTable.keys.count" counter="$i">
+                    <check_all>
+                      <check_value value="not $PatrolShipCoordinationTable.{$PatrolShipCoordinationTable.keys.{$i}}.{1}.isoperational"/>
+                    </check_all>
+                  </check_any>
+                  <check_value value="$PatrolShipCoordinationTable.keys.count lt 8"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!-- Check which position's ship has been destroyed, if ships have already been entered into the table -->
+                <do_if value="$PatrolShipCoordinationTable.keys.count">
+                  <do_for_each name="$key" valuename="$patrolship" in="$PatrolShipCoordinationTable">
+                    <do_if value="not $patrolship.{1}.isoperational">
+                      <remove_value name="$PatrolShipCoordinationTable.{$key}"/>
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+
+                <!-- Create a ship, either docked at the enemy wharf or at a safepos if no space is available -->
+                <find_dockingbay name="this.$dock" object="$EnemyWharf">
+                  <match_dock size="tag.dock_s" free="true" storage="true" />
+                </find_dockingbay>
+                <get_ship_definition reference="this.$EnemyShipDef" size="class.ship_s" faction="$HostileFaction" tags="tag.military"/>
+                <do_if value="this.$dock?">
+                  <create_ship name="$PatrolShip" ref="this.$EnemyShipDef" dock="this.$dock" sector="player.sector" groupname="$SinglePatrolGroup" capturable="false">
+                    <owner exact="$HostileFaction" overridenpc="true"/>
+                    <pilot>
+                      <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                  </create_ship>
+                  <set_allow_drop object="$PatrolShip" allow="false"/>
+                </do_if>
+                <do_else>
+                  <create_ship name="$PatrolShip" ref="this.$EnemyShipDef" sector="player.sector" groupname="$SinglePatrolGroup" capturable="false">
+                    <owner exact="$HostileFaction" overridenpc="true"/>
+                    <pilot>
+                      <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <safepos object="$EnemyWharf" max="5km"/>
+                  </create_ship>
+                  <set_allow_drop object="$PatrolShip" allow="false"/>
+                </do_else>
+                <set_object_name object="$PatrolShip" name="'{30610,301}'" comment="Enemy Patrol"/>
+
+                <!-- See which positions do not yet have a ship assigned to them, and register the ship to $PatrolShipCoordinationTable -->
+                <do_for_each name="$keyname" valuename="$position" in="$PatrolPositionTable">
+                  <do_if value="not $PatrolShipCoordinationTable.{$keyname}?">
+                    <set_value name="$PatrolShipCoordinationTable.{$keyname}" exact="[$PatrolShip, $position]"/>
+                    <set_value name="$DefendPos" exact="$position"/>
+                    <!-- optionally set $position to $DefendPos for later use but since this will only happen once anyway, you might as well create the orders here directly using $position -->
+                    <break/>
+                  </do_if>
+                </do_for_each>
+
+                <!-- Create the order to protect the assigned position and reset the cue so that it can keep checking for destroyed ships -->
+                <create_order id="'ProtectPosition'" object="$PatrolShip" default="true">
+                  <param name="destination" value="[player.sector, $DefendPos]"/>
+                  <param name="radius" value="15km"/>
+                </create_order>
+                <create_order object="$PatrolShip" id="'MoveWait'"  immediate="true" name="$moveorder">
+                  <param name="destination" value="[player.sector, $DefendPos]" />
+                  <param name="timeout" value="2s" comment="with 0s this will be infinite" />
+                  <param name="noattackresponse" value="true"/>
+                </create_order>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <!-- Respawn enemy ships -->
+            <cue name="Respawn_EnemyForces" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed group="$EnemyWharfGroup"/>
+                  <event_object_destroyed group="$EnemyDefenceGroup"/>
+                  <event_object_destroyed group="$EnemyPatrols"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="this.$DestroyedShip" exact="event.object"/>
+                <do_if value="$EnemyWharfGroup.indexof.{this.$DestroyedShip}">
+                  <set_value name="this.$ReinforcementGroup" exact="$EnemyWharfGroup"/>
+                </do_if>
+                <do_elseif value="$EnemyDefenceGroup.indexof.{this.$DestroyedShip}">
+                  <set_value name="this.$ReinforcementGroup" exact="$EnemyDefenceGroup"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="this.$ReinforcementGroup" exact="$EnemyPatrols"/>
+                </do_else>
+
+                <do_if value="this.$DestroyedShip.isclass.ship_s">
+                  <set_value name="this.$ShipSize" exact="[class.ship_s]"/>
+                </do_if>
+                <do_else>
+                  <set_value name="this.$ShipSize" exact="[class.ship_m]"/>
+                </do_else>
+
+                <find_dockingbay name="this.$dock" object="$EnemyWharf">
+                  <match_dock size="this.$DestroyedShip.macro.docksize" free="true" storage="true" />
+                </find_dockingbay>
+                <get_ship_definition reference="this.$EnemyShipDef" size="this.$ShipSize" faction="$HostileFaction" tags="tag.military"/>
+
+                <create_ship name="this.$ReinforcementShip" ref="this.$EnemyShipDef" dock="this.$dock" sector="player.sector" groupname="this.$ReinforcementGroup" capturable="false">
+                  <owner exact="$HostileFaction" overridenpc="true"/>
+                  <pilot>
+                    <select race="$HostileFaction.primaryrace" tags="tag.aipilot"/>
+                  </pilot>
+                  <loadout>
+                    <level exact="0.8"/>
+                  </loadout>
+                </create_ship>
+                <set_allow_drop object="this.$ReinforcementShip" allow="false"/>
+
+                <do_if value="$EnemyWharfGroup.indexof.{this.$DestroyedShip}">
+                  <create_order id="'AssignCommander'" object="this.$ReinforcementShip">
+                    <param name="commander" value="$EnemyWharf"/>
+                    <param name="assignment" value="assignment.defence"/>
+                    <param name="cancelorders" value="true"/>
+                  </create_order>
+                </do_if>
+                <do_elseif value="$EnemyDefenceGroup.indexof.{this.$DestroyedShip}">
+                  <do_if value="$HostileDefenceStations.{1}.subordinates.count lt $HostileDefenceStations.{2}.subordinates.count">
+                    <set_value name="$station" exact="$HostileDefenceStations.{1}"/>
+                  </do_if>
+                  <do_else>
+                    <set_value name="$station" exact="$HostileDefenceStations.{2}"/>
+                  </do_else>
+                  <create_order id="'AssignCommander'" object="this.$ReinforcementShip">
+                    <param name="commander" value="$station"/>
+                    <param name="assignment" value="assignment.defence"/>
+                    <param name="cancelorders" value="true"/>
+                  </create_order>
+                </do_elseif>
+                <do_else>
+                  <do_if value="this.$ReinforcementShip.class == class.ship_m">
+                    <create_order object="this.$ReinforcementShip" id="'Patrol'" default="true">
+                      <param name="space" value="player.sector"/>
+                      <param name="targetclasses" value="[class.ship_s, class.ship_m, class.satellite]"/>
+                      <param name="targetpurposes" value="[purpose.trade]"/>
+                    </create_order>
+                    <create_order object="this.$ReinforcementShip" id="'MoveGeneric'" name="$order" immediate="true">
+                      <param name="destination" value="player.sector"/>
+                      <param name="position" value="position.[51353m, 0m, 16298m]"/>
+                    </create_order>
+                  </do_if>
+                  <do_else>
+                    <do_for_each name="$ship" in="$EnemyPatrols">
+                      <do_if value="$ship.class == class.ship_m">
+                        <create_order id="'AssignCommander'" object="this.$ReinforcementShip">
+                          <param name="commander" value="$ship"/>
+                          <param name="assignment" value="assignment.attack"/>
+                          <param name="cancelorders" value="true"/>
+                        </create_order>
+                      </do_if>
+                    </do_for_each>
+                  </do_else>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="PlayerShip_Attacked_While_Docked">
+              <conditions>
+                <event_object_attacked group="global.$PlayerContainerGroup"/>
+                <check_value value="event.object.dock" comment="attacked ship is docked"/>
+              </conditions>
+              <actions>
+                <set_value name="$Attacker" exact="event.param"/>
+                <!-- Attacking ship should always have a default -->
+                <cancel_all_orders object="$Attacker"/>
+                <create_position name="$protectpos" object="$Attacker" space="player.sector"/>
+                <create_order id="'ProtectPosition'" object="$PatrolShip" default="true">
+                  <param name="destination" value="[player.sector, $protectpos]"/>
+                  <param name="radius" value="15km"/>
+                </create_order>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <cue name="EfficiencyTracking_ref" ref="md.LIB_Scenario.ScenarioTrading_EfficiencyTracking">
+              <param name="TrackedShipGroup" value="$PlayerAssets"/>
+              <param name="ReportSignalCue" value="EfficiencyReportCue"/>
+            </cue>
+
+            <cue name="EfficiencyReportCue">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$InefficientStationStops" operation="add" exact="1"/>
+              </actions>
+            </cue>
+
+            <!-- Rep can slide under -10 in rare occasions, making completing the scenario impossible -->
+            <cue name="Reputation_Recovery" instantiate="true">
+              <conditions>
+                <event_faction_relation_changed faction="faction.player" otherfaction="$MissionFaction"/>
+                <check_value value="$MissionFaction.relationto.{faction.player} le faction.player.relation.dock.min"/>
+              </conditions>
+              <actions>
+                <set_faction_relation faction="$MissionFaction" otherfaction="faction.player" value="faction.player.relation.dock.min + 0.0001" comment="otherwise docking is barely not allowed"/>
+              </actions>
+            </cue>
+
+            <!-- check for secondary objectives with each completed trade -->
+            <cue name="Player_FinishedTrade" instantiate="true">
+              <conditions>
+                <event_player_trade_completed/>
+              </conditions>
+              <actions>
+                <set_value name="this.$trade" exact="event.param"/>
+                <set_value name="$ware" exact="this.$trade.ware"/>
+                <do_if value="this.$trade.buyer.isplayerowned">
+                  <do_if value="not $PlayerWareTable.$ware?">
+                    <set_value name="$PlayerWareTable.$ware" exact="0"/>
+                  </do_if>
+                  <do_else>
+                    <set_value name="$buyvalue" exact="$PlayerWareTable.$ware"/>
+                  </do_else>
+                  <set_value name="$buyvalue" operation="add" exact="this.$trade.transferredamount * this.$trade.unitprice"/>
+                  <set_value name="$PlayerWareTable.$ware" exact="$buyvalue"/>
+                </do_if>
+
+                <do_if value="this.$trade.seller.isplayerowned">
+                  <set_value name="this.$BuyPrice" exact="$PlayerWareTable.$ware"/>
+                  <set_value name="this.$SalePrice" exact="this.$trade.transferredamount * this.$trade.unitprice"/>
+                  <set_value name="this.$CurrentSaleProfit" exact="this.$SalePrice - this.$BuyPrice"/>
+                  <do_if value="this.$CurrentSaleProfit gt $LargestProfitSale" >
+                    <set_value name="$LargestProfitSale" exact="this.$CurrentSaleProfit"/>
+                  </do_if>
+                  <set_value name="$PlayerWareTable.$ware" exact="0"/>
+                </do_if>
+
+                <do_if value="this.$trade.buyer == $TradeStation or this.$trade.seller == $TradeStation">
+                  <set_value name="$PlayerSoldToTradeStation" operation="add"/>
+                </do_if>
+                <set_value name="$AmountOfTrades" operation="add" exact="1"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerDestroyed_EnemyProperty">
+              <conditions>
+                <event_player_owned_killed_object/>
+                <check_value value="event.param.isplayerowned and event.param2.owner == $HostileFaction"/>
+              </conditions>
+              <actions>
+                <set_value name="$PlayerDestroyedEnemyShip"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_MoneyChange" instantiate="true">
+              <conditions>
+                <event_player_money_updated/>
+              </conditions>
+              <actions>
+                <!--<do_if value="event.param2 - event.param ge 15000Cr">
+                  <set_value name="$PlayerTopTradeOver15k"/>
+                </do_if>-->
+                <do_if value="player.money ge $RequiredCr">
+                  <set_value name="$EndTime" exact="player.age"/>
+                  <remove_mission cue="$MissionCue" type="completed"/>
+                  <signal_cue cue="ResultWindow"/>
+                </do_if>
+                <do_else>
+                  <signal_cue cue="UpdateBriefing"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="UpdateBriefing" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}" updatebriefing="true" silent="@event.param">
+                  <progress text="{30178,1096}" progress="(player.money)/100" max="($RequiredCr)/100"/>
+                </set_objective>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+
+            <do_if value="player.money gt $RequiredCr">
+
+              <!-- Stat: Time -->
+              <run_actions ref="md.LIB_Scenario.Add_Scenario_Stat_Time" result="$Score_Time">
+                <param name="StartTime" value="$StartTime"/>
+                <param name="EndTime" value="$EndTime"/>
+                <param name="ScoreTimeReference" value="2400"/>
+              </run_actions>
+
+              <set_value name="$Score_TopTrade15k" exact="if $LargestProfitSale gt 15000Cr then 100 else 0"/>
+              <set_value name="$Score_TradeStation" exact="if $PlayerSoldToTradeStation? then - ($PlayerSoldToTradeStation * 100) else 0"/>
+              <set_value name="$Score_Trades" exact="if $AmountOfTrades lt 10 then 200 else 0"/>
+              <set_value name="$Score_PlayerKill" exact="if $PlayerDestroyedEnemyShip? then 300 else 0 "/>
+
+              <do_if value="not $InefficientStationStops?">
+                <unlock_achievement name="TL_LOGISTICAL" scenario="true"/>
+              </do_if>
+              <add_scenario_stat id="'profit'" name="{30610,1201} + ' ' + $LargestProfitSale.formatted.{'%.s %Cr'}" description="{30610,1202}" comment="Most profit in one trade"/>
+
+              <!-- Stat: Time -->
+              <set_value name="$ResultData.$Score" exact="$Score_Time + $Score_TopTrade15k + $Score_Trades + $Score_PlayerKill"/>
+
+              <do_if value="$ResultData.$Score lt 50">
+                <set_value name="$ResultData.$Score" exact="50"/>
+              </do_if>
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_else>
+            <add_scenario_stat id="'trade'" name="{30610,1211}" description="{30610,1212}" comment="Made over 15k Cr profits with one trade?" uivalue="if @$Score_TopTrade15k gt 0 then {1001,2617} else {1001,2618} " score="@$Score_TopTrade15k" maxscore="100"/>
+            <add_scenario_stat id="'trades'" name="{30610,1221}" description="{30610,1222}"  comment="Completed in 10 trades or less?" uivalue="if $AmountOfTrades lt 10 then {1001,2617} else {1001,2618}" score="@$Score_Trades" maxscore="200"/>
+            <add_scenario_stat id="'destroyed'" name="{30610,3221}" description="{30610,3222}" comment="Shot down at least one enemy ship?" uivalue="if $PlayerDestroyedEnemyShip? then {1001,2617} else {1001,2618} " score="@$Score_PlayerKill" maxscore="300"/>
+
+            <set_value name="$ResultData.$CustomStats" exact="table[]"/>
+            <set_value name="$ResultData.$CustomStats.$TradeAmount" exact="if $AmountOfTrades? then $AmountOfTrades else 0"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<components>
+	<component name="bullet_gen_m_yacht_laser_01_mk1" class="bullet">
+		<source geometry="extensions\ego_dlc_pirate\assets\fx\weaponfx\bullet_gen_m_yacht_laser_01_mk1_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<box name="XU BoxLight24" shadow="0" r="255" g="255" b="255" lighteffect="1" trigger="1" intensity="3" specularintensity="1">
+						<size x="25.79999" y="33.39999" z="33.39999"/>
+						<lightanimations/>
+						<offset>
+							<position x="0" y="0" z="-8.900067"/>
+							<quaternion qx="-0" qy="0.7071068" qz="-0" qw="-0.7071067"/>
+						</offset>
+					</box>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="bullet">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation ">
+				<offset>
+					<position x="0" y="1.700214E-02" z="0.270133"/>
+				</offset>
+				<animations>
+					<animation name="loop_random" start="1" end="1000"/>
+				</animations>
+				<parts>
+					<part name="part_bullet">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.bullets_p1_fx_master_colour_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.412493" y="8.427219" z="107.2748"/>
+							<center x="-1.48201E-03" y="-6.877929E-03" z="-107.4022"/>
+						</size>
+						<size_raw>
+							<max x="8.40015" y="8.40015" z="107.2748"/>
+							<center x="1.086044E-02" y="-3.394607E-02" z="-107.4022"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="1000" value="0.1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection_Laser01" tags="laser">
+				<offset>
+					<position x="0" y="0" z="-140.6658"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

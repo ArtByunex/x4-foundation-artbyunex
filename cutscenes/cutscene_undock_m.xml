@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_undock_m" />
+
+  <!--
+    param name="ship"
+    This cutscene watches an M ship undocking for 10 seconds
+    It works only if the cutscene is started at the same time as the ship launches,
+    as soon as the ship finishes undocking, the cutscene loses the ship.
+  -->
+
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:ship" />
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Undocking" start="0">
+        <shot name="Shot1" environment="scenezone" duration="10000">
+
+          <camera_follow reference="ship" orient_to="ecliptic">
+            <begin distance="100" />
+            <end distance="400" pitch="30" yaw="60" />
+          </camera_follow>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

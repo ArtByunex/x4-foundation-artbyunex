@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<components>
+
+  <!-- ROBOT -->
+  <component name="character_robot_01" class="npc">
+    <size>
+      <max x="0.5" y="1.0" z="0.5"/>
+      <center x="0.0" y="1.0" z="0.0"/>
+    </size>
+    <connections>
+      <connection name="attachments" tags="attachment" value="0" optional="1" />
+    </connections>
+    <properties>
+      <boneroot name="robot_root_ctrl" />
+      <skeleton>
+        <root name="robot_root_ctrl" />
+        <head name="robot_head_bone" />
+        <!-- used for lookat controller -->
+        <middleeye name="robot_eye_dummy" />
+        <!-- used for lookat controller -->
+        <righthand name="attachment_helper" />
+      </skeleton>
+      <animations>
+
+        <!-- ~~~~~~~~ -->
+        <!-- STANDING -->
+        <!-- ~~~~~~~~ -->
+
+        <!-- conversation -->
+        <animation name="anim_stand_conversation_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_gen_robot_01" retargetanim = "false" />
+        <!-- idle -->
+        <animation name="anim_stand_idle_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_gen_robot_01" retargetanim="false" />
+
+
+        <!-- ~~~~~~~~ -->
+        <!-- MOVEMENT -->
+        <!-- ~~~~~~~~ -->
+
+        <animation name="walking01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_walking_gen_robot_01" reposition="false" retargetanim="false">
+          <sounds>
+            <sound name="footstep_npc_walking_boron_01" time="0.01" />
+          </sounds>
+        </animation>
+        <animation name="walkingslow01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_walking_gen_robot_01" reposition="false" retargetanim="false">
+          <sounds>
+            <sound name="footstep_npc_walking_boron_01" time="0.01" />
+          </sounds>
+        </animation>
+        <animation name="running01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_walking_gen_robot_01" reposition="false" retargetanim="false">
+          <sounds>
+            <sound name="footstep_npc_running_boron_01" time="0.01" />
+          </sounds>
+        </animation>
+        <animation name="anim_turnleft90_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_turnleft90_gen_robot_01" lookat="0" retargetanim="false">
+          <offset>
+            <rotation yaw="-90" pitch="0" roll="0" />
+          </offset>
+        </animation>
+        <animation name="anim_turnright90_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_turnright90_gen_robot_01" lookat="0" retargetanim="false">
+          <offset>
+            <rotation yaw="90" pitch="0" roll="0" />
+          </offset>
+        </animation>
+        <animation name="anim_turnleft180_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_turnleft180_gen_robot_01" lookat="0" retargetanim="false">
+          <offset>
+            <rotation yaw="-180" pitch="0" roll="0" />
+          </offset>
+        </animation>
+        <animation name="anim_turnright180_01" ref="extensions/ego_dlc_timelines/assets/characters/animations/anim_a_turnright180_gen_robot_01" lookat="0" retargetanim="false">
+          <offset>
+            <rotation yaw="180" pitch="0" roll="0" />
+          </offset>
+        </animation>
+      </animations>
+
+      <sequences>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ -->
+        <!-- ANIMATION SEQUENCES -->
+        <!-- ~~~~~~~~~~~~~~~~~~~ -->
+
+        <!-- ~~~~~~~~ -->
+        <!-- STANDING -->
+        <!-- ~~~~~~~~ -->
+
+        <sequence type="idle" behavior="stand">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_stand_idle_01" />
+          </transitions>
+        </sequence>
+        <sequence type="busy" behavior="stand">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_stand_idle_01" />
+          </transitions>
+        </sequence>
+        <sequence type="conversation" behavior="stand">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_stand_conversation_01" />
+            <!-- transitions -->
+          </transitions>
+        </sequence>
+        <sequence type="conversationturnright90" behavior="stand" next="conversation">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnright90_01" />
+          </transitions>
+        </sequence>
+        <sequence type="conversationturnleft90" behavior="stand" next="conversation">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnleft90_01" />
+          </transitions>
+        </sequence>
+        <sequence type="conversationturnright180" behavior="stand" next="conversation">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnright180_01" />
+          </transitions>
+        </sequence>
+        <sequence type="conversationturnleft180" behavior="stand" next="conversation">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnleft180_01" />
+          </transitions>
+        </sequence>
+
+
+        <!-- ~~~~~~~ -->
+        <!-- GENERIC -->
+        <!-- ~~~~~~~ -->
+        <sequence type="idle" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_stand_idle_01" />
+          </transitions>
+        </sequence>
+        <sequence type="walking" behavior="generic">
+          <transitions>
+            <transition start="standing" end="walking" animation="walking01" />
+            <transition start="walking" end="walking" animation="walking01" />
+            <transition start="walkingslow" end="walking" animation="walking01" />
+            <transition start="running" end="walking" animation="walking01" />
+          </transitions>
+        </sequence>
+        <sequence type="walkingslow" behavior="generic">
+          <transitions>
+            <transition start="standing" end="walkingslow" animation="walkingslow01" />
+            <transition start="walkingslow" end="walkingslow" animation="walkingslow01" />
+            <transition start="walking" end="walkingslow" animation="walkingslow01" />
+            <transition start="running" end="walkingslow" animation="walkingslow01" />
+          </transitions>
+        </sequence>
+        <sequence type="running" behavior="generic">
+          <transitions>
+            <transition start="standing" end="running" animation="running01" />
+            <transition start="running" end="running" animation="running01" />
+            <transition start="walking" end="running" animation="running01" />
+            <transition start="walkingslow" end="running" animation="running01" />
+          </transitions>
+        </sequence>
+        <sequence type="turnleft90" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnleft90_01" />
+          </transitions>
+        </sequence>
+        <sequence type="turnright90" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnright90_01" />
+          </transitions>
+        </sequence>
+        <sequence type="turnleft180" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnleft180_01" />
+          </transitions>
+        </sequence>
+        <sequence type="turnright180" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_turnright180_01" />
+          </transitions>
+        </sequence>
+        <sequence type="conversation" behavior="generic">
+          <transitions>
+            <transition start="standing" end="standing" animation="anim_stand_conversation_01" />
+            <transition start="running" end="standing" animation="anim_stand_conversation_01" />
+            <transition start="walking" end="standing" animation="anim_stand_conversation_01" />
+            <transition start="walkingslow" end="standing" animation="anim_stand_conversation_01" />
+          </transitions>
+        </sequence>
+      </sequences>
+    </properties>
+  </component>
+
+  <!-- Computer -->
+  <component name="character_player_xenon_01" class="player">
+    <connections>
+      <connection name="computer" tags="computer" optional="1" />
+      <connection name="control" tags="playercontrol" optional="1" />
+      <connection name="primaryship" tags="primaryship" optional="1" />
+      <connection name="room" tags="player" value="1" optional="0" />
+      <connection name="uianchor" tags="uianchor" optional="1" />
+    </connections>
+  </component>
+
+</components>

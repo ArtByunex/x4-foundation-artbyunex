@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Story Criminal Briefing Cutscene -->
+  <director key="story_boron_ch2_argument">
+    <params>
+      <param name="target_ali_leader" object="true" />
+      <param name="target_nila_ti" object="true" />
+      <param name="target_leda_we" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_leda_we" />
+    <object_group name="target_group">
+      <reference object="target_ali_leader" />
+      <reference object="target_nila_ti" />
+      <reference object="target_leda_we" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="StaticCameraShot01" environment="scenezone" duration="onevent:TriggerSequence01Done">
+
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" cycle="none" z="-0.8" y="0.3">
+            <begin angle="70">
+              <distance>
+                <value exact="6.8"/>
+              </distance>
+              <elevation>
+                <value exact="0.6"/>
+              </elevation>
+            </begin>
+            <end angle="660" time="650000">
+              <distance>
+                <value exact="6.2"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="PanAwayShot02" environment="scenezone" duration="onevent:TriggerSequence02Done">
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" y="0.5">
+            <begin angle="90">
+              <distance>
+                <value exact="2.8"/>
+              </distance>
+            </begin>
+            <end angle="90" time="18800">
+              <distance>
+                <value exact="3.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="StaticCameraShot03" environment="scenezone" duration="onevent:TriggerSequence03Done">
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" y="0.55">
+            <begin angle="122">
+              <distance>
+                <value exact="5.4"/>
+              </distance>
+            </begin>
+            <end angle="122" time="18800">
+              <distance>
+                <value exact="5.4"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence04" start="onevent:TriggerSequence04Start">
+        <shot name="StaticShot04" environment="scenezone" duration="onevent:TriggerSequence04Done">
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" y="0.6">
+            <begin angle="90">
+              <distance>
+                <value exact="1.8"/>
+              </distance>
+            </begin>
+            <end angle="90" time="18800">
+              <distance>
+                <value exact="1.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence05" start="onevent:TriggerSequence05Start">
+        <shot name="PanTowardsShot05" environment="scenezone" duration="onevent:TriggerSequence05Done">
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" y="0.6">
+            <begin angle="90">
+              <distance>
+                <value exact="2"/>
+              </distance>
+            </begin>
+            <end angle="90" time="42800">
+              <distance>
+                <value exact="1.4"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence06" start="onevent:TriggerSequence06Start">
+        <shot name="StaticShot06" environment="scenezone" duration="onevent:TriggerSequence06Done">
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" y="0.75">
+            <begin angle="290">
+              <distance>
+                <value exact="3"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </begin>
+            <end angle="270" time="18800">
+              <distance>
+                <value exact="3"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence07" start="onevent:TriggerSequence07Start">
+        <shot name="PanOutCameraShot07" environment="scenezone" duration="onevent:TriggerSequence07Done">
+          <camera_orbit reference="target_nila_ti" orient_to="ecliptic" y="0.65" >
+            <begin angle="92">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </begin>
+            <end angle="92" time="18800">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence08" start="onevent:TriggerSequence08Start">
+        <shot name="PanOutCameraShot08" environment="scenezone" duration="onevent:TriggerSequence08Done">
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" y="0.65"  interpolation="smooth">
+            <begin angle="55">
+              <distance>
+                <value exact="1.2"/>
+              </distance>
+            </begin>
+            <end angle="13" time="14800">
+              <distance>
+                <value exact="1.6"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence09" start="onevent:TriggerSequence09Start">
+        <shot name="StaticShot09" environment="scenezone" duration="onevent:TriggerSequence09Done">
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" y="0.6">
+            <begin angle="80">
+              <distance>
+                <value exact="1"/>
+              </distance>
+              <elevation>
+                <value exact="-0.1"/>
+              </elevation>
+            </begin>
+            <end angle="100" time="18800">
+              <distance>
+                <value exact="1.2"/>
+              </distance>
+              <elevation>
+                <value exact="-0.15"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence10" start="onevent:TriggerSequence10Start">
+        <shot name="PanTowardsShot10" environment="scenezone" duration="onevent:TriggerSequence10Done">
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" y="0.6">
+            <begin angle="90">
+              <distance>
+                <value exact="1.3"/>
+              </distance>
+            </begin>
+            <end angle="90" time="42800">
+              <distance>
+                <value exact="1.1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence11" start="onevent:TriggerSequence11Start">
+        <shot name="PanTowardsShot11" environment="scenezone" duration="onevent:TriggerSequence11Done">
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" x="-1.2" y="0.9" z="1">
+            <begin angle="280">
+              <distance>
+                <value exact="0.65"/>
+              </distance>
+            </begin>
+            <end angle="283" time="15800">
+              <distance>
+                <value exact="0.75"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence12" start="onevent:TriggerSequence12Start">
+        <shot name="PanOutCameraShot12" environment="scenezone" duration="onevent:TriggerSequence12Done">
+
+          <camera_orbit reference="target_ali_leader" orient_to="ecliptic" cycle="none" y="0.73">
+            <begin angle="65">
+              <distance>
+                <value exact="1.1"/>
+              </distance>
+              <elevation>
+                <value exact="-0.01"/>
+              </elevation>
+            </begin>
+            <end angle="71" time="34000">
+              <distance>
+                <value exact="1"/>
+              </distance>
+              <elevation>
+                <value exact="-0.01"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence13" start="onevent:TriggerSequence13Start">
+        <shot name="PanOutCameraShot13" environment="scenezone" duration="onevent:TriggerSequence13Done">
+          <camera_orbit reference="target_nila_ti" orient_to="ecliptic" y="0.65" >
+            <begin angle="120">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </begin>
+            <end angle="120" time="18800">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence14" start="onevent:TriggerSequence14Start">
+        <shot name="PanOutCameraShot14" environment="scenezone" duration="onevent:TriggerSequence14Done">
+
+          <camera_orbit reference="target_leda_we" orient_to="ecliptic" cycle="none" y="0.3" x="3">
+            <begin angle="310">
+              <distance>
+                <value exact="2.6"/>
+              </distance>
+              <elevation>
+                <value exact="0.59"/>
+              </elevation>
+            </begin>
+            <end angle="312" time="34000">
+              <distance>
+                <value exact="2.5"/>
+              </distance>
+              <elevation>
+                <value exact="0.45"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

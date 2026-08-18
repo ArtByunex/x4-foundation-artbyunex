@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_pan1" />
+
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="testgroup">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="DynamicSequence" start="0">
+
+        <shot name="OrbitTarget" environment="scenezone" duration="8000">
+          <camera_orbit reference="target_object" orient_to="ecliptic" interpolation="smooth">
+            <begin angle="25" distance="100%" elevation="0"   />
+            <end angle="125" distance="70%" elevation="10" time="8000"/>
+          </camera_orbit>
+        </shot>
+        <shot name="PanOver" environment="scenezone" duration="8000" >
+          <camera_panover reference="target_object" showing="back" pan_direction="leftwards" panstart="50" panend="50" interpolation="linear">
+            <begin distance="50" elevation="-2" />
+            <end distance="50" elevation="-2"/>
+          </camera_panover>
+        </shot>
+     
+
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

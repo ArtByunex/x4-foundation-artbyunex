@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="story_split_curb_throneroom_reveal">
+    <params>
+      <param name="targetobject" object="true" />
+      <param name="orbitdist" number="true" />
+      <param name="orbitelevation" number="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="DeclarationSequenceStart" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+
+        <shot name="FromDoorPanShot" environment="scenezone" duration="3000">
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none">
+            <begin distance="22.22" angle="90" elevation="1.5" />
+            <end distance="15" angle="90" time="3000" elevation="2.5"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="PanInShot" environment="scenezone" duration="4000">
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none">
+            <begin distance="15" angle="90" elevation="2.5" />
+            <end distance="6" angle="90" time="4000" elevation="1"/>
+          </camera_orbit>
+        </shot>
+        <shot name="PanIntoSweep" environment="scenezone" duration="4000">
+          <!--<takeover_position duration="1000"/>-->
+          <camera_orbit  reference="targetobject" orient_to="ecliptic" cycle="none">
+            <begin distance="6" angle="90" elevation="1" />
+            <end distance="5" angle="255" time="4000" elevation="1"/>
+          </camera_orbit>
+        </shot>
+        <shot name="PauseForEffect" environment="scenezone" duration="1500">
+          <!--<takeover_position duration="1000"/>-->
+          <camera_orbit  reference="targetobject" orient_to="ecliptic" cycle="none">
+            <begin distance="5.5" angle="255" elevation="1" />
+            <end distance="5.5" angle="255" time="1500" elevation="1"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

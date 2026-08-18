@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues">
+
+    <cue name="X4ep1_Gamestart_Pirate_Shared">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <debug_text text="'Pirate Shared'"/>
+        <set_value name="$DebugChance" exact="0"/>
+      </actions>
+      <cues>
+      </cues>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Pirate1" module="x4ep1_gamestart_pirate1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- trigger setup shared by all terran gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Pirate_Shared"/>
+      </actions>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Pirate2" module="x4ep1_gamestart_pirate2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- trigger setup shared by all terran gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Pirate_Shared"/>
+      </actions>
+    </cue>
+  </add>
+
+  <add sel="//cue[@name='X4ep1_Gamestart_Workshop']/actions">
+    <do_if value="userdatasigned.story_research_module_welfare_2?">
+      <add_blueprints wares="ware.module_gen_welfare_casino_01"/>
+    </do_if>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ArgonShips'][1]" pos="before">
+    <set_value name="$SharkShips" exact="[]"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_gen_m_yacht_01_a_macro"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_pir_s_fighter_01_a_macro"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_pir_s_fighter_02_a_macro"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_pir_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_pir_s_trans_container_01_a_macro"/>
+    <append_to_list name="$SharkShips" exact="macro.ship_pir_s_trans_condensate_01_a_macro"/>
+    <append_list_elements name="$ShipMacros" other="$SharkShips"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_elseif[@value='$ParanidShips.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$SharkShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.loanshark" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//set_value[@name='$CapshipMacros']" pos="after">
+    <set_value name="$SharkCapships" exact="[]"/>
+    <append_to_list name="$SharkCapships" exact="macro.ship_pir_l_scrapper_01_macro"/>
+    <append_to_list name="$SharkCapships" exact="macro.ship_pir_l_scavenger_01_a_macro"/>
+    <append_to_list name="$SharkCapships" exact="macro.ship_pir_l_miner_solid_01_a_macro"/>
+    <append_list_elements name="$CapshipMacros" other="$SharkCapships"/>
+    <!-- should not be in SharkCapships since we want it to have a custom loadout -->
+    <append_to_list name="$CapshipMacros" exact="macro.ship_pir_xl_battleship_01_a_macro"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$ParanidCapships.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$SharkCapships.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.loanshark" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='@$loadout']" pos="after">
+    <do_elseif value="$ShipMacro == macro.ship_pir_xl_battleship_01_a_macro">
+      <create_ship macro="$ShipMacro" sector="$Station.sector">
+        <owner exact="faction.player" overridenpc="true"/>
+        <loadout ref="erlking_complete"/>
+        <pilot>
+          <select race="[race.argon, race.paranid, race.teladi]" tags="tag.aipilot"/>
+        </pilot>
+        <people>
+          <fillpercent exact="100"/>
+          <person role="service" weight="100">
+            <select race="[race.argon, race.paranid, race.teladi]" tags="tag.service"/>
+          </person>
+        </people>
+        <drop ref="ship_large_civilian" />
+        <safepos object="$Station" max="5km"/>
+      </create_ship>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//remove_value[@name='$CapshipMacros']" pos="before">
+    <remove_value name="$SharkCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform_2']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ShipMacros'][1]" pos="before">
+    <append_to_list name="$ShipMacros" exact="macro.ship_gen_m_yacht_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_pir_s_fighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_pir_s_fighter_02_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_pir_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_pir_s_trans_container_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_pir_s_trans_condensate_01_a_macro"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Recycling']//set_value[@name='$CapshipMacros']" pos="after" silent="true">
+    <append_to_list name="$CapshipMacros" exact="macro.ship_pir_l_scrapper_01_macro"/>
+  </add>
+  <replace sel="//cue[@name='Test_Recycling']//set_value[@name='$loadoutfaction']/@exact" silent="true">faction.scavenger</replace>
+</diff>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_pan2" />
+
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:ship1" />
+    <object_group name="testgroup">
+      <reference object="ship1" />
+      <reference object="ship2" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="DynamicSequence" start="0">
+
+        <shot name="ShowShip1" environment="scenezone" duration="8000">
+          <camera_follow reference="ship1" orient_to="ecliptic" interpolation="linear">
+            <begin distance="2000" pitch="10" yaw="-10" />
+            <end distance="3250" pitch="10" yaw="10" />
+          </camera_follow>
+        </shot>
+
+        <shot name="Ship1PanShip2" environment="scenezone" duration="8000">
+          <camera_panto reference="ship1" panto_reference="ship2" time_firstobject="3000" time_pan="3000" orient_to="ecliptic" interpolation="smooth">
+            <zoom>
+              <keyframes cycle="none">
+                <keyframe timestamp="0" interpolation="smooth">
+                  <value exact="0.6" />
+                </keyframe>
+                <keyframe timestamp="1000" interpolation="smooth">
+                  <value exact="0.1" />
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="smooth">
+                  <value exact="0.1" />
+                </keyframe>
+                <!--keyframe timestamp="2500" interpolation="smooth">
+                  <value exact="0.6" />
+                </keyframe-->
+                <keyframe timestamp="3000" interpolation="smooth">
+                  <value exact="1" />
+                </keyframe>
+                <keyframe timestamp="8000" interpolation="linear">
+                  <value exact="0.025" />
+                </keyframe>
+              </keyframes>
+            </zoom>
+
+          </camera_panto>
+        </shot>
+
+
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

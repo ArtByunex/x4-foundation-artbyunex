@@ -1,0 +1,2429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/soundlibrary">
+    <sound id="gate_beams" description="Electricity" repeat="1" is3d="1" preload="0" noocclusion="true">
+      <sample start="sfx\animation\firing_beams"/>
+      <volume start="1.0" distance="25.0">
+      </volume>
+    </sound>
+
+    <!-- Engine sounds -->
+
+  <group id="enginedetail_ship_boron_s_01">
+    <sound id="enginedetail_ship_boron_s_01_jet_01" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_01_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_01_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_01_03"/>
+      </sample>
+      <volume start="0.1" distance="3">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.3" />
+          <point position="0.5" value="0.5" />
+          <point position="0.8" value="0.3" />
+          <point position="1" value="0.025" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="3"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_jet_02" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_02_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_02_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_jet_02_03"/>
+      </sample>
+      <volume start="0.4" distance="3">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.3" />
+          <point position="0.5" value="0.5" />
+          <point position="1" value="0.025" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="3"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_lfe" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_lfe_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_lfe_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_lfe_03"/>
+      </sample>
+       <volume start="0.65" distance="1">
+        <customcurve input="forwardspeeddiff">
+          <point position="-0.75" value="1"/>
+          <point position="0" value="0.2"/>
+          <point position="0.25" value="0.5"/>
+          <point position="0.75" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0"/>
+          <point position="0" value="-0.4"/>
+          <point position="1" value="0"/>
+        </customcurve>
+      </pitch>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_stutter" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_stutter_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_stutter_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_stutter_03"/>
+      </sample>
+      <volume start="0.5" distance="1">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.5" />
+          <point position="-0.5" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.3" value="0.5" />
+          <point position="1" value="0.2" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_thrusters_accel" tags="accelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_accel_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_accel_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_accel_03"/>
+      </sample>
+      <volume start="1.0" distance="5">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="1" out="6" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_thrusters_break" tags="decelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_break_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_break_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_break_03"/>
+      </sample>
+      <volume start="0.75" distance="5">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="1" out="6" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boostchargestarted" tags="boostchargestarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boostchargestarted_noplayer" tags="boostchargestarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted_noplayer"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boost_start" tags="booststarted player" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_s_01_booster_start"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boost_start_noplayer" tags="booststarted noplayer" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_s_01_booster_start_mono"/>
+      <volume start="0.6" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boost_loop" tags="boosting player" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_s_01_booster_loop"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_boost_loop_noplayer" tags="boosting noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_s_01_booster_loop_mono"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_charge_5s" tags="travelcharging player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_start" tags="travelstarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_loop" tags="traveling player" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade in="0" out="5" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_stop" tags="travelstopped player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_charge_5s_noplayer" tags="travelcharging noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s_noplayer"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_start_noplayer" tags="travelstarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_loop_noplayer" tags="traveling noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop_noplayer"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_travel_stop_noplayer" tags="travelstopped noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_highspeed" tags="highspeed" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_highspeed"/>
+      <volume start="0.2" distance="0.1"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_gforce" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_ship_stress"/>
+      <volume start="0.7" distance="3">
+        <customcurve input="gforce">
+          <point position="0" value="0"/>
+          <point position="0.5" value="0.8"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_s_01_landing" tags="docking" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\landing\enginedetail_ship_landing"/>
+      <volume start="0.6" distance="2"/>
+    </sound>
+   <sound id="enginedetail_ship_boron_s_01_npc_s" tags="ambient noplayer" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="sfx\engines\enginedetail_npc_s_01"/>
+        <select start="sfx\engines\enginedetail_npc_s_02"/>
+        <select start="sfx\engines\enginedetail_npc_s_03"/>
+      </sample>
+      <volume start="0.4" distance="4">
+        <customcurve input="forwardspeeddiff2">
+          <point position="-1" value="1"/>
+          <point position="-0.5" value="1"/>
+          <point position="-0.1" value="0.1"/>
+          <point position="0" value="0"/>
+          <point position="0.1" value="0.1"/>
+          <point position="0.5" value="1"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="4"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+  </group>
+
+  <group id="shipdetail_ship_boron_s_01">
+    <sound id="shipdetail_ship_boron_s_01_ignition_start" tags="startup" is3d="1" preload="0">
+      <sample start="sfx\engines\ignition\ship_ignition_start"/>
+      <volume start="0.3" distance="2"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_ignition_stop" tags="shutdown" is3d="1" preload="0">
+      <sample start="sfx\engines\enginedetail_ship_s_01_ignition_stop"/>
+      <volume start="0.3" distance="2"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_left" tags="strafeleft yawleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="leftforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_right" tags="straferight yawright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rightforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_up" tags="strafeup pitchup" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="upforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_down" tags="strafedown pitchdown" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="downforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_roll_left" tags="rollleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rollspeed">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_thrusters_maneuvering_roll_right" tags="rollright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_s_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rollspeed">
+          <point position="-1" value="1" />
+          <point position="0" value="0" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_left" tags="wallleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_right" tags="wallright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_above" tags="wallabove" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_below" tags="wallbelow" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_above_left" tags="wallaboveleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_above_right" tags="wallaboveright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_below_left" tags="wallbelowleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_s_01_wall_below_right" tags="wallbelowright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+  </group>
+  
+  <group id="enginedetail_ship_boron_m_01">
+    <sound id="enginedetail_ship_boron_m_01_jet_01" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_01_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_01_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_01_03"/>
+      </sample>
+      <volume start="0.6" distance="4">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.3" />
+          <point position="0.5" value="0.5" />
+          <point position="0.8" value="0.3" />
+          <point position="1" value="0.1" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="4"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_jet_02" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_02_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_02_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_jet_02_03"/>
+      </sample>
+      <volume start="0.2" distance="4">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.2" />
+          <point position="0.5" value="0.3" />
+          <point position="0.8" value="0.2" />
+          <point position="1" value="0.1" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="4"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_lfe" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_lfe_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_lfe_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_lfe_03"/>
+      </sample>
+      <volume start="0.2" distance="1">
+        <customcurve input="forwardspeeddiff">
+          <point position="-0.75" value="1"/>
+          <point position="0" value="0.2"/>
+          <point position="0.25" value="0.5"/>
+          <point position="0.75" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0"/>
+          <point position="0" value="-0.4"/>
+          <point position="1" value="0"/>
+        </customcurve>
+      </pitch>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_stutter" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_stutter_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_stutter_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_stutter_03"/>
+      </sample>
+      <volume start="0.4" distance="2">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.5" />
+          <point position="-0.5" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.3" value="0.3" />
+          <point position="1" value="0" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_thrusters_accel" tags="accelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_accel_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_accel_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_accel_03"/>
+      </sample>
+      <volume start="0.75" distance="5">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="0" out="1" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_thrusters_break" tags="decelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_break_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_break_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_break_03"/>
+      </sample>
+      <volume start="0.6" distance="5">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="0" out="1" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boostchargestarted" tags="boostchargestarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boostchargestarted_noplayer" tags="boostchargestarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted_noplayer"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boost_start" tags="booststarted player" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_m_01_booster_start"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boost_start_noplayer" tags="booststarted noplayer" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_m_01_booster_start_mono"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boost_loop" tags="boosting player" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_m_01_booster_loop"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_boost_loop_noplayer" tags="boosting noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_m_01_booster_loop_mono"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_charge_5s" tags="travelcharging player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_start" tags="travelstarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_loop" tags="traveling player" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade in="0" out="5" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_stop" tags="travelstopped player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_charge_5s_noplayer" tags="travelcharging noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s_noplayer"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_start_noplayer" tags="travelstarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_loop_noplayer" tags="traveling noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop_noplayer"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_travel_stop_noplayer" tags="travelstopped noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_gforce" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_ship_stress"/>
+      <volume start="0.7" distance="7">
+        <customcurve input="gforce">
+          <point position="0" value="0"/>
+          <point position="0.5" value="0.8"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_m_01_landing" tags="docking" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\landing\enginedetail_ship_landing"/>
+      <volume start="0.6" distance="3"/>
+    </sound>
+
+    <sound id="enginedetail_ship_boron_m_01_npc_s" tags="ambient noplayer" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="sfx\engines\enginedetail_npc_m_01"/>
+        <select start="sfx\engines\enginedetail_npc_m_02"/>
+        <select start="sfx\engines\enginedetail_npc_m_03"/>
+      </sample>
+      <volume start="0.8" distance="5">
+        <customcurve input="forwardspeeddiff2">
+          <point position="-1" value="1"/>
+          <point position="-0.5" value="1"/>
+          <point position="-0.1" value="0.1"/>
+          <point position="0" value="0"/>
+          <point position="0.1" value="0.1"/>
+          <point position="0.5" value="1"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="5"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+  </group>
+  
+  <group id="shipdetail_ship_boron_m_01">
+    <sound id="shipdetail_ship_boron_m_01_ignition_start" tags="startup" is3d="1" preload="0">
+      <sample start="sfx\engines\ignition\ship_m_01_ignition_start"/>
+      <volume start="0.5" distance="5"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_ignition_stop" tags="shutdown" is3d="1" preload="0">
+      <sample start="sfx\engines\enginedetail_ship_m_01_ignition_stop"/>
+      <volume start="0.5" distance="5"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_left" tags="strafeleft yawleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="leftforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_right" tags="straferight yawright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rightforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_up" tags="strafeup pitchup" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="upforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_down" tags="strafedown pitchdown" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="downforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_roll_left" tags="rollleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rollspeed">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_thrusters_maneuvering_roll_right" tags="rollright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_m_01_thrusters_maneuvering"/>
+      <volume start="0.15" distance="10">
+        <customcurve input="rollspeed">
+          <point position="-1" value="1" />
+          <point position="0" value="0" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_left" tags="wallleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_right" tags="wallright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_above" tags="wallabove" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_below" tags="wallbelow" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_above_left" tags="wallaboveleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_above_right" tags="wallaboveright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_below_left" tags="wallbelowleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_m_01_wall_below_right" tags="wallbelowright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+  </group>
+  
+  <group id="enginedetail_ship_boron_l_xl_01">
+    <sound id="enginedetail_ship_boron_l_xl_01_jet_01" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_01_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_01_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_01_03"/>
+      </sample>
+      <volume start="0.4" distance="20">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.3" />
+          <point position="0.5" value="0.5" />
+          <point position="0.8" value="0.3" />
+          <point position="1" value="0.1" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="20"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_jet_02" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_02_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_02_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_jet_02_03"/>
+      </sample>
+      <volume start="0.3" distance="20">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0" />
+          <point position="-0.8" value="0.6" />
+          <point position="-0.2" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.2" value="0.3" />
+          <point position="0.5" value="0.5" />
+          <point position="0.8" value="0.3" />
+          <point position="1" value="0.21" />
+        </customcurve> 
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="20"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_lfe" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_lfe_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_lfe_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_lfe_03"/>
+      </sample>
+      <volume start="1.0" distance="10">
+        <customcurve input="forwardspeeddiff">
+          <point position="-0.75" value="1"/>
+          <point position="0" value="0.2"/>
+          <point position="0.25" value="0.5"/>
+          <point position="0.75" value="1"/>
+        </customcurve>
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+         <distancecurve>
+          <point distance="0.0" volume="1.0"/>
+          <point distance="0.3" volume="0.5"/>
+          <point distance="0.6" volume="0.1"/>
+          <point distance="1.0" volume="0.05"/>
+         </distancecurve>
+        </filter>
+      </effects>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0"/>
+          <point position="0" value="-0.4"/>
+          <point position="1" value="0"/>
+        </customcurve>
+      </pitch>
+      <lfe>
+        <customcurve input="forwardspeeddiff">
+          <point position="-0.75" value="1" />
+          <point position="0" value="0" />
+          <point position="0.5" value="1" />
+        </customcurve>
+      </lfe>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_stutter" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_stutter_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_stutter_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_stutter_03"/>
+      </sample>
+      <volume start="1.0" distance="2">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.5" />
+          <point position="-0.5" value="0.3" />
+          <point position="0" value="0" />
+          <point position="0.3" value="0.5" />
+          <point position="1" value="0.2" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_thrusters_accel" tags="accelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_accel_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_accel_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_accel_03"/>
+      </sample>
+      <volume start="1.5" distance="10">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="0.1" out="8.0" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+       </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_thrusters_break" tags="decelerate" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_break_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_break_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_break_03"/>
+      </sample>
+      <volume start="1.0" distance="10">
+        <!-- <customcurve input="forwardspeeddiff">
+          <point position="-0.05" value="1"/>
+          <point position="0" value="0.5"/>
+          <point position="0.05" value="1"/>
+        </customcurve> -->
+      </volume>
+      <effects>
+        <fade in="0.1" out="8.0" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boostchargestarted" tags="boostchargestarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boostchargestarted_noplayer" tags="boostchargestarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\booster\enginedetail_boostchargestarted_noplayer"/>
+      <volume start="1.0" distance="2"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boost_start" tags="booststarted player" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_l_xl_01_booster_start"/>
+      <volume start="0.6" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boost_start_noplayer" tags="booststarted noplayer" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_l_xl_01_booster_start_mono"/>
+      <volume start="0.6" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boost_loop" tags="boosting player" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_l_xl_01_booster_loop"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_boost_loop_noplayer" tags="boosting noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\booster\enginedetail_ship_boron_l_xl_01_booster_loop_mono"/>
+      <volume start="1.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade out="2" />
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_charge_5s" tags="travelcharging player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_start" tags="travelstarted player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_loop" tags="traveling player" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <fade in="0" out="5" />
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_stop" tags="travelstopped player" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_charge_5s_noplayer" tags="travelcharging noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_charge_5s_noplayer"/>
+      <volume start="0.5" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_start_noplayer" tags="travelstarted noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_start_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_loop_noplayer" tags="traveling noplayer" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_loop_noplayer"/>
+      <volume start="0.5" distance="10">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.1"/>
+          <point position="0" value="0.2"/>
+          <point position="1" value="0.3"/>
+          <point position="2" value="1"/>
+        </customcurve>
+      </volume>
+      <pitch>
+        <customcurve input="forwardspeed">
+          <point position="-1" value="-0.9"/>
+          <point position="0" value="-0.8"/>
+          <point position="1" value="-0.7"/>
+          <point position="2" value="0"/>
+        </customcurve>
+      </pitch>
+      <effects>
+        <filter mode="lowpass" distance="10">
+          <distancecurve>
+            <point distance="0.0" volume="1.0"/>
+            <point distance="0.3" volume="0.5"/>
+            <point distance="0.6" volume="0.1"/>
+            <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+        </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_travel_stop_noplayer" tags="travelstopped noplayer" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_stop_noplayer"/>
+      <volume start="0.3" distance="10"/>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_highspeed" tags="highspeed" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_travel_highspeed"/>
+      <volume start="0.2" distance="0.1"/>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_gforce" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\travel\enginedetail_ship_stress"/>
+      <volume start="0.7" distance="3">
+        <customcurve input="gforce">
+          <point position="0" value="0"/>
+          <point position="0.5" value="0.8"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="enginedetail_ship_boron_l_xl_01_landing" tags="docking" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\landing\enginedetail_ship_landing"/>
+      <volume start="0.6" distance="2"/>
+    </sound>
+
+    <sound id="enginedetail_ship_boron_l_xl_01_npc_s" tags="ambient noplayer" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="sfx\engines\enginedetail_npc_l_01"/>
+        <select start="sfx\engines\enginedetail_npc_l_02"/>
+        <select start="sfx\engines\enginedetail_npc_l_03"/>
+      </sample>
+      <volume start="0.4" distance="10">
+        <customcurve input="forwardspeeddiff2">
+          <point position="-1" value="1"/>
+          <point position="-0.5" value="1"/>
+          <point position="-0.1" value="0.1"/>
+          <point position="0" value="0"/>
+          <point position="0.1" value="0.1"/>
+          <point position="0.5" value="1"/>
+          <point position="1" value="1"/>
+        </customcurve>
+      </volume>
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+  </group>
+  
+  <group id="shipdetail_ship_boron_l_xl_01">
+    <sound id="shipdetail_ship_boron_l_xl_01_cockpit" tags="ambient" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\cockpit\enginedetail_allships_cockpit"/>
+      <volume start="0.1" distance="0.05">
+        <customcurve input="forwardspeed">
+          <point position="-1" value="0.2"/>
+          <point position="0" value="0.1"/>
+          <point position="1" value="0.4"/>
+        </customcurve>
+        <distancecurve>
+          <point distance="0.0" volume="1.0" />
+          <point distance="0.1" volume="1.0" />
+          <point distance="0.75" volume="1.0" />
+          <point distance="1.0" volume="0.1" />
+        </distancecurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_ignition_start" tags="startup" is3d="1" preload="0">
+      <sample start="sfx\engines\ignition\ship_ignition_start"/>
+      <volume start="0.3" distance="1"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_ignition_stop" tags="shutdown" is3d="1" preload="0">
+      <sample start="sfx\engines\enginedetail_ship_m_01_ignition_stop"/>
+      <volume start="0.3" distance="1"/>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_left" tags="strafeleft yawleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="leftforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_right" tags="straferight yawright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="rightforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_up" tags="strafeup pitchup" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="upforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_down" tags="strafedown pitchdown" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="downforce">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_roll_left" tags="rollleft" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="rollspeed">
+          <point position="0" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_thrusters_maneuvering_roll_right" tags="rollright" repeat="-1" is3d="1" preload="0">
+      <sample start="extensions\ego_dlc_boron\sfx\engines\enginedetail_ship_boron_l_xl_01_thrusters_maneuvering"/>
+      <volume start="0.3" distance="10">
+        <customcurve input="rollspeed">
+          <point position="-1" value="1" />
+          <point position="0" value="0" />
+        </customcurve>
+      </volume>
+      <effects>
+        <fade in="0.5" out="1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_left" tags="wallleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_right" tags="wallright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_above" tags="wallabove" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_below" tags="wallbelow" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_above_left" tags="wallaboveleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_above_right" tags="wallaboveright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_above_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_below_left" tags="wallbelowleft" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_left">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+    <sound id="shipdetail_ship_boron_l_xl_01_wall_below_right" tags="wallbelowright" repeat="-1" is3d="1" preload="0">
+      <sample start="sfx\engines\wall\enginedetail_allships_wall_flyby_01"/>
+      <volume start="1" distance="1">
+        <customcurve input="wallecho_below_right">
+          <point position="0.2" value="0" />
+          <point position="1" value="1" />
+        </customcurve>
+      </volume>
+    </sound>
+  </group>
+
+    <!-- Weapon sounds -->
+
+    <sound id="weapon_bor_s_laser_01_mk1_muzzle" description="S Positron Gun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_gun\boron_positron_gun_08" />
+      </sample>
+      <volume start="0.6" distance="10" />
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_s_arc_01_mk1_muzzle" description="S Arc Gun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_arc_gun\boron_arc_gun_08" />
+      </sample>
+      <volume start="0.6" distance="10" />
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_s_gatling_01_mk1_loop" description="S Ion Pulser" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_loop_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_loop_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_loop_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_loop_04" />
+      </sample>
+      <volume start="0.5" loop="0.5" end="0.5" distance="10" />
+      <effects>
+        <fade in="0.1" out="0.1" />
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_s_gatling_01_mk1_stopshooting" description="S Ion Pulser" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_stop_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_stop_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_stop_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_pulser\boron_ion_pulser_stop_04" />
+      </sample>
+      <volume start="0.5" distance="10" />
+      <effects>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_m_railgun_01_mk1_muzzle" description="M Ion Shard Railgun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_08" />
+      </sample>
+      <volume start="0.7" distance="15" />
+      <effects>
+        <filter mode="lowpass" distance="15"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_m_railgun_01_mk1_impact" description="M Ion Shard Railgun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_08" />
+      </sample>
+      <volume start="0.7" distance="10" />
+    </sound>
+
+    <sound id="weapon_bor_m_railgun_01_mk1_impact_inside" description="M Ion Shard Railgun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_08" />
+      </sample>
+      <volume start="0.7" distance="10" />
+      <effects>
+        <filter mode="lowpass" frequency="0.1"/>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_m_railgun_01_mk1_impact_inside_bigobject" description="M Ion Shard Railgun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_impact_08" />
+      </sample>
+      <volume start="0.5" distance="10" />
+      <effects>
+        <filter mode="lowpass" frequency="0.1"/>
+      </effects>
+    </sound>
+
+    <!-- <sound id="weapon_bor_m_railgun_01_mk1_charge" description="M Ion Shard Railgun" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_shard_railgun\boron_ion_shard_railgun_charge_08" />
+      </sample>
+      <volume start="0.7" distance="10" />
+    </sound> -->
+
+    <sound id="weapon_bor_m_laser_01_mk1_muzzle" description="M Positron Cannon" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_positron_cannon\boron_positron_cannon_08" />
+      </sample>
+      <volume start="0.7" distance="15" />
+      <effects>
+        <filter mode="lowpass" distance="15"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_m_flak_01_mk1_muzzle" description="M Ion Atomizer" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_08" />
+      </sample>
+      <volume start="0.7" distance="15" />
+      <effects>
+        <filter mode="lowpass" distance="15"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_m_flak_01_mk1_impact" description="M Ion Atomizer" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_atomizer\boron_ion_atomizer_impact_08" />
+      </sample>
+      <volume start="0.5" distance="10" />
+    </sound>
+
+    <sound id="weapon_bor_l_beam_01_mk1_muzzle" description="L Ion Projector" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_start_08" />
+      </sample>
+      <volume start="0.7" distance="12" />
+    </sound>
+
+    <sound id="weapon_bor_l_beam_01_mk1_loop" description="L Ion Projector" repeat="-1" is3d="1" preload="0">
+      <sample selection="random">
+        <!-- <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_01_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_01_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_01_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_01_04" />
+
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_02_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_02_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_02_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_02_04" /> -->
+
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_03_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_03_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_03_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_03_04" />
+
+        <!-- <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_04_01"/>
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_04_02"/>
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_04_03"/>
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_loop_04_04"/> -->
+      </sample>
+    <volume start="0.8" loop="0.8" end="0.8" distance="8">
+      <distancecurve>
+        <point distance="0.0" volume="1.0"/>
+        <point distance="0.05" volume="0.2"/>
+        <point distance="0.5" volume="0.1"/>
+        <point distance="1.0" volume="0.0"/>
+      </distancecurve>
+    </volume>
+      <effects>
+        <fade in="0.1" out="0.1" />
+      </effects>
+    </sound>
+
+    <sound id="weapon_bor_l_beam_01_mk1_charge" description="L Ion Projector" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_charge_muzzle_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_charge_muzzle_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_charge_muzzle_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_charge_muzzle_04" />
+      </sample>
+      <volume start="1.2" distance="12" />
+    </sound>
+
+    <sound id="weapon_bor_l_beam_01_mk1_stopshooting" description="L Ion Projector" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_projector\boron_ion_projector_stop_08" />
+      </sample>
+      <volume start="0.7" distance="12" />
+    </sound>
+
+    <sound id="turret_bor_l_disruptor_01_mk1_muzzle" description="L T Ion Net launcher" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_08" />
+      </sample>
+      <volume start="0.7" distance="15" />
+      <effects>
+        <filter mode="lowpass" distance="15"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="turret_bor_l_disruptor_01_mk1_impact" description="L T Ion Net launcher" repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_net_launcher\boron_ion_net_launcher_impact_08" />
+      </sample>
+      <volume start="1.0" distance="15" />
+    </sound>
+
+    <sound id="turret_bor_l_flak_01_mk1_muzzle" description="L T Ion Flak " repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_08" />
+      </sample>
+      <volume start="0.7" distance="15" />
+      <effects>
+        <filter mode="lowpass" distance="15"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+
+    <sound id="turret_bor_l_flak_01_mk1_impact" description="L T Ion Flak " repeat="1" is3d="1" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_01" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_02" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_03" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_04" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_05" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_06" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_07" />
+        <select start="extensions\ego_dlc_boron\sfx\weapons\boron_ion_flak\boron_ion_flak_impact_08" />
+      </sample>
+      <volume start="0.7" distance="10" />
+    </sound>
+
+    <!-- ................... -->
+    <!-- ...... MUSIC ...... -->
+    <!-- ................... -->
+
+    <!-- Sector soundtracks -->
+    <sound id="music_dlc_boron_soundtrack_border" description="Music for the ownerless sectors Watchful Gaze and Sanctuary of Darkness." repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\02. Alexei Zakharov - Ghost of the Ocean" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\04. Alexei Zakharov - Bells of Fate" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\11. Alexei Zakharov - Fading Hope" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\13. Alexei Zakharov - Songs of the Past" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\14. Alexei Zakharov - Azimuth Golden Azure" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\15. Alexei Zakharov - Yearning of Cobalt Blue (Epilogue)" />
+      </sample>
+      <volume start="0.3" />
+      <effects>
+        <fade in="1.66667" out="0.666667" />
+      </effects>
+    </sound>
+
+    <sound id="music_dlc_boron_soundtrack_outer_bubble" description="Music for the Boron sectors Barren Shores, Great Reef and Ocean of Fantasy." repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\01. Alexei Zakharov - Lullaby of the Lilac Star" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\03. Alexei Zakharov - Shimmering Waves" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\05. Alexei Zakharov - Desolation of the Deep" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\06. Alexei Zakharov - Provinces Adrift" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\07. Alexei Zakharov - Nostalgia" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\12. Alexei Zakharov - Call of Obscurity" />
+      </sample>
+      <volume start="0.3" />
+      <effects>
+        <fade in="1.66667" out="0.666667" />
+      </effects>
+    </sound>
+
+    <sound id="music_dlc_boron_soundtrack_kingdom_end" description="Music for the three Kingdom End sectors." repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\07. Alexei Zakharov - Nostalgia" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\08. Alexei Zakharov - Saudade" />
+        <select weight="10" start="extensions\ego_dlc_boron\music\Cluster\10. Alexei Zakharov - Return to Kingdom End" />
+      </sample>
+      <volume start="0.3" />
+      <effects>
+        <fade in="1.66667" out="0.666667" />
+      </effects>
+    </sound>
+
+    <sound id="music_dlc_boron_soundtrack_inner_bubble" description="Music for the Boron sectors Rolk's Demise, Atreus' Clouds and Menelaus' Oasis." repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\01. Alexei Zakharov - Lullaby of the Lilac Star" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\03. Alexei Zakharov - Shimmering Waves" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\04. Alexei Zakharov - Bells of Fate" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\08. Alexei Zakharov - Saudade" />
+        <select weight="7" start="extensions\ego_dlc_boron\music\Cluster\14. Alexei Zakharov - Azimuth Golden Azure" />
+        <select weight="5" start="extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River" />
+      </sample>
+      <volume start="0.3" />
+      <effects>
+        <fade in="1.66667" out="0.666667" />
+      </effects>
+    </sound>
+
+    <!-- Special -->
+    <sound id="music_kingdom_end_system_first_entry" description="Music for the first arrival in the Kingdom End system, so in the sector Towering Wave." repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_boron\music\Cluster\10. Alexei Zakharov - Return to Kingdom End"/>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667" />
+      </effects>
+    </sound>
+
+    <sound id="return_to_kingdom_end" description="Special version for first arrival to kingdom End" repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_boron\music\Special\Return_to_KE_Arrival"/>
+      <volume start="1"/>
+      <effects>
+        <fade in="0" out="1"/>
+      </effects>
+    </sound>
+  
+    <sound id="music_boron_throneroom_cutscene" description="Special music for audience in throne room" repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_boron\music\Cluster\10. Alexei Zakharov - Return to Kingdom End"/>
+      <volume start="0.18"/>
+      <effects>
+        <fade in="0" out="1"/>
+      </effects>
+    </sound>
+
+    <sound id="music_boron_experiment_cutscene" description="Special music for gate experiment" repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River"/>
+      <volume start="0.18"/>
+      <effects>
+        <fade in="0" out="1"/>
+      </effects>
+    </sound>
+    <sound id="music_menu_main_bor_music" description="Start menu Music" repeat="-1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River"/>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+  </add>
+
+  <!-- Patch all new music into music_complete_soundtrack -->
+  <add sel="/soundlibrary/sound[@id='music_complete_soundtrack']/sample">
+    <select start="extensions\ego_dlc_boron\music\Cluster\01. Alexei Zakharov - Lullaby of the Lilac Star" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\02. Alexei Zakharov - Ghost of the Ocean" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\03. Alexei Zakharov - Shimmering Waves" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\04. Alexei Zakharov - Bells of Fate" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\05. Alexei Zakharov - Desolation of the Deep" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\06. Alexei Zakharov - Provinces Adrift" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\07. Alexei Zakharov - Nostalgia" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\08. Alexei Zakharov - Saudade" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\09. Alexei Zakharov - Boso Ta's Dream" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\10. Alexei Zakharov - Return to Kingdom End" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\11. Alexei Zakharov - Fading Hope" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\12. Alexei Zakharov - Call of Obscurity" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\13. Alexei Zakharov - Songs of the Past" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\14. Alexei Zakharov - Azimuth Golden Azure" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\15. Alexei Zakharov - Yearning of Cobalt Blue (Epilogue)" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River" />
+  </add>
+
+  <add sel="/soundlibrary/sound[@id='music_station_designer']/sample">
+    <select start="extensions\ego_dlc_boron\music\Cluster\01. Alexei Zakharov - Lullaby of the Lilac Star" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\02. Alexei Zakharov - Ghost of the Ocean" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\03. Alexei Zakharov - Shimmering Waves" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\04. Alexei Zakharov - Bells of Fate" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\05. Alexei Zakharov - Desolation of the Deep" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\06. Alexei Zakharov - Provinces Adrift" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\07. Alexei Zakharov - Nostalgia" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\08. Alexei Zakharov - Saudade" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\10. Alexei Zakharov - Return to Kingdom End" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\11. Alexei Zakharov - Fading Hope" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\12. Alexei Zakharov - Call of Obscurity" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\13. Alexei Zakharov - Songs of the Past" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\14. Alexei Zakharov - Azimuth Golden Azure" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\15. Alexei Zakharov - Yearning of Cobalt Blue (Epilogue)" />
+    <select start="extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River" />
+  </add>
+
+  <!-- Main Menu -->
+  <replace sel="/soundlibrary/sound[@id='music_menu_main_music']/sample/@start">extensions\ego_dlc_boron\music\Cluster\16. Alexei Zakharov - Ode of the Black River</replace>
+  <replace sel="/soundlibrary/sound[@id='music_menu_main_music']/volume/@start">0.3</replace>
+</diff>

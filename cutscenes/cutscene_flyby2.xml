@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- For best results, position the playership well away from the sector center before playback. -->
+  <director key="Cutscene_flyby2" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+
+    </environments>
+
+  <presentation>
+    <actions>
+      
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence" start="0">
+
+
+        <!-- #1: Simple preset with animated parameters. -->
+        <shot name="OrbitPresetDemo" environment="scenezone" duration="5000">
+          <camera_orbit reference="target_object" orient_to="object">
+            <begin angle="25" distance="12000" elevation="40" />
+            <end angle="170" distance="600" elevation="0" />
+          </camera_orbit>
+        </shot>
+        
+        <shot name="FollowPresetAdvancedDemo" environment="scenezone" duration="8000">
+          <takeover_position duration="14000" interpolation="smooth"/>
+          <camera_follow reference="target_object" orient_to="ecliptic">
+            <begin distance="600" />
+            <end distance="200" pitch="50" yaw="10" time="5000" />
+          </camera_follow>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

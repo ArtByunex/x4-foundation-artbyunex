@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="//cue[@name='CinematicCameraManager']/actions/do_if[@value='@$HomeSystemsPatchMarker']" pos="after">
+    <append_list_elements name="$HomeSystems" other="[
+               table[$Owner = faction.split, $System = macro.cluster_404_macro, $RaceSystem = false],
+               table[$Owner = faction.split, $System = macro.cluster_405_macro, $RaceSystem = false],
+               table[$Owner = faction.split, $System = macro.cluster_406_macro, $RaceSystem = false],
+               ]"/>
+  </add>
+</diff>

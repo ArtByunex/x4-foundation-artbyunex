@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_race_intro_zoom">
+    <params>
+      <!-- Zone to create scenezone from -->
+      <param name="anchor" object="true" />
+
+      <param name="from_x" number="true"/>
+      <param name="from_y" number="true"/>
+      <param name="from_z" number="true"/>
+      <param name="to_x" number="true"/>
+      <param name="to_y" number="true"/>
+      <param name="to_z" number="true"/>
+      <param name="lookat_x" number="true"/>
+      <param name="lookat_y" number="true"/>
+      <param name="lookat_z" number="true"/>
+      <param name="duration" number="true" default="8000"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="RaceZoomSeq" start="0">
+        <shot name="CameraZoom" environment="scenezone" duration="2000">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="from_x" y="from_y" z="from_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:duration" interpolation="linear">
+                  <reference x="to_x" y="to_y" z="to_z"  object="anchor"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="to_x" y="to_y" z="to_z"  object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:duration" interpolation="linear">
+                  <reference x="lookat_x" y="lookat_y" z="lookat_z"  object="anchor"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

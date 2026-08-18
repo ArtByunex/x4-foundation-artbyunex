@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff>
+  <add sel="/sequencestates">
+    <!-- Cluster Wave states -->
+    <state name="wave_inactive">
+      <transition nextstate="wave_warningactivating" trigger="wave_activatewarning" />
+      <transition nextstate="wave_inactive" />
+    </state>
+    <state name="wave_warningactivating">
+      <transition nextstate="wave_warningactive" />
+    </state>
+    <state name="wave_warningactive">
+      <transition nextstate="wave_active" trigger="wave_activatewave" />
+      <transition nextstate="wave_warningdeactivating" trigger="wave_deactivatewarning" />
+      <transition nextstate="wave_warningactive"/>
+    </state>
+    <state name="wave_warningdeactivating">
+      <transition nextstate="wave_inactive"/>
+    </state>
+    <state name="wave_active">
+      <transition nextstate="wave_inactive" />
+
+    </state>
+      <state name="airlock_outside">
+      <transition nextstate="airlock_cycling" trigger="activate" />
+    </state>
+    <state name="airlock_cycling">
+      <transition nextstate="airlock_inside" />
+    </state>
+    <state name="airlock_inside">
+      <transition nextstate="airlock_cycling2" trigger="deactivate" />
+    </state>
+    <state name="airlock_cycling2">
+      <transition nextstate="airlock_outside"/>
+    </state>
+    
+    <!--test setup-->
+    <!--state name="wave_inactive">
+      <transition nextstate="wave_warningactivating" />
+    </state>
+    <state name="wave_warningactivating">
+      <transition nextstate="wave_warningactive" />
+    </state>
+    <state name="wave_warningactive">
+      <transition nextstate="wave_active" />
+    </state>
+    <state name="wave_warningdeactivating">
+      <transition nextstate="wave_inactive"/>
+    </state>
+    <state name="wave_active">
+      <transition nextstate="wave_inactive" />
+    </state-->
+  </add>
+</diff>

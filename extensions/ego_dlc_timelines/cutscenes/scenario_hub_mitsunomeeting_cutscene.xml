@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Story Criminal Briefing Cutscene -->
+  <director key="scenario_hub_mitsunomeeting_cutscene">
+    <params>
+      <param name="target_Mitsuno_Actor" object="true" />
+      <param name="target_Sae_Actor" object="true" />
+      <param name="target_Player" object="true" />
+      <param name="hideoutroom" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:hideoutroom" />
+    <object_group name="target_group">
+      <reference object="target_Mitsuno_Actor" />
+      <reference object="target_Sae_Actor" />
+      <reference object="target_Player" />
+      <reference object="hideoutroom" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.8" y="1.7" z="0.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <zoom>
+              <autozoom fillspace="70"/>
+            </zoom>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.499" y="1.7" z="2.73"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Player" head="1"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="target_Player" head="1" x="0.0" y="0" z="0.0" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="0.2" y="1.7" z="0.4"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="StaticCameraShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="smooth">
+                  <reference object="hideoutroom" x="0.8" y="0.8" z="1.55" />
+                </keyframe>
+                <keyframe timestamp="9000" interpolation="smooth">
+                  <reference object="hideoutroom" x="1.73" y="1.11" z="3.90" />
+                </keyframe>
+                <keyframe timestamp="12000" interpolation="smooth">
+                  <reference object="hideoutroom" x="-0.47" y="0.92" z="3.22" />
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <reference object="target_Mitsuno_Actor" y="2.0" z="2.8"/>
+            </position>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="StaticCameraShot5" environment="scenezone" duration="onevent:TriggerSequence5Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="0.1" y="1.7" z="-2.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence6" start="onevent:TriggerSequence6Start">
+        <shot name="StaticCameraShot6" environment="scenezone" duration="onevent:TriggerSequence6Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="0.35" y="1.7" z="2.06"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Player" head="true" y="0"/>
+            </lookdirection>
+            <zoom>
+              <autozoom fillspace="5"/>
+            </zoom>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="target_Player" head="1" x="0.0" y="0" z="0.0" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence7" start="onevent:TriggerSequence7Start">
+        <shot name="StaticCameraShot7" environment="scenezone" duration="onevent:TriggerSequence7Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.8" y="1.7" z="0.4"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence8" start="onevent:TriggerSequence8Start">
+        <shot name="StaticCameraShot8" environment="scenezone" duration="onevent:TriggerSequence8Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.65" y="1.7" z="2.61"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Sae_Actor" y="1.6"/>
+            </lookdirection>
+            <zoom>
+              <autozoom fillspace="10"/>
+            </zoom>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="target_Player" head="1" x="0.0" y="0" z="0.0" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence9" start="onevent:TriggerSequence9Start">
+        <shot name="StaticCameraShot9" environment="scenezone" duration="onevent:TriggerSequence9Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.8" y="1.7" z="0.4"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence10" start="onevent:TriggerSequence10Start">
+        <shot name="StaticCameraShot10" environment="scenezone" duration="onevent:TriggerSequence10Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.65" y="1.7" z="2.61"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Sae_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="target_Player" head="1" x="0.0" y="0" z="0.0" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence11" start="onevent:TriggerSequence11Start">
+        <shot name="StaticCameraShot11" environment="scenezone" duration="onevent:TriggerSequence11Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="0.3" y="1.7" z="-2.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" y="1.6"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence12" start="onevent:TriggerSequence12Start">
+        <shot name="StaticCameraShot12" environment="scenezone" duration="onevent:TriggerSequence12Done">
+          <camera>
+            <position>
+              <reference object="hideoutroom" x="-0.35" y="1.7" z="2.06"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Player" head="true" y="0"/>
+            </lookdirection>
+            <panloop time="10" pitch="0.01" />
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="target_Player" head="1" x="0.0" y="0" z="0.0" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

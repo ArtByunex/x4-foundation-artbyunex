@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- DLC Specific Signal Leak Mission Variants -->
+
+  <!-- ##################################################################################################-->
+  <!-- DLC_Split_GM_Assassinate__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_Assassinate__Trigger_patchmarker ']">
+    <do_elseif value="$Station.owner == faction.freesplit">
+      <set_value name="$TextOffset" exact="[5100, 5200, 5300].random" comment="Split specific missions"/>
+      <set_value name="$ClientOwner" exact="faction.fallensplit"/>
+      <do_if value="not $ClientOwner.isrelationlocked">
+        <set_value name="$ForeignSignalLeak"/>
+      </do_if>
+    </do_elseif>
+  </replace>
+
+  <!-- ##################################################################################################-->
+  <!-- DLC_Split_GM_Transport_Passengers__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_Transport_Passengers__Trigger_patchmarker ']">
+    <do_elseif value="$Station.owner == faction.freesplit">
+      <set_value name="$ClientOwner" exact="faction.fallensplit"/>
+    </do_elseif>
+  </replace>
+
+  <!-- ##################################################################################################-->
+  <!-- DLC_Split_GM_Sabotage__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_Sabotage__Trigger_patchmarker ']">
+    <do_elseif value="$Station.owner == faction.freesplit">
+      <set_value name="$TextOffset"   exact="[5100, 5200].random" comment="Split specific missions"/>
+      <set_value name="$ClientOwner"  exact="faction.fallensplit"/>
+      <set_value name="$EnemyFaction" exact="[faction.split, faction.freesplit].random"/>
+    </do_elseif>
+  </replace>
+
+  <!-- ##################################################################################################-->
+  <!-- DLC_Split_GM_BoardShip__Trigger_EnemyFactions_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_BoardShip__Trigger_EnemyFactions_patchmarker ']">
+    <append_to_list name="$EnemyFactions" exact="faction.split"/>
+    <append_to_list name="$EnemyFactions" exact="faction.freesplit"/>
+    <append_to_list name="$EnemyFactions" exact="faction.fallensplit"/>
+  </replace>
+
+  <!-- DLC_Split_GM_BoardShip__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_BoardShip__Trigger_patchmarker ']">
+    <do_elseif value="$Station.owner == faction.freesplit">
+      <set_value name="$Faction"  exact="faction.fallensplit"/>
+      <set_value name="$TextOffset" exact="6100" comment="Split pirate missions"/>
+    </do_elseif>
+  </replace>
+
+  <!-- ##################################################################################################-->
+  <!-- DLC_Split_GM_HackPanel__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Split_GM_HackPanel__Trigger_patchmarker ']">
+    <do_elseif value="$Station.owner == faction.freesplit">
+      <set_value name="$TextOffset" exact="[5100, 5200, 5300].random" comment="Split specific missions"/>
+      <set_value name="$ClientOwner" exact="faction.fallensplit"/>
+    </do_elseif>
+  </replace>
+
+</diff>

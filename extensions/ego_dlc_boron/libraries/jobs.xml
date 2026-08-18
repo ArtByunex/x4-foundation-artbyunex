@@ -1,0 +1,3128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<diff>
+
+  <add sel="/jobs/job[@id='loanshark_plunderer_iceunion']" pos="after" silent="true">
+    <!-- Boron relief water smuggler to ToA DLC sectors, activate when Kingdom End gates open. Added separately to be compatible with ToA DLC -->
+    <job id="boron_water_smuggler_m" name="{20204,10009}" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="3" />
+          <param name="maxbuy" value="10" />
+          <param name="maxsell" value="2" />
+          <param name="usecover" value="true" />
+          <param name="preferredcoverfactions" value="[faction.loanshark]" />
+        </order>
+      </orders>
+      <basket basket="water" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="self" comparison="exact" matchextension="false" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+  </add>
+
+  <add sel="/jobs">
+    <!-- BORON QUEENDOM
+        Starting Clusters: 3 border and 4 core
+        Sectors: 3 border and 6 core 
+        Zones: TODO
+      
+    General: first pocket of boron space (tag: boronborder) starts disconnected from core sectors (tag: boroncore)
+    only wharf is present in boronborder sectors so L ships should be kept at minimum (excluding boronborder tag clusters),
+    as story progresses and boron space is connected or shipyard is built, boronborder tag will be removed from clusters thus allowing more L-ship jobs to populate border space more
+
+    Military: peaceful by nature but smart, so try to stay in groups (like fish, hehe) and overwhelm the enemy when possible to increase the odds, rarely go 1v1.
+    No S patrols (except police), focus on M patrols, L light carriers and L destroyer packs-->
+
+    <!-- ############################ -->
+    <!-- STORY-activated jobs START -->
+    <!-- ############################ -->
+    <!-- Boron "curiosity" traders with large range to go deep into other factions territory, should activate after gates to Kingdom End open -->
+    <job id="boron_universal_trader_l" name="{20204,17301}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="6" />
+          <param name="maxsell" value="15" />
+        </order>
+      </orders>
+      <basket basket="energy" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_universal_trader_l_hightech" name="{20204,17301}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="6" />
+          <param name="maxsell" value="15" />
+        </order>
+      </orders>
+      <basket basket="equipment" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" />
+      </subordinates>
+    </job>
+
+    <!-- "Import" traders that come to borons to sell faction-specific wares -->
+    <job id="argon_import_trader_m" name="{20204,1801}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="5" />
+          <param name="maxbuy" value="15" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="foodrations"/>
+      <category faction="argon" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+      <quota galaxy="2" cluster="1" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boroncore"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="argon" tags="[trader, container]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="argon" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="paranid_import_trader_m" name="{20204,1801}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="5" />
+          <param name="maxbuy" value="15" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="sojahusk"/>
+      <category faction="paranid" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+      <quota galaxy="2" cluster="1" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boroncore"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="paranid" tags="[trader, container]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="paranid" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="teladi_import_trader_m" name="{20204,1801}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="5" />
+          <param name="maxbuy" value="15" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="nostropoil"/>
+      <category faction="teladi" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+      <quota galaxy="2" cluster="1" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boroncore" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="teladi" tags="[trader, container]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="teladi" overridenpc="true"/>
+      </ship>
+    </job>
+
+
+    <!-- Queenseekers, activate when first boron gates open, ships to be transferred to next boron_scout_patrol_s job after Kingdom End gates open and this job deactivates -->
+    <job id="boron_scout_patrol_s_queenseeker" name="{20204,17201}" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Recon" default="true">
+          <param name="deploysatellites" value="true" />
+        </order>
+      </orders>
+      <time start="60" interval="60" />
+      <category faction="boron" tags="[factionlogic, scout]" size="ship_s" />
+      <quota galaxy="6" maxgalaxy="6" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="neutral" comparison="le" matchextension="false" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[scout]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Activates after Kingdom End gates open, gets ships from job above. -->
+    <job id="boron_scout_patrol_s" name="{20204,2801}" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Recon" default="true">
+          <param name="deploysatellites" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, scout]" size="ship_s" />
+      <quota galaxy="10" maxgalaxy="20" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="lt" matchextension="false" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[scout]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Argon helper job, should be activated after gates to Kingdom End open. -->
+    <job id="argon_construction_m_boron" name="{20204,1601}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0" />
+        <param name="maxbuy" value="10" />
+        <param name="minsell" value="0" />
+        <param name="maxsell" value="10" />
+      </order>
+      <basket basket="construction_stations" />
+      <category faction="argon" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="5" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="argon" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="argon" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Hatikvah patol job that uses boron ships, will be activated somewhere in story, NEEDS BORON LICENSES. -->
+    <job id="hatikvah_fighter_patrol_s_boron_random" name="{20204,2901}" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+        </order>
+      </orders>
+      <category faction="hatikvah" tags="[military, fighter]" size="ship_s" />
+      <quota galaxy="3" zone="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" stationfaction="hatikvah" stationtype="factory" matchextension="false" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="hatikvah" tags="[hatikvahboron]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="hatikvah" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="hatikvah_fighter_escort_s_boron" />
+      </subordinates>
+    </job>
+
+    <job id="hatikvah_fighter_patrol_s_boron_tradestation" name="{20204,2901}" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+        </order>
+      </orders>
+      <category faction="hatikvah" tags="[military, fighter]" size="ship_s" />
+      <quota galaxy="1" zone="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" stationfaction="hatikvah"  stationtype="tradingstation" matchextension="false" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="hatikvah" tags="[hatikvahboron]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="hatikvah" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="hatikvah_fighter_escort_s_boron" />
+      </subordinates>
+    </job>
+
+    <job id="hatikvah_fighter_escort_s_boron" name="{20204,2601}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <quota wing="1" variation="1" />
+      <category faction="hatikvah" tags="[military, fighter]" size="ship_s" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" matchextension="false" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="hatikvah" tags="[hatikvahboron]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="hatikvah" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- SCA pirates, activated with gates opening or story -->
+    <!-- This jobs one should be activated ONLY with KE gates open -->
+    <job id="scaleplate_scavenger_m_cluster_bor_core" name="{20204,4301}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Plunder" default="true">
+          <param name="range_internal" value="'cluster'"/>
+          <param name="plundermode" value="0"/>
+        </order>
+      </orders>
+      <time start="60" interval="7200" />
+      <category faction="scaleplate" tags="[plunderer]" size="ship_m"/>
+      <quota galaxy="2" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronpirate"/>
+      <environment buildatshipyard="false" gate="true"/>
+      <basket basket="pirate_container"/>
+      <ship>
+        <select faction="scaleplate" tags="[scaleplateboron]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="scaleplate" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="scaleplate_scavenger_s_cluster_bor_core" name="{20204,4301}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Plunder" default="true">
+          <param name="range_internal" value="'cluster'"/>
+          <param name="plundermode" value="0"/>
+        </order>
+      </orders>
+      <time start="60" interval="3600" />
+      <category faction="scaleplate" tags="[plunderer]" size="ship_s"/>
+      <quota galaxy="3" sector="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronpirate"/>
+      <environment buildatshipyard="false" gate="true"/>
+      <basket basket="pirate_container"/>
+      <ship>
+        <select faction="scaleplate" tags="[scaleplateboron]" size="ship_s"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="scaleplate" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- These two should be activated with HE gates open -->
+    <job id="scaleplate_plunderer_l_cluster_bor_outer" name="{20204,4101}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Plunder" default="true">
+          <param name="range_internal" value="'cluster'"/>
+          <param name="plundermode" value="1"/>
+        </order>
+      </orders>
+      <time start="60" interval="7200" />
+      <category faction="scaleplate" tags="[plunderer]" size="ship_l"/>
+      <quota galaxy="1" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore" />
+      <environment buildatshipyard="false" gate="true"/>
+      <basket basket="pirate_container"/>
+      <ship>
+        <select faction="scaleplate" tags="[plunderer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="scaleplate" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="scaleplate_scavenger_m_cluster_bor_outer" name="{20204,4301}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Plunder" default="true">
+          <param name="range_internal" value="'cluster'"/>
+          <param name="plundermode" value="0"/>
+        </order>
+      </orders>
+      <time start="60" interval="1800" />
+      <category faction="scaleplate" tags="[plunderer]" size="ship_m"/>
+      <quota galaxy="1" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore"/>
+      <environment buildatshipyard="false" gate="true"/>
+      <basket basket="pirate_container"/>
+      <ship>
+        <select faction="scaleplate" tags="[plunderer]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="scaleplate" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- Bilateral argon defence group, should activate along with boron bilateral carrier group -->
+    <job id="argon_destroyer_patrol_l_boron" name="{20204,17101}" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster"/>
+        </order>
+      </orders>
+      <category faction="argon" tags="[military, destroyer]" size="ship_l"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="argon" tags="[military, destroyer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="argon" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="argon_frigate_escort_m"/>
+        <subordinate job="argon_frigate_escort_m"/>
+      </subordinates>
+    </job>
+
+    <!-- ############################ -->
+    <!-- STORY-activated jobs END -->
+    <!-- ############################ -->
+
+    <job id="boron_bogas_trader_l" name="{20204,1401}">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="6"/>
+        </order>
+      </orders>
+      <basket basket="bogas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bogas_trader_m" name="{20204,1401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="bogas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="9" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bogas_trader_m_initial" name="{20204,1401}" startactive="false">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="5" />
+        </order>
+      </orders>
+      <basket basket="bogas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bogas_trader_m_fake" name="{20204,1401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="bogas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bio_trader_l" name="{20204,1301}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="bio" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bio_trader_m" name="{20204,1401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="bio" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="14" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bio_trader_m_initial" name="{20204,1401}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="8" />
+        </order>
+      </orders>
+      <basket basket="bio" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_bio_trader_m_fake" name="{20204,1401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="bio" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+
+    <job id="boron_food_trader_s" name="{20204,1801}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="food" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="9" cluster="4" sector="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_food_trader_s_initial" name="{20204,1801}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="food" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+
+    <job id="boron_medical_trader_s" name="{20204,10011}">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="3" />
+        </order>
+      </orders>
+      <basket basket="medicalsupplies" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_medical_trader_s_initial" name="{20204,10011}" startactive="false">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="5" />
+        </order>
+      </orders>
+      <basket basket="medicalsupplies" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_medical_trader_s_fake" name="{20204,10011}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="2" />
+        </order>
+      </orders>
+      <basket basket="medicalsupplies" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+
+    <job id="boron_energycell_trader_l" name="{20204,101}">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="2" />
+        </order>
+      </orders>
+      <basket basket="energycells" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_energycell_trader_m" name="{20204,201}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="energycells" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="8" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_energycell_trader_m_initial" name="{20204,201}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="8" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="4" />
+        </order>
+      </orders>
+      <basket basket="energycells" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_energycell_trader_m_fake" name="{20204,201}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="energycells" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+
+    <job id="boron_energycell_trader_s" name="{20204,201}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="energy" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_equipment_trader_l" name="{20204,301}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="equipment" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_equipment_trader_m" name="{20204,401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="equipment" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_equipment_trader_m_border_only" name="{20204,401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="equipment" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_construction_trader_l" name="{20204,301}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="construction_stations" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_construction_trader_m" name="{20204,401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="construction_stations" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_construction_trader_m_initial" name="{20204,401}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="8" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="3" />
+        </order>
+      </orders>
+      <basket basket="construction_stations" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" preferbuilding="true"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_ship_construction_trader_l" name="{20204,301}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="construction_ships" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_hullparts_trader_l" name="{20204,701}">
+      <modifiers rebuild="true" commandeerable="false" />
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="5" />
+        </order>
+      </orders>
+      <basket basket="hullparts" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_ship_construction_trader_m" name="{20204,401}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="construction_ships" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="4" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_ship_construction_trader_m_border_only" name="{20204,401}" startactive="false">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="6" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="construction_ships" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedgas_trader_l" name="{20204,501}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_gas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedgas_trader_m" name="{20204,601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_gas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="9" cluster="2" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedgas_trader_m_initial" name="{20204,601}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="6" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_gas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedgas_trader_m_fake" name="{20204,601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="refined_gas" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedmineral_trader_l" name="{20204,501}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_mineral" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="2" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedmineral_trader_m" name="{20204,601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_mineral" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="6" cluster="2" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_refinedmineral_trader_m_initial" name="{20204,601}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="refined_mineral" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="2" cluster="1"  />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_tech_trader_l" name="{20204,301}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="tech" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" cluster="1" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_tech_trader_m" name="{20204,401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="tech" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_tech_trader_s" name="{20204,401}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="tech" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_s" />
+      <quota galaxy="5" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+
+    <!-- borons need more water, so slightly higher quotas -->
+    <job id="boron_water_trader_l_border" name="{20204,1501}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="10" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="10" />
+        </order>
+      </orders>
+      <basket basket="water" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="1" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_water_trader_l" name="{20204,1501}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="10" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="10" />
+        </order>
+      </orders>
+      <basket basket="water" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_l" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_water_trader_m" name="{20204,1601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="water" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="10" cluster="2" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_water_trader_m_intial" name="{20204,1601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="2" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="2" />
+        </order>
+      </orders>
+      <basket basket="water" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="3" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" tags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Gas trader job, using gas miner ship -->
+    <job id="boron_gas_trader_m_liquid" name="{20204,3601}">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="gases" />
+      <category faction="boron" tags="[factionlogic, freighter, trader]" size="ship_m" />
+      <quota galaxy="10" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" stationfaction="boron" stationtype="tradingstation" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, liquid]" size="ship_m" />
+         <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Station Trader Jobs, by request only -->
+    <job id="boron_stationtrader_m" name="{20204,801}">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="maxbuy" value="5" />
+        </order>
+      </orders>
+      <basket basket="all_container" />
+      <category faction="boron" tags="[stationtrader]" size="ship_m" />
+      <quota galaxy="0" maxgalaxy="10" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_stationtrader_l" name="{20204,701}">
+      <modifiers rebuild="false" commandeerable="false" />
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="maxbuy" value="5" />
+        </order>
+      </orders>
+      <basket basket="all_container" />
+      <category faction="boron" tags="[stationtrader]" size="ship_l" />
+      <quota galaxy="0" maxgalaxy="3" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[trader, container]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- Station Miner Jobs, by request only -->
+    <job id="boron_stationminer_m_liquid" name="{20204,5701}">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="maxbuy" value="5"/>
+        </order>
+      </orders>
+      <basket basket="gases"/>
+      <category faction="boron" tags="[stationminerliquid]" size="ship_m"/>
+      <quota galaxy="6" maxgalaxy="30"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="ally" comparison="ge"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[miner, liquid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="boron_stationminer_m_solid" name="{20204,5601}">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="maxbuy" value="5"/>
+        </order>
+      </orders>
+      <basket basket="minerals"/>
+      <category faction="boron" tags="[stationminersolid]" size="ship_m"/>
+      <quota galaxy="6" maxgalaxy="30"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="ally" comparison="ge"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- Mining Jobs -->
+    <job id="boron_free_miner_l_liquid" name="{20204,5701}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="gases" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_l" />
+      <quota galaxy="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="gases" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, liquid]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares multiple="true">
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_liquid" name="{20204,5701}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="gases" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="4" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="gases" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, liquid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_liquid_initial" name="{20204,5701}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="3" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="3" />
+        </order>
+      </orders>
+      <basket basket="gases" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="2" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="gases" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true" />
+      <ship>
+        <select faction="boron" tags="[miner, liquid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_l_mineral" name="{20204,5601}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="minerals" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_l" />
+      <quota galaxy="3" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="minerals" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_mineral" name="{20204,5601}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="minerals" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="4" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="minerals" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_mineral_initial" name="{20204,5601}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="3" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="3" />
+        </order>
+      </orders>
+      <basket basket="minerals" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="2" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="minerals" tags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_s_mineral" name="{20204,5601}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="1" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="minerals" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_s" />
+      <quota galaxy="4" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="minerals" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_s_nividium" name="{20204,6001}">
+      <modifiers rebuild="true" commandeerable="false" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="1" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="nividium" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_s" />
+      <quota galaxy="1" maxgalaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="minerals" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_l_ice" name="{20204,2001}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="ice" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_l" />
+      <quota galaxy="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="ice" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_ice" name="{20204,2001}">
+      <modifiers rebuild="true" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="5" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="5" />
+        </order>
+      </orders>
+      <basket basket="ice" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="3" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="ice" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.4">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_free_miner_m_ice_initial" name="{20204,2001}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true" />
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0" />
+          <param name="maxbuy" value="3" />
+          <param name="minsell" value="0" />
+          <param name="maxsell" value="3" />
+        </order>
+      </orders>
+      <basket basket="ice" />
+      <category faction="boron" tags="[factionlogic, freighter, miner]" size="ship_m" />
+      <quota galaxy="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" regionbasket="ice" tags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[miner, solid]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.1"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" preferbuilding="true"/>
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell" />
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="boron_scavenger_free_tug_m" name="{20204,5401}" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="SalvageRoutine" default="true">
+          <param name="range" value="4"/>
+        </order>
+      </orders>
+      <basket basket="all_scrap"/>
+      <category faction="boron" tags="[factionlogic, tug]" size="ship_m"/>
+      <quota galaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="ge"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[tug]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- boron static defense jobs -->
+    <job id="boron_staticdefense_engineer_m" name="{20204, 8401}" comment="Combat Engineer" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="DeployStaticDefenseStrategy" default="true">
+        </order>
+      </orders>
+      <category faction="boron" tags="[staticdefense]" size="ship_m"/>
+      <quota galaxy="0" maxgalaxy="3"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[military]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="boron_staticdefense_minelayer_s" name="{20204, 8501}" comment="Saboteur" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="DeployStaticDefenseStrategy" default="true">
+          <param name="isminesonly" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[staticdefense]" size="ship_s"/>
+      <quota galaxy="0" maxgalaxy="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[military]" size="ship_s"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- Boron Combat Jobs -->
+
+    <!-- Phase 2 Combat Jobs-->
+    <job id="boron_carrier_patrol_xl_flagship_phase2" name="{20204,6201}" friendgroup="boron_kingdomend" comment="Kingdom End" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+          <param name="organizesubordinates" value="true"/>
+          <param name="defences_maxgatedistance" value="6"/>
+          <param name="defences_includedassignments" value="[assignment.attack]"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier, fleetphase_2]" size="ship_xl"/>
+      <quota galaxy="1"/>
+      <location class="cluster" macro="cluster_606_macro" faction="boron" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_xl"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_carrier_escort_l_flagship_phase2" assignment="attack" group="1"/>
+        <subordinate job="boron_carrier_escort_l_flagship_phase2" assignment="attack" group="2"/>
+        <subordinate job="boron_carrier_escort_l_flagship_phase2" assignment="attack" group="3"/>
+        <subordinate job="boron_carrier_escort_l_flagship_phase2" assignment="attack" group="4"/>
+        <subordinate job="boron_destroyer_escort_l_phase2" assignment="defence" group="5"/>
+        <subordinate job="boron_fighter_escort_s_carrier_flagship" assignment="defence" group="6"/>
+        <subordinate job="boron_resupplier_escort_xl" assignment="supplyfleet" group="10"/>
+      </subordinates>
+    </job>
+    <job id="boron_carrier_patrol_xl_argon_phase2" name="{20204,17101}" friendgroup="boron_argonsupport" comment="Argon support fleet" startactive="false">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+          <param name="organizesubordinates" value="true"/>
+          <param name="defences_maxgatedistance" value="3"/>
+          <param name="defences_includedassignments" value="[assignment.attack]"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier, fleetphase_2]" size="ship_xl"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="exact" excludedtags="noboronfleet"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_xl"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_carrier_escort_l_argon_phase2" assignment="attack" group="1"/>
+        <subordinate job="boron_carrier_escort_l_argon_phase2" assignment="attack" group="2"/>
+        <subordinate job="boron_carrier_escort_l_argon_phase2" assignment="attack" group="3"/>
+        <subordinate job="boron_destroyer_escort_l_phase2" assignment="defence" group="5"/>
+        <subordinate job="boron_fighter_escort_s_carrier_flagship" assignment="defence" group="6"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_carrier_patrol_l_sector_phase2" name="{20204,3201}" friendgroup="boron_notborder" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, carrier, fleetphase_2]" size="ship_l"/>
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_fighter_escort_s_carrier" assignment="defence"/>
+      </subordinates>
+    </job>
+    <job id="boron_destroyer_patrol_l_border_only_phase2" name="{20204,3301}" friendgroup="boron_border" comment="border sectors only" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, destroyer, fleetphase_2]" size="ship_l"/>
+      <quota galaxy="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_destroyer_escort_l_phase2" assignment="attack"/>
+        <subordinate job="boron_destroyer_escort_l_single_phase2" assignment="defence"/>
+      </subordinates>
+    </job>
+    <job id="boron_destroyer_patrol_l_exp_phase2" name="{20204,3301}" friendgroup="boron_notborder" comment="leader of destroyer group" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, destroyer, fleetphase_2]" size="ship_l"/>
+      <quota galaxy="14" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_destroyer_escort_l_single_phase2" assignment="attack"/>
+        <subordinate job="boron_destroyer_escort_l_single_phase2" assignment="defence"/>
+      </subordinates>
+    </job>
+
+    <!-- Phase 1 Combat Jobs -->
+    <!-- Flagship is used for coordiating light carriers and respond to threats, can go out to allied argon space -->
+    <job id="boron_carrier_patrol_xl_flagship" name="{20204,6201}" friendgroup="boron_kingdomend" comment="Kingdom End">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+          <param name="organizesubordinates" value="true" />
+          <param name="defences_maxgatedistance" value="6" />
+          <param name="defences_includedassignments" value="[assignment.attack]" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier, fleetphase_1]" size="ship_xl"/>
+      <quota galaxy="1" cluster="1" />
+      <location class="cluster" macro="cluster_606_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_carrier_escort_l_flagship" assignment="attack" group="1" />
+        <subordinate job="boron_carrier_escort_l_flagship" assignment="attack" group="2" />
+        <subordinate job="boron_carrier_escort_l_flagship" assignment="attack" group="3" />
+        <subordinate job="boron_carrier_escort_l_flagship" assignment="attack" group="4" />
+        <subordinate job="boron_destroyer_escort_l" assignment="defence" group="5"/>
+        <subordinate job="boron_fighter_escort_s_carrier_flagship" assignment="defence" group="6"/>
+        <subordinate job="boron_resupplier_escort_xl" assignment="supplyfleet" group="10"/>
+      </subordinates>
+    </job>
+
+    <!-- @Volodymyr - change job name -->
+    <!-- This job will change its main sector to Argon space after KE gates open -->
+    <job id="boron_carrier_patrol_xl_argon_initial" name="{20204,17101}" comment="Argon support fleet" startactive="false">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+          <param name="organizesubordinates" value="true" />
+          <param name="defences_maxgatedistance" value="1" />
+          <param name="defences_includedassignments" value="[assignment.attack]" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier]" size="ship_xl" />
+      <quota galaxy="1" cluster="1" />
+      <location class="cluster" macro="cluster_606_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="1" />
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="2" />
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="3" />
+        <subordinate job="boron_destroyer_escort_l" assignment="defence" group="5"/>
+        <subordinate job="boron_fighter_escort_s_carrier_flagship" assignment="defence" group="6"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_carrier_patrol_xl_argon" name="{20204,17101}" friendgroup="boron_argonsupport" comment="Argon support fleet" startactive="false">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+          <param name="organizesubordinates" value="true" />
+          <param name="defences_maxgatedistance" value="3" />
+          <param name="defences_includedassignments" value="[assignment.attack]" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier, fleetphase_1]" size="ship_xl"/>
+      <quota galaxy="1" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="exact" excludedtags="noboronfleet" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="1" />
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="2" />
+        <subordinate job="boron_carrier_escort_l_argon" assignment="attack" group="3" />
+        <subordinate job="boron_destroyer_escort_l" assignment="defence" group="5"/>
+        <subordinate job="boron_fighter_escort_s_carrier_flagship" assignment="defence" group="6"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_carrier_patrol_l_sector" name="{20204,3201}" friendgroup="boron_notborder">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, carrier, fleetphase_1]" size="ship_l"/>
+      <quota galaxy="7" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" assignment="defence"/>
+        <subordinate job="boron_fighter_escort_s_carrier" assignment="defence"/>
+      </subordinates>
+    </job>
+
+    <!-- destroyers: usually operate in packs of 2 with gunboat escorts for anti-S defense 
+  Single destroyer in border sectors before gates opening. 
+  Ion Net launcher threshold is 1 so only leader will have level=1 to not spam the weapon-->
+    <job id="boron_destroyer_patrol_l_border_only" name="{20204,3301}" friendgroup="boron_border" comment="border sectors only" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic,military, destroyer, fleetphase_1]" size="ship_l"/>
+      <quota galaxy="1" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore" />
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" assignment="defence"/>
+        <subordinate job="boron_corvette_escort_m" assignment="attack"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_destroyer_patrol_l_leader" name="{20204,3301}" friendgroup="boron_notborder" comment="leader of destroyer gorup">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, destroyer, fleetphase_1]" size="ship_l"/>
+      <quota galaxy="5" maxgalaxy="10" cluster="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" assignment="defence"/>
+        <subordinate job="boron_destroyer_escort_l_single" assignment="attack"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_corvette_patrol_m_sector_exp" name="{20204,2901}" friendgroup="boron_notborder" comment="each sector, expansion">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, military, corvette, fleetphase_1]" size="ship_m"/>
+      <quota galaxy="14" maxgalaxy="40" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, corvette]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_medium_patrol_m_sector_exp_mission" name="{20204,2901}" comment="each sector, expansion">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, medium]" size="ship_m" />
+      <quota galaxy="14" maxgalaxy="14" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boronborder"/>
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[military, medium]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_medium_patrol_m_sector_border_mission" name="{20204,2901}" comment="border only patrol" startactive="false">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, medium]" size="ship_m" />
+      <quota galaxy="3" maxgalaxy="3" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" excludedtags="boroncore"/>
+      <environment buildatshipyard="true" preferbuilding="true"/>
+      <ship>
+        <select faction="boron" tags="[military, corvette]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_fighter_escort_s_corvette" />
+      </subordinates>
+    </job>
+
+
+    <job id="boron_police_patrol_s" name="{20204,6101}" comment="each sector, expansion">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Police" default="true" />
+      </orders>
+      <category faction="boron" tags="[police]" size="ship_s" />
+      <quota galaxy="30" sector="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" policefaction="boron" relation="self" comparison="exact" matchextension="false" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[fighter, light]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_fighter_escort_s_police" />
+      </subordinates>
+
+    </job>
+
+    <!-- Boron Escorts-->
+    <job id="boron_destroyer_escort_l_phase2" name="{20204,3301}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape"/>
+          <param name="overrideformationskill" value="true"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, destroyer]" size="ship_l"/>
+      <quota wing="2"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <modifiers subordinate="true"/>
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="boron_destroyer_escort_l_single_phase2" name="{20204,3301}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape"/>
+          <param name="overrideformationskill" value="true"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, destroyer]" size="ship_l"/>
+      <quota wing="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <modifiers subordinate="true"/>
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+    </job>
+    <job id="boron_carrier_escort_l_flagship_phase2" name="{20204,3201}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape"/>
+          <param name="overrideformationskill" value="true"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier]" size="ship_l"/>
+      <quota wing="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <modifiers subordinate="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_fighter_escort_s_carrier"/>
+      </subordinates>
+    </job>
+    <job id="boron_carrier_escort_l_argon_phase2" name="{20204,3201}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape"/>
+          <param name="overrideformationskill" value="true"/>
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier]" size="ship_l"/>
+      <quota wing="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro"/>
+      <environment buildatshipyard="true"/>
+      <modifiers subordinate="true"/>
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="boron_fighter_escort_s_carrier"/>
+      </subordinates>
+    </job>
+
+    <job id="boron_carrier_escort_l_flagship" name="{20204,3201}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier]" size="ship_l" />
+      <quota wing="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" />
+        <subordinate job="boron_fighter_escort_s_carrier" />
+      </subordinates>
+    </job>
+
+    <job id="boron_carrier_escort_l_argon" name="{20204,3201}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, carrier]" size="ship_l" />
+      <quota wing="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, carrier]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_corvette_escort_m" />
+        <subordinate job="boron_fighter_escort_s_carrier" />
+      </subordinates>
+    </job>
+
+    <job id="boron_destroyer_escort_l" name="{20204,3301}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, destroyer]" size="ship_l" />
+      <quota wing="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_destroyer_escort_l_single" name="{20204,3301}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.invvshape" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, destroyer]" size="ship_l" />
+      <quota wing="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, destroyer]" size="ship_l" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_corvette_escort_m" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.dartvertical" />
+          <param name="formationparam" value="2500m" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military]" size="ship_m" />
+      <quota wing="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, medium, corvette]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="boron_gunboat_escort_m" />
+      </subordinates>
+    </job>
+
+    <job id="boron_gunboat_escort_m" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.dartvertical" />
+          <param name="formationparam" value="2500m" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military]" size="ship_m" />
+      <quota wing="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, medium, gunboat]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_fighter_escort_s_carrier_flagship" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <quota wing="38" variation="4" />
+      <category faction="boron" tags="[military, fighter]" size="ship_s" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, fighter, selection]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_fighter_escort_s_carrier" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <quota wing="14" variation="2" />
+      <category faction="boron" tags="[military, fighter]" size="ship_s" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, fighter, selection]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_fighter_escort_s_corvette" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <quota wing="2" />
+      <category faction="boron" tags="[military, fighter]" size="ship_s" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, fighter, selection]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_fighter_escort_s_police" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[military, fighter]" size="ship_s" />
+      <quota wing="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[military, fighter, light]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_resupplier_escort_xl" name="{20204,5501}" startactive="false">
+      <orders>
+        <order order="SupplyFleet" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+          <param name="overrideformationskill" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[resupplier]" size="ship_xl" />
+      <quota wing="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="boron" tags="[resupplier]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!--Boron Misc-->
+    <!--TODO @Owen distribute construction vessels around space with shipyard?-->
+    <job id="boron_construction_vessel_xl" name="{20204,5101}">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="FindBuildTasks" default="true">
+          <param name="maxjumps" value="6" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, builder]" size="ship_xl" />
+      <quota galaxy="4" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" matchextension="false" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[builder]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_construction_vessel_xl_border_only" name="{20204,5101}">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="FindBuildTasks" default="true">
+          <param name="maxjumps" value="6" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, builder]" size="ship_xl" />
+      <quota galaxy="1" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" matchextension="false" excludedtags="boroncore" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[builder]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.71">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_construction_vessel_xl_playeronly" name="{20204,5101}">
+      <modifiers commandeerable="true" />
+      <orders>
+        <order order="FindBuildTasks" default="true">
+          <param name="maxjumps" value="6" />
+          <param name="playeronly" value="true" />
+        </order>
+      </orders>
+      <category faction="boron" tags="[factionlogic, builder]" size="ship_xl" />
+      <quota galaxy="2" maxgalaxy="2" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="self" comparison="exact" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[builder]" size="ship_xl" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <job id="boron_resupplier_xl" name="{20204,5501}" disabled="true">
+      <orders>
+        <order order="SupplyFleet" default="true" />
+      </orders>
+      <quota galaxy="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="boron" relation="neutral" comparison="ge" excludedtags="boronborder" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="boron" tags="[resupplier]" />
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="boron" overridenpc="true" />
+      </ship>
+    </job>
+
+    <!-- MASS TRAFFIC -->
+    <!--boron sectors-->
+    <job id="masstraffic_boron_civilian">
+      <task task="masstraffic.generic" />
+      <location class="sector" factionrace="boron" />
+      <quota sector="1000" />
+      <masstraffic ref="masstraffic_boron_civilian" />
+    </job>
+    <!--boron stations-->
+    <!--<job id="masstraffic_boron_police">
+    <task task="masstraffic.police"/>
+    <location class="station" policefaction="boron"/>
+    <quota station="5"/>
+    <masstraffic ref="masstraffic_boron_police"/>
+  </job>-->
+    <job id="masstraffic_boron_criminal">
+      <task task="masstraffic.generic" />
+      <location class="station" factionrace="boron" />
+      <quota sector="2" station="1" />
+      <masstraffic ref="masstraffic_boron_civilian" respawndelay="300" relaunchdelay="60">
+        <owner exact="faction.criminal" overridenpc="true" />
+      </masstraffic>
+    </job>
+    <!--boron station modules-->
+    <job id="masstraffic_boron_dockarea">
+      <task task="masstraffic.generic" />
+      <location class="dockarea" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_dockarea" />
+    </job>
+    <job id="masstraffic_boron_pier">
+      <task task="masstraffic.generic" />
+      <location class="pier" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_pier" />
+    </job>
+    <job id="masstraffic_boron_storage">
+      <task task="masstraffic.generic" />
+      <location class="storage" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_storage" />
+    </job>
+    <job id="masstraffic_boron_production">
+      <task task="masstraffic.generic" />
+      <location class="production" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_production" />
+    </job>
+    <job id="masstraffic_boron_buildmodule">
+      <task task="masstraffic.generic" />
+      <location class="buildmodule" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_buildmodule" />
+    </job>
+    <job id="masstraffic_boron_defencemodule">
+      <task task="masstraffic.generic" />
+      <location class="defencemodule" factionrace="boron" />
+      <quota station="20" />
+      <masstraffic ref="masstraffic_boron_defencemodule" />
+    </job>
+  </add>
+</diff>

@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<components>
+	<component name="muzzle_pir_l_laser_01_mk1" class="effectobject">
+		<source geometry="extensions\ego_dlc_pirate\assets\fx\weaponfx\muzzle_pir_l_laser_01_mk1_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="214" b="247" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="2" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0.8087769" y="0" z="12.20023"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="0" y="1.700214E-02" z="-0.4778519"/>
+					<quaternion qx="-1" qy="-0" qz="-0" qw="-7.54979E-08"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="100"/>
+				</animations>
+				<parts>
+					<part name="part_bullet">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.bullets_fx_master_noscaling"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="50.31646" y="50.31646" z="118.7792"/>
+							<center x="-3.814697E-06" y="1.713634E-05" z="115.7035"/>
+						</size>
+						<size_raw>
+							<max x="50.28078" y="50.28078" z="118.7792"/>
+							<center x="2.432442E-02" y="0.026144" z="115.7035"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part iklink animation textureanimation  " parent="part_bullet">
+				<animations>
+					<animation name="loop" start="1" end="50"/>
+				</animations>
+				<parts>
+					<part name="part_shockwave">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.bullets_fx_master_multilayer_noscaling"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.99118" y="19.99118" z="17.47313"/>
+							<center x="-1.907349E-06" y="2.831221E-06" z="15.10084"/>
+						</size>
+						<size_raw>
+							<max x="19.93478" y="19.92711" z="32.57397"/>
+							<center x="2.111244E-02" y="-2.878001E-02" z="15.10084"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="3">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="50" value="-2"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="50" value="4"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision  ">
+				<offset>
+					<position x="0" y="0" z="-4.24371"/>
+				</offset>
+				<parts>
+					<part name="fx_distortion">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_bullet_distortion_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="50" y="50" z="6.801805"/>
+							<center x="0" y="0" z="8.444778"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection_Laser01" tags="laser">
+				<offset>
+					<position x="0" y="0" z="-3.042812"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

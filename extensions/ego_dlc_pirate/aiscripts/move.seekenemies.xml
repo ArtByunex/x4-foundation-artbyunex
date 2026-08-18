@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- in-house patches to ai should not contain blocking actions. messes with aicompat. -->
+  <add sel="//check_value[@value='$victimsector.owner == $ourtrueowner']" pos="after">
+    <check_all>
+      <check_value value="$ourtrueowner == faction.loanshark"/>
+      <check_value value="$ourtrueowner == event.param2.trueowner"/>
+      <debug_text text="'%s %s %s %s reinforcing %s %s %s %s in sector %s'.[this.assignedcontrolled.job, @this.assignedcontrolled.idcode, @this.assignedcontrolled.knownname, this.assignedcontrolled, event.param2.job, @event.param2.idcode, @event.param2.knownname, event.param2, event.param2.sector.knownname]" debugchance="$debugchance"/>
+    </check_all>
+  </add>
+</diff>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_Paranid_Monument_Core" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:core1" />
+    <object_group name="target_group">
+      <reference object="core1" />
+      <reference object="core2" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Core1Seq" start="0">
+        <shot name="Core1Shot" environment="scenezone" duration="6000">
+          <camera_orbit reference="core1" orient_to="object">
+            <begin angle="110" distance="20" elevation="40%" />
+            <end angle="270" distance="40" elevation="10%" />
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+
+    </actions>
+  </presentation>
+
+</cutscene>

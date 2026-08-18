@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Diplomacy_Intro_3">
+    <params>
+      <!--Dockking capship-->
+      <param name="capship" object="true" />
+
+      <!--Limpet mine-->
+      <param name="limpetmine" object="true" />
+
+      <!--Capship bridge-->
+      <param name="bridge" object="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="capshipscene" zone="@auto:capship" />
+    <environment_implicit name="limpetscene" zone="@auto:limpetmine" />
+    <environment_implicit name="bridgescene" zone="@auto:bridge" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <!--first sequence starts at 0 - ends on event-->
+      <sequence name="CapshipDockingSequence" start="0">
+        <shot name="CapshipDockingShot" environment="capshipscene" duration="onevent:CapshipDockingEnd">
+          <camera_orbit reference="capship" x="0" y="-20" z="-10" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="160" distance="530" elevation="-180"/>
+            <end angle="170" distance="520" elevation="-180" time="10000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="LimpetSequence" start="onevent:LimpetStart">
+        <shot name="LimpetShot" environment="limpetscene" duration="onevent:LimpetEnd">
+          <camera_orbit reference="limpetmine" x="0" y="0" z="0" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="5" distance="30" elevation="0"/>
+            <end angle="5" distance="50" elevation="0" time="10000"/>
+            <roll>
+              <value exact="5"/>
+            </roll>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="TrafficLeavingSequence" start="onevent:TrafficLeavingStart">
+        <shot name="TrafficLeavingShot" environment="capshipscene" duration="onevent:TrafficLeavingEnd">
+          <camera_orbit reference="capship" x="-15" y="-20" z="-420" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="70" distance="150" elevation="10"/>
+            <end angle="0" distance="250" elevation="-10" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="TrafficEnteringSequence" start="onevent:TrafficEnteringStart">
+        <shot name="TrafficEnteringShot" environment="capshipscene" duration="onevent:TrafficEnteringEnd">
+          <camera_orbit reference="capship" x="-15" y="-20" z="-480" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-30" distance="100" elevation="5"/>
+            <end angle="-60" distance="200" elevation="-5" time="20000"/>
+            <roll>
+              <value exact="20"/>
+            </roll>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="BridgeSequence" start="onevent:BridgeStart">
+        <shot name="BridgeShot" environment="bridgescene" duration="onevent:BridgeEnd">
+          <camera_orbit reference="bridge" x="0.5" y="1.3" z="8" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="290" distance="3.7" elevation="1.5"/>
+            <end angle="310" distance="3" elevation="0" time="18000"/>
+            <roll>
+              <value exact="10"/>
+            </roll>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+
+    </actions>
+  </presentation>
+
+</cutscene>
+

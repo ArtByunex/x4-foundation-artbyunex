@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_khaak_boss_battle_intro_cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="spacezone" zone="@auto:target_gate" />
+    <environment_implicit name="bridgezone" zone="@auto:target_ban_danna" />
+    <object_group name="target_group">
+      <reference object="target_argon_one" />
+      <reference object="target_player_ship"/>
+    </object_group>
+    <object_group name="argon_one_bridge_group">
+      <reference object="target_ban_danna"/>
+      <reference object="target_argon_one_bridge"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PlayerShipSequence" start="0">
+        <shot name="PlayerShipShot" environment="spacezone" duration="onevent:TriggerPlayerShipShotDone">
+          <camera_orbit reference="target_player_ship" orient_to="object" elevation="50%" cycle="none" >
+            <begin distance="100" angle="450"/>
+            <end distance="400" angle="270" time="40000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="BridgeSequence1" start="onevent:TriggerPlayerShipShotDone">
+        <shot name="BridgeShot1" environment="bridgezone" duration="onevent:TriggerBridgeShot1Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_ban_danna" orient_to="object" y="0.5">
+            <begin angle="250">
+              <distance>
+                <value exact="4"/>
+              </distance>
+            </begin>
+            <end angle="290" time="20000">
+              <distance>
+                <value exact="2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="ConsoleSequence" start="onevent:TriggerBridgeShot1Done">
+        <shot name="ConsoleShot" environment="bridgezone" duration="onevent:TriggerConsoleShotDone">
+          <camera_orbit reference="target_argon_one_bridge" x="3" y="0.1" z="-5" orient_to="object">
+            <begin angle="175">
+              <distance>
+                <value exact="3"/>
+              </distance>
+            </begin>
+            <end angle="185" time="10000">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="BridgeSequence2" start="onevent:TriggerConsoleShotDone">
+        <shot name="BridgeShot2" environment="bridgezone" duration="onevent:TriggerBridgeShot2Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_ban_danna" orient_to="ecliptic" y="0.5">
+            <begin angle="70">
+              <distance>
+                <value exact="1.5"/>
+              </distance>
+            </begin>
+            <end angle="100" time="20000">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="KhaakWaveSequence" start="onevent:TriggerBridgeShot2Done">
+        <shot name="KhaakWaveShot" environment="spacezone" duration="onevent:TriggerKhaakWaveShotDone">
+          <camera_orbit reference="target_argon_one" time="13000" elevation="50%" cycle="none" >
+            <begin distance="10000" angle="280"/>
+            <end distance="5000" angle="260" time="300"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

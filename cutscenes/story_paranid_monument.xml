@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_Paranid_Monument" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:monument" />
+    <object_group name="target_group">
+      <reference object="monument" />
+      <reference object="gride_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <!-- Start by facing Gride's ship and orbit around so that the monument comes into view. -->
+        <shot name="GrideShipIntro" environment="scenezone" duration="10000">
+          <camera_orbit reference="gride_ship" orient_to="object">
+            <begin angle="110" distance="50" elevation="40%" />
+            <end angle="270" distance="3500" elevation="10%" />
+          </camera_orbit>
+        </shot>
+
+        <!-- Orbit around the monument and get closer, end when Gride's ship is visible through the debris. -->
+        <shot name="OrbitOnMonument" environment="scenezone" duration="28000">
+          <camera_orbit reference="monument" orient_to="object">
+            <begin angle="180" distance="15000" elevation="40%" />
+            <end angle="30" distance="2500" elevation="10%" />
+          </camera_orbit>
+        </shot>
+
+        <!-- Zoom in on Gride's ship through the gap between the two halves of the monument. -->
+        <shot name="GrideShipOutro" environment="scenezone" duration="8000">
+          <camera_orbit reference="gride_ship" orient_to="object">
+            <begin angle="90" distance="5500" elevation="20%"/>
+            <end angle="90" distance="3300" elevation="10%" />
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_dragonfyre_arrival_cutscene"/>
+
+  <environments>
+    <environment_implicit name="playerzone" zone="@auto:@playership" />
+    <environment_implicit name="zone_bridge" zone="@auto:bridge" />
+    <object_group name="target_group">
+      <reference object="dragonfyre" />
+      <reference object="enemy_capship" />
+      <reference object="bridge" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <!--CAMERA SHOWS the station and the Terraformer, then PAN TO and ZOOM IN on the DRAGONFYRE.-->
+        <!--The DRAGONFYRE begins firing on the Terraformer, which is slow to disengage from the station. The Terraformer explodes, barely having had a chance to fire back.-->
+        <shot name="ShowDragonfyre" duration="1" environment="playerzone">
+          <camera>
+            <position>
+              <reference object="dragonfyre" x="-100" y="-50" z="-500" />
+            </position>
+            <lookdirection>
+              <reference object="enemy_capship" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="PanToTerraformer" duration="onevent:ShowDockingPlayerShip" environment="playerzone">
+          <takeover_position interpolation="smooth" duration="10000"/>
+          <camera>
+            <position>
+              <reference object="dragonfyre" x="-300" y="-50" z="-200" />
+            </position>
+            <lookdirection>
+              <reference object="enemy_capship" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence2" start="onevent:ShowDockingPlayerShip">
+        <!--CUT TO the DRAGONFYRE, showing one of the fighters approaching it.-->
+        <shot name="ShowShip_Start" duration="1" environment="playerzone">
+          <camera>
+            <position>
+              <reference object="@playership" x="10" y="0" z="-50" />
+            </position>
+            <lookdirection>
+              <reference object="@playership" x="10" y="0" z="100" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowShip_End" duration="onevent:ShowBridge" environment="playerzone">
+          <takeover_position interpolation="linear" duration="10000"/>
+          <camera>
+            <position>
+              <reference object="@playership" x="10" y="10" z="-100" />
+            </position>
+            <lookdirection>
+              <reference object="@playership" x="10" y="10" z="100" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence3" start="onevent:ShowBridge">
+        <!--FADE TO the bridge of the DRAGONFYRE. GUNNE is walking to the command deck.-->
+        <shot name="ShowBridge" duration="1" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="-0.15" y="0.0" z="-8.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0.0" y="0.0" z="-12.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowGunneWalking" duration="onevent:ShowGunne" environment="zone_bridge">
+          <takeover_position interpolation="smooth" duration="10000"/>
+          <camera>
+            <position>
+              <reference object="bridge" x="-0.15" y="0.0" z="-9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0.0" y="0.0" z="-10.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence4" start="onevent:ShowGunne">
+        <shot name="ShowGunne" duration="onevent:ShowKelly" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="-4.15" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="6.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence5" start="onevent:ShowKelly">
+        <!--GUNNE stands next to KELLY.-->
+        <shot name="ShowKelly" duration="onevent:MoveToGunne" environment="zone_bridge">
+          <takeover_position interpolation="smooth" duration="10000"/>
+          <camera>
+            <position>
+              <reference object="bridge" x="1.5" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="8.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence6" start="onevent:MoveToGunne">
+        <!--GUNNE turns towards the window.-->
+        <!--CAMERA moves to his head. It either seamlessly becomes the player's view, or there is a brief fade to black for the transition.-->
+        <shot name="MoveToGunne_Start" duration="1" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="1.5" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="8.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="MoveToGunne" duration="onevent:stopscene" environment="zone_bridge">
+          <takeover_position interpolation="smooth" duration="3000"/>
+          <camera>
+            <position>
+              <reference object="bridge" x="0" y="-3.73" z="7.5" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.73" z="8.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

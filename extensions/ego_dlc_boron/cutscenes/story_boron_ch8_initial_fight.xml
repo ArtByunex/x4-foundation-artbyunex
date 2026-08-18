@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Boron_Ch8_Initial_Fight" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:constructionsite" />
+    <object_group name="target_group">
+      <reference object="carrier" />
+      <reference object="constructionsite" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <!-- keyframe duration = time_firstobject + time_fly, shot-duration needs to match that + a few seconds extra (to avoid a keyframe error) -->
+        <shot name="FlyFromConstructionSiteToCarrier" environment="scenezone" duration="34000">
+          <!-- duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes -->
+          <!-- Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="constructionsite" distance="800" flyto_reference="carrier" flyto_distance="100" interpolation="smooth" time_firstobject="14000" time_fly="15000" cycle="bounce"/>
+        </shot>
+      </sequence>
+
+      <!-- Alternative shot without camera_flyfromto:
+      <sequence name="Sequence1" start="0">
+        <shot name="PanOverConstructionSite" environment="scenezone" duration="15000">
+          <camera_panover reference="constructionsite" showing="front" pan_direction="leftwards" panstart="100" panend="100" interpolation="linear" distance="500"/>
+        </shot>
+
+        <shot name="FlyByCarrier" environment="scenezone" duration="20000">
+          <camera_flyby reference="carrier" time="20000" distance="100%" elevation="200%" offset="10%">
+            <begin distance="5000"/>
+            <end distance="2000"/>
+          </camera_flyby>
+        </shot>
+      </sequence>-->
+
+    </actions>
+  </presentation>
+
+</cutscene>

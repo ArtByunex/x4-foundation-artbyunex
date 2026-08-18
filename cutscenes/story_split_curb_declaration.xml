@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="story_split_curb_declaration">
+    <params>
+      <param name="targetobject" object="true" />
+      <param name="orbitdist" number="true" />
+      <param name="orbitelevation" number="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="DeclarationSequenceStart" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <!--shot name="OrbitShot" environment="scenezone" duration="onevent:stopscene"-->
+        <shot name="RotationShot" environment="scenezone" duration="onevent:DeclarationPanIntense">
+          <!-- Do a little pan/zoom effect to zero in on the object, makes it look a bit cooler. -->
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none" startangle="0" stopangle="360">
+            <begin angle="30">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </begin>
+            <end angle="390" time="145000">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="DeclarationSequenceSecondShot" start="onevent:DeclarationPanIntense">
+        <!-- change close up to face, then pan out -->
+        <shot name="PanOutShot" environment="scenezone" duration="onevent:stopscene">
+       <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none">
+            <begin distance="2.5" angle="90" elevation="1.5" />
+            <end distance="4.5" angle="98" time="16000" elevation="-1.0"/>
+          </camera_orbit>  
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

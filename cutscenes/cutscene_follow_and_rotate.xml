@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_follow_and_rotate">
+    <params>
+      <param name="duration" number="true" default="5.0" comment="default was 5000ms, when using params specified in seconds!"/>
+      <param name="pitch_start"     number="true" default="20.0"  />
+      <param name="pitch_end"       number="true" default="-5"    />
+      <param name="yaw_start"       number="true" default="210"   />
+      <param name="yaw_end"         number="true" default="170"   />
+      <param name="distance_start"  number="true" default="1000.0"/>
+      <param name="distance_end"    number="true" default="100.0" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="Follow" environment="scenezone" duration="param:duration">
+          <camera_follow reference="target_object" interpolation="smooth">
+            <begin distance="100" pitch="20" yaw="210">
+              <distance>
+                <value var="distance_start"/>
+              </distance>
+              <pitch>
+                <value var="pitch_start"/>
+              </pitch>
+              <yaw>
+                <value var="yaw_start"/>
+              </yaw>
+            </begin>
+            <end distance="100" pitch="-5" yaw="170">
+              <distance>
+                <value var="distance_end"/>
+              </distance>
+              <pitch>
+                <value var="pitch_end"/>
+              </pitch>
+              <yaw>
+                <value var="yaw_end"/>
+              </yaw>
+            </end>
+          </camera_follow>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

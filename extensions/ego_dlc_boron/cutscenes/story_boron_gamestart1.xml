@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- For best results, position the playership well away from the sector center before playback. -->
+  <director key="Story_Boron_Gamestart1" >
+    <params>
+      <param name="customheight" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <environment_implicit name="scenezone_captain" zone="@auto:target_captain" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" />
+      <reference object="target_captain" />
+      <reference object="target_player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+
+        <shot name="AtGate" environment="scenezone" duration="12000">
+          <camera_orbit reference="target_gate" time="12000" elevation="50%" cycle="none">
+            <begin distance="15000" angle="180"/>
+            <end distance="2500" angle="90"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="PanShip" environment="scenezone" duration="8000">
+          <camera_panover reference="target_ship" showing="back" pan_direction="rightwards" panstart="50" panend="0" interpolation="linear" cycle="none">
+            <begin distance="90"/>
+            <end distance="90"/>
+          </camera_panover>
+        </shot>
+
+        <shot name="PanOutCameraShot5" environment="scenezone_captain" duration="14000">
+          <camera_orbit reference="target_player" orient_to="ecliptic" cycle="none" y="customheight" x="-0.17">
+            <begin distance="11.2" angle="122" elevation="-0.5" />
+            <end distance="6.1" angle="138" time="20000" elevation="-0.3"/>
+          </camera_orbit>
+
+        </shot>
+
+        <shot name="OrbitAroundCrew" environment="scenezone_captain" duration="onevent:TriggerSequence01Done">
+          <camera_orbit reference="target_captain" orient_to="ecliptic" y="0.78">
+            <begin angle="75">
+              <distance>
+                <value exact="3.5"/>
+              </distance>
+              <elevation>
+                <value exact="0.2"/>
+              </elevation>
+            </begin>
+            <end angle="89" time="17500">
+              <distance>
+                <value exact="4.2"/>
+              </distance>
+              <elevation>
+                <value exact="0"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="DetailofAllianceShip" environment="scenezone" duration="onevent:TriggerSequence02Done">
+          <camera>
+            <position>
+              <reference object="target_ship" x="82" y="30" z="-313"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="ReturnToInterior" environment="scenezone_captain" duration="onevent:TriggerSequence03Done">
+          <camera_orbit reference="target_captain" orient_to="ecliptic" y="0.75">
+            <begin angle="-80">
+              <distance>
+                <value exact="2.5"/>
+              </distance>
+            </begin>
+            <end angle="56" time="17500">
+              <distance>
+                <value exact="4.4"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

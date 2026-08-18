@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_fleet_battle_1_intro_cutscene" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_PlayerFlagship" zone="@auto:PlayerFlagship"/>
+    <environment_implicit name="scenezone_ARGStation" zone="@auto:ARGStation"/>
+    <environment_implicit name="scenezone_PARFleet" zone="@auto:PARFlagship"/>
+    <environment_implicit name="scenezone_ARGFleet" zone="@auto:ARGFlagship"/>
+    <object_group name="target_group_A">
+      <reference object="PlayerFlagship"/>
+    </object_group>
+    <object_group name="target_group_B">
+      <reference object="ARGStation"/>
+    </object_group>
+    <object_group name="target_group_C">
+      <reference object="PARFlagship"/>
+    </object_group>
+    <object_group name="target_group_D">
+      <reference object="ARGFlagship"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="FB1_IntroSequence" start="2000">
+        <shot name="Shot_ARGStation" environment="scenezone_ARGStation" duration="25000">
+          <camera_flyfromto reference="ARGStation" distance="180" flyto_reference="PARFlagship" flyto_distance="360" interpolation="smooth" time_firstobject="15000" time_fly="2500" cycle="none"
+                            orbit1_yaw_start="40" orbit1_yaw_end="100" orbit1_elevation="20"
+                            orbit2_yaw_start="-160" orbit2_yaw_end="-240" orbit2_pitch="10"/>
+        </shot>
+        <shot name="Shot_ARGShip" environment="scenezone_ARGFleet" duration="17500">
+          <camera_orbit reference="ARGFlagship" time="12000" elevation="30%" interpolation="smooth" orient_to="object">
+            <begin distance="190%" angle="330" elevation="30%"/>
+            <end distance="80%" angle="480" elevation="0%"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+</cutscene>

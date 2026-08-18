@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: AJ (192.168.3.53) on 2026-04-24 12:08:09-->
+<macros>
+  <macro name="missile_flagship_light_mk1_macro" class="missile">
+    <component ref="missile_flagship_light_mk1" />
+    <properties>
+      <identification name="{20105,6314}" basename="{20105,6311}" description="{20105,6312}" />
+      <ammunition value="6" reload="15" />
+      <missile amount="1" barrelamount="4" lifetime="16" range="9000" guided="1" icon="hud_ms_ter_l_flagship_01_light_mk1" retarget="1" tags="ship_ter_l_flagship_01" />
+      <explosiondamage value="500" />
+      <reload time="0.25" />
+      <hull max="1" />
+      <effects>
+        <explosion ref="missile_explosion_flagship" />
+        <launch ref="missile_flagship_muzzle" />
+      </effects>
+      <weapon system="missile_guided" />
+      <countermeasure resilience="0.985" />
+      <physics mass="1">
+        <inertia pitch="0.9" yaw="0.9" roll="0.9" />
+        <drag forward="0.054" reverse="0.7" horizontal="2" vertical="2" pitch="0.38" yaw="0.38" roll="0.38" />
+        <accfactors reverse="1.5" />
+      </physics>
+    </properties>
+    <connections>
+      <connection ref="con_engine_01">
+        <macro ref="engine_missile_guided_mk1_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

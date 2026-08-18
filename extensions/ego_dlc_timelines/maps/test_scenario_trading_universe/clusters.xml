@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <macro name="test_scenario_trading_cluster_01_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="test_scenario_trading_cluster_01_sector001_connection" ref="sectors">
+        <macro ref="test_scenario_trading_cluster_01_sector001_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+        <macro>
+          <component connection="space" ref="Cluster_06" />
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+</macros>

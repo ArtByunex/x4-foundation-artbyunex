@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_Terran_Teladi" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship1" />
+    <object_group name="target_group">
+      <reference object="target_ship1" />
+      <reference object="target_ship2" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera>
+            <!-- up slightly angled looking down -->
+            <!--position>
+              <reference object="target_ship2" x="1173.421265" y="2658.635498" z="225.782043" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship2" x="1173.057983" y="2657.734375" z="226.018555" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.800298"/>
+            </roll-->
+            <!--position>
+              <reference object="target_ship2" x="-329.290283" y="196.781555" z="938.767639" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship2" x="-328.754822" y="196.553329" z="937.954529" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-1.099568"/>
+            </roll-->
+
+            <position>
+              <reference object="target_ship1" x="-1785.130127" y="857.403015" z="2092.572754" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship1" x="-1784.299316" y="857.051666" z="2092.141113" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.164998"/>
+            </roll>
+
+          </camera>
+        </shot>
+      </sequence>
+
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <!--position>
+              <reference object="target_ship1" x="-137.619156" y="-645.020447" z="950.992065" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship1" x="-137.418762" y="-644.325806" z="950.301208" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-2.149236"/>
+            </roll-->
+
+            <position>
+              <reference object="target_ship1" x="-329.290283" y="196.781555" z="938.767639" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship1" x="-328.754822" y="196.553329" z="937.954529" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-1.099568"/>
+            </roll>
+            
+          </camera>
+        </shot>
+      </sequence>
+
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera_panover reference="target_ship2" showing="back" pan_direction="leftwards" panstart="-300" panend="300" time="10000">
+            <begin distance="800"/>
+            <end distance="200"/>
+          </camera_panover>
+
+          <!--position>
+            <reference object="target_ship2" x="1762.942627" y="434.786896" z="-6.140900" comment="copied from player camera"/>
+          </position>
+          <lookdirection>
+            <reference object="target_ship2" x="1762.080322" y="434.560455" z="-5.687958" comment="copied from player camera"/>
+          </lookdirection>
+          <roll>
+            <value exact="-0.100063"/>
+          </roll-->
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="StaticCameraShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+          <camera>
+            <position>
+              <reference object="target_ship1" x="-121.150482" y="40.810310" z="-919.591553" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship1" x="-121.343666" y="40.989910" z="-918.626953" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.687086"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

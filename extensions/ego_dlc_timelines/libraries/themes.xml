@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- default theme for factions -->
+  <add sel="/themes/theme[@id='painttheme_race_default']">
+    <group faction="kaori" paintmod="paintmod_0059" />
+  </add>
+
+  <!-- ship variation theme for all factions -->
+  <add sel="/themes/theme[@id='painttheme_race_ship']">
+    <group faction="kaori" selection="random" paintmod="">
+      <select paintmod="paintmod_0059" weight="1" />
+    </group>
+  </add>
+
+  <!-- faction themes available to the player when ALLY -->
+  <add sel="/themes">
+    <theme id="painttheme_player_kaori_0059" default="error_theme" name="{20116,10311}" tags="hidden noblueprint permit">
+      <group faction="kaori" paintmod="" />
+      <group faction="player" paintmod="paintmod_0059" />
+    </theme>
+  </add>
+</diff>
+
+

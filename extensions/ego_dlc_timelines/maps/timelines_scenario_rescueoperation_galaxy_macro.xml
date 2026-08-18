@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <macro name="timelines_scenario_rescueoperation_c701_s01_zone_01_macro" class="zone">
+    <component ref="standardzone" />
+    <connections>
+      <connection name="connection_ClusterGate001To002" ref="gates">
+        <offset>
+          <position x="-33563.359375" y="0" z="34544.76953125" />
+          <quaternion qx="0" qy="0.8433914185" qz="0" qw="0.537299633" />
+        </offset>
+        <macro ref="props_gates_anc_gate_macro" connection="space" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c701_s01_zone_02_macro" class="zone">
+    <component ref="standardzone" />
+    <connections>
+      <connection name="connection_ClusterGate001To003" ref="gates">
+        <offset>
+          <position x="-33563.359375" y="0" z="34544.76953125" />
+          <quaternion qx="0" qy="0.8433914185" qz="0" qw="-0.537299633" />
+        </offset>
+        <macro ref="props_gates_anc_gate_macro" connection="space" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c702_s01_zone_01_macro" class="zone">
+    <component ref="standardzone" />
+    <connections>
+      <connection name="connection_ClusterGate002To001" ref="gates">
+        <offset>
+          <position x="-33563.359375" y="0" z="34544.76953125" />
+          <quaternion qx="0" qy="0.8433914185" qz="0" qw="0.537299633" />
+        </offset>
+        <macro ref="props_gates_anc_gate_macro" connection="space" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c703_s01_zone_01_macro" class="zone">
+    <component ref="standardzone" />
+    <connections>
+      <connection name="connection_ClusterGate003To001" ref="gates">
+        <offset>
+          <position x="-33563.359375" y="0" z="34544.76953125" />
+          <quaternion qx="0" qy="0.8433914185" qz="0" qw="-0.537299633" />
+        </offset>
+        <macro ref="props_gates_anc_gate_macro" connection="space" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c701_sector_01_macro" class="sector">
+    <component ref="standardsector" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c701_s01_zone_01_connection" ref="zones">
+        <offset>
+          <position x="-200000" y="0" z="0" />
+        </offset>
+        <macro ref="timelines_scenario_rescueoperation_c701_s01_zone_01_macro" connection="sector" />
+      </connection>
+      <connection name="timelines_scenario_rescueoperation_c701_s01_zone_02_connection" ref="zones">
+        <offset>
+          <position x="200000" y="0" z="0" />
+        </offset>
+        <macro ref="timelines_scenario_rescueoperation_c701_s01_zone_02_macro" connection="sector" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c702_sector_01_macro" class="sector">
+    <component ref="standardsector" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c702_s01_zone_01_connection" ref="zones">
+        <macro ref="timelines_scenario_rescueoperation_c702_s01_zone_01_macro" connection="sector" />
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_c703_sector_01_macro" class="sector">
+    <component ref="standardsector" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c703_s01_zone_01_connection" ref="zones">
+        <macro ref="timelines_scenario_rescueoperation_c703_s01_zone_01_macro" connection="sector" />
+      </connection>
+    </connections>
+  </macro>
+
+  <macro name="timelines_scenario_rescueoperation_cluster_701_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c701_sector_01_connection" ref="sectors">
+        <macro ref="timelines_scenario_rescueoperation_c701_sector_01_macro" connection="cluster" />
+      </connection>
+      <connection name="C701S01_Region01_connection" ref="regions">
+        <offset>
+          <position x="0.0" y="-50000" z="0.0" />
+        </offset>
+        <macro name="C701S01_Region01_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="c701s1_region" />
+          </properties>
+        </macro>
+      </connection>
+      <connection name="C701S01_Region02_connection" ref="regions">
+        <offset>
+          <position x="0.0" y="-4000" z="0.0" />
+        </offset>
+        <macro name="C701S01_Region02_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="c701s1_region2" />
+          </properties>
+        </macro>
+      </connection>
+      <connection ref="content">
+        <macro>
+          <component connection="space" ref="Cluster_01" />
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_cluster_702_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c702_sector_01_connection" ref="sectors">
+        <macro ref="timelines_scenario_rescueoperation_c702_sector_01_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+        <macro>
+          <component connection="space" ref="Cluster_02" />
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_cluster_703_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_c703_sector_01_connection" ref="sectors">
+        <macro ref="timelines_scenario_rescueoperation_c703_sector_01_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+        <macro>
+          <component connection="space" ref="Cluster_03" />
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_scenario_rescueoperation_galaxy_macro" class="galaxy">
+    <component ref="standardgalaxy" />
+    <connections>
+      <connection name="timelines_scenario_rescueoperation_cluster_701_connection" ref="clusters">
+        <macro ref="timelines_scenario_rescueoperation_cluster_701_macro" connection="galaxy" />
+      </connection>
+      <connection name="timelines_scenario_rescueoperation_cluster_702_connection" ref="clusters">
+        <offset>
+          <position x="-15000000" y="0" z="25980000" />
+        </offset>
+        <macro ref="timelines_scenario_rescueoperation_cluster_702_macro" connection="galaxy" />
+      </connection>
+      <connection name="timelines_scenario_rescueoperation_cluster_703_connection" ref="clusters">
+        <offset>
+          <position x="15000000" y="0" z="25980000" />
+        </offset>
+        <macro ref="timelines_scenario_rescueoperation_cluster_703_macro" connection="galaxy" />
+      </connection>
+      <connection name="ClusterGate001To002" ref="destination" path="../timelines_scenario_rescueoperation_cluster_701_connection/timelines_scenario_rescueoperation_c701_sector_01_connection/timelines_scenario_rescueoperation_c701_s01_zone_01_connection/connection_ClusterGate001To002">
+        <macro connection="destination" path="../../../../../timelines_scenario_rescueoperation_cluster_702_connection/timelines_scenario_rescueoperation_c702_sector_01_connection/timelines_scenario_rescueoperation_c702_s01_zone_01_connection/connection_ClusterGate002To001" />
+      </connection>
+      <connection name="ClusterGate001To003" ref="destination" path="../timelines_scenario_rescueoperation_cluster_701_connection/timelines_scenario_rescueoperation_c701_sector_01_connection/timelines_scenario_rescueoperation_c701_s01_zone_02_connection/connection_ClusterGate001To003">
+        <macro connection="destination" path="../../../../../timelines_scenario_rescueoperation_cluster_703_connection/timelines_scenario_rescueoperation_c703_sector_01_connection/timelines_scenario_rescueoperation_c703_s01_zone_01_connection/connection_ClusterGate003To001" />
+      </connection>
+
+
+    </connections>
+  </macro>
+
+</macros>

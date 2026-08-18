@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Diplomacy_Intro_1">
+    <params>
+      <param name="reenroom" object="true"/>
+      <param name="shipcockpit" object="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="reenscene" zone="@auto:reenroom" />
+    <environment_implicit name="shipscene" zone="@auto:shipcockpit" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <!--first sequence starts at 0 - ends on event-->
+      <sequence name="CrewmanChatSequence" start="0">
+        <shot name="CrewmanChat" environment="reenscene" duration="onevent:CrewmanChatEnd">
+          <camera_orbit reference="reenroom" x="-5.5" y="-0.4" z="0.2" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="5" distance="6.3" elevation="0"/>
+            <end angle="-25" distance="4.0" elevation="0.5" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="CrewmanLeavesSequence" start="onevent:CrewmanLeavesStart">
+        <shot name="CrewmanLeaves" environment="reenscene" duration="onevent:CrewmanLeavesEnd">
+          <camera_orbit reference="reenroom" x="0.5" y="0.1" z="5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="250" distance="7.4" elevation="-0.2"/>
+            <end angle="265" distance="6.4" elevation="0.2" time="60000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenFaceSequence" start="onevent:ReenFaceFaceStart">
+        <shot name="ReenFaceFace" environment="reenscene" duration="onevent:ReenFaceFaceEnd">
+          <camera_orbit reference="reenroom" x="-3.5" y="-0.4" z="0.2" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-3" distance="5.4" elevation="0.2"/>
+            <end angle="-3" distance="5.0" elevation="0.2" time="60000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="DockedShipSequence" start="onevent:DockedShipStart">
+        <shot name="DockedShip" environment="shipscene" duration="onevent:DockedShipEnd">
+          <camera_orbit reference="shipcockpit" x="0" y="0.2" z="-4.2" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-315" distance="13" elevation="0"/>
+            <end angle="25" distance="16" elevation="2.5" time="60000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenLeavesSequence" start="onevent:ReenLeavesStart">
+        <shot name="ReenLeaves" environment="reenscene" duration="onevent:ReenLeavesEnd">
+          <!--TODO @Owen add error if 'reference' doesn't exist-->
+          <camera_orbit reference="reenroom" x="0.2" y="0.1" z="1.6" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="320" distance="5.8" elevation="0.2"/>
+            <end angle="260" distance="5.1" elevation="1.0" time="120000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

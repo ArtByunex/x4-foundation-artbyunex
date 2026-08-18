@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Boron_Ch8_Khaak_Gathering" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:gathering" />
+    <object_group name="target_group">
+      <reference object="carrier" />
+      <reference object="gathering" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <!-- keyframe duration = time_firstobject + time_fly, shot-duration needs to match that + a few seconds extra (to avoid a keyframe error) -->
+        <shot name="FlyFromCarrierToGathering" environment="scenezone" duration="60000">
+          <!-- duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes -->
+          <!-- Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <!-- "time_firstobject" has to be above 0, or the cutscene breaks. 1ms is enough to make it look as if the camera movement starts immediately -->
+          <camera_flyfromto reference="carrier" distance="600" flyto_reference="gathering" flyto_distance="80" interpolation="smooth" time_firstobject="1" time_fly="30000" cycle="bounce"/>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

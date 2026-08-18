@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Boron_Ch5_Queen_Briefing">
+    <params>
+      <param name="target_queen" object="true" />
+      <param name="target_ALILeader" object="true" />
+      <param name="target_nila" object="true" />
+      <param name="target_boso" object="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_queen" />
+    <object_group name="target_group">
+      <reference object="target_queen" />
+      <reference object="target_ALILeader" />
+      <reference object="target_nila" />
+      <reference object="target_boso" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="EnteringThroneRoomPan" environment="scenezone" duration="10000">
+          <camera_orbit reference="target_queen" orient_to="ecliptic" cycle="none">
+            <begin distance="13.22" angle="90" elevation="0.13" />
+            <end distance="4.8" angle="90" time="8000" elevation="0.67"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="OrbitAroundCongregationShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera_orbit reference="target_queen" orient_to="ecliptic" cycle="none" z="0.8" y="-0.6">
+            <begin angle="124">
+              <distance>
+                <value exact="6.2"/>
+              </distance>
+              <elevation>
+                <value exact="0.7"/>
+              </elevation>
+            </begin>
+            <end angle="86" time="26000">
+              <distance>
+                <value exact="6.2"/>
+              </distance>
+              <elevation>
+                <value exact="0.38"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="target_ALILeader" x="-0.32" y="1.39" z="-0.85"/>
+            </position>
+            <lookdirection>
+              <reference object="target_queen" head="true"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera_orbit reference="target_ALILeader" orient_to="ecliptic" cycle="none" y="0.7">
+            <begin angle="90">
+              <distance>
+                <value exact="1.7"/>
+              </distance>
+              <elevation>
+                <value exact="0.3"/>
+              </elevation>
+            </begin>
+            <end angle="90" time="250000">
+              <distance>
+                <value exact="1.7"/>
+              </distance>
+              <elevation>
+                <value exact="0.3"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="StaticCameraShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+          <camera>
+            <position>
+              <reference object="target_queen"  z="1.3" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="target_queen" head="true"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="PanInCameraShot5" environment="scenezone" duration="onevent:TriggerSequence5Done">
+          <camera_orbit reference="target_nila" orient_to="ecliptic" cycle="none" y="0.45" x="-0.3">
+            <begin distance="1.8" angle="120" elevation="0.2" />
+            <end distance="1.6" angle="117" time="16000" elevation="0.2"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence6" start="onevent:TriggerSequence6Start">
+        <shot name="PanOutCameraShot6" environment="scenezone" duration="onevent:TriggerSequence6Done">
+          <camera_orbit reference="target_queen" orient_to="ecliptic" cycle="none" z="1" y="0.23" x="-0.74">
+            <begin distance="2.7" angle="62" elevation="0.2" />
+            <end distance="2.7" angle="59" time="8000" elevation="0.2"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence7" start="onevent:TriggerSequence7Start">
+        <shot name="StaticCameraShot7" environment="scenezone" duration="onevent:TriggerSequence7Done">
+          <camera>
+            <position>
+              <reference object="target_boso"  z="1.35" head="true" y="-0.28"/>
+            </position>
+            <lookdirection>
+              <reference object="target_boso" head="true" y="-0.29"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_dragonfyre_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_1" ref="gates">
+        <offset>
+          <rotation yaw="90"/>
+        </offset>
+        <macro connection="con_destination_01" ref="props_ter_gate_02_macro">
+          <properties>
+            <identification owner="argon" description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7710011}" description="{20004,7710012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_174385" ref="zones">
+        <macro ref="timelines_map_dragonfyre_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_1" ref="zones">
+        <offset>
+          <position x="-120000" z="30000"/>
+        </offset>
+        <macro ref="timelines_map_dragonfyre_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7710001}" description="{20003,7710002}"/>
+    </properties>
+    <connections>
+      <connection name="sectors_1" ref="sectors">
+        <macro ref="timelines_map_dragonfyre_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_1" ref="content">
+        <macro connection="space" ref="cluster_717_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_002_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_1" ref="gates">
+        <offset>
+          <rotation yaw="-45"/>
+        </offset>
+        <macro connection="con_destination_01" ref="props_ter_gate_02_macro">
+          <properties>
+            <identification owner="argon" description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_002_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7700011}" description="{20004,7700012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_1" ref="zones">
+        <macro ref="timelines_map_dragonfyre_cluster_002_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_cluster_002_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7700001}" description="{20003,7700002}"/>
+    </properties>
+    <connections>
+      <connection name="sectors_1" ref="sectors">
+        <macro ref="timelines_map_dragonfyre_cluster_002_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_1" ref="content">
+        <macro connection="space" ref="cluster_718_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_dragonfyre_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_1" ref="clusters">
+        <macro ref="timelines_map_dragonfyre_cluster_001_macro" connection="galaxy"/>
+      </connection>
+      <connection name="clusters_2" ref="clusters">
+        <offset>
+          <position x="-45000000" z="8660000"/>
+        </offset>
+        <macro ref="timelines_map_dragonfyre_cluster_002_macro" connection="galaxy"/>
+      </connection>
+      <connection name="gateconnection_001" ref="con_destination_01" path="../clusters_1/sectors_1/zones_1/gates_1">
+        <macro connection="con_destination_01" path="../../../../../clusters_2/sectors_1/zones_1/gates_1"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

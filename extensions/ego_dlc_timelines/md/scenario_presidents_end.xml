@@ -1,0 +1,3220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Presidents_End" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_presidents_end_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$DebugChance2"       exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30601"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--This prevents the InitUniverse script interfering with scenario objects. All map ships/stations will not have any entities such as engineers, which is intended for this scenario.-->
+        <set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <set_value name="$MainSector" exact="player.sector"/>
+        <set_value name="$Seed" exact="9083502845882190L"/>
+        <find_sector name="$Sec_TheWall" macro="macro.timelines_map_presidents_end_cluster_004_sector_001_macro"/>
+        <find_sector name="$Sec_CloudbaseSouthEast" macro="macro.timelines_map_presidents_end_cluster_001_sector_001_macro"/>
+        <find_sector name="$Sec_ElenasFortune" macro="macro.timelines_map_presidents_end_cluster_002_sector_001_macro"/>
+        <find_sector name="$Sec_HomeOfLight" macro="macro.timelines_map_presidents_end_cluster_003_sector_001_macro"/>
+        <set_value name="$BlackboxesCollected" exact="0"/>
+        <set_value name="$BlackboxesDestroyed" exact="0"/>
+        <set_value name="$JumpgateWarningDistance" exact="30km"/>
+        <set_value name="$JumpgateDeathDistance" exact="20km"/>
+        <set_value name="$AydonDebrisComments" exact="[306010126, 306010127]"/>
+        <set_value name="$Argon_Fighter_1_Macro" exact="macro.ship_arg_s_fighter_01_a_macro" comment="since 9.0 a nova with loadout timelines_scenario_nova_presidentsend, pre 9.0 macro.ship_arg_s_fighter_02_a_macro Elite with loadout timelines_scenario_argon_fighter_2"/>
+        <set_value name="$Argon_Fighter_2_Macro" exact="macro.ship_tel_s_scout_02_b_macro" comment="since 9.0 Guillemot with loadout timelines_scenario_teladi_guillemot_presidentsend, pre 9.0: ship_tel_s_fighter_02_b_macro Buzzard with loadout timelines_scenario_teladi_buzzard_presidentsend"/>
+        <set_value name="$AllyMShipMacro" exact="macro.ship_arg_m_trans_container_01_b_macro"/>
+        <set_value name="$LastMShipAttackTime" exact="0s"/>
+        <set_value name="$TransmittedPackets" exact="0"/>
+        <set_value name="$EnemiesKilled" exact="0"/>
+
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Stations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Gates" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_AllyFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Ownerless_Ships" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Blackbox_Locations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_StartFight" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_StartRoom" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="Post_Setup" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $HasError"/>
+                  </conditions>
+                  <delay exact="1ms"/>
+                  <actions>
+                    <do_for_each name="$Module" in="$LastModules">
+                      <set_object_hull object="$Module" exact="1"/>
+                      <apply_attackstrength object="$Module.object" strength="999999" explosion="false" module="$Module"/>
+                    </do_for_each>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="player.exists">
+                  <set_known object="player.cluster" known="true"/>
+                  <set_known object="player.sector" known="true"/>
+                  <set_known object="player.zone" known="true"/>
+                  <!--Prevent the player from using SHIFT+D at the start of the scenario-->
+                  <set_value name="player.entity.$x4ep1_teleporter_malfunctioning" exact="true"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Stations">
+              <actions>
+                <find_station name="$TradingStation" tradestation="true" space="$MainSector" required="true"/>
+                <find_station name="$WeaponComponentFactory" macro="macro.timelines_map_presidents_end_cluster_006_sector_001_zone_007_station_001_macro" space="$MainSector" required="true"/>
+                <find_station name="$MicroChipFactory" macro="macro.timelines_map_presidents_end_cluster_006_sector_001_zone_007_station_002_macro" space="$MainSector" required="true"/>
+                <!--Damage the modules to be wrecks-->
+                <find_station name="$Stations" space="$MainSector" multiple="true"/>
+
+                <!--TODO @Owen #hack looping over all modules and damaging them will cause the station to queue up a kill event for itself in the same frame as the kill event dispatches of damaged modules
+                This leads to some modules being killed after their state is already changed to wreck, leading to the wrecks actually being removed from the game.
+                To get past this we add the last module of each station to $LastModules and destroy them next frame so all other events are correctly dispatched-->
+                <set_value name="$LastModules" exact="[]"/>
+                <do_for_each name="$Station" in="$Stations">
+                  <add_default_production_wares object="$Station" lowerlimit="20" upperlimit="21" extremechance="0" />
+                  <do_if value="$Station.shadyguy">
+                    <!--TODO @Owen disable shadyguy for all scenarios?-->
+                    <destroy_object object="$Station.shadyguy"/>
+                  </do_if>
+                  <set_value name="$Modules" exact="$Station.modules.all.list"/>
+                  <do_for_each name="$Module" in="$Modules" counter="$module_i">
+                    <do_if value="$Station == $WeaponComponentFactory">
+                      <set_object_min_hull object="$Module" exact="1"/>
+                      <set_object_hull object="$Module" exact="1"/>
+                    </do_if>
+                    <do_else>
+                      <do_if value="$module_i == $Modules.count">
+                        <append_to_list name="$LastModules" exact="$Module"/>
+                        <break/>
+                      </do_if>
+                      <set_object_hull object="$Module" exact="1"/>
+                      <apply_attackstrength object="$Station" strength="999999" explosion="false" module="$Module"/>
+                    </do_else>
+                  </do_for_each>
+                </do_for_each>
+
+                <do_if value="$TradingStation.exists">
+                  <set_value name="$TradingStationAmmoCrateContent" exact="[
+                             [macro.missile_gen_s_guided_01_mk1_macro, 8, position.[-11334, -501, -8749] ],
+                             [macro.missile_gen_s_swarm_01_mk1_macro, 5, position.[-10351, -60, -9862] ]
+                          ]"/>
+                  <do_for_each name="$AmmoCrateContent" in="$TradingStationAmmoCrateContent">
+                    <create_object name="this.$crate" groupname="$TradingStationAmmoCrateGroup" macro="macro.sm_gen_ammo_01_macro" zone="$TradingStation.zone">
+                      <!--safepos object="$TradingStation" radius="750m" max="750m"/-->
+                      <position value="$AmmoCrateContent.{3}"/>
+                    </create_object>
+                    <do_if value="this.$crate.exists">
+                      <set_ammo object="this.$crate" macro="$AmmoCrateContent.{1}" amount="$AmmoCrateContent.{2}"/>
+                      <set_drop_persistence object="this.$crate" persistent="true"/>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'Warning: AmmoCrate %s (%s x%s)not created'.[$BlackboxDefinition.$ammocratemacro, $AmmoCrateContent.{1}, $AmmoCrateContent.{2}]" filter="error"/>
+                    </do_else>
+                  </do_for_each>
+                </do_if>
+
+                <do_if value="$WeaponComponentFactory">
+                  <create_ship name="$KhaakCapship" macro="macro.ship_kha_l_destroyer_01_a_macro" sector="$WeaponComponentFactory.sector">
+                    <owner exact="faction.khaak"/>
+                    <pilot>
+                      <select faction="faction.khaak" tags="tag.aipilot"/>
+                    </pilot>
+                    <position object="$WeaponComponentFactory" x="5500m" y="2000m"/>
+                  </create_ship>
+
+                  <set_object_name object="$KhaakCapship" page="20109" line="5101"/>
+                  <set_drop_object object="$KhaakCapship" comment="'Prevent drops'"/>
+                  <disable_travel_mode ship="$KhaakCapship" duration="24h"/>
+                  <create_order id="'Attack'" object="$KhaakCapship" immediate="true">
+                    <param name="primarytarget" value="$WeaponComponentFactory"/>
+                  </create_order>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Gates">
+              <actions>
+                <find_gate name="$NorthGate" groupname="$PE_Jumpgates" space="$MainSector" destination="$Sec_TheWall" required="true"/>
+                <find_gate name="$SouthGate" groupname="$PE_Jumpgates" space="$MainSector" destination="$Sec_CloudbaseSouthEast" required="true"/>
+                <find_gate name="$EastGate" groupname="$PE_Jumpgates" space="$MainSector" destination="$Sec_ElenasFortune" required="true"/>
+                <find_gate name="$WestGate" groupname="$PE_Jumpgates" space="$MainSector" destination="$Sec_HomeOfLight" required="true"/>
+                <do_for_each name="$PE_Jumpgate" in="$PE_Jumpgates">
+                  <!--TODO @Owen flag as un-traversable?-->
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_AllyFleet">
+              <actions>
+                <create_group groupname="$AllyFleet"/>
+
+                <!--spawn allied ships-->
+
+                <set_value name="$StartShip" exact="player.ship"/>
+                <do_if value="not $StartShip">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'Player is not starting on a ship'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+                  <add_to_group groupname="$AllyFleet" object="$StartShip"/>
+                  <find_object_component groupname="$Engines" object="$StartShip" class="class.engine" multiple="true"/>
+                  <destroy_group group="$Engines" explosion="true"/>
+                  <remove_value name="$Engines"/>
+                  <find_object_component name="$TopRearTurret" object="$StartShip" class="class.turret" sortbyvalue="loop.element.distanceto.[$StartShip, position.[-10m, 150m, -500m]]" sortdescending="false"/>
+                  <find_object_component name="$PotentialTurrets" excluded="$TopRearTurret" object="$StartShip" class="class.turret" multiple="true"/>
+                  <shuffle_list list="$PotentialTurrets" seed="$Seed"/>
+                  <do_all exact="$PotentialTurrets.count / 2" counter="$turret_i">
+                    <destroy_object object="$PotentialTurrets.{$turret_i}" explosion="true"/>
+                  </do_all>
+                  <remove_value name="$Turrets"/>
+                  <find_object_component groupname="$Shields" object="$StartShip" class="class.shieldgenerator" multiple="true"/>
+                  <set_object_shield object="$StartShip" exact="0"/>
+                  <destroy_group group="$Shields" explosion="true"/>
+                  <remove_value name="$Shields"/>
+                  <set_object_active object="$StartShip" activate="true"/>
+                  <set_object_hull object="$StartShip" exact="45"/>
+                  <set_value name="$DefenceUnits" exact="$StartShip.units.{unitcategory.defence}.table"/>
+                  <do_for_each name="$DefenceMacro" valuename="$DefenceAmount" in="$DefenceUnits">
+                    <remove_units object="$StartShip" macro="$DefenceMacro" exact="$DefenceAmount"/>
+                  </do_for_each>
+
+                  <create_cue_actor name="$DefenceComputer" cue="this">
+                    <select tags="tag.defence"/>
+                    <owner exact="faction.argon" />
+                  </create_cue_actor>
+                  <do_if value="$DefenceComputer">
+                    <assign_control_entity object="$StartShip" actor="$DefenceComputer" post="controlpost.defence" transfer="true"/>
+                  </do_if>
+
+                  <create_cue_actor name="$CapshipCaptain" cue="namespace" macro="macro.character_argon_female_cau_crew_02_macro">
+                    <owner exact="faction.argon"/>
+                    <page exact="10135"/>
+                    <skills>
+                      <skill type="management"  exact="10"/>
+                      <skill type="morale"      exact="5"/>
+                      <skill type="piloting"    exact="7"/>
+                      <skill type="engineering" exact="11"/>
+                      <skill type="boarding"    exact="6"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_value name="$CapshipCaptain.$Stay" exact="true"/>
+                  <assign_control_entity actor="$CapshipCaptain" object="$StartShip" post="controlpost.aipilot" init="false"/>
+                  <set_entity_traits entity="$CapshipCaptain" customhandler="true" missionactor="true" remote="false"/>
+
+                  <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $CapshipCaptain,
+                                          table[
+                                          $requestercue = namespace,
+                                          $location = $StartShip.controlroom,
+                                          $position = position.[-1.3m, -0.05m, -7.3m],
+                                          $rotation = rotation.[-100deg, 0deg, 0deg],
+                                          $priority = 100,
+                                          $debugchance = $DebugChance2,
+                                          $debugcaller = if $DebugChance == 100 then this else null]
+                                          ]"/>
+
+                  <create_cue_actor name="$Aydon" cue="namespace" macro="macro.character_timelines_scenario_presidents_end_argon_male_01_macro">
+                    <owner exact="faction.argon"/>
+                    <page exact="10195"/>
+                    <skills>
+                      <skill type="management"  exact="10"/>
+                      <skill type="morale"      exact="4"/>
+                      <skill type="piloting"    exact="4"/>
+                      <skill type="engineering" exact="15"/>
+                      <skill type="boarding"    exact="4"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_value name="$Aydon.$Stay" exact="true"/>
+                  <set_entity_role entity="$Aydon" role="entityrole.service"/>
+                  <set_entity_traits entity="$Aydon" customhandler="true" missionactor="true"/>
+                  <set_entity_overrides entity="$Aydon" title="'{30601,115}'" icon="'engineer'"/>
+
+                  <create_cue_actor name="$MShipPilot" cue="namespace" macro="macro.character_argon_female_cau_civ_01_macro" seed="725423356L">
+                    <owner exact="faction.argon"/>
+                    <page exact="10107"/>
+                    <skills>
+                      <skill type="management"  exact="9"/>
+                      <skill type="morale"      exact="2"/>
+                      <skill type="piloting"    exact="13"/>
+                      <skill type="engineering" exact="10"/>
+                      <skill type="boarding"    exact="2"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_entity_traits entity="$MShipPilot" customhandler="true"/>
+
+                  <create_cue_actor name="$MShipCrew_1" cue="namespace" macro="macro.character_argon_female_asi_crew_02_macro" seed="653243714L">
+                    <owner exact="faction.argon"/>
+                    <page exact="10106"/>
+                    <skills>
+                      <skill type="management"  exact="5"/>
+                      <skill type="morale"      exact="1"/>
+                      <skill type="piloting"    exact="3"/>
+                      <skill type="engineering" exact="11"/>
+                      <skill type="boarding"    exact="5"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_entity_role entity="$MShipCrew_1" role="entityrole.service"/>
+                  <set_entity_traits entity="$MShipCrew_1" customhandler="true"/>
+
+                  <create_cue_actor name="$MShipCrew_2" cue="namespace" macro="macro.character_argon_male_asi_crew_02_macro" seed="8252562782346195845L">
+                    <owner exact="faction.argon"/>
+                    <page exact="10103"/>
+                    <skills>
+                      <skill type="management"  exact="6"/>
+                      <skill type="morale"      exact="3"/>
+                      <skill type="piloting"    exact="2"/>
+                      <skill type="engineering" exact="9"/>
+                      <skill type="boarding"    exact="3"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_entity_role entity="$MShipCrew_2" role="entityrole.service"/>
+                  <set_entity_traits entity="$MShipCrew_2" customhandler="true"/>
+
+                  <create_cue_actor name="$MShipCrew_3" cue="namespace" macro="macro.character_argon_male_cau_crew_02_macro" seed="4226813462696754976L">
+                    <owner exact="faction.argon"/>
+                    <page exact="10101"/>
+                    <skills>
+                      <skill type="management"  exact="6"/>
+                      <skill type="morale"      exact="3"/>
+                      <skill type="piloting"    exact="2"/>
+                      <skill type="engineering" exact="9"/>
+                      <skill type="boarding"    exact="3"/>
+                    </skills>
+                  </create_cue_actor>
+                  <set_value name="$MShipCrew_3.$Stay" exact="true"/>
+                  <set_entity_role entity="$MShipCrew_3" role="entityrole.service"/>
+                  <set_entity_traits entity="$MShipCrew_3" customhandler="true"/>
+
+                  <set_value name="$MissionActors.$CapshipCaptain" exact="table[
+                            $entity = $CapshipCaptain,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNPCFace',
+                              $caption = true
+                            ]
+                          ]"/>
+
+                  <set_value name="$MissionActors.$Aydon" exact="table[
+                            $entity = $Aydon,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNPCFace',
+                              $caption = true
+                            ]
+                          ]"/>
+
+                  <set_value name="$MissionActors.$MShipPilot" exact="table[
+                            $entity = $MShipPilot,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNPCFace',
+                              $caption = true
+                            ]
+                          ]"/>
+
+                  <set_value name="$MissionActors.$MShipCrew_1" exact="table[
+                            $entity = $MShipCrew_1,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNPCFace',
+                              $caption = true
+                            ]
+                          ]"/>
+
+                  <set_value name="$MissionActors.$MShipCrew_2" exact="table[
+                            $entity = $MShipCrew_2,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNPCFace',
+                              $caption = true
+                            ]
+                          ]"/>
+                  <set_value name="$ComputerActor" exact="player.computer"/>
+                  <set_value name="$MissionActors.$ComputerActor" exact="table[
+                            $entity = $ComputerActor,
+                            $monitor = table[
+                              $cutscenekey = 'ShowNoise',
+                              $caption = true
+                            ]
+                          ]"/>
+
+                  <find_dockingbay name="$SpawnDock" object="$StartShip" sortbydistanceto="player.room" sortdescending="false">
+                    <match_dock size="tag.dock_m" storage="false"/>
+                  </find_dockingbay>
+                  <set_value name="$SpawnDockArea" exact="$SpawnDock.walkablemodule"/>
+                  <create_ship name="$AllyMShip" groupname="$AllyFleet" macro="$AllyMShipMacro" dock="$SpawnDock">
+                    <owner exact="faction.argon"/>
+                    <pilot actor="$MShipPilot"/>
+                    <basket basket="all_container"/>
+                    <loadout ref="'timelines_scenario_argon_m_freighter'"/>
+                    <!--TODO @Owen have fixed drops?-->
+                    <drop ref="ship_medium_civilian"/>
+                  </create_ship>
+                  <add_equipment_mods object="$AllyMShip">
+                    <engine ware="ware.mod_engine_forwardthrust_01_mk3"/>
+                  </add_equipment_mods>
+                  <add_to_group groupname="md.NPC_Instantiation.Instantiation.$ExcludedObjects" object="$AllyMShip"/>
+                  <do_if value="not $AllyMShip.exists">
+                    <debug_text text="'Unable to create ally M ship ' + macro.ship_arg_m_trans_container_01_b_macro + ' on ' + $SpawnDock" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                  <do_else>
+                    <add_to_group groupname="$MissionRelevantObjects" object="$AllyMShip"/>
+                    <disable_travel_mode ship="$AllyMShip" duration="1h"/>
+                    <set_known object="$AllyMShip" known="true"/>
+                    <create_order id="'DockAndWait'" object="$AllyMShip" default="true">
+                      <param name="destination" value="$StartShip"/>
+                    </create_order>
+                    <!--Ignore attacks-->
+                    <set_object_signal_response object="$AllyMShip" signal="'attacked'" response="'ignore'" />
+                    <!--Hold fire during the initial escape-->
+                    <find_object_component name="$AllyTurrets" class="class.turret" object="$AllyMShip" multiple="true"/>
+                    <do_for_each name="$AllyTurret" in="$AllyTurrets">
+                      <set_weapon_mode weapon="$AllyTurret" weaponmode="weaponmode.holdfire"/>
+                    </do_for_each>
+                    <find_dockingbay name="$MShip_XS_Dock" object="$AllyMShip">
+                      <match_dock size="tag.dock_xs"/>
+                    </find_dockingbay>
+                    <set_room_locked room="$MShip_XS_Dock" locked="true"/>
+
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $Aydon,
+                                                    table[
+                                                    $requestercue = namespace,
+                                                    $location = $AllyMShip.controlroom,
+                                                    $priority = 100,
+                                                    $position = position.[-0.63m, -1.1m, -1.05m],
+                                                    $rotation = rotation.[35deg, 0deg, 0deg],
+                                                    $debugchance = $DebugChance2,
+                                                    $debugcaller = if $DebugChance == 100 then this else null]
+                                                    ]"/>
+
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MShipCrew_1,
+                                                    table[
+                                                    $requestercue = namespace,
+                                                    $location = $AllyMShip.controlposition.{controlposition.gunner}.roomslot,
+                                                    $priority = 100,
+                                                    $debugchance = $DebugChance2,
+                                                    $debugcaller = if $DebugChance == 100 then this else null]
+                                                    ]"/>
+
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MShipCrew_2,
+                                                    table[
+                                                    $requestercue = namespace,
+                                                    $location = $AllyMShip.controlposition.{controlposition.navigation}.roomslot,
+                                                    $priority = 100,
+                                                    $debugchance = $DebugChance2,
+                                                    $debugcaller = if $DebugChance == 100 then this else null]
+                                                    ]"/>
+
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MShipCrew_3,
+                                                    table[
+                                                    $requestercue = namespace,
+                                                    $location = $AllyMShip.controlroom,
+                                                    $priority = 100,
+                                                    $position = position.[-1.61m, -2.85m, 1.3m],
+                                                    $rotation = rotation.[-30deg, 0deg, 0deg],
+                                                    $debugchance = $DebugChance2,
+                                                    $debugcaller = if $DebugChance == 100 then this else null]
+                                                    ]"/>
+
+                    <set_entity_role_object entity="$Aydon" object="$AllyMShip"/>
+                    <set_entity_role_object entity="$MShipCrew_1" object="$AllyMShip"/>
+                    <set_entity_role_object entity="$MShipCrew_2" object="$AllyMShip"/>
+                    <set_entity_role_object entity="$MShipCrew_3" object="$AllyMShip"/>
+                    <get_character_definition macro="$ServiceMacros" faction="faction.argon" tags="[tag.crew, tag.service, tag.regular]" multiple="true"/>
+                    <!--It's an emergency! Cram people on board-->
+                    <do_all exact="$AllyMShip.people.free + 2">
+                      <create_npc_template object="$AllyMShip" macro="$ServiceMacros.random" force="true"/>
+                    </do_all>
+                  </do_else>
+
+                  <create_object name="$DistressBeacon" macro="macro.env_deco_nav_beacon_t1_macro" owner="faction.player" sector="$StartShip.sector">
+                    <safepos object="$StartShip" radius="500m"/>
+                  </create_object>
+                  <create_ai_unit object="$DistressBeacon"/>
+                  <set_object_name object="$DistressBeacon" page="20101" line="101401"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_Ownerless_Ships">
+              <actions>
+                <get_safe_pos result="$Argon_Fighter_1_Pos" radius="150m" object="$StartShip" directionobject="$StartShip" direction="quadrant.front" direction2="quadrant.left" x="-150m" y="-50m" z="600m" sector="$StartShip.sector"/>
+                <create_ship name="$Argon_Fighter_1" macro="$Argon_Fighter_1_Macro" sector="$StartShip.sector">
+                  <owner exact="faction.ownerless"/>
+                  <pilot actor="null"/>
+                  <!--loadout ref="'timelines_scenario_argon_fighter_2'"/-->
+                  <loadout ref="'timelines_scenario_nova_presidentsend'"/>
+                  <drop ref="ship_small_military"/>
+                  <position value="$Argon_Fighter_1_Pos"/>
+                </create_ship>
+                <set_object_hull object="$Argon_Fighter_1" exact="83"/>
+                <set_object_radar_visible object="$Argon_Fighter_1" visible="false"/>
+                <disable_travel_mode ship="$Argon_Fighter_1" duration="24h"/>
+                <!--TODO :Owen have fixed debris positions. Could be done in the map once positions are final.-->
+                <do_all exact="13">
+                  <create_object name="$Debris" groupname="$Argon_Fighter_1_Debris_Group" macro="macro.env_debris_debris_s_01_macro" sector="$Argon_Fighter_1.sector">
+                    <safepos object="$Argon_Fighter_1" min="100m" max="750m" profile="increasing"/>
+                  </create_object>
+                  <do_any chance="66">
+                    <add_effect object="$Debris" effect="'cutscene_fire_xl_01'" weight="2"/>
+                    <add_effect object="$Debris" effect="'cutscene_fire_xl_02'" weight="1"/>
+                  </do_any>
+                  <set_value name="$Debris_Vel_Y" min="-0.4m" max="0.4m"/>
+                  <set_object_velocity object="$Debris" constantvel="true">
+                    <angular x="-0.002m" y="$Debris_Vel_Y" z="0.01m"/>
+                  </set_object_velocity>
+                </do_all>
+
+                <get_safe_pos result="$Argon_Fighter_2_Pos" radius="200m" x="-64000m" y="-1600m" z="-66000m" sector="$StartShip.sector"/>
+                <create_ship name="$Argon_Fighter_2" macro="$Argon_Fighter_2_Macro" sector="$StartShip.sector">
+                  <owner exact="faction.ownerless"/>
+                  <pilot actor="null"/>
+                  <!--loadout ref="'timelines_scenario_teladi_buzzard_presidentsend'"/-->
+                  <loadout ref="'timelines_scenario_teladi_guillemot_presidentsend'"/>
+                  <drop ref="ship_small_military"/>
+                  <position value="$Argon_Fighter_2_Pos"/>
+                  <rotation yaw="-27deg" pitch="-9deg" roll="143deg"/>
+                </create_ship>
+                <add_equipment_mods object="$Argon_Fighter_2">
+                  <shield ware="ware.mod_shield_rechargerate_01_mk2"/>
+                </add_equipment_mods>
+                <find_object_component object="$Argon_Fighter_2" name="$Argon_Fighter_2_Weapons" class="class.weapon" multiple="true"/>
+                <debug_text text="'weapons ' + $Argon_Fighter_2_Weapons"/>
+
+                <set_object_hull object="$Argon_Fighter_2" exact="78"/>
+                <!--<set_value name="$EngineTable" exact="table[{ware.engine_arg_s_combat_01_mk2}=1]"/>
+                <generate_loadout result="$EngineLoadout" macro="$Argon_Fighter_2_Macro" faction="faction.argon" wares="$EngineTable" flags="engines"/>
+                <apply_loadout object="$Argon_Fighter_2" loadout="$EngineLoadout.{1}" flags="engines"/>-->
+                <set_object_radar_visible object="$Argon_Fighter_2" visible="false"/>
+                <disable_travel_mode ship="$Argon_Fighter_2" duration="24h"/>
+                <do_all exact="10">
+                  <create_object name="$Debris" groupname="$Argon_Fighter_2_Debris_Group" macro="macro.env_debris_debris_s_01_macro" sector="$Argon_Fighter_2.sector">
+                    <safepos object="$Argon_Fighter_2" y="-150m" min="10m" max="350m"/>
+                  </create_object>
+                  <do_any chance="66">
+                    <add_effect object="$Debris" effect="'cutscene_fire_xl_01'" weight="2"/>
+                    <add_effect object="$Debris" effect="'cutscene_fire_xl_02'" weight="1"/>
+                  </do_any>
+                  <set_value name="$Debris_Vel_Y" min="-0.2m" max="0.2m"/>
+                  <set_object_velocity object="$Debris" constantvel="true">
+                    <angular x="-0.008m" y="$Debris_Vel_Y" z="0.01m"/>
+                  </set_object_velocity>
+                </do_all>
+
+                <create_ship name="$Argon_Fighter_2_Lead_Ship" macro="macro.ship_tel_m_trans_container_01_a_macro" sector="$StartShip.sector">
+                  <owner exact="faction.ownerless"/>
+                  <pilot actor="null"/>
+                  <safepos x="$Argon_Fighter_2_Pos.x" y="$Argon_Fighter_2_Pos.y" z="$Argon_Fighter_2_Pos.z - 500m"/>
+                </create_ship>
+                <destroy_object object="$Argon_Fighter_2_Lead_Ship" explosion="true"/>
+              </actions>
+            </library>
+
+            <library name="Setup_Blackbox_Locations">
+              <actions>
+                <create_group groupname="$Blackboxes"/>
+                <create_group groupname="$BlackboxDebris"/>
+                <!--TODO @Owen more debris macro definitions-->
+                <!--sorted by x coordinate
+                  -56km, 2km, -35km = E from weapons component factory
+                  -19km, 0km, -35km = Navy POI
+                  -17km, 3km, 22km = SE of Argon Silicon refinery
+                -->
+                <set_value name="$BlackboxDefinitions" exact="[
+                           table[$secpos = position.[-71km, -1km, -18km], $numdebris = 3, $maptextid = 101],
+                           table[$secpos = position.[-56km, 2km, -35km], $numdebris = 3, $maptextid = 101, $minescount = 18],
+                           table[$secpos = position.[-44km, 3km, -6km], $numdebris = 5, $maptextid = 101, $cratemacro = macro.sm_gen_lockbox_common_01_macro, $cratecontents = [[ware.inv_finemeal, 4], [ware.inv_argnusteak, 7]]   ],
+                           table[$secpos = position.[-32km, -1km, -53km], $numdebris = 6, $maptextid = 101, $MShipDestinationIdx = 1],
+                           table[$secpos = position.[-19km, 0km, -35km], $numdebris = 5, $maptextid = 102, $ammocratemacro = macro.sm_gen_ammo_01_macro, $ammocratecontents = [[macro.missile_gen_s_guided_01_mk1_macro, 6], [macro.missile_gen_s_heatseeker_01_mk1_macro, 5]], $lasertowercount = 1, $MShipDestinationIdx = 2],
+                           table[$secpos = position.[-17km, 2km, 22km], $numdebris = 2, $maptextid = 101, $minescount = 3, $lasertowercount = 1],
+                           table[$secpos = position.[-8km, -2km, -14km], $numdebris = 2, $maptextid = 105, $MShipDestinationIdx = 3],
+                           table[$secpos = position.[12km, 3km, 10km], $numdebris = 2, $maptextid = 101],
+                           ]"/>
+                <set_value name="$CurrentMShipDestinationIdx" exact="0"/>
+                <set_value name="$FinalMShipDestinationIdx" exact="0"/>
+                <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                  <create_group groupname="$BlackboxDebris"/>
+                  <set_value name="$BlackboxDefinition.$debrisgroup" exact="$BlackboxDebris"/>
+                  <do_all exact="$BlackboxDefinition.$numdebris">
+                    <create_object groupname="$BlackboxDefinition.$debrisgroup" macro="macro.env_debris_debris_m_01_macro" sector="$MainSector">
+                      <safepos value="$BlackboxDefinition.$secpos" max="1km"/>
+                    </create_object>
+                  </do_all>
+                  <create_object name="$BlackboxDefinition.$blackbox" groupname="$Blackboxes" macro="macro.sm_gen_wares_rare_01_macro" sector="$MainSector">
+                    <safepos value="$BlackboxDefinition.$secpos" radius="60m" max="50m"/>
+                  </create_object>
+                  <set_object_radar_visible object="$BlackboxDefinition.$blackbox" visible="false"/>
+                  <add_cargo object="$BlackboxDefinition.$blackbox" ware="ware.inv_unmarked_black_box" exact="1"/>
+                  <do_if value="@$BlackboxDefinition.$MShipDestinationIdx gt $FinalMShipDestinationIdx">
+                    <set_value name="$FinalMShipDestinationIdx" exact="$BlackboxDefinition.$MShipDestinationIdx"/>
+                  </do_if>
+                  <!-- ammo-crates, if any -->
+                  <do_if value="@$BlackboxDefinition.$ammocratemacro and @$BlackboxDefinition.$ammocratecontents">
+                    <do_for_each name="$AmmoCrateContent" in="$BlackboxDefinition.$ammocratecontents">
+                      <debug_text text="'Spawning ammocrate'"/>
+                      <create_object name="this.$crate" groupname="$BlackboxDefinition.$crategroup" macro="$BlackboxDefinition.$ammocratemacro" sector="$MainSector">
+                        <safepos value="$BlackboxDefinition.$secpos" radius="75m" max="75m"/>
+                      </create_object>
+                      <do_if value="this.$crate.exists">
+                        <set_ammo object="this.$crate" macro="$AmmoCrateContent.{1}" amount="$AmmoCrateContent.{2}"/>
+                        <set_drop_persistence object="this.$crate" persistent="true"/>
+                      </do_if>
+                      <do_else>
+                        <debug_text text="'Warning: AmmoCrate %s (%s x%s)not created'.[$BlackboxDefinition.$ammocratemacro, $AmmoCrateContent.{1}, $AmmoCrateContent.{2}]" filter="error"/>
+                      </do_else>
+                    </do_for_each>
+                  </do_if>
+                  <!-- lockboxes, if any -->
+                  <do_if value="@$BlackboxDefinition.$cratemacro and @$BlackboxDefinition.$cratecontents">
+                    <debug_text text="'Spawning lockbox'"/>
+                    <create_lockbox name="this.$crate" groupname="$BlackboxDefinition.$crategroup" macro="$BlackboxDefinition.$cratemacro" sector="$MainSector">
+                      <safepos value="$BlackboxDefinition.$secpos" radius="75m" max="75m"/>
+                    </create_lockbox>
+                    <do_if value="this.$crate.exists">
+                      <do_for_each name="$CrateContent" in="$BlackboxDefinition.$cratecontents">
+                        <add_cargo object="this.$crate" ware="$CrateContent.{1}" exact="$CrateContent.{2}" />
+                        <debug_text text="'Adding: ' + $CrateContent.{2} + ' ' + $CrateContent.{1}" chance="0" />
+                      </do_for_each>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'Warning: Crate %s not created'.[$BlackboxDefinition.$cratemacro]" filter="error"/>
+                    </do_else>
+                  </do_if>
+                  <!-- lasertowers -->
+                  <do_if value="@$BlackboxDefinition.$lasertowercount">
+                    <do_all exact="$BlackboxDefinition.$lasertowercount">
+                      <!--
+                        ship_gen_xs_lasertower_01_a_macro = Mk1
+                        ship_gen_s_lasertower_01_a_macro = Mk2 (requires S-dock), too powerful
+                      -->
+                      <debug_text text="'Spawning lasertower'"/>
+                      <create_ship name="this.$LasersBeacon" groupname="$BlackboxDefinition.$lasertowergroup" macro="macro.ship_gen_xs_lasertower_01_a_macro" sector="$MainSector">
+                        <pilot>
+                          <select race="race.drone"/>
+                        </pilot>
+                        <owner exact="faction.argon"/>
+                        <!--safepos value="$BlackboxDefinition.$secpos" radius="350m" max="850m" comment="A bit too powerful vs 1 Kha'ak"/-->
+                        <safepos value="$BlackboxDefinition.$secpos" radius="550m" max="1250m"/>
+                      </create_ship>
+                    </do_all>
+                  </do_if>
+                  <!-- minefield -->
+                  <do_if value="@$BlackboxDefinition.$minescount">
+                    <debug_text text="'Spawning minefield'"/>
+                    <do_all exact="$BlackboxDefinition.$minescount">
+                      <create_object name="this.$Mine" groupname="$BlackboxDefinition.$minesgroup" macro="macro.weapon_gen_mine_01_a_macro" owner="faction.argon" sector="$MainSector">
+                        <safepos value="$BlackboxDefinition.$secpos" radius="750m" max="3775m"/>
+                      </create_object>
+                    </do_all>
+                  </do_if>
+
+                </do_for_each>
+                <do_if value="$Blackboxes.count != $BlackboxDefinitions.count">
+                  <debug_text text="'Unable to create the correct amount of blackboxes'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <set_value name="$NumBlackboxes" exact="$Blackboxes.count"/>
+              </actions>
+            </library>
+
+            <library name="Setup_StartFight">
+              <actions>
+                <!--TODO @Owen lock the faction known state?-->
+                <set_faction_known faction="faction.khaak" known="false"/>
+                <create_group groupname="$StartKhaakShips"/>
+                <set_value name="$StartKhaakShipsAttackOrders" exact="[]"/>
+
+                <!--spawn Kha'ak ships-->
+
+                <do_all exact="14" counter="$kha_i">
+                  <create_ship name="$KhaakShip" groupname="$StartKhaakShips" sector="$StartShip.sector">
+                    <select faction="faction.khaak" size="if $kha_i lt 3 then class.ship_m else class.ship_s"/>
+                    <owner exact="faction.khaak"/>
+                    <pilot>
+                      <select faction="faction.khaak" tags="tag.aipilot"/>
+                    </pilot>
+                    <orientation orientation="look_at" refobject="$StartShip"/>
+                    <safepos object="$StartShip" min="2km" max="3km"/>
+                  </create_ship>
+                  <set_drop_object object="$KhaakShip" comment="'Prevent drops'"/>
+                  <disable_travel_mode ship="$KhaakShip" duration="1h"/>
+                  <set_object_name object="$KhaakShip" page="20109" line="5101"/>
+                  <create_order object="$KhaakShip" id="'ProtectPosition'" default="true">
+                    <param name="destination" value="[$StartShip.sector, $StartShip.relativeposition.{$StartShip.sector}]"/>
+                    <param name="radius" value="10km"/>
+                  </create_order>
+                  <create_order object="$KhaakShip" id="'Attack'" name="$AttackOrder" immediate="true">
+                    <param name="primarytarget" value="$StartShip"/>
+                    <param name="allowothertargets" value="false"/>
+                  </create_order>
+                  <append_to_list name="$StartKhaakShipsAttackOrders" exact="$AttackOrder"/>
+                </do_all>
+                <do_if value="$StartKhaakShips.count == 0">
+                  <debug_text text="'Unable to spawn any Khaak ships'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+
+                </do_else>
+
+                <do_for_each name="$PE_Jumpgate" in="$PE_Jumpgates">
+                  <do_all exact="9" counter="$kha_i">
+                    <do_if value="$kha_i == 1">
+                      <create_ship name="$KhaakShip" macro="macro.ship_kha_l_destroyer_01_a_macro" sector="$PE_Jumpgate.sector">
+                        <owner exact="faction.khaak"/>
+                        <pilot>
+                          <select faction="faction.khaak" tags="tag.aipilot"/>
+                        </pilot>
+                        <safepos object="$PE_Jumpgate" min="2km" max="3km"/>
+                      </create_ship>
+                    </do_if>
+                    <do_else>
+                      <create_ship name="$KhaakShip" groupname="$KhaakGateShips" sector="$PE_Jumpgate.sector">
+                        <select faction="faction.khaak" size="class.ship_m"/>
+                        <owner exact="faction.khaak"/>
+                        <pilot>
+                          <select faction="faction.khaak" tags="tag.aipilot"/>
+                        </pilot>
+                        <safepos object="$PE_Jumpgate" min="2km" max="3km"/>
+                      </create_ship>
+                    </do_else>
+                    <set_drop_object object="$KhaakShip" comment="'Prevent drops'"/>
+                    <disable_travel_mode ship="$KhaakShip" duration="1h"/>
+                    <set_object_name object="$KhaakShip" page="20109" line="5101"/>
+                    <create_order object="$KhaakShip" id="'ProtectPosition'" default="true">
+                      <param name="destination" value="[$PE_Jumpgate.sector, $PE_Jumpgate.relativeposition.{$PE_Jumpgate.sector}]"/>
+                      <param name="radius" value="20km"/>
+                    </create_order>
+                  </do_all>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_StartRoom">
+              <actions>
+                <!--TODO @Owen use or remove existing crew quarters-->
+                <get_room_definition macro="$CrewQuartersRoomMacro" tags="tag.crewquarters" />
+                <!-- Create persistent interior. -->
+                <create_dynamic_interior      roomname="$CrewQuartersRoom"          room="$CrewQuartersRoomMacro"
+                                          corridorname="$CrewQuartersCorridor"      corridor="macro.room_arg_corridor_06_macro"
+                                          interiorname="$CrewQuartersInterior"      roomtype="roomtype.crewquarters"
+                                          name="'{20007,1251}'" comment="Crew Quarter Room"
+                                          object="$StartShip" persistent="true"/>
+
+                <do_if value="$CrewQuartersRoom.exists">
+                  <leave_control_position/>
+                  <add_actor_to_room actor="player.entity" object="$CrewQuartersRoom">
+                    <position x="4.5m" y="player.entity.race.height" z="-9.8m"/>
+                    <rotation yaw="290deg"/>
+                  </add_actor_to_room>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Failed to create dynamic interior'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_else>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+            <cue name="Start_Fade_In">
+              <actions>
+                <set_value name="$HoldTime" exact="3s"/>
+                <set_value name="$FadeInTime" exact="6s"/>
+                <fade_screen fadeout="0s" fadein="6s" holdtime="$HoldTime" realtime="true"/>
+
+                <add_effect effect="'room_explosion_smoke_s'" object="$CrewQuartersRoom">
+                  <!--<position x="12" y="-50m" z="-18" max="2m"/>-->
+                  <position x="0.5m" y="1.7m" z="-5.7m" />
+                </add_effect>
+                <blur_screen strength="0.7" duration="4s" holdtime="6s"/>
+              </actions>
+              <delay exact="$HoldTime"/>
+              <actions>
+                <!--#hackminor @Owen move the player again as they could have moved during the holdtime. Would be better to keep them in place-->
+                <add_actor_to_room actor="player.entity" object="$CrewQuartersRoom">
+                  <position x="4.5m" y="player.entity.race.height" z="-9.8m"/>
+                  <rotation yaw="290deg"/>
+                </add_actor_to_room>
+                <lock_firstperson_jump_input/>
+                <set_player_firstperson_override id="'argon_slow_stumble'"/>
+                <!--Find all player satellites in the sector which were used to reveal the map and objects and destroy them-->
+                <find_object groupname="$Satellites" class="class.satellite" owner="faction.player" space="player.galaxy" multiple="true"/>
+                <destroy_group group="$Satellites" explosion="false"/>
+              </actions>
+            </cue>
+
+            <cue name="VisualFx">
+              <cues>
+                <cue name="VfxStartingRoom">
+                  <delay exact="5s"/>
+                  <actions>
+                    <find_object_component name="$GenRooms" object="$StartShip"  macro="macro.room_gen_common_01_macro" multiple="true"/>
+                    <do_for_each name="$GenRoom" in="$GenRooms">
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$GenRoom" comment="project in center of room">
+                        <position x="0.2m" y="2.8m" z="-6.2m"/>
+                        <rotation pitch="180deg" />
+                      </add_effect>
+                    </do_for_each>
+                  </actions>
+                </cue>
+                <cue name="VfxBridge">
+                  <actions>
+                    <!-- corridor with the round holographic computer in the center -->
+                    <find_object_component name="$BridgeRoom" object="$StartShip"  macro="macro.bridge_arg_xl_01_macro" multiple="false"/>
+                    <do_if value="$BridgeRoom.exists">
+                      <add_effect effect="'room_explosion_smoke_s'" object="$BridgeRoom">
+                        <position x="0.2m" y="3.5m" z="1.4m" />
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$BridgeRoom" comment="directly at the entrance">
+                        <position x="1.3m" y="3.0m" z="-12.4m" />
+                        <rotation roll="90deg"/>
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$BridgeRoom" comment="over first console on the left side">
+                        <position x="-3.6m" y="2.0m" z="-9.1m" />
+                        <rotation roll="45deg"/>
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$BridgeRoom" comment="right side ceiling">
+                        <position x="7.2m" y="3.1m" z="1.9m"/>
+                        <rotation pitch="180deg" />
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$BridgeRoom" comment="airco on the left">
+                        <position x="-3.2m" y="3.6m" z="-2.1m"/>
+                        <rotation pitch="180deg" />
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$BridgeRoom" comment="airco on the right near the entrance">
+                        <position x="5.0m" y="2.5m" z="-7.3m"/>
+                        <rotation pitch="180deg" />
+                      </add_effect>
+                    </do_if>
+                  </actions>
+                </cue>
+                <cue name="VfxCorridor1">
+                  <actions>
+                    <find_object_component name="$Corridors" object="$StartShip"  macro="macro.room_arg_corridor_06_macro" multiple="true"/>
+                    <do_for_each name="$Corridor" in="$Corridors">
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Corridor" comment="on the 'bridge'" chance="66">
+                        <position x="-4.5m" y="2.7m" z="-2.9m" />
+                        <rotation yaw="90deg"/>
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Corridor" comment="on the 'bridge'" chance="66">
+                        <position x="-2.5m" y="2.7m" z="-2.1m" />
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Corridor" comment="in the corner" chance="33">
+                        <position x="2.1m" y="1.7m" z="-5.2m" />
+                        <rotation yaw="-135deg"/>
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Corridor" comment="in the corner" chance="33">
+                        <position x="1.0m" y="2.2m" z="0.5m" />
+                        <rotation yaw="-45deg"/>
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$Corridor" comment="forward wall, near the 'bridge'">
+                        <position x="-5.2m" y="5.0m" z="-2.4m"/>
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$Corridor" comment="pipes, falling directly down">
+                        <position x="-3.0m" y="4.7m" z="-3.8m"/>
+                        <rotation pitch="180deg" />
+                      </add_effect>
+                      <add_effect effect="'sparks_3deg_constant_v1'" object="$Corridor" comment="pipes, falling directly down">
+                        <position x="0.5" y="4.8m" z="-3.6m"/>
+                        <rotation pitch="180deg" roll="69deg" />
+                      </add_effect>
+                    </do_for_each>
+                  </actions>
+                </cue>
+                <cue name="VfxCorridor2">
+                  <actions>
+                    <!-- corridor with the round holographic computer in the center -->
+                    <find_object_component name="$Corridor2" object="$StartShip"  macro="macro.room_arg_corridor_03_macro" multiple="false"/>
+                    <do_if value="$Corridor2.exists">
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Corridor2">
+                        <position x="0.0m" y="1.7m" z="3.5m" />
+                      </add_effect>
+                    </do_if>
+                  </actions>
+                </cue>
+                <cue name="VfxBrig">
+                  <actions>
+                    <find_object_component name="$Brigs" object="$StartShip"  macro="macro.room_gen_detentioncell_01_macro" multiple="true"/>
+                    <do_for_each name="$Brig" in="$Brigs">
+                      <!-- smoke -->
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Brig" comment="right cell" chance="40">
+                        <position x="-3.1m" y="2.3m" z="-7.5m" />
+                        <rotation yaw="35deg" pitch="20deg"/>
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Brig" comment="right cell" chance="40">
+                        <position x="0.1m" y="2.3m" z="-7.5m" />
+                        <rotation yaw="-15deg"/>
+                      </add_effect>
+                      <add_effect effect="'room_explosion_smoke_s'" object="$Brig" comment="right cell" chance="40">
+                        <position x="3.0m" y="2.3m" z="-7.5m" />
+                        <rotation yaw="-35deg"/>
+                      </add_effect>
+                    </do_for_each>
+
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Run_Blur">
+              <cues>
+                <cue name="Player_Is_Running" checkinterval="50ms">
+                  <conditions>
+                    <check_value value="player.entity.relspeed gt 2.8m"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$BlurVal" exact="0.7f"/>
+                    <set_value name="$BlurDuration" min="0.5s" max="1.5s"/>
+                    <set_value name="$BlurHoldTime" min="0.5s" max="1s"/>
+                    <blur_screen strength="$BlurVal" duration="$BlurDuration" holdtime="$BlurHoldTime"/>
+                  </actions>
+                  <delay exact="$BlurDuration + $BlurHoldTime"/>
+                  <actions>
+                    <set_value name="$NextPossibleBlurTime" exact="player.age + 5s"/>
+                  </actions>
+                  <cues>
+                    <cue name="Unblur" checkinterval="1s">
+                      <conditions>
+                        <check_value value="Player_Is_Running.state == cuestate.complete and player.age gt $NextPossibleBlurTime"/>
+                      </conditions>
+                      <actions>
+                        <reset_cue cue="Player_Is_Running"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Initial_Effects">
+              <actions>
+                <!--Prevent external camera view-->
+                <set_external_view_allowed allow="false"/>
+                <set_emergency_eject_active active="false"/>
+
+                <!--Add slight rotation to the ship-->
+                <set_object_velocity object="$StartShip" constantvel="true">
+                  <angular x="-0.002m" y="-0.004m" z="-0.01m"/>
+                </set_object_velocity>
+
+                <set_alert_level object="$StartShip" level="red" />
+                <set_alert_level object="$AllyMShip" level="red" />
+
+                <flicker_object_lights object="$StartShip" duration="10min" base="0.2" range="0.2"/>
+
+                <!--flicker room lights-->
+                <find_object_component name="$Interiors" object="$StartShip" class="class.navcontext" multiple="true"/>
+                <do_for_each name="$Interior" in="$Interiors">
+                  <do_for_each name="$InteriorRoom" in="$Interior.rooms">
+                    <flicker_object_lights object="$InteriorRoom" duration="10min" base="0.2" strength="0.6" range="0.2" interval="2s"/>
+                    <play_sound object="$InteriorRoom" sound="'cockpit_ambient_alert_repeat'" type="ambient"/>
+                  </do_for_each>
+                </do_for_each>
+                <remove_value name="$Interiors"/>
+                <flicker_object_lights object="$StartShip.controlroom" duration="10min" base="0.35" strength="0.6" range="0.2" interval="2s"/>
+                <play_sound object="$StartShip.controlroom" sound="'cockpit_ambient_alert_repeat'" type="ambient"/>
+
+                <!--flicker docking bay lights-->
+                <find_object_component name="$Dockarea" object="$StartShip" class="class.walkablemodule" comment="haswalkableroom-check not needed on ships"/>
+                <flicker_object_lights object="$Dockarea" duration="10min" base="0.2" strength="0.6" range="0.2" interval="2s"/>
+
+                <find_object_component name="$DockareaRooms" object="$Dockarea" class="class.room" walkable="true" multiple="true"/>
+                <do_for_each name="$DockareaRoom" in="$DockareaRooms">
+                  <flicker_object_lights object="$DockareaRoom" duration="10min" base="0.2" strength="0.6" range="0.2" interval="2s"/>
+                  <play_sound object="$DockareaRoom" sound="'cockpit_ambient_alert_repeat'" type="ambient"/>
+                </do_for_each>
+              </actions>
+              <delay exact="0.5s"/>
+              <actions>
+                <add_effect effect="'room_explosion_shake_s'" object="$CrewQuartersRoom">
+                  <position x="0" y="0m" z="-5m" max="2m"/>
+                </add_effect>
+              </actions>
+              <delay exact="0.5s"/>
+              <actions>
+                <find_object_component name="$SoundObject" class="[class.engine, class.shieldgenerator, class.turret]" object="$StartShip" checkoperational="false"/>
+                <play_sound sound="'wpn_beam_khaak_lowpass'" object="$SoundObject" type="effect"/>
+              </actions>
+              <delay exact="1.7s"/>
+              <actions>
+                <find_object_component name="$SoundObject" class="[class.engine, class.shieldgenerator, class.turret]" object="$StartShip" checkoperational="false"/>
+                <play_sound sound="'wpn_beam_khaak_lowpass'" object="$SoundObject" type="effect"/>
+              </actions>
+              <delay exact="2.3s"/>
+              <actions>
+                <find_object_component name="$SoundObject" class="[class.engine, class.shieldgenerator, class.turret]" object="$StartShip" checkoperational="false"/>
+                <play_sound sound="'wpn_beam_khaak_lowpass'" object="$SoundObject" type="effect"/>
+              </actions>
+              <delay exact="1.2s"/>
+              <actions>
+                <find_object_component name="$SoundObject" class="[class.engine, class.shieldgenerator, class.turret]" object="$StartShip" checkoperational="false"/>
+                <play_sound sound="'wpn_beam_khaak_lowpass'" object="$SoundObject" type="effect"/>
+              </actions>
+            </cue>
+
+            <cue name="Initial_Voices">
+              <actions>
+                <create_cue_actor name="$Actor_1" cue="namespace" macro="macro.character_argon_male_afr_pilot_01_macro">
+                  <page exact="10101"/>
+                </create_cue_actor>
+                <create_cue_actor name="$Actor_2" cue="namespace" macro="macro.character_argon_female_asi_pilot_01_macro">
+                  <page exact="10107"/>
+                </create_cue_actor>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <!--TODO @Owen move to usecase script-->
+                <speak actor="$Actor_1" line="10030" backgroundcomm="true"/>
+              </actions>
+              <delay exact="3.2s"/>
+              <actions>
+                <speak actor="$Actor_2" line="10602" backgroundcomm="true"/>
+              </actions>
+              <delay exact="6s"/>
+              <actions>
+                <destroy_object object="$Actor_1"/>
+                <destroy_object object="$Actor_2"/>
+                <signal_cue cue="Escape_Announcement"/>
+              </actions>
+            </cue>
+
+            <cue name="Ship_Explosions" instantiate="true" checkinterval="6s">
+              <conditions>
+                <check_value value="player.entity.hascontext.{$CrewQuartersInterior}"/>
+              </conditions>
+              <delay min="6s" max="10s"/>
+              <actions>
+                <add_effect effect="'room_explosion_shake_s'" object="$CrewQuartersRoom">
+                  <position x="0" y="0m" z="-5m" max="2m"/>
+                </add_effect>
+                <add_effect effect="'room_explosion_spark_s'" object="$CrewQuartersRoom">
+                  <position x="-0.4m" y="1.8m" z="-10.6m"/>
+                </add_effect>
+              </actions>
+            </cue>
+
+            <!--event.param force kill delay-->
+            <cue name="Make_Weapon_Component_Factory_Vulnerable">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="$WeaponComponentFactory.exists"/>
+              </conditions>
+              <actions>
+                <set_value name="this.$Delay" exact="event.param"/>
+                <set_value name="$Modules" exact="$WeaponComponentFactory.modules.all.list"/>
+                <do_for_each name="$Module" in="$Modules">
+                  <set_object_min_hull object="$Module" exact="0"/>
+                  <set_object_hull object="$Module" exact="1"/>
+                </do_for_each>
+              </actions>
+              <delay exact="this.$Delay"/>
+              <actions>
+                <do_for_each name="$Module" in="$Modules">
+                  <do_if value="$Module.isoperational">
+                    <apply_attackstrength object="$WeaponComponentFactory" module="$Module" strength="999999"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+              <cues>
+                <cue name="Weapon_Component_Factory_Destroyed">
+                  <conditions>
+                    <event_object_destroyed object="$WeaponComponentFactory"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="player.age + ' ' + $WeaponComponentFactory.debugname + ' killed'" chance="$DebugChance"/>
+                    <get_safe_pos result="$GateSafepos" radius="$KhaakCapship.size" object="$WestGate" y="-1km" z="5km" sector="$WestGate.sector"/>
+                    <create_order object="$KhaakCapship" id="'MoveGeneric'" immediate="true">
+                      <param name="destination" value="$WestGate.sector"/>
+                      <param name="position" value="$GateSafepos"/>
+                    </create_order>
+                    <create_order object="$KhaakCapship" id="'ProtectPosition'" default="true">
+                      <param name="destination" value="[$WestGate.sector, $WestGate.relativeposition.{$WestGate.sector}]"/>
+                      <param name="radius" value="20km"/>
+                    </create_order>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Factory_FX">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="$MicroChipFactory.exists"/>
+              </conditions>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_02'"/>
+              </actions>
+              <delay exact="6s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_01'"/>
+              </actions>
+              <delay exact="7s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_02'"/>
+              </actions>
+              <delay exact="10s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+              </actions>
+              <delay exact="13s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_02'"/>
+              </actions>
+              <delay exact="15s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_01'"/>
+              </actions>
+              <delay exact="18s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+              </actions>
+              <delay exact="22s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_01'"/>
+                <add_effect object="$MicroChipFactory" effect="'cutscene_fire_xl_02'"/>
+              </actions>
+              <delay exact="27s"/>
+              <actions>
+                <add_effect object="$MicroChipFactory" effect="'ref_explosion_xl_01'"/>
+              </actions>
+            </cue>
+
+            <cue name="Yeet_Argon_Fighter_2_Lead_Ship">
+              <delay exact="1s"/>
+              <actions>
+                <!--The M ship next to the fighter 2 debris field should now be destroyed. Sent it towards the XL start ship so it may be visible when heading there.-->
+
+                <!--Calculate the direction vector by creating an object near the ship but facing +z-->
+                <create_object name="$TempObject" macro="macro.env_deco_nav_beacon_t1_macro" owner="faction.ownerless" sector="$Argon_Fighter_2_Lead_Ship.sector">
+                  <safepos object="$Argon_Fighter_2_Lead_Ship" x="1500m" y="-1500m" comment="put lower so the resulting direction vector for the ship has it flight higher above the ecliptic"/>
+                </create_object>
+                <set_value name="this.$RelPos" exact="$StartShip.relativeposition.{$TempObject}"/>
+                <destroy_object object="$TempObject"/>
+                <set_value name="this.$SpeedFactor" exact="1.0 / 420" comment="7 minutes"/>
+                <debug_text text="'$SpeedFactor ' + this.$SpeedFactor" chance="$DebugChance"/>
+                <set_object_velocity object="$Argon_Fighter_2_Lead_Ship" constantvel="true">
+                  <linear x="this.$RelPos.x * this.$SpeedFactor" y="this.$RelPos.y * this.$SpeedFactor" z="this.$RelPos.z * this.$SpeedFactor"/>
+                  <angular x="-0.008m" y="0.07m" z="0.04m"/>
+                </set_object_velocity>
+              </actions>
+              <cues>
+                <cue name="Argon_Fighter_2_Lead_Ship_Effects" checkinterval="1s">
+                  <conditions>
+                    <check_value value="$Argon_Fighter_2_Lead_Ship.exists and player.sector == $Argon_Fighter_2_Lead_Ship.sector and player.entity.distanceto.{$Argon_Fighter_2_Lead_Ship} lt 20km"/>
+                  </conditions>
+                  <actions>
+                    <add_effect object="$Argon_Fighter_2_Lead_Ship" effect="'cutscene_fire_xl_01'" weight="2"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Crew_Conv_Handler" instantiate="true">
+              <conditions>
+                <check_any>
+                  <check_all>
+                    <event_conversation_started actor="$MShipPilot"/>
+                    <check_value value="not @$SuppressPilotComm"/>
+                  </check_all>
+                  <event_conversation_started actor="$MShipCrew_1"/>
+                  <event_conversation_started actor="$MShipCrew_2"/>
+                  <event_conversation_started actor="$MShipCrew_3"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <add_npc_line speaker="event.object" line="5027"/>
+              </actions>
+            </cue>
+
+            <cue name="Free_Start_Khaak_Ships">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'The start Khaak ships are about to be freed from their restrictive attack orders'" chance="$DebugChance"/>
+              </actions>
+              <cues>
+                <cue name="Free_Start_Khaak_Ships_Remove_Order">
+                  <delay min="0s" max="2s"/>
+                  <actions>
+                    <do_if value="$StartKhaakShipsAttackOrders.last.exists">
+                      <!--Kha'ak ship will go back to the default ProtectPosition order-->
+                      <cancel_order order="$StartKhaakShipsAttackOrders.last"/>
+                    </do_if>
+                    <remove_value name="$StartKhaakShipsAttackOrders.last"/>
+                    <do_if value="$StartKhaakShipsAttackOrders.count == 0">
+                      <cancel_cue cue="Free_Start_Khaak_Ships"/>
+                    </do_if>
+                    <do_else>
+                      <reset_cue cue="Free_Start_Khaak_Ships_Remove_Order"/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Took_Control">
+              <conditions>
+                <event_player_started_control/>
+              </conditions>
+              <actions>
+                <!--Once the player has taken control of something, allow them to again use SHIFT+D, external view and cure their limp!-->
+                <remove_value name="player.entity.$x4ep1_teleporter_malfunctioning"/>
+                <set_external_view_allowed allow="true"/>
+                <cancel_cue cue="Run_Blur"/>
+                <unlock_firstperson_jump_input/>
+                <clear_player_firstperson_override/>
+                <signal_cue_instantly cue="Make_Weapon_Component_Factory_Vulnerable" param="20s" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Claimed_Ship_1">
+              <conditions>
+                <event_object_changed_owner object="$Argon_Fighter_1" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <set_value name="$ClaimedShip1" exact="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Claimed_Ship_2">
+              <conditions>
+                <event_object_changed_owner object="$Argon_Fighter_2" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <set_value name="$ClaimedShip2" exact="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Killed_Khaak" instantiate="true">
+              <conditions>
+                <event_player_owned_killed_object/>
+                <check_value value="event.param2.owner == faction.khaak"/>
+              </conditions>
+              <actions>
+                <set_value name="$EnemiesKilled" operation="add"/>
+              </actions>
+            </cue>
+
+            <cue name="Hint_Ship_Capture" checkinterval="1s">
+              <conditions>
+                <check_value value="player.ship.isclass.spacesuit"/>
+                <check_value value="player.entity.distanceto.{$Argon_Fighter_1} lt 75m or player.entity.distanceto.{$Argon_Fighter_2} lt 75m"/>
+              </conditions>
+              <actions>
+                <show_help position="13" duration="15s" force="true" line="13151" comment="Find and approach the signal leak with SCAN MODE enabled \($INPUT_ACTION_TOGGLE_SCAN_MODE$\) to claim the ship."/>
+              </actions>
+            </cue>
+
+            <cue name="Hint_Ship_Docking">
+              <conditions>
+                <event_player_signal_unlock_finished/>
+                <check_value value="event.param2 == $Argon_Fighter_2"/>
+              </conditions>
+              <actions>
+                <show_help position="13" duration="15s" force="true" line="7510" comment="Press $INPUT_ACTION_DOCK_ACTION$ or use the ship menu \($INPUT_ACTION_OPEN_COCKPIT_MENU$\) to request docking permission."/>
+              </actions>
+            </cue>
+
+            <cue name="Escape_Announcement">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010101, $recipient = 'player', $monitor = false, $comment = 'Hey! I said, do you hear me?'],
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010102, $recipient = 'player', $monitor = false, $comment = 'You need to make your way to the docking bay so we can leave!' ],
+                                ],
+                     $callbackcue = Escape_Objective,
+                     $abortcallbackcue = Escape_Objective
+                     ]" />
+              </actions>
+            </cue>
+
+            <cue name="Escape_Objective">
+              <conditions>
+                <event_cue_signalled/>
+                <cue_is_waiting cue="Player_Enters_Spacesuit_Early"/>
+              </conditions>
+              <actions>
+                <create_mission cue="Start" name="{30601,1001}" description="{30601,11}" abortable="false" difficulty="level.veryhard" faction="faction.argon" type="missiontype.plot"
+                            icon="'briefing_mission_director_01'" iconcaption="{30293,102}">
+                  <briefing>
+                    <objective step="1" action="objective.goto" object="$SpawnDock"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="Start" step="1"/>
+              </actions>
+            </cue>
+
+            <cue name="Check_Blackbox_Distance" checkinterval="1s" instantiate="true">
+              <actions>
+                <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                  <do_if value="$BlackboxDefinition.$blackbox.exists and not $BlackboxDefinition.$blackbox.isradarvisible and $BlackboxDefinition.$blackbox.distanceto.{player.entity} lt 7km">
+                    <set_object_radar_visible object="$BlackboxDefinition.$blackbox" visible="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Check_Ship_1_Distance" checkinterval="1.1s">
+              <conditions>
+                <check_value value="$Argon_Fighter_1.exists and $Argon_Fighter_1.sector == player.sector and player.entity.distanceto.{$Argon_Fighter_1} lt 500m"/>
+              </conditions>
+              <actions>
+                <set_object_radar_visible object="$Argon_Fighter_1" visible="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Check_Ship_2_Distance" checkinterval="1.2s">
+              <conditions>
+                <check_value value="$Argon_Fighter_2.exists and $Argon_Fighter_2.sector == player.sector and player.entity.distanceto.{$Argon_Fighter_2} lt 500m"/>
+              </conditions>
+              <actions>
+                <set_object_radar_visible object="$Argon_Fighter_2" visible="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Captain_Manager">
+              <actions>
+                <set_value name="$CaptainRoomLines" exact="[306010102, 306010103, 306010104, 306010105, 306010106]"/>
+                <set_value name="$NextCaptainRoomLine" exact="1"/>
+
+                <set_value name="$CaptainFightLines" exact="[306010107, 306010108, 306010109]"/>
+                <set_value name="$NextCaptainFightLine" exact="1"/>
+
+                <set_value name="$LastCaptainConv" exact="0s"/>
+              </actions>
+              <cues>
+                <library name="Set_Next_Captain_Line">
+                  <actions>
+                    <do_if value="$CaptainRoomLines.{$NextCaptainRoomLine} == 306010104">
+                      <remove_value name="$CaptainRoomLines.{$NextCaptainRoomLine}" comment="Only speak this one once"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$NextCaptainRoomLine" operation="add"/>
+                    </do_else>
+                    <do_if value="$NextCaptainRoomLine gt $CaptainRoomLines.count">
+                      <set_value name="$NextCaptainRoomLine" exact="1"/>
+                    </do_if>
+                  </actions>
+                </library>
+
+                <library name="Set_Next_Captain_Fight_Line">
+                  <actions>
+                    <do_if value="$CaptainFightLines.{$NextCaptainFightLine} == 306010104">
+                      <remove_value name="$CaptainFightLines.{$NextCaptainFightLine}" comment="Only speak this one once"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$NextCaptainFightLine" operation="add"/>
+                    </do_else>
+                    <do_if value="$NextCaptainFightLine gt $CaptainFightLines.count">
+                      <set_value name="$NextCaptainFightLine" exact="1"/>
+                    </do_if>
+                  </actions>
+                </library>
+
+                <cue name="Down_With_The_Ship">
+                  <conditions>
+                    <event_object_destroyed object="$CapshipCaptain"/>
+                  </conditions>
+                  <actions>
+                    <!--o7-->
+                    <cancel_cue cue="Captain_Manager"/>
+                  </actions>
+                </cue>
+
+                <cue name="Captain_Manager_Conv_Started" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$CapshipCaptain"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$LastCaptainConv" exact="player.age"/>
+                    <add_npc_line speaker="$CapshipCaptain" line="$CaptainRoomLines.{$NextCaptainRoomLine}"/>
+                    <include_actions ref="Set_Next_Captain_Line"/>
+                  </actions>
+                </cue>
+
+                <cue name="Player_Entered_Bridge">
+                  <conditions>
+                    <event_object_changed_room object="player.entity" room="$StartShip.controlroom"/>
+                  </conditions>
+                  <actions>
+                    <find_npc_slot name="$CaptainBridgeSlots" object="$StartShip.controlroom" tags="[tag.service, tag.stand_terminal_forward]" multiple="true"/>
+                    <sort_list list="$CaptainBridgeSlots" sortbydistanceto="$CapshipCaptain" sortdescending="false"/>
+                    <set_value name="$FirstBridgeSlot" exact="$CaptainBridgeSlots.{1}"/>
+
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                            $script = [
+                                      1s,
+                                      table[ $actor = '$CapshipCaptain', $speak = 306010101, $recipient = 'player', $templookat = 'player', $monitor = false, $comment = 'Crewman, what do you think you`re doing here? I ordered all hands to abandon ship! Go!'],
+                                      ],
+                            ]" />
+                  </actions>
+                  <delay exact="3s"/>
+                  <actions>
+                    <signal_cue cue="Captain_Manager_Move_Console_Start"/>
+                  </actions>
+                </cue>
+
+                <cue name="Captain_Manager_Move_Console_Start">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Captain_Manager_Move_Console">
+                      <actions>
+                        <do_if value="$FirstBridgeSlot?">
+                          <set_value name="$CaptainBridgeSlot" exact="$FirstBridgeSlot"/>
+                          <remove_value name="$FirstBridgeSlot"/>
+                        </do_if>
+                        <do_else>
+                          <find_npc_slot name="$CaptainBridgeSlot" object="$StartShip.controlroom" tags="[tag.service, tag.stand_terminal_forward]"/>
+                        </do_else>
+
+
+                        <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $CapshipCaptain,
+                                          table[
+                                          $requestercue = namespace,
+                                          $location = $CaptainBridgeSlot,
+                                          $priority = 100,
+                                          $movementspeed = 2.3,
+                                          $debugchance = $DebugChance,
+                                          $debugcaller = if $DebugChance == 100 then this else null]
+                                          ]"/>
+                      </actions>
+                      <delay min="15s" max="25s"/>
+                      <actions>
+                        <reset_cue cue="this"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Captain_Manager_Wander_Speak" checkinterval="1s">
+                  <conditions>
+                    <cue_is_complete cue="Captain_Manager_Move_Console_Start"/>
+                    <check_value value="player.age gt Captain_Manager_Move_Console_Start.time + 15s and player.age gt $LastCaptainConv + 25s"/>
+                    <check_value value="player.room == $StartShip.controlroom and player.entity.distanceto.{$CapshipCaptain} lt 5m"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                        $script = [
+                                  1s,
+                                  table[ $actor = '$CapshipCaptain', $speak = $CaptainRoomLines.{$NextCaptainRoomLine}, $recipient = 'player', $monitor = false, $comment = ''],
+                                  ],
+                       ]" />
+                    <include_actions ref="Set_Next_Captain_Line"/>
+                  </actions>
+                  <delay min="15s" max="20s"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="Captain_Manager_Fight_Speak" checkinterval="1s">
+                  <conditions>
+                    <check_any>
+                      <check_value value="Captain_Manager_Move_Console_Start.state == cuestate.complete and player.age gt Captain_Manager_Move_Console_Start.time + 15s"/>
+                      <check_value value="Player_Enters_Cockpit.state == cuestate.complete and player.age gt Player_Enters_Cockpit.time + 30s"/>
+                    </check_any>
+                    <check_value value="player.age gt $LastCaptainConv + 25s"/>
+                    <check_value value="player.room != $StartShip.controlroom and player.entity.distanceto.{$StartShip} lt 30km"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                        $script = [
+                                  table[ $actor = '$CapshipCaptain', $speak = $CaptainFightLines.{$NextCaptainFightLine}, $backgroundcomm = true, $monitor = false, $comment = ''],
+                                  ],
+                       ]" />
+                    <include_actions ref="Set_Next_Captain_Fight_Line"/>
+                  </actions>
+                  <delay min="35s" max="45s"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!--Polling check as player could rush to dock sooner-->
+            <cue name="Player_Arrives_On_Dock" checkinterval="500ms">
+              <conditions>
+                <check_value value="player.entity.hascontext.{$SpawnDockArea}"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010105, $recipient = 'player', $monitor = false, $comment = 'There you are! Get on board, quick!'],
+                                ],
+                     $callbackcue = Embark_M_Ship_Objective,
+                     $abortcallbackcue = Embark_M_Ship_Objective
+                     ]" />
+              </actions>
+              <cues>
+                <cue name="Embark_M_Ship_Objective">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <update_mission cue="Start">
+                      <briefing>
+                        <objective step="1" action="objective.embark_passenger" object="$AllyMShip"/>
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="Start" step="1"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Enters_M_Ship">
+              <conditions>
+                <!--TODO @Owen check that the player is not on the ramp as they can fall through it when it animates.-->
+                <event_object_changed_room object="player.entity" room="$AllyMShip.controlroom"/>
+              </conditions>
+              <actions>
+                <set_value name="$ShipDisembarked" exact="false" comment="Flag changing the comment of Aydon, giving the 'get us out of here' remark or not"/>
+                <cancel_cue cue="Run_Blur" comment="At this point stop the run-blur"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <cancel_cue cue="Player_Enters_Spacesuit_Early"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                table[ $actor = '$Aydon', $speak = 306010110, $recipient = 'player', $broadcast = true, $monitor = false, $comment = 'Alright, we`re getting the heck out of here!'],
+                                ],
+                     ]" />
+
+                <set_value name="$MShipPilot.$skipwait"/>
+                <create_position name="$FlyToPos" value="$Argon_Fighter_2_Pos" y="100m"/>
+                <create_order id="'MoveWait'" object="$AllyMShip" default="true">
+                  <param name="destination" value="[$AllyMShip.sector, $FlyToPos]"/>
+                  <!--<param name="withdraw" value="true"/>-->
+                  <param name="precise" value="true"/>
+                </create_order>
+              </actions>
+              <delay exact="10s"/>
+              <actions>
+                <set_value name="$ShipDisembarked" exact="true"/>
+                <signal_cue cue="Factory_FX"/>
+              </actions>
+              <delay exact="15s"/>
+              <actions>
+                <!--Boost a little bit to get away-->
+                <start_boost object="$AllyMShip"/>
+                <debug_text text="'Boost'" chance="$DebugChance"/>
+              </actions>
+              <delay exact="4s"/>
+              <actions>
+                <stop_boost object="$AllyMShip"/>
+              </actions>
+              <delay exact="20s"/>
+              <actions>
+                <find_object_component name="$AllyTurrets" class="class.turret" object="$AllyMShip" multiple="true"/>
+                <do_for_each name="$AllyTurret" in="$AllyTurrets">
+                  <set_weapon_mode weapon="$AllyTurret" weaponmode="weaponmode.attackenemies"/>
+                </do_for_each>
+              </actions>
+              <cues>
+                <!--TODO @Owen @Nick there doesn't seem to be a way to skip this via a MoveWait param-->
+                <!--<cue name="Player_Enters_M_Ship_Undock_Skip">
+                  <conditions>
+                    <event_object_order_ready object="$AllyMShip"/>
+                    <check_value value="event.param.id == 'Undock'"/>
+                  </conditions>
+                  <actions>
+                    <edit_order_param order="event.param" param="'skipwait'" value="true"/>
+                  </actions>
+                </cue>-->
+
+                <cue name="M_Ship_Precache" comment="hinting to avoid characters to pop in">
+                  <actions>
+                    <precache_hint target="$AllyMShip.controlroom" includechildren="true"/>
+                    <debug_text text="'Hinting $AllyMShip.controlroom (%s)'.[$AllyMShip.controlroom]"/>
+                  </actions>
+                </cue>
+
+                <cue name="M_Ship_Escaping__Free_Khaak">
+                  <delay exact="70s"/>
+                  <actions>
+                    <!--The player entered the M ship. Give them some time to escape before the kha'ak start looking for other targets.-->
+                    <signal_cue cue="Free_Start_Khaak_Ships" check="false"/>
+                    <debug_text text="player.age + ' attempt to signal Free_Start_Khaak_Ships'" chance="$DebugChance"/>
+                  </actions>
+                </cue>
+                <cue name="Player_Uses_M_Ship_Transporter">
+                  <conditions>
+                    <event_entity_transport_finished entity="player.entity"/>
+                    <check_value value="player.ship == $AllyMShip"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Player_Enters_Cockpit" checkinterval="500ms">
+                      <conditions>
+                        <check_value value="player.room == $AllyMShip.controlroom"/>
+                        <set_value name="$FloorTags" exact="player.entity.floortags"/>
+                        <check_value value="$FloorTags.indexof.{tag.transporter} == 0"/>
+                      </conditions>
+                      <actions>
+
+                        <set_objective cue="Start" action="objective.survive" comment="while waiting for M-ship to arrive at destination"/>
+
+                        <do_if value="$ShipDisembarked">
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                            $script = [
+                                      1s,
+                                      table[ $actor = '$Aydon', $speak = 306010147, $recipient = 'player', $templookat = 'player', $monitor = false, $comment = '306010147'],
+                                      1.5s,
+                                      table[ $actor = '$MShipCrew_2', $speak = 5040, $recipient = '$Aydon', $monitor = false, $comment = ''],
+                                      ],
+                            $callbackcue = Escaping_M_Ship_Comments,
+                            $abortcallbackcue = Escaping_M_Ship_Comments
+                            ]" />
+                        </do_if>
+                        <do_else>
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                            $script = [
+                                      1s,
+                                      table[ $actor = '$Aydon', $speak = 306010147, $recipient = 'player', $templookat = 'player', $monitor = false, $comment = 'Glad to see you`re safe.'],
+                                      1s,
+                                      table[ $actor = '$Aydon', $speak = 306010148, $recipient = '$MShipPilot', $templookat = '$MShipPilot', $monitor = false, $comment = 'Alright, get us out of here.'],
+                                      0.5s,
+                                      table[ $actor = '$MShipPilot', $speak = 2107, $recipient = '$Aydon', $monitor = false, $comment = 'Got it'],
+                                      1s,
+                                      table[ $actor = '$MShipCrew_2', $speak = 5040, $recipient = '$Aydon', $monitor = false, $comment = 'Plotting course.'],
+                                      ],
+                            $callbackcue = Escaping_M_Ship_Comments,
+                            $abortcallbackcue = Escaping_M_Ship_Comments
+                            ]" />
+                        </do_else>
+                      </actions>
+                    </cue>
+                    <cue name="Escaping_M_Ship_Comments">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="5s"/>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                            $script = [
+                                      table[ $actor = '$Aydon', $speak = 306010149, $recipient = 'player', $templookat = 'player', $monitor = false, $comment = 'What the heck are these things? They came out of nowhere.'],
+                                      1s,
+                                      table[ $actor = '$Aydon', $speak = 306010150, $recipient = 'player', $templookat = '$MShipPilot', $monitor = false, $comment = 'We`re lucky this many of us managed to get out.'],
+                                      2s,
+                                      table[ $actor = '$Aydon', $speak = 306010151, $recipient = 'player', $templookat = '$MShipPilot', $monitor = false, $comment = 'Last I saw of the captain, she was manning the gunnery station herself.'],
+                                      3s,
+                                      table[ $actor = '$MShipCrew_2', $speak = 5031, $recipient = '$MShipCrew_1', $templookat = '$MShipCrew_1', $monitor = false, $comment = 'Keep an eye on sensors.'],
+                                      1s,
+                                      table[ $actor = '$MShipCrew_1', $speak = 2103, $recipient = '$MShipCrew_2', $monitor = false, $comment = 'Affirmative.'],
+                                      ],
+                            ]" />
+                      </actions>
+                      <delay exact="20s"/>
+                      <actions>
+                        <signal_cue_instantly cue="Make_Weapon_Component_Factory_Vulnerable" param="45s" check="false"/>
+                      </actions>
+                      <delay exact="15s"/>
+                      <actions>
+                        <set_actor_lookat actor="$Aydon" component="$KhaakCapship" />
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $keeplookat = true,
+                            $script = [
+                                      1s,
+                                      table[ $actor = '$Aydon', $speak = 306010146, $recipient = 'player', $monitor = false, $comment = 'Look at the size of that ship!'],
+                                      ],
+                            $callbackcue = Escaping_M_Ship_Comments_Finished,
+                            $abortcallbackcue = Escaping_M_Ship_Comments_Finished
+                            ]" />
+                      </actions>
+                      <delay exact="10s"/>
+                      <actions>
+                        <clear_actor_lookat actor="$Aydon"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+                <cue name="Escaping_M_Ship_Comments_Finished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+
+                <cue name="Player_Leaves_M_Ship_Early">
+                  <conditions>
+                    <event_object_changed_object object="player.entity"/>
+                    <check_value value="not player.entity.hascontext.{$AllyMShip}"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Player_Uses_M_Ship_Transporter"/>
+                    <do_if value="player.entity.distanceto.{$Argon_Fighter_1} lt player.entity.distanceto.{$Argon_Fighter_2}">
+                      <signal_cue cue="Embark_Fighter_1_Speak"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="Embark_Fighter_2_Speak"/>
+                    </do_else>
+                  </actions>
+                </cue>
+                <cue name="M_Ship_Enroute_To_Fighter_2" checkinterval="1s">
+                  <conditions>
+                    <check_value value="(Escaping_M_Ship_Comments_Finished.state != cuestate.waiting and player.age gt Escaping_M_Ship_Comments_Finished.time + 7s and player.age gt $LastMShipAttackTime + 20s) or player.age gt Player_Enters_M_Ship.time + 80s"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Escaping_M_Ship_Comments"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                          $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                          $script = [
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010152, $recipient = 'player', $monitor = false, $comment = 'I know it looks bad, but keep it together people. We`ll get through this.'],
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010153, $recipient = 'player', $monitor = false, $comment = 'Steady on this heading. Hopefully we`ll keep a low profile.'],
+                                2s,
+                                table[ $actor = '$Aydon', $speak = 306010128, $recipient = 'player', $monitor = false, $comment = 'The gates are a no-go. Let`s head to the trading station and look for survivors along the way.'],
+                                ],
+                          $callbackcue = Check_M_Ship_Approaching_Fighter_2,
+                          $abortcallbackcue = Check_M_Ship_Approaching_Fighter_2
+                     ]" />
+                  </actions>
+                </cue>
+
+                <cue name="Check_M_Ship_Approaching_Fighter_2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="M_Ship_Approaching_Fighter_2" checkinterval="1s">
+                      <conditions>
+                        <check_value value="$AllyMShip.sector == $Argon_Fighter_2.sector and $AllyMShip.distanceto.{$Argon_Fighter_2} lt 8km"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                            $script = [
+                                table[ $actor = '$Aydon', $speak = 306010154, $recipient = 'player', $monitor = false, $comment = 'There, up ahead. Looks like wreckage from a fight. Let`s hope lightning doesn`t strike twice. Bring us in close.'],
+                                ],
+                         ]" />
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="M_Ship_Arrives_At_Fighter_2" checkinterval="1s">
+                  <conditions>
+                    <!--TODO @Owen better ensure the ship heads to a suitable fixed position-->
+                    <check_value value="$AllyMShip.sector == $Argon_Fighter_2.sector and $AllyMShip.distanceto.{$Argon_Fighter_2} lt 800m"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Check_M_Ship_Approaching_Fighter_2"/>
+                    <signal_cue cue="Embark_Fighter_2_Speak"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Enters_Spacesuit_Early">
+              <conditions>
+                <event_object_changed_object object="player.entity"/>
+                <check_value value="event.param.isclass.spacesuit"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Player_Arrives_On_Dock"/>
+                <create_order id="'MoveWait'" object="$AllyMShip" default="true">
+                  <param name="destination" value="[$AllyMShip.sector, $Argon_Fighter_2_Pos]"/>
+                  <param name="noboost" value="true"/>
+                  <param name="precise" value="true"/>
+                </create_order>
+                <signal_cue cue="Embark_Fighter_1_Speak"/>
+                <do_if value="not Start.hasmission">
+                  <create_mission cue="Start" name="{30601,1001}" description="{30601,11}" abortable="false" difficulty="level.veryhard" faction="faction.argon" type="missiontype.plot"
+                            icon="'briefing_mission_director_01'" iconcaption="{30293,102}">
+                    <briefing>
+                      <objective step="1" action="objective.survive"/>
+                    </briefing>
+                  </create_mission>
+                </do_if>
+                <do_else>
+                  <update_mission cue="Start">
+                    <briefing>
+                      <objective step="1" action="objective.survive"/>
+                    </briefing>
+                  </update_mission>
+                </do_else>
+                <set_objective_from_briefing cue="Start" step="1"/>
+              </actions>
+              <delay exact="25s"/>
+              <actions>
+                <!--Boost a little bit to get away-->
+                <start_boost object="$AllyMShip"/>
+                <debug_text text="'Boost'" chance="$DebugChance"/>
+              </actions>
+              <delay exact="4s"/>
+              <actions>
+                <stop_boost object="$AllyMShip"/>
+              </actions>
+              <delay exact="20s"/>
+              <actions>
+                <find_object_component name="$AllyTurrets" class="class.turret" object="$AllyMShip" multiple="true"/>
+                <do_for_each name="$AllyTurret" in="$AllyTurrets">
+                  <set_weapon_mode weapon="$AllyTurret" weaponmode="weaponmode.attackenemies"/>
+                </do_for_each>
+              </actions>
+              <cues>
+                <cue name="M_Ship_Left_Alone__Free_Khaak">
+                  <delay exact="250s"/>
+                  <actions>
+                    <!--If the player entered the spacesuit the M ship will launch. Give them a head start before the kha'ak start looking for other targets, including you.-->
+                    <signal_cue cue="Free_Start_Khaak_Ships" check="false"/>
+                    <debug_text text="player.age + ' attempt to signal Free_Start_Khaak_Ships'" chance="$DebugChance"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Embark_Fighter_1_Speak">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_objective cue="Start" action="objective.wait" comment="avoid the objective being 'Embark: M-trader - with subobjective Undock' (really confusing), before you get the 'enter spacesuit' objective"/>
+                <cancel_cue cue="Embark_Fighter_2_Speak"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010106, $recipient = 'player', $monitor = false, $comment = 'What are you doing? Those things are still out there!'],
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010107, $recipient = 'player', $monitor = false, $comment = 'Ok, we have no choice but to undock and leave.'],
+                                0.5s,
+                                table[ $actor = '$Aydon', $speak = 306010108, $recipient = 'player', $monitor = false, $comment = 'There are abandoned ships among the wrecks. See if this one still flies.'],
+                                ],
+                     $callbackcue = Embark_Fighter_1_Objective,
+                     $abortcallbackcue = Embark_Fighter_1_Objective
+                     ]" />
+              </actions>
+            </cue>
+
+            <cue name="Embark_Fighter_1_Objective" comment="Failed to escape on M ship (fallback)">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1ms"/>
+              <actions>
+                <set_value name="$TransporterSlot" exact="null"/>
+                <do_if value="player.entity.object == $StartShip">
+                  <find_room name="$NearestTransporterRoom2" object="$StartShip" macro="macro.dockingbay_arg_m_01_macro" multiple="false" sortbydistanceto="player.entity"/>
+                  <find_player_transporter_slot name="$TransporterSlot" object="$NearestTransporterRoom2" multiple="false"/>
+                  <debug_text text="'playership=%s %s ts=%s'.[player.ship, player.ship.macro, $TransporterSlot]" chance="0"/>
+                  <set_objective cue="Start" step="2" action="objective.usespacesuit" slot="$TransporterSlot" updatebriefing="true" comment="player missed the escaping freighter, set guidance to use spacesuit"/>
+                </do_if>
+                <set_object_radar_visible object="$Argon_Fighter_1" visible="true"/>
+              </actions>
+              <cues>
+                <cue name="Embark_Fighter_1_Objective_Update" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_player_teleport_successful/>
+                      <event_cue_completed cue="Embark_Fighter_1_Objective"/>
+                    </check_any>
+                    <check_value value="player.ship != $Argon_Fighter_1" comment="filter out teleporting into the ship and then being told to get into the spacesuit"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$TransporterSlot and player.ship == $StartShip">
+                      <set_objective cue="Start" step="2" action="objective.usespacesuit" slot="$TransporterSlot" comment="Use spacesuit" updatebriefing="true"/>
+                    </do_if>
+                    <do_else>
+                      <set_objective cue="Start" step="2" action="objective.embark" object="$Argon_Fighter_1" comment="in spacesuit, embark fighter" updatebriefing="true"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <cue name="Entered_Fighter_1">
+                  <conditions>
+                    <event_object_changed_object object="player.entity" newobject="$Argon_Fighter_1"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Embark_Fighter_1_Objective_Update"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010109, $recipient = 'player', $monitor = false, $comment = ''],
+                                ],
+                     $callbackcue = Escort_M_Ship_Pt1,
+                     $abortcallbackcue = Escort_M_Ship_Pt1
+                     ]" />
+                  </actions>
+                  <cues>
+                    <cue name="Entered_Fighter_1__Free_Khaak">
+                      <delay exact="30s"/>
+                      <actions>
+                        <!--If the player entered ship 1 give them some time to control the ship before the kha'ak start looking for other targets, including you.-->
+                        <signal_cue cue="Free_Start_Khaak_Ships" check="false"/>
+                        <debug_text text="player.age + ' attempt to signal Free_Start_Khaak_Ships'" chance="$DebugChance"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Embark_Fighter_2_Speak">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Embark_Fighter_1_Speak"/>
+                <do_if value="Player_Leaves_M_Ship_Early.state == cuestate.complete">
+                  <!--Player has left the M ship early but is closer to the Fighter #2 than #1.-->
+                  <set_value name="this.$Script" exact="[
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010106, $recipient = 'player', $monitor = false, $comment = 'What are you doing? Those things are still out there!'],
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010108, $recipient = 'player', $monitor = false, $comment = 'There are abandoned ships among the wrecks. See if this one still flies.'],
+                                ]"/>
+                </do_if>
+                <do_else>
+                  <!--Player is on the M ship and they have approached the Fighter #2 area-->
+                  <set_value name="this.$Script" exact="[
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010111, $recipient = 'player', $monitor = false, $comment = 'Not seeing any survivors, but there is a fighter which looks slightly dinged-up.'],
+                                1s,
+                                table[ $actor = '$Aydon', $speak = 306010112, $recipient = 'player', $monitor = false, $comment = 'We need all the help we can get.'],
+                                0.5s,
+                                table[ $actor = '$Aydon', $speak = 306010113, $recipient = 'player', $templookat = 'player', $monitor = false, $comment = 'Get into a spacesuit and see if you can bring it back online.'],
+                                ]"/>
+                </do_else>
+                <cancel_cue cue="Player_Leaves_M_Ship_Early"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = this.$Script,
+                      $callbackcue = Embark_Fighter_2_Objective,
+                      $abortcallbackcue = Embark_Fighter_2_Objective
+                      ]" />
+
+                <!--Unlock the M ship's XS dock-->
+                <set_room_locked room="$MShip_XS_Dock" locked="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Embark_Fighter_2_Objective" comment="M-ship arrived at wreckage, look for fighter">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <find_player_transporter_slot name="$TransporterSlot" object="$AllyMShip"/>
+                <!--set_objective cue="Start" step="2" action="objective.usespacesuit" slot="$TransporterSlot" comment="Use spacesuit" updatebriefing="true"/-->
+                <set_object_radar_visible object="$Argon_Fighter_2" visible="true"/>
+              </actions>
+              <delay exact="0.1s"/>
+              <actions>
+                <signal_cue cue="Embark_Fighter_2_Objective_Update"/>
+              </actions>
+              <cues>
+
+                <cue name="Embark_Fighter_2_Objective_Update" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_player_teleport_successful/>
+                      <event_cue_signalled/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <do_if value="@player.controlled.isclass.spacesuit">
+                      <set_objective cue="Start" step="2" action="objective.embark" object="$Argon_Fighter_2" comment="in spacesuit, embark fighter" updatebriefing="true"/>
+                    </do_if>
+                    <do_elseif value="@player.ship == $AllyMShip">
+                      <set_objective cue="Start" step="2" action="objective.usespacesuit" slot="$TransporterSlot" comment="Use spacesuit" updatebriefing="true"/>
+                    </do_elseif>
+                  </actions>
+                </cue>
+
+                <cue name="Entered_Fighter_2">
+                  <conditions>
+                    <event_object_changed_object object="player.entity" newobject="$Argon_Fighter_2"/>
+                  </conditions>
+                  <actions>
+                    <set_alert_level object="$Argon_Fighter_2" level="red" />
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <play_sound object="$Argon_Fighter_2.controlroom" sound="'cockpit_ambient_alert'" type="ambient"/>
+                  </actions>
+                  <delay exact="4s"/>
+                  <actions>
+                    <play_sound object="$Argon_Fighter_2.controlroom" sound="'cockpit_ambient_alert'" type="ambient"/>
+                  </actions>
+                  <delay exact="4s"/>
+                  <actions>
+                    <play_sound object="$Argon_Fighter_2.controlroom" sound="'cockpit_ambient_alert'" type="ambient"/>
+                  </actions>
+                </cue>
+
+                <cue name="Controlling_Fighter_2">
+                  <conditions>
+                    <event_player_started_control/>
+                    <check_value value="player.ship == $Argon_Fighter_2"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Embark_Fighter_2_Objective_Update"/>
+                    <signal_cue cue="Escort_M_Ship_Pt1"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Escort_M_Ship_Pt1">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <update_mission cue="Start">
+                  <briefing>
+                    <objective step="2" action="objective.escort" object="$AllyMShip"/>
+                  </briefing>
+                </update_mission>
+                <set_objective_from_briefing cue="Start" step="2"/>
+                <set_value name="$PlayerWasFar" exact="player.ship == $Argon_Fighter_1 and $Argon_Fighter_1.distanceto.{$AllyMShip} gt 5000m"/>
+                <signal_cue cue="M_Ship_Debris_Movement"/>
+              </actions>
+              <cues>
+                <cue name="Escort_M_Ship_Pt1_Caught_Up_Comment" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.entity.distanceto.{$AllyMShip} lt 4000m"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = if $PlayerWasFar then 306010115 else 306010114, $recipient = 'player', $monitor = false, $comment = ''],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010116, $recipient = 'player', $monitor = false, $comment = 'We`ve collected some data transmitted from ships before they were lost.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010117, $recipient = 'player', $monitor = false, $comment = 'Whatever those things are, they tore right through us.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010118, $recipient = 'player', $monitor = false, $comment = 'The last warning said that ships fleeing by gate were being picked off one by one. Those things can come out of nowhere.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010119, $recipient = 'player', $monitor = false, $comment = 'Let`s keep a low profile and stay away from the gates for now. Maybe we can grab some survivors on our way to the trading station.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010120, $recipient = 'player', $monitor = false, $comment = 'I`m transmitting the last known positions of ships that ran into trouble.'],
+                                                ],
+                                      $callbackcue = Escort_M_Ship_Pt1_Situation_Explained,
+                                      $abortcallbackcue = Escort_M_Ship_Pt1_Situation_Explained
+                                      ]" />
+                  </actions>
+                </cue>
+
+                <!--Player can stat with the ship or fly of on their own-->
+                <cue name="Escort_M_Ship_Pt1_Situation_Explained">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Mark_Blackboxes"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                $script = [
+                                          1.5s,
+                                          table[ $actor = '$ComputerActor', $speak = 30224515, $recipient = 'player', $monitor = false, $comment = 'Receiving transmission.'],
+                                          ],
+                                ]" />
+                  </actions>
+                  <cues>
+
+                    <cue name="Hint_Map">
+                      <delay exact="2s"/>
+                      <actions>
+                        <do_if value="$MapWasOpened?">
+                          <cancel_cue cue="this"/>
+                        </do_if>
+                        <do_else>
+                          <show_help position="13" duration="15s" custom="{30601,2000}" />
+                        </do_else>
+                      </actions>
+                      <cues>
+                        <cue name="Hint_Map_Closed">
+                          <conditions>
+                            <event_ui_triggered screen="'MapMenu'" control="''"/>
+                          </conditions>
+                          <actions>
+                            <remove_help all="true"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Escort_M_Ship_Pt1_Player_Left_1" checkinterval="1s">
+                      <conditions>
+                        <check_value value="player.ship.distanceto.{$AllyMShip} gt 6000m"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="false" comment="disable, confusing after just having received POI locations to investigate">
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                              $script = [
+                                        table[ $actor = '$Aydon', $speak = 306010122, $recipient = 'player', $monitor = false, $comment = 'Don`t venture off too far. We`ll have a better chance together.'],
+                                        ],
+                             ]" />
+                        </do_if>
+                      </actions>
+                      <cues>
+                        <cue name="Escort_M_Ship_Pt1_Player_Left_2" checkinterval="1s">
+                          <conditions>
+                            <check_value value="player.ship.exists"/>
+                            <check_any>
+                              <check_value value="player.age gt Escort_M_Ship_Pt1_Player_Left_1.time +  5s and player.ship.distanceto.{$AllyMShip} gt 15000m"/>
+                              <check_value value="player.age gt Escort_M_Ship_Pt1_Player_Left_1.time + 15s and player.ship.distanceto.{$AllyMShip} gt 10000m"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                $script = [
+                                          table[ $actor = '$Aydon', $speak = 306010123, $recipient = 'player', $monitor = false, $comment = 'Alright buddy. Stay safe out there, and head back to us soon. We`ll take a look in this direction.'],
+                                          ],
+                                $callbackcue = Investigate_Blackboxes,
+                                $abortcallbackcue = Investigate_Blackboxes
+                               ]" />
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Investigate_Blackboxes">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <update_mission cue="Start">
+                  <briefing>
+                    <objective step="3" action="objective.investigate" text="{30601,1003}"/>
+                  </briefing>
+                </update_mission>
+                <set_objective_from_briefing cue="Start" step="3"/>
+              </actions>
+            </cue>
+
+            <!--Move the M ship to predefined debris groups, leaving ones that the player has already surveyed-->
+            <cue name="M_Ship_Debris_Movement">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$CurrentDestPos" exact="null"/>
+              </actions>
+              <cues>
+                <cue name="M_Ship_Debris_Movement_Select">
+                  <actions>
+                    <set_value name="$CurrentMShipDestinationIdx" operation="add"/>
+                    <set_value name="$Reevaluate" exact="false"/>
+                    <set_value name="$SelectedDefinition" exact="null"/>
+                    <set_value name="$CurrentDestPos" exact="null"/>
+                    <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                      <do_if value="@$BlackboxDefinition.$MShipDestinationIdx == $CurrentMShipDestinationIdx">
+                        <do_if value="@$BlackboxDefinition.$collected and $CurrentMShipDestinationIdx != $FinalMShipDestinationIdx">
+                          <!--Area has already been surveyed by the player. Skip unless it is the final one.-->
+                          <set_value name="$Reevaluate" exact="true"/>
+                        </do_if>
+                        <do_else>
+                          <set_value name="$SelectedDefinition" exact="$BlackboxDefinition"/>
+                        </do_else>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                    <do_if value="$Reevaluate">
+                      <reset_cue cue="this"/>
+                    </do_if>
+                    <do_elseif value="$SelectedDefinition">
+                      <set_value name="$CurrentDestPos" exact="$SelectedDefinition.$secpos"/>
+                      <create_order id="'MoveWait'" object="$AllyMShip" default="true">
+                        <param name="destination" value="[$MainSector, $CurrentDestPos]"/>
+                        <param name="noboost" value="true"/>
+                      </create_order>
+                      <reset_cue cue="M_Ship_Debris_Movement_Arrived"/>
+                    </do_elseif>
+                    <do_else>
+                      <!--The last position was at the trading station-->
+                      <signal_cue cue="M_Ship_At_Trading_Station"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <!--TODO @Owen failsafe-->
+                <cue name="M_Ship_Debris_Movement_Arrived" checkinterval="1s">
+                  <conditions>
+                    <check_value value="$CurrentDestPos and $AllyMShip.distanceto.[$MainSector, $CurrentDestPos] lt 1km"/>
+                  </conditions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <set_value name="$SelectedDefinition.$collected" exact="true"/>
+                    <set_value name="$BlackboxesCollected" operation="add"/>
+                    <set_userdata name="'timelines_presidents_end_blackbox'" value="1"/>
+                    <!--TODO HACK @Owen have the M ship attempt to collect it?-->
+                    <destroy_object object="$SelectedDefinition.$blackbox" explosion="false"/>
+
+                    <!--Comment on the situation-->
+                    <do_if value="$AydonDebrisComments.count and $CurrentMShipDestinationIdx != $FinalMShipDestinationIdx">
+                      <append_to_list name="$AydonDebrisComments" exact="$AydonDebrisComments.{1}"/>
+                      <remove_value name="$AydonDebrisComments.{1}"/>
+                    </do_if>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = $AydonDebrisComments.{1}, $recipient = 'player', $monitor = false, $comment = ''],
+                                                ],
+                                      ]" />
+                  </actions>
+                  <delay exact="if $CurrentMShipDestinationIdx == $FinalMShipDestinationIdx then 3s else 10s"/>
+                  <actions>
+                    <reset_cue cue="M_Ship_Debris_Movement_Select"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="M_Ship_At_Trading_Station">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$PlayerWasFar" exact="player.entity.distanceto.{$AllyMShip} gt 12000m"/>
+                <do_if value="$PlayerWasFar">
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = 306010129, $recipient = 'player', $monitor = false, $comment = 'We`re at the trading station.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010130, $recipient = 'player', $monitor = false, $comment = 'We`ll hunker down here.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010131, $recipient = 'player', $monitor = false, $comment = 'Head back to us when you can.'],
+                                                ],
+                                      ]" />
+                </do_if>
+                <do_else>
+                  <signal_cue cue="Everyone_At_Trading_Station" check="false"/>
+                </do_else>
+              </actions>
+              <delay exact="1s" />
+              <actions>
+                <launch_lasertower object="$AllyMShip" comment="Trader is waiting at HUB and vulnerable, launch a lasertower for added protection"/>
+              </actions>
+              <delay exact="5s" />
+              <actions>
+                <launch_lasertower object="$AllyMShip" comment="Trader is waiting at HUB and vulnerable, launch a lasertower for added protection"/>
+              </actions>
+              <cues>
+                <cue name="M_Ship_At_Trading_Station_Player_Nearby_Objective" checkinterval="3s">
+                  <conditions>
+                    <check_value value="player.ship.exists and $AllyMShip.exists and player.ship.distanceto.{$AllyMShip} lt 12km" comment="M-ship at HUB and player nearby M-ship, cancel the 'investigate POI' objective"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="M_Ship_At_Trading_Station_Await_Player" check="false"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="M_Ship_At_Trading_Station_Await_Player_Objective" checkinterval="3s">
+              <conditions>
+                <cue_is_complete cue="Investigate_Blackboxes" comment="start checking when the investigation objective is done"/>
+                <check_any>
+                  <check_value value="not $Blackboxes.count" comment="no blackboxes remaining, switch to 'fly to M ship'"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <signal_cue cue="M_Ship_At_Trading_Station_Await_Player" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="M_Ship_At_Trading_Station_Await_Player" comment="Tell player to fly to the M ship (either because the player was closer, or because all blackboxes found)">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!--TODO @Owen ensure that the step 3 of investigate has happened-->
+                <update_mission cue="Start">
+                  <briefing>
+                    <objective step="4" action="objective.flyto" text="$AllyMShip.name" object="$AllyMShip"/>
+                  </briefing>
+                </update_mission>
+                <set_objective_from_briefing cue="Start" step="4"/>
+              </actions>
+              <cues>
+                <cue name="M_Ship_At_Trading_Station_Player_Arrives" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.age + M_Ship_At_Trading_Station_Await_Player.time + 5s and $AllyMShip.isoperational and player.entity.distanceto.{$AllyMShip} gt 8000m"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Everyone_At_Trading_Station" check="false"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Everyone_At_Trading_Station">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Blackbox_Nearby_Objective" comment="proceed with mission, investigate POI's is done (wether completed or not)"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = if $PlayerWasFar then 306010132 else 306010133, $recipient = 'player', $monitor = false, $comment = ''],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010134, $recipient = 'player', $monitor = false, $comment = 'It`s no good. There`s nothing left...'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010135, $recipient = 'player', $monitor = false, $comment = 'More of those things keep showing up, so we don`t have much time.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010136, $recipient = 'player', $monitor = false, $comment = 'I hate to sound morbid but unless an Argon fleet pushes through the gate blockade, I don`t fancy our chances.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010137, $recipient = 'player', $monitor = false, $comment = 'Let`s pool all the data we`ve gathered. I`m sure the Argon Navy and next of kin would appreciate it.'],
+                                                1s,
+                                                table[ $actor = '$Aydon', $speak = 306010138, $recipient = 'player', $monitor = false, $comment = 'We`ll make a run for a gate, transmitting the data as we go.'],
+                                                ],
+                                      $callbackcue = Gate_Selection_Conv_Trigger,
+                                      $abortcallbackcue = Gate_Selection_Conv_Trigger
+                                      ]" />
+              </actions>
+            </cue>
+
+            <cue name="Gate_Selection_Conv_Trigger">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <update_mission cue="Start">
+                  <briefing>
+                    <objective step="4" action="objective.comm" object="$AllyMShip"/>
+                  </briefing>
+                </update_mission>
+                <set_objective_from_briefing cue="Start" step="4"/>
+                <!--<start_conversation actor="$Aydon" conversation="gate_selection"/>-->
+                <set_value name="$SelectedGate" exact="null"/>
+                <set_value name="$SuppressPilotComm" exact="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Gate_Selection_Conv_Started">
+              <conditions>
+                <!--<event_conversation_started actor="$Aydon" conversation="gate_selection"/>-->
+                <event_conversation_started actor="$MShipPilot"/>
+                <check_value value="Gate_Selection_Conv_Trigger.state == cuestate.complete"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false"/>
+                <open_conversation_menu menu="MapMenu" param="[0, 0, true, null, null, 'selectComponent', [ 'gate_select', [class.gate], '', false, {30601,118} ]]" param2="null" />
+                <signal_cue_instantly cue="Setup_Gate_Selection_Map"/>
+                <add_npc_line speaker="$Aydon" line="306010139" hidechoices="true" comment="So, which gate?"/>
+              </actions>
+              <cues>
+                <cue name="Gate_Selection_Conv_Returned" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_conversation_returned_to_section/>
+                      <event_conversation_next_section section="g_cancel"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <allow_conversation_escape enabled="false"/>
+                    <add_player_choice text="{30601,117}" section="open_gate_menu"/>
+                  </actions>
+                </cue>
+                <cue name="Gate_Selection_Open_Map" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section section="open_gate_menu"/>
+                  </conditions>
+                  <actions>
+                    <open_conversation_menu menu="MapMenu" param="[0, 0, true, null, null, 'selectComponent', [ 'gate_select', [class.gate], '', false, {30601,118} ]]" param2="null" />
+                    <signal_cue_instantly cue="Setup_Gate_Selection_Map"/>
+                  </actions>
+                </cue>
+                <cue name="Gate_Selection_Done" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section section="gate_select"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$SelectedGate" exact="event.param2.{1}"/>
+                    <add_npc_line speaker="$Aydon" line="306010140" hidechoices="true" comment="Sounds good. Let's get a move on."/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Setup_Gate_Selection_Map" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1ms"/>
+              <actions>
+                <!--dummy actions as it apparently needs 2 frames-->
+              </actions>
+              <delay exact="1ms"/>
+              <actions>
+                <set_holomap_zoom instant="true" value="500000m"/>
+                <set_holomap_target object="$TradingStation"/>
+                <do_for_each name="$PE_Jumpgate" in="$PE_Jumpgates">
+                  <add_holomap_text object="$PE_Jumpgate" text="$PE_Jumpgate.destination.sector.knownname" color="[255, 120, 0, 255]"/>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Gate_Selection_Conv_Finished">
+              <conditions>
+                <event_conversation_finished/>
+                <check_value value="event.param == 'gate_select'"/>
+              </conditions>
+              <actions>
+                <do_if value="not $SelectedGate">
+                  <set_value name="$SelectedGate" exact="$PE_Jumpgates.random"/>
+                  <debug_text text="'No gate was selected via the conversation'" filter="error"/>
+                </do_if>
+                <cancel_cue cue="Gate_Selection_Conv_Started"/>
+                <remove_value name="$SuppressPilotComm"/>
+                <signal_cue cue="Approach_Gate_For_Transmission"/>
+              </actions>
+            </cue>
+
+            <cue name="Approach_Gate_For_Transmission">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_order id="'MoveWait'" object="$AllyMShip" default="true">
+                  <param name="destination" value="[$SelectedGate.sector, $SelectedGate.relativeposition.{$SelectedGate.sector}]"/>
+                  <param name="noboost" value="true"/>
+                </create_order>
+                <remove_from_group group="$MissionRelevantObjects" object="$AllyMShip"/>
+
+                <set_value name="$TransmissionIdealRange" exact="3km"/>
+                <set_value name="$TransmissionRangeLimit" exact="75km"/>
+                <!--Transmission percentage per second tick-->
+                <set_value name="$TransmissionMinRate" exact="1"/>
+                <set_value name="$TransmissionMaxRate" exact="15"/>
+                <set_value name="$CurrentTransmissionVal" exact="0"/>
+                <set_value name="$MaxTransmissionVal" exact="100"/>
+                <set_value name="$FirstTransmission" exact="true"/>
+
+                <set_userdata name="'timelines_presidents_end_transmit'" value="1"/>
+
+                <!--TODO #HACK @Owen using step 3 as we know that up to 2 is already used. Have a step counter increment if the player went off to investigate-->
+                <update_mission cue="Start">
+                  <briefing>
+                    <objective step="4" action="objective.approach" object="$SelectedGate"/>
+                  </briefing>
+                </update_mission>
+                <set_objective_from_briefing cue="Start" step="4"/>
+              </actions>
+              <delay exact="5s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = 306010141, $recipient = 'player', $monitor = false],
+                                                ],
+                                      ]" />
+              </actions>
+              <cues>
+                <cue name="Transmission_M_Ship_Starting" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.age gt Approach_Gate_For_Transmission.time + 15s and $AllyMShip.isoperational and $AllyMShip.distanceto.{$SelectedGate} lt $TransmissionRangeLimit"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = 306010142, $recipient = 'player', $monitor = false],
+                                                ],
+                                      ]" />
+                  </actions>
+                </cue>
+
+                <cue name="Transmission_M_Ship_Near_Death">
+                  <conditions>
+                    <event_object_attacked object="$AllyMShip"/>
+                    <cue_is_complete cue="Transmission_M_Ship_Starting"/>
+                    <check_value value="$AllyMShip.isoperational and $AllyMShip.hullpercentage lt 10"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = 306010157, $recipient = 'player', $monitor = false],
+                                                ],
+                                      ]" />
+                  </actions>
+                </cue>
+
+                <cue name="Transmit_Checker" instantiate="true" checkinterval="1s">
+                  <conditions>
+                    <check_value value="$TransmittedPackets lt $BlackboxesCollected"/>
+                    <check_value value="not @player.ship.isclass.spacesuit"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="player.sector == $MainSector">
+                      <sort_group group="$PE_Jumpgates" sortbydistanceto="player.entity" sortdescending="false"/>
+                      <set_value name="$ClosestGateDist" exact="player.entity.distanceto.{$PE_Jumpgates.{1}}"/>
+                      <do_if value="$ClosestGateDist lt $TransmissionRangeLimit">
+                        <set_value name="$NewPacket" exact="false"/>
+                        <interpolate_value result="$TransmitValue" value="$ClosestGateDist">
+                          <linear mininput="$TransmissionIdealRange" maxinput="$TransmissionRangeLimit" minoutput="$TransmissionMaxRate" maxoutput="$TransmissionMinRate"/>
+                        </interpolate_value>
+                        <set_value name="$CurrentTransmissionVal" operation="add" exact="$TransmitValue"/>
+                        <debug_text text="'Transmitting at ' + $TransmitValue + ' per tick. Total ' + $CurrentTransmissionVal" chance="$DebugChance"/>
+                        <do_if value="$CurrentTransmissionVal gt $MaxTransmissionVal">
+                          <set_value name="$TransmittedPackets" operation="add"/>
+                          <set_value name="$NewPacket" exact="true"/>
+                          <set_value name="$CurrentTransmissionVal" exact="0"/>
+                        </do_if>
+
+                        <do_if value="$TransmittedPackets ge $BlackboxesCollected">
+                          <signal_cue cue="Final_Khaak_Phase"/>
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                      $script = [
+                                                table[ $actor = '$Aydon', $speak = 306010155, $broadcast = true, $recipient = 'player', $monitor = false],
+                                                ],
+                                      ]" />
+                        </do_if>
+                        <do_elseif value="$NewPacket or $FirstTransmission">
+                          <update_mission cue="Start">
+                            <briefing>
+                              <objective step="4" action="objective.custom" customaction="{30601,1004}" text="{30601,1005}" object="$SelectedGate"/>
+                            </briefing>
+                          </update_mission>
+                          <!--<substitute_text text="$ProgressText" source="{30601,1006}">
+                            <replace string="'$NUM$'" with="$TransmittedPackets + 1"/>
+                            <replace string="'$MAXNUM$'" with="$BlackboxesCollected"/>
+                          </substitute_text>-->
+                          <substitute_text text="$ObjectiveText" source="{30601,1007}">
+                            <replace string="'$NUM$'" with="$TransmittedPackets + 1"/>
+                            <replace string="'$MAXNUM$'" with="$BlackboxesCollected"/>
+                          </substitute_text>
+                          <set_objective cue="Start" step="4" action="objective.custom" customaction="{30601,1004}" text="$ObjectiveText" object="$SelectedGate" silent="not $FirstTransmission">
+                            <progress progress="$CurrentTransmissionVal" max="$MaxTransmissionVal"/>
+                          </set_objective>
+                          <do_if value="$FirstTransmission">
+                            <!--This annoys the Khaak at the gates. Their patrol range is restored to default.-->
+                            <do_for_each name="$KhaakGateShip" in="$KhaakGateShips">
+                              <do_if value="$KhaakGateShip.order.id == 'ProtectPosition'">
+                                <edit_order_param order="$KhaakGateShip.order" param="'radius'" value="$KhaakGateShip.maxradarrange"/>
+                              </do_if>
+                            </do_for_each>
+                            <set_value name="$FirstTransmission" exact="false"/>
+                          </do_if>
+                        </do_elseif>
+                        <do_else>
+                          <update_objective_progress cue="Start" progress="$CurrentTransmissionVal" max="$MaxTransmissionVal"/>
+                        </do_else>
+                      </do_if>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!--Ongoing Managers-->
+
+            <cue name="Jumpgate_Approach">
+              <cues>
+                <cue name="Jumpgate_Approach_Warning" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.sector == $MainSector"/>
+                    <check_any exact="$PE_Jumpgates.count" counter="$i">
+                      <check_value value="player.entity.distanceto.{$PE_Jumpgates.{$i}} lt $JumpgateWarningDistance"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Getting too close'"/>
+                  </actions>
+                </cue>
+
+                <cue name="Jumpgate_Approach_Attack" checkinterval="4s" instantiate="true">
+                  <conditions>
+                    <cue_is_complete cue="Jumpgate_Approach_Warning"/>
+                    <check_value value="@$GateApproachKhaakShips.count lt 40"/>
+                    <check_any exact="$PE_Jumpgates.count" counter="$i">
+                      <check_all>
+                        <check_value value="player.entity.distanceto.{$PE_Jumpgates.{$i}} lt $JumpgateDeathDistance"/>
+                        <set_value name="$NearbyJumpgate" exact="$PE_Jumpgates.{$i}"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <do_all exact="5">
+                      <signal_cue_instantly cue="Jumpgate_Approach_Attack_Spawn" param="[$NearbyJumpgate, 'bulk']"/>
+                    </do_all>
+                  </actions>
+                </cue>
+
+                <cue name="Jumpgate_Approach_Attack_Spawn" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Spawn gate=%s command=%s'.[event.param.{1}, event.param.{2}]" chance="$DebugChance"/>
+                    <set_value name="this.$NearbyJumpGateSpawn" exact="event.param.{1}"/>
+                    <set_value name="this.$Command" exact="event.param.{2}"/>
+                    <create_ship name="$KhaakShip" groupname="$GateApproachKhaakShips" sector="this.$NearbyJumpGateSpawn.sector">
+                      <select faction="faction.khaak" size="class.ship_m"/>
+                      <owner exact="faction.khaak"/>
+                      <pilot>
+                        <select faction="faction.khaak" tags="tag.aipilot"/>
+                      </pilot>
+                      <orientation orientation="look_at" refobject="$StartShip"/>
+                      <safepos object="this.$NearbyJumpGateSpawn" min="4km" max="8km"/>
+                    </create_ship>
+                    <do_any>
+                      <create_order object="$KhaakShip" id="'ProtectPosition'" default="true" weight="66">
+                        <param name="destination" value="[this.$NearbyJumpGateSpawn.sector, this.$NearbyJumpGateSpawn.relativeposition.{this.$NearbyJumpGateSpawn.sector}]"/>
+                      </create_order>
+                      <create_order object="$KhaakShip" id="'Attack'" weight="34">
+                        <param name="primarytarget" value="player.ship" />
+                        <param name="allowothertargets" value="true"/>
+                        <param name="pursuetargets" value="true"/>
+                        <param name="pursuedistance" value="250km" />
+                      </create_order>
+                    </do_any>
+                    <add_effect object="$KhaakShip.zone" effect="'jump_jumpin_khaak'">
+                      <position object="$KhaakShip"/>
+                    </add_effect>
+                    <disable_travel_mode ship="$KhaakShip" duration="1h"/>
+                    <set_object_name object="$KhaakShip" page="20109" line="5101"/>
+                  </actions>
+                </cue>
+
+                <cue name="Jumpgate_Approach_Final_Blur" instantiate="true">
+                  <conditions>
+                    <check_all>
+                      <check_any>
+                        <event_object_hull_damaged object="$Argon_Fighter_1"/>
+                        <event_object_shield_damaged object="$Argon_Fighter_1"/>
+                        <event_object_hull_damaged object="$Argon_Fighter_2"/>
+                        <event_object_shield_damaged object="$Argon_Fighter_2"/>
+                      </check_any>
+                      <cue_is_complete cue="Jumpgate_Approach_Warning"/>
+                      <check_any exact="$PE_Jumpgates.count" counter="$i">
+                        <check_all>
+                          <check_value value="player.entity.distanceto.{$PE_Jumpgates.{$i}} lt ($JumpgateDeathDistance * 0.75)"/>
+                          <set_value name="$NearbyJumpgate" exact="$PE_Jumpgates.{$i}"/>
+                        </check_all>
+                      </check_any>
+                    </check_all>
+                  </conditions>
+                  <actions>
+                    <set_value name="$BlurStrength" exact="(($JumpgateDeathDistance * 0.75) - player.entity.distanceto.{$NearbyJumpgate}) / ($JumpgateDeathDistance * 0.75)"/>
+                    <blur_screen strength="$BlurStrength" duration="0.1s" holdtime="[0.25s, 0.5s, 0.75s].random" chance="20"/>
+                    <debug_text text="'Disrupt-Blur %s (gatedist=%s gatedeathdist75=%s)'.[$BlurStrength, player.entity.distanceto.{$NearbyJumpgate}, $JumpgateDeathDistance * 0.75]" chance="$DebugChance"/>
+
+                    <add_object_velocity object="player.ship" chance="25">
+                      <linear  x="[-0.4, -0.2, 0.2, 0.4].random" y="[-0.4, -0.2, 0.2, 0.4].random" z="[-1.0, -0.9, 0.9, 1.0].random"/>
+                      <angular x="[-1.2, -0.4, 0.4, 1.2].random" y="[-0.4, -0.3, 0.3, 0.4].random" z="[-0.3, -0.2, 0.2, 0.3].random"/>
+                    </add_object_velocity>
+                  </actions>
+                </cue>
+
+                <cue name="Jumpgate_Approach_Final" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <cue_is_complete cue="Jumpgate_Approach_Warning"/>
+                    <check_value value="@$GateApproachKhaakShips.count lt 60"/>
+                    <check_any exact="$PE_Jumpgates.count" counter="$i">
+                      <check_all>
+                        <check_value value="player.entity.distanceto.{$PE_Jumpgates.{$i}} lt ($JumpgateDeathDistance * 0.50)"/>
+                        <set_value name="$NearbyJumpgate" exact="$PE_Jumpgates.{$i}"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Disrupt-Spawn'" chance="$DebugChance"/>
+                    <signal_cue_instantly cue="Jumpgate_Approach_Attack_Spawn" param="[$NearbyJumpgate, 'single']"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Mark_Blackboxes">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                  <do_for_each name="$Debris" in="$BlackboxDefinition.$debrisgroup">
+                    <set_object_forced_radar_visible object="$Debris" visible="true"/>
+                  </do_for_each>
+                </do_for_each>
+                <set_value name="$BlackboxTextColour_Default" exact="[255, 255, 255, 255]"/>
+                <set_value name="$BlackboxTextColour_Objective" exact="[255, 120, 0, 255]"/>
+                <set_value name="$BlackboxTextColour_Done" exact="[128, 128, 128, 255]"/>
+              </actions>
+              <cues>
+                <cue name="Add_Blackbox_Map_Text" instantiate="true">
+                  <conditions>
+                    <event_ui_triggered screen="'MapMenu'" control="''"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$MapWasOpened" exact="true"/>
+                    <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                      <do_if value="$BlackboxDefinition.$debrisgroup.count">
+                        <do_if value="@$BlackboxDefinition.$collected">
+                          <set_value name="this.$Colour" exact="$BlackboxTextColour_Done"/>
+                          <add_holomap_text object="$BlackboxDefinition.$debrisgroup.{1}" text="readtext.{$Page}.{$BlackboxDefinition.$maptextid} + ' ' + {30601,103}" color="$BlackboxTextColour_Done"/>
+                        </do_if>
+                        <do_elseif value="Investigate_Blackboxes.state == cuestate.complete">
+                          <add_holomap_text object="$BlackboxDefinition.$debrisgroup.{1}" text="readtext.{$Page}.{$BlackboxDefinition.$maptextid}" color="$BlackboxTextColour_Objective"/>
+                        </do_elseif>
+                        <do_else>
+                          <add_holomap_text object="$BlackboxDefinition.$debrisgroup.{1}" text="readtext.{$Page}.{$BlackboxDefinition.$maptextid}" color="$BlackboxTextColour_Default"/>
+                        </do_else>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Blackbox_Nearby_Objective" checkinterval="2s" instantiate="true">
+              <conditions>
+                <check_value value="($Blackboxes.count) and (Investigate_Blackboxes.state == cuestate.complete)"/>
+              </conditions>
+              <actions>
+                <set_value name="$BlackboxNearbyPrevious" exact="@$BlackboxNearby"/>
+                <set_value name="$BlackboxNearby" exact="null"/>
+
+                <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                  <do_if value="not $BlackboxDefinition.$collected?">
+                    <do_if value="player.entity.distanceto.{$BlackboxDefinition.$blackbox} lt 2km">
+                      <set_value name="$BlackboxNearby" exact="$BlackboxDefinition.$blackbox"/>
+                      <break/>
+                    </do_if>
+                  </do_if>
+                </do_for_each>
+                <!-- while nearby point to the blackbox, otherwise switch back to 'investigate points of interest' -->
+                <do_if value="(not $BlackboxNearbyPrevious) and $BlackboxNearby">
+                  <set_objective cue="Start" step="3" action="objective.pickup" object="$BlackboxNearby" comment="nearby, point directly at blackbox" />
+                  <signal_cue cue="Blackbox_Nearby_Help" check="false" comment="one-time hint on loot-magnet"/>
+                </do_if>
+                <do_elseif value="$BlackboxNearbyPrevious and (not $BlackboxNearby)" comment="was nearby but moved further away">
+                  <set_objective_from_briefing cue="Start" step="3"/>
+                </do_elseif>
+              </actions>
+            </cue>
+
+            <cue name="Blackbox_Nearby_Help">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <show_help position="13" duration="15s" force="true" line="2301" comment="Press and hold $INPUT_STATE_LOOTMAGNET$ to make nearby boxes move towards to your ship."/>
+              </actions>
+            </cue>
+
+            <cue name="Blackbox_Nearby_Destroyed" instantiate="true" comment="Destroyed for any reason (incl collected by player)">
+              <conditions>
+                <event_object_destroyed group="$Blackboxes"/>
+                <check_value value="event.object == $BlackboxNearbyPrevious" comment="current nearby BB destroyed?"/>
+              </conditions>
+              <actions>
+                <set_objective_from_briefing cue="Start" step="3" comment="reset objective back to investigate poi, so we don't point to a non-existant blackbox"/>
+                <set_value name="$BlackboxNearby" exact="null"/>
+                <set_value name="$BlackboxesDestroyed" operation="add"/>
+              </actions>
+            </cue>
+
+            <cue name="Blackbox_Collected" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$Blackboxes" method="killmethod.collected"/>
+                <check_value value="event.param.isplayerowned"/>
+              </conditions>
+              <actions>
+                <set_value name="$BlackboxesCollected" operation="add"/>
+                <do_for_each name="$BlackboxDefinition" in="$BlackboxDefinitions">
+                  <do_if value="event.object == $BlackboxDefinition.$blackbox">
+                    <set_value name="$BlackboxDefinition.$collected" exact="true"/>
+                    <break/>
+                  </do_if>
+                </do_for_each>
+                <!--Even when destroyed, the group still contains the killed object for a frame-->
+                <do_if value="$Blackboxes.count == 3">
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                      $script = [
+                                4s,
+                                table[ $actor = '$Aydon', $speak = 306010125, $recipient = 'player', $monitor = false, $comment = ''],
+                                ],
+                     ]" />
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Last_M_Ship_Attack" instantiate="true">
+              <conditions>
+                <event_object_attacked object="$AllyMShip"/>
+              </conditions>
+              <actions>
+                <set_value name="$LastMShipAttackTime" exact="player.age"/>
+              </actions>
+            </cue>
+
+            <cue name="Khaak_Spawner">
+              <actions>
+                <!--Must be listed in order of $spawntime-->
+                <!--Enemy types:
+                $size_s_a: macro.ship_kha_s_fighter_01_a_macro
+                $size_s_b: macro.ship_kha_s_fighter_02_a_macro
+                $size_m_a: macro.ship_kha_m_fighter_01_a_macro
+                $cluster_a: TODO
+                -->
+                <set_value name="$SpawnTables" exact="[
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1],
+                                  $spawntime = 130s,
+                                  $position = position.[-35000m, 2000m, -110000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1],
+                                  $spawntime = 180s,
+                                  $position = position.[10000m, -1000m, 6000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1],
+                                  $spawntime = 230s,
+                                  $position = position.[40000m, -1000m, -6000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 2],
+                                  $spawntime = 310s,
+                                  $position = position.[30000m, -1000m, 12000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1],
+                                  $spawntime = 330s,
+                                  $position = position.[-70000m, 1500m, -48000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 350s,
+                                  $position = position.[-100000m, 100m, 45000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 2,
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 390s,
+                                  $position = position.[75000m, -100m, 80000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 405s,
+                                  $position = position.[-46000m, 3000m, -8000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1,
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 420s,
+                                  $position = position.[-75000m, 100m, 90000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 2],
+                                  $spawntime = 460s,
+                                  $position = position.[55000m, 100m, 1000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1],
+                                  $spawntime = 545s,
+                                  $position = position.[8000m, 100m, 6000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 610s,
+                                  $position = position.[-7000m, 100m, -2000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 3,
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 650s,
+                                  $position = position.[-9000m, -2000m, 30000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 1,
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 2],
+                                  $spawntime = 690s,
+                                  $position = position.[-95000m, 100m, -25000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 1],
+                                  $spawntime = 730s,
+                                  $position = position.[17000m, 100m, 29000m]],
+                           table[
+                                  $enemytypes = table[
+                                                  {macro.ship_kha_s_fighter_01_a_macro} = 2,
+                                                  {macro.ship_kha_m_fighter_01_a_macro} = 2],
+                                  $spawntime = 755s,
+                                  $position = position.[-55000m, 1000m, 15000m]],
+                           ]"/>
+              </actions>
+              <cues>
+                <cue name="Khaak_Spawner_Check" instantiate="true" checkinterval="1s">
+                  <conditions>
+                    <check_value value="$SpawnTables.count and player.age gt $SpawnTables.{1}.$spawntime"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Khaak_Spawner_Instance" param="$SpawnTables.{1}"/>
+                    <remove_value name="$SpawnTables.{1}"/>
+                  </actions>
+                </cue>
+
+                <!--A separate instance to deal with spawning this group of Kha'ak ships, potentially over several seconds-->
+                <cue name="Khaak_Spawner_Instance" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$params" exact="event.param"/>
+                  </actions>
+                  <cues>
+                    <cue name="Khaak_Spawner_Instance_Process">
+                      <actions>
+                        <do_for_each name="$shiptypekey" valuename="$shiptypeamount" in="Khaak_Spawner_Instance.$params.$enemytypes">
+                          <do_all exact="$shiptypeamount">
+                            <set_value name="this.$SpawnDelay" min="0s" max="2s"/>
+                            <signal_cue_instantly cue="Khaak_Spawner_Create_Ship" param="table[$delay = this.$SpawnDelay, $shiptype = $shiptypekey]"/>
+                          </do_all>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+                    <cue name="Khaak_Spawner_Create_Ship" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="event.param.$delay"/>
+                      <actions>
+
+                        <do_if value="typeof event.param.$shiptype == datatype.macro">
+                          <create_ship name="$KhaakShip" macro="event.param.$shiptype" capturable="false" sector="$MainSector">
+                            <pilot>
+                              <select faction="faction.khaak" tags="tag.fighterpilot"/>
+                            </pilot>
+                            <owner exact="faction.khaak"/>
+                            <drop ref="ship_small_khaak"/>
+                            <safepos value="Khaak_Spawner_Instance.$params.$position" max="200m"/>
+                            <rotation yaw="[0deg, 360deg].randominrange" pitch="[-50deg, 50deg].randominrange"/>
+                          </create_ship>
+                          <debug_text text="player.age + ' - Spawning ' + $KhaakShip + ' ' + $KhaakShip.knownname"/>
+                          <disable_travel_mode ship="$KhaakShip" duration="1h"/>
+                          <set_object_name object="$KhaakShip" page="20109" line="5101"/>
+                          <add_object_velocity object="$KhaakShip">
+                            <linear z="[5m, 20m].randominrange"/>
+                          </add_object_velocity>
+
+                          <add_effect object="$KhaakShip.zone" effect="'jump_jumpin_khaak'">
+                            <position object="$KhaakShip"/>
+                          </add_effect>
+                        </do_if>
+                        <do_elseif value="event.param.$shiptype == 'cluster_a'">
+                          <!--TODO-->
+                        </do_elseif>
+
+                        <create_order object="$KhaakShip" id="'ProtectPosition'" default="true">
+                          <param name="destination" value="[$MainSector, Khaak_Spawner_Instance.$params.$position]"/>
+                          <param name="radius" value="20km"/>
+                        </create_order>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Final_Khaak_Phase">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_group groupname="$FinalKhaak"/>
+
+                <!-- hub stretcher line -->
+                <do_if value="not userdata.hub_a10s11_presidents_end_1?">
+                  <set_userdata name="'hub_a10s11_presidents_end_1'" value="1"/>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Final_Khaak_Phase_Spawn" instantiate="true" checkinterval="2s">
+                  <conditions>
+                    <check_value value="$FinalKhaak.count lt 30"/>
+                  </conditions>
+                  <delay min="1s" max="5s"/>
+                  <actions>
+                    <do_any>
+                      <set_value name="this.$Macro" exact="macro.ship_kha_s_fighter_01_a_macro" weight="2"/>
+                      <set_value name="this.$Macro" exact="macro.ship_kha_m_fighter_01_a_macro" weight="5"/>
+                      <set_value name="this.$Macro" exact="macro.ship_kha_l_destroyer_01_a_macro" weight="50"/>
+                    </do_any>
+                    <create_ship name="$KhaakShip" groupname="$FinalKhaak" macro="this.$Macro" capturable="false" sector="$MainSector">
+                      <pilot>
+                        <select faction="faction.khaak" tags="tag.fighterpilot"/>
+                      </pilot>
+                      <owner exact="faction.khaak"/>
+                      <safepos object="player.entity.object" min="4km" max="7km"/>
+                      <rotation yaw="[0deg, 360deg].randominrange" pitch="[-50deg, 50deg].randominrange"/>
+                    </create_ship>
+                    <debug_text text="player.age + ' - Spawning ' + $KhaakShip + ' ' + $KhaakShip.knownname"/>
+                    <disable_travel_mode ship="$KhaakShip" duration="1h"/>
+                    <set_object_name object="$KhaakShip" page="20109" line="5101"/>
+                    <add_object_velocity object="$KhaakShip">
+                      <linear z="[5m, 20m].randominrange"/>
+                    </add_object_velocity>
+
+                    <add_effect object="$KhaakShip.zone" effect="'jump_jumpin_khaak'">
+                      <position object="$KhaakShip"/>
+                    </add_effect>
+                  </actions>
+                </cue>
+
+                <cue name="Final_Khaak_Phase_Cleanup_Distant" instantiate="true" checkinterval="3s">
+                  <actions>
+                    <shuffle_group group="$FinalKhaak"/>
+                    <do_for_each name="$ActiveKhaak" in="$FinalKhaak">
+                      <do_if value="$ActiveKhaak.iscapitalship and $ActiveKhaak.bboxdistanceto.{player.entity} gt 25km">
+                        <signal_cue_instantly cue="Final_Khaak_Phase_Remove_Presentation" param="$ActiveKhaak"/>
+                        <remove_from_group group="$FinalKhaak" object="$ActiveKhaak"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <!--event.param Kha'ak ship-->
+                <cue name="Final_Khaak_Phase_Remove_Presentation" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <add_effect object="event.param.zone" effect="'jump_jumpin_khaak'">
+                      <position object="event.param"/>
+                    </add_effect>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <destroy_object object="event.param" explosion="false"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <debug_text text="'End reason: ' + event.name" chance="$DebugChance"/>
+            <do_if value="event.name == 'event_object_destroyed'">
+              <debug_text text="'destroyed: ' + event.object.knownname" chance="$DebugChance"/>
+            </do_if>
+            <set_value name="$ResultData" exact="table[]"/>
+
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$ResultData.$Score" exact="0"/>
+
+            <set_value name="$PointsPerKill" exact="5"/>
+            <set_value name="$EnemiesKilledScore" exact="$PointsPerKill * $EnemiesKilled"/>
+            <substitute_text text="$EnemiesKilledScoreDescText" source="{30601,4012}">
+              <replace string="'$NUMBER$'" with="$PointsPerKill"/>
+            </substitute_text>
+            <add_scenario_stat id="'enemies_killed'" name="{30601,4011}" uivalue="$EnemiesKilled" description="$EnemiesKilledScoreDescText" score="$EnemiesKilledScore"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="$EnemiesKilledScore"/>
+
+            <do_if value="$ClaimedShip1?">
+              <set_value name="$ClaimedShip1Score" exact="15"/>
+              <set_value name="$ResultData.$Score" operation="add" exact="$ClaimedShip1Score"/>
+              <substitute_text text="$ClaimedShip1ScoreText" source="{30601,4061}">
+                <replace string="'$SHIPNAME$'" with="$Argon_Fighter_1_Macro.name"/>
+              </substitute_text>
+              <add_scenario_stat id="'claimed_ship_1'" name="$ClaimedShip1ScoreText" uivalue="{1001,2617}" description="{30601,4062}" score="$ClaimedShip1Score"/>
+            </do_if>
+
+            <do_if value="$ClaimedShip2?">
+              <set_value name="$ClaimedShip2Score" exact="15"/>
+              <set_value name="$ResultData.$Score" operation="add" exact="$ClaimedShip2Score"/>
+              <substitute_text text="$ClaimedShip2ScoreText" source="{30601,4061}">
+                <replace string="'$SHIPNAME$'" with="$Argon_Fighter_2_Macro.name"/>
+              </substitute_text>
+              <add_scenario_stat id="'claimed_ship_2'" name="$ClaimedShip2ScoreText" uivalue="{1001,2617}" description="{30601,4062}" score="$ClaimedShip2Score"/>
+            </do_if>
+
+            <do_if value="@userdata.timelines_presidents_end_blackbox">
+              <set_value name="$PointsPerBlackBox" exact="15"/>
+              <set_value name="$BlackboxesCollectedScore" exact="$PointsPerBlackBox * $BlackboxesCollected"/>
+              <set_value name="$ResultData.$Score" operation="add" exact="$BlackboxesCollectedScore"/>
+              <substitute_text text="$BlackboxesCollectedScoreDescText" source="{30601,4042}">
+                <replace string="'$NUMBER$'" with="$PointsPerBlackBox"/>
+              </substitute_text>
+              <add_scenario_stat id="'blackboxes_collected'" name="{30601,4041}" uivalue="$BlackboxesCollected" description="$BlackboxesCollectedScoreDescText" score="$BlackboxesCollectedScore"/>
+            </do_if>
+
+            <do_if value="@userdata.timelines_presidents_end_transmit">
+              <set_value name="$MaxTransmissionScore" exact="150"/>
+              <do_if value="$TransmittedPackets == $NumBlackboxes">
+                <set_value name="$TransmissionScore" exact="$MaxTransmissionScore"/>
+              </do_if>
+              <do_else>
+                <set_value name="$TransmissionScore" exact="($MaxTransmissionScore / $NumBlackboxes) * $TransmittedPackets"/>
+              </do_else>
+              <set_value name="$ResultData.$Score" operation="add" exact="$TransmissionScore"/>
+              <add_scenario_stat id="'transmissions_completed'" name="{30601,4051}" uivalue="$TransmittedPackets" description="{30601,4052}" score="$TransmissionScore"/>
+            </do_if>
+
+            <do_if value="player.allmodules.{player.module}.rating.{$ResultData.$Score}">
+              <unlock_achievement name="TL_SCENARIO_4" scenario="true"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

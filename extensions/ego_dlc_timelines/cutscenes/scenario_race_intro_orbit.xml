@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_race_intro_orbit">
+    <params>
+      <!-- Zone to create scenezone from -->
+      <param name="anchor" object="true" />
+
+      <param name="target" object="true"/>
+      <param name="beginangle" number="true"/>
+      <param name="endangle" number="true"/>
+      <param name="begindistance" number="true" default="1000"/>
+      <param name="enddistance" number="true" default="1000"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="LookAtShip" start="0">
+        <shot name="CameraOrbit" environment="scenezone" duration="8000">
+          <camera_orbit reference="target" orient_to="ecliptic" cycle="none" z="0" y="0">
+            <begin angle="param:beginangle">
+              <distance>
+                <value var="begindistance"/>
+              </distance>
+            </begin>
+            <end angle="param:endangle">
+              <distance>
+                <value var="enddistance"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

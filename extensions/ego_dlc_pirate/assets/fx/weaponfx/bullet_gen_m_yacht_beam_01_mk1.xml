@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-05-27 11:10:37-->
+<components>
+  <component name="bullet_gen_m_yacht_beam_01_mk1" class="bullet">
+    <source geometry="extensions\ego_dlc_pirate\assets\fx\weaponfx\bullet_gen_m_yacht_beam_01_mk1_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="xu_omni_01" shadow="0" r="168" g="128" b="92" intensity="4" specularintensity="1" range="5" shadowrange="5" lighteffect="1" trigger="0">
+            <offset>
+              <position x="0.01296949" y="0" z="0" />
+            </offset>
+          </omni>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="Connection01" tags="animation part textureanimation ">
+        <animations>
+          <animation name="loop" start="1" end="10" />
+        </animations>
+        <parts>
+          <part name="bullet_m_beam">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_bullets_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.139768" y="0.139768" z="0.5" />
+              <center x="-2.7269e-06" y="2.31862e-05" z="0.5" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0.1" />
+                  <key frame="10" value="1" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection02" tags="animation part textureanimation ">
+        <animations>
+          <animation name="loop_random" start="1" end="30" />
+        </animations>
+        <parts>
+          <part name="bullet_m_beam_bolt">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.beam_fx_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="14.63713" y="15.45661" z="0.5" />
+              <center x="-1.303493" y="0.5937796" z="0.5" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0.03333334" />
+                  <key frame="30" value="1" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="connection_laser01" tags="laser ">
+        <offset>
+          <position x="0" y="0" z="0.006603815" />
+        </offset>
+      </connection>
+      <connection name="position" tags="position" value="1" />
+      <connection name="Connection03" tags="animation iklink part textureanimation " parent="bullet_m_beam_bolt" />
+    </connections>
+  </component>
+</components>

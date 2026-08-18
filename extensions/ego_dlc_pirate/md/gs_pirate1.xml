@@ -1,0 +1,1313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Pirate1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_pirate1" version="2">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Pirate_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="0"/>
+        <set_value name="$DeepDebugChance" exact="0"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="30287"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="@$MissionCue.hasmission">
+          <update_mission cue="$MissionCue" group="missiongroup.gs_pirate1"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Setup">
+          <actions>
+            <set_value name="md.$GlobalHintsDND" exact="true" />
+          </actions>
+          <delay exact="3s"/>
+          <actions>
+            <signal_cue cue="Ch1_Intro"/>
+          </actions>
+          <cues>
+
+            <cue name="Setup_Map">
+              <actions>
+                <!-- Windfall IV, Black Hole Sun IV (for the EQ dock and a known way to safe space) -->
+                <set_value name="$InitialMap" exact="[
+                    macro.cluster_503_sector001_macro,
+                    macro.cluster_06_sector001_macro
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Satellite">
+              <actions>
+                <find_station name="$SatelliteStation" space="player.entity.sector" sortbydistanceto="player.entity"/>
+                <create_position name="$SatelliteStationPosition" space="player.entity.sector" object="$SatelliteStation"/>
+                <create_object name="$Satellite" macro="macro.eq_arg_satellite_01_macro" owner="faction.player" sector="$SatelliteStation.sector">
+                  <safepos x="$SatelliteStationPosition.x + 20km" y="$SatelliteStationPosition.y" z="$SatelliteStationPosition.z - 10km"/>
+                </create_object>
+              </actions>
+            </cue>
+
+            <cue name="Cleanup_Vig_Hostiles">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <assert value="$Ch1_LoanSharkAttackers?" text="'Missing LoanSharkAttackers (called too early)'"/>
+                <find_station name="$PirateBase" space="$PirateLandmark02.sector" defencestation="true" required="true"/>
+
+                <do_for_each in="$Ch1_LoanSharkAttackers" name="$CurrentShip">
+                  <cancel_all_orders object="$CurrentShip"/>
+                  <cease_fire object="$CurrentShip"/>
+                  <reset_relation_boost object="$CurrentShip" faction="faction.player" comment="player is likely not on his ship, so use faction= instead of otherobject="/>
+                  <create_order id="'MoveToObject'" object="$CurrentShip">
+                    <param name="destination" value="$PirateBase"/>
+                    <param name="noattackresponse" value="true"/>
+                  </create_order>
+                  <create_order id="'MoveDie'" object="$CurrentShip">
+                    <param name="atstation" value="$PirateBase"/>
+                  </create_order>
+                </do_for_each>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch1_Intro">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Pirate gamestart 1'" chance="$DebugChance"/>
+            <set_value name="$ObjectiveStep" exact="1"/>
+
+            <find_sector name="$PirateSectors" extension="'ego_dlc_pirate'" multiple="true"/>
+            <find_station name="$PirateLandmark02" space="$PirateSectors" godstationentry="'pirate_landmark_02'" required="true"/>
+            <set_value name="$PirateLandmarkSector" exact="$PirateLandmark02.sector"/>
+            <assert value="$PirateLandmarkSector == player.sector"/>
+
+            <set_value name="$StationDistanceInitial" exact="$PirateLandmark02.distanceto.{player.entity}"/>
+            <set_value name="$StationDistanceHoming" exact="$StationDistanceInitial"/>
+
+            <set_value name="$BriefingText" exact="{30287, 1001} + '\n\n' + {30287, 1002}"/>
+
+            <!-- Define deliveries, note that double-entries are NOT allowed (ware is used as a lookup into a table later) -->
+            <!-- type: false=selloffer, true=buyoffer (from the perspective of the player, it's the opposite, so type=false means he needs to buy it) -->
+            <set_value name="$DeliveryTable" exact="table[
+                {ware.spacefuel} = table[$amount=600, $type=true],
+                {ware.wheat} = table[$amount=200, $type=true]
+              ]"/>
+
+            <!-- Setup trades -->
+            <create_list name="$TradeOfferList"/>
+            <do_for_each in="$DeliveryTable" name="$Ware">
+              <assert value="$DeliveryTable.{$Ware}.$type == true"/>
+
+              <substitute_text text="$CurrentWareText" source="{1004,1009}">
+                <replace string="'$AMOUNT$'" with="$DeliveryTable.{$Ware}.$amount"/>
+                <replace string="'$WARE$'" with="$Ware.name"/>
+              </substitute_text>
+              <set_value name="$BriefingText"  exact="$BriefingText + '\n' + $CurrentWareText"/>
+
+              <create_trade_offer name="$TradeOffer" buyer="$PirateLandmark02" object="$PirateLandmark02" ware="$Ware" amount="$DeliveryTable.{$Ware}.$amount" missioncue="namespace" playeronly="true" price="$Ware.minprice" comment="sell/deliver" />
+              <append_to_list name="$TradeOfferList" exact="$TradeOffer"/>
+              <!-- All wares are onboard playership, ready for delivery -->
+              <add_wares object="player.ship" ware="$Ware" exact="$DeliveryTable.{$Ware}.$amount" result="$WareResult"/>
+              <assert value="$WareResult"/>
+            </do_for_each>
+
+            <!-- create trade mission -->
+            <create_mission cue="$MissionCue" name="{30287,1000}" description="$BriefingText" rewardtext="{30287,1003}" type="missiontype.plot" group="missiongroup.gs_pirate1" faction="faction.civilian" difficulty="level.trivial" abortable="false" activate="true" icon="'briefing_jawn_kobeyoshi_01'">
+              <briefing>
+                <objective step="$ObjectiveStep" action="objective.deliver" text="{30287,1010}" object="$PirateLandmark02"/>
+              </briefing>
+            </create_mission>
+            <set_objective_from_briefing cue="$MissionCue" step="$ObjectiveStep"/>
+
+            <append_to_list name="md.$MissionDND" exact="Ch1_Intro"/>
+          </actions>
+          <delay exact="10s"/>
+          <actions>
+            <signal_cue_instantly cue="Vig_Comments" param="[[30287101],[30287102]]" comment="Let's get this job done"/>
+          </actions>
+          <delay exact="3s"/>
+          <actions>
+            <signal_cue cue="Ch1_TravelDrive_Hint"/>
+          </actions>
+          <cues>
+
+            <cue name="Aurora_Destroyed">
+              <conditions>
+                <event_object_destroyed object="$PirateLandmark02"/>
+              </conditions>
+              <actions>
+                <!-- cleanup VIG squad + Aurora Trader -->
+                <signal_cue cue="Cleanup_Vig_Hostiles"/>
+                <do_if value="md.GS_Pirate1.Ch1_SetupTrader_MoveDie.state == cuestate.waiting">
+                  <signal_cue_instantly cue="Ch1_SetupTrader_MoveDie" check="false" comment="cleanup trader"/>
+                </do_if>
+                <!-- cancel -->
+                <cancel_cue cue="Ch1_Intro" />
+                <cancel_cue cue="Ch2_AuroraCasino" />
+                <remove_mission cue="$MissionCue" type="failed" />
+              </actions>
+            </cue>
+
+            <cue name="Ch1_TravelDrive_Hint">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Ch1_TravelDrive_Hint_Show">
+                  <delay exact="15s"/>
+                  <actions>
+                    <do_if value="not player.ship.travel.active">
+                      <show_help line="4302" log="true" position="13" force="true" width="350" duration="10s" comment="Every ship engine can accelerate beyond its normal top speed using TRAVEL MODE." allowclose="false"/>
+                      <show_help line="4301" log="true" position="13" force="true" width="350" duration="10s" comment="Press $INPUT_ACTION_TOGGLE_TRAVEL_MODE$ or activate TRAVEL MODE from the SHIP MENU \($INPUT_ACTION_OPEN_COCKPIT_MENU$\)." allowclose="false"/>
+                    </do_if>
+                  </actions>
+                </cue>
+                <cue name="Ch1_TravelDrive_Hint_Remove">
+                  <conditions>
+                    <event_player_changed_activity activity="activity.travel"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Ch1_TravelDrive_Hint_Show"/>
+                    <remove_help line="4301"/>
+                    <remove_help line="4302"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_SetupEscortActor">
+              <actions>
+                <!-- Copy VIG enforcer from main story. -->
+                <set_value name="$LoansharkPirateActor" exact="md.$PersistentCharacters.$LoansharkPirateActor"/>
+
+                <!-- Squad mate looks are generated randomly, so we have to copy the exact actors over from the main story or they'll turn out different. -->
+                <set_value name="$LoansharkSquadmateActor_1" exact="md.$PersistentCharacters.$LoansharkSquadmateActor_1"/>
+                <set_value name="$LoansharkSquadmateActor_2" exact="md.$PersistentCharacters.$LoansharkSquadmateActor_2"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupEscort">
+              <actions>
+                <create_group groupname="$Ch1_LoanSharkAttackers" comment="includes commanders"/>
+                <create_group groupname="$Ch1_LoanSharkCommanders" comment="commanders only"/>
+
+                <get_loadout result="$Loadout_Harrasser_Shih" macro="macro.ship_pir_s_heavyfighter_01_a_macro" loadout="'story_thefan_harrasser_shih'"/>
+                <get_loadout result="$Loadout_Harrasser_Kyd" macro="macro.ship_pir_s_fighter_01_a_macro" loadout="'story_thefan_harrasser_kyd'"/>
+                <get_loadout result="$Loadout_Harrasser_Lux" macro="macro.ship_pir_s_fighter_02_a_macro" loadout="'story_thefan_harrasser_lux'"/>
+
+                <set_value name="$FleetComposition" exact="[
+                            [ macro.ship_pir_s_heavyfighter_01_a_macro, $LoansharkPirateActor,      $Loadout_Harrasser_Shih ],
+                            [ macro.ship_pir_s_fighter_01_a_macro,      $LoansharkSquadmateActor_1, $Loadout_Harrasser_Kyd ],
+                            [ macro.ship_pir_s_fighter_02_a_macro,      $LoansharkSquadmateActor_2, $Loadout_Harrasser_Lux ]
+                            ]" />
+
+                <do_all exact="$FleetComposition.count" counter="$i">
+                  <create_ship name="$CurrentShip" missioncue="namespace" macro="$FleetComposition.{$i}.{1}" sector="$PirateLandmarkSector" commandeerable="false" capturable="false">
+                    <owner exact="faction.loanshark"/>
+                    <loadout loadout="$FleetComposition.{$i}.{3}"/>
+                    <pilot actor="$FleetComposition.{$i}.{2}"/>
+                    <people ref="argon_elite_military_crew">
+                      <fillpercent exact="100"/>
+                    </people>
+                    <safepos object="player.ship" space="player.sector" min="1km" max="2km"/>
+                  </create_ship>
+
+                  <do_if value="$i == 1">
+                    <set_object_name object="$CurrentShip" page="30251" line="217"/>
+                    <add_to_group groupname="$Ch1_LoanSharkCommanders" object="$CurrentShip"/>
+                    <create_order id="'ProtectShip'" object="$CurrentShip">
+                      <param name="target" value="player.ship"/>
+                    </create_order>
+                  </do_if>
+                  <do_else>
+                    <do_if value="$i == 2">
+                      <set_object_name object="$CurrentShip" page="30251" line="212"/>
+                    </do_if>
+                    <do_elseif value="$i == 3">
+                      <set_object_name object="$CurrentShip" page="30251" line="214"/>
+                    </do_elseif>
+
+                    <create_order id="'AssignCommander'" object="$CurrentShip">
+                      <param name="commander" value="$Ch1_LoanSharkCommanders.{1}"/>
+                      <param name="assignment" value="assignment.attack"/>
+                    </create_order>
+                  </do_else>
+
+                  <add_to_group groupname="$Ch1_LoanSharkAttackers" object="$CurrentShip"/>
+
+                  <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                    <param name="Object" value="$CurrentShip"/>
+                    <param name="RequesterCue" value="namespace"/>
+                    <param name="ReachedThresholdSignalCue" value="null"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                  </run_actions>
+                </do_all>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupTrader">
+              <actions>
+                <create_ship name="$TraderShip" sector="$PirateLandmark02.sector" macro="ship_tel_m_trans_container_01_a_macro" missioncue="this" capturable="false" commandeerable="false">
+                  <pilot group="scavenger.pilot">
+                    <owner exact="faction.scavenger"/>
+                  </pilot>
+                  <people ref="argon_freighter_crew">
+                    <fillpercent exact="15"/>
+                  </people>
+                  <owner exact="faction.scavenger"/>
+                  <safepos x="-182540.344" z="400.307"/>
+                  <!--safepos x="-92485.258" z="-8623.482"/-->
+                </create_ship>
+                <set_object_name object="$TraderShip" page="30287" line="101"/>
+                <create_order object="$TraderShip" id="'Wait'">
+                  <param name="noattackresponse" value="true"/>
+                </create_order>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupTrader_Order" checkinterval="3s" comment="wait for the player to be near to increase the chance of meeting each other">
+              <conditions>
+                <check_value value="($TraderShip.exists) and ($Ch1_LoanSharkCommanders.count) and ($Ch1_LoanSharkCommanders.{1}.distanceto.{$TraderShip} lt 40km)"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch1_SetupTrader_MoveDie"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupTrader_MoveDie">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- moving towards the station, relatively high chance of meeting with the vig escort -->
+                <create_order object="$TraderShip" id="'MoveDie'" comment="And queue MoveDie, so that it docks once it arrives">
+                  <param name="atstation" value="$PirateLandmark02"/>
+                  <param name="byidle" value="false"/>
+                  <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                </create_order>
+              </actions>
+            </cue>
+
+            <cue name="Vig_Comments" instantiate="true" comment="fire and forget speaks (no callbacks!)">
+              <conditions>
+                <event_cue_signalled comment="event.param contains lines to be spoken!"/>
+                <check_value value="$LoansharkPirateActor"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Dialog.Speak_Actor_Run">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$LoansharkPirateActor"/>
+                  <param name="Lines"             value="event.param"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+            <!-- RML observing the station, what the player delivers and doing manual bookkeeping -->
+            <cue name="Ch1_Trade_Wares_Ref" ref="md.RML_Trade_Wares.TradeWares">
+              <param name="EndSignalCue"  value="Ch1_Trade_End"/>
+              <param name="MissionCue"    value="$MissionCue"/>
+              <param name="StartStep"     value="1"/>
+              <param name="TradeOffers"   value="$TradeOfferList"/>
+              <param name="PartialTradeSignalCue" value="Ch1_Partial_Delivery_Complete"/>
+              <param name="DebugChance"   value="$DebugChance" />
+            </cue>
+
+            <cue name="Ch1_Partial_Delivery_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+
+                <cue name="Ch1_Vig_Part_Of_It_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$LoansharkPirateActor"/>
+                  <param name="Lines"             value="[[30287141]]"/>
+                  <param name="Cutscene"          value="false"/>
+                  <param name="WaitForFullscreen" value="false"/>
+                  <param name="EndSignalCue"      value="null"/>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Trade_End">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!--debug_text text="'Trade finished (tradeoffers are auto-removed)'" chance="$DebugChance"/-->
+                <signal_cue cue="Ch1_Done"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Vig_Harassment" checkinterval="3s">
+              <conditions>
+                <check_value value="($Ch1_LoanSharkCommanders.count) and ($Ch1_LoanSharkCommanders.{1}.distanceto.{$TraderShip} lt 30km)"/>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+              </actions>
+              <delay exact="1.5s"/>
+              <actions>
+                <!-- Cutscene starts by showing the escort formation. -->
+                <play_cutscene result="this.$CutsceneID" key="'Story_Gamestart1_Ch1_Trader'" abortable="true">
+                  <param name="EnforcerShip" object="$Ch1_LoanSharkCommanders.{1}"/>
+                  <param name="TraderShip" object="$TraderShip"/>
+                </play_cutscene>
+              </actions>
+              <delay exact="5s"/>
+              <actions>
+                <!-- Camera shows Kass in her cockpit. -->
+                <signal_cue cue="Ch1_Vig_Harassment_Part1"/>
+                <cutscene_event key="'Story_Gamestart1_Ch1_Trader'" event="'Trigger_Sequence2'"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_Vig_Harassment_Part1">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Vig_Harass_Trader_Speak_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287120], [30287121]]"/>
+                      <param name="Cutscene"          value="false"/>
+                      <param name="WaitForFullscreen" value="false"/>
+                      <param name="EndSignalCue"      value="Ch1_Vig_Harassment_Part2_Delay"/>
+                    </cue>
+                    <cue name="Ch1_Vig_Harassment_Part1_Trigger_Next_Shot">
+                      <conditions>
+                        <event_speak_finished actor="$LoansharkPirateActor" line="30287120"/>
+                      </conditions>
+                      <actions>
+                        <!-- Camera shows the trader. -->
+                        <cutscene_event key="'Story_Gamestart1_Ch1_Trader'" event="'Trigger_Sequence3'"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Part2_Delay">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <stop_cutscene cutscene="parent.$CutsceneID"/>
+                    <signal_cue cue="Ch1_Vig_Harassment_Follow_Order_Gerra"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <signal_cue cue="Ch1_Vig_Harassment_Part2"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Part2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Vig_Harass_Trader_Speak_2_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287122],[30287123, 0.5s],[30287124, 0.5s],[30287125, 0.5s],[30287126, 3s]]"/>
+                      <param name="Cutscene"          value="false"/>
+                      <param name="WaitForFullscreen" value="false"/>
+                      <param name="EndSignalCue"      value="Ch1_Vig_Harassment_Part3"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Part3">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="VIG_Dialog_Not_You_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287127]]"/>
+                      <param name="EndSignalCue"      value="null"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Follow_Order_Gerra">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$TraderShip.isoperational"/>
+                  </conditions>
+                  <actions>
+                    <!-- Find Gerra and make him follow the trader for a moment. -->
+                    <do_for_each in="$Ch1_LoanSharkAttackers" name="$CurrentShip">
+                      <do_if value="$CurrentShip.pilot == $LoansharkSquadmateActor_1">
+                        <cancel_all_orders object="$CurrentShip"/>
+                        <create_order id="'Follow'" object="$CurrentShip">
+                          <param name="target" value="$TraderShip"/>
+                        </create_order>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Spawn_Drops">
+                  <conditions>
+                    <event_speak_finished actor="$LoansharkPirateActor" line="30287125" comment="Each line in Vig_Harass_Trader_Speak_2_Ref counts as its own speak."/>
+                    <check_value value="$TraderShip.isoperational"/>
+                  </conditions>
+                  <actions>
+                    <!-- Spawn an amount of wares that can fit in Gerra's Kyd. -->
+                    <set_value name="$TraderShipWaresTable" exact="table[
+                                                                   {ware.spacefuel} = 50,
+                                                                   {ware.spaceweed} = 50,
+                                                                   {ware.majadust} = 50
+                                                                 ]"/>
+                    <do_for_each in="$TraderShipWaresTable" name="$Ware">
+                      <add_wares object="$TraderShip" ware="$Ware" exact="$TraderShipWaresTable.{$Ware}" result="$WareResult"/>
+                    </do_for_each>
+                    <drop_cargo object="$TraderShip" ware="$TraderShipWaresTable" groupname="$TraderDropGroup"/>
+                    <create_list name="$TraderDropList"/>
+                    <do_for_each in="$TraderDropGroup" name="$CurrentDrop">
+                      <append_to_list name="$TraderDropList" exact="$CurrentDrop"/>
+                    </do_for_each>
+                    <signal_cue cue="Ch1_Vig_Harassment_Collect_Order_Gerra"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Vig_Harassment_Collect_Order_Gerra">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- Find Gerra and make him stay with the trader. -->
+                    <do_for_each in="$Ch1_LoanSharkAttackers" name="$CurrentShip">
+                      <do_if value="$CurrentShip.pilot == $LoansharkSquadmateActor_1">
+                        <cancel_all_orders object="$CurrentShip"/>
+                        <create_order name="$GerraCollectDropsOrder" id="'Collect'" object="$CurrentShip">
+                          <param name="targetlist" value="$TraderDropList"/>
+                        </create_order>
+                        <set_value name="$GerraShip" exact="$CurrentShip"/>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                  <delay exact="2min"/>
+                  <actions>
+                    <signal_cue cue="Ch1_Vig_Harassment_Return_Order_Gerra" check="false" comment="Failsafe"/>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_Vig_Harassment_Return_Order_Gerra">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                          <event_object_order_finished object="$GerraShip" order="$GerraCollectDropsOrder"/>
+                          <event_object_order_cancelled object="$GerraShip" order="$GerraCollectDropsOrder"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <!-- Find Gerra and make him return to the squad commander. -->
+                        <do_for_each in="$Ch1_LoanSharkAttackers" name="$CurrentShip">
+                          <do_if value="$CurrentShip.pilot == $LoansharkSquadmateActor_1">
+                            <cancel_all_orders object="$CurrentShip"/>
+                            <create_order id="'AssignCommander'" object="$CurrentShip">
+                              <param name="commander" value="$Ch1_LoanSharkCommanders.{1}"/>
+                              <param name="assignment" value="assignment.attack"/>
+                            </create_order>
+                          </do_if>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_PlayerWandering">
+              <cues>
+
+                <cue name="Ch1_NarrowRadius" checkinterval="1s" instantiate="true" comment="keep tightening so player doesn't wander off">
+                  <actions>
+                    <set_value name="this.$StationDistanceCurrent" exact="$PirateLandmark02.distanceto.{player.entity}"/>
+                    <!-- tighten radius -->
+                    <do_if value="($StationDistanceHoming gt 50km) and (this.$StationDistanceCurrent lt $StationDistanceHoming - 30km)">
+                      <debug_text text="'Tightening from %s to %s'.[$StationDistanceHoming, this.$StationDistanceCurrent + 10km]" chance="$DebugChance"/>
+                      <set_value name="$StationDistanceHoming" exact="this.$StationDistanceCurrent + 10km"/>
+                    </do_if>
+                    <!-- warn player if going outside radius -->
+                    <do_if value="( $PirateLandmark02.distanceto.{player.entity} gt $StationDistanceHoming) and Ch1_Vig_DistanceWarning1.state != cuestate.complete">
+                      <signal_cue cue="Ch1_Vig_DistanceWarning1"/>
+                    </do_if>
+                    <do_elseif value="($PirateLandmark02.distanceto.{player.entity} gt $StationDistanceHoming + 30km) and Ch1_Vig_DistanceWarning2.state != cuestate.complete">
+                      <signal_cue cue="Ch1_Vig_DistanceWarning2"/>
+                    </do_elseif>
+                    <do_elseif value="($PirateLandmark02.distanceto.{player.entity} gt $StationDistanceHoming + 60km) and Ch1_Vig_DistanceWarning3.state != cuestate.complete">
+                      <!-- turn aggressive if player is far outside radius -->
+                      <signal_cue cue="Ch1_Vig_DistanceWarning3"/>
+                    </do_elseif>
+                  </actions>
+                </cue>
+
+                
+                <cue name="Ch1_Gate_Approach" checkinterval="1s" instantiate="true">
+                  <conditions>
+                    <count_gates result="$EscapeGate" active="true" space="$PirateLandmarkSector" multiple="false" comment="We only need the closest Gate.">
+                      <match_distance object="player.entity" max="120km"/>
+                    </count_gates>
+                    <check_value value="Ch1_Vig_DistanceWarning3.state == cuestate.waiting" comment="Only if the last distance warning isn't already playing."/>
+                  </conditions>
+                  <actions>
+                    <do_if value="($EscapeGate.distanceto.{player.entity} le 120km) and Ch1_Vig_DistanceWarning1.state == cuestate.waiting">
+                      <signal_cue cue="Ch1_Vig_DistanceWarning1"/>
+                    </do_if>
+
+                    <do_elseif value="($EscapeGate.distanceto.{player.entity} lt 90km) and Ch1_Vig_DistanceWarning2.state == cuestate.waiting">
+                      <signal_cue cue="Ch1_Vig_DistanceWarning2"/>
+                    </do_elseif>
+
+                    <do_elseif value="($EscapeGate.distanceto.{player.entity} lt 60km) and Ch1_Vig_DistanceWarning3.state == cuestate.waiting">
+                      <signal_cue cue="Ch1_Vig_DistanceWarning3"/>
+                    </do_elseif>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Vig_DistanceWarning1">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_Vig_DistanceWarning1_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287110]]"/>
+                      <param name="EndSignalCue"      value="null"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_DistanceWarning2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_Vig_DistanceWarning2_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287111]]"/>
+                      <param name="EndSignalCue"      value="null"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_DistanceWarning3">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Ch1_Vig_DistanceWarning3_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="Lines"             value="[[30287112]]" comment="player needs to be taught a lesson, vig turns hostile"/>
+                      <param name="EndSignalCue"      value="Ch1_Vig_DistanceWarning3_Done"/>
+                    </cue>
+                    <cue name="Ch1_Vig_DistanceWarning3_Done">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Ch1_Vig_Hostile"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Docked">
+              <conditions>
+                <event_object_docked object="player.ship" dock="$PirateLandmark02"/>
+              </conditions>
+              <cues>
+
+                <cue name="Ch1_Docked_Comment_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$LoansharkPirateActor"/>
+                  <param name="Lines"             value="[[30287140]]"/>
+                  <param name="DelayInitial"      value="3s" comment="don't overlap with 'succesfully docked' speech"/>
+                  <param name="EndSignalCue"      value="Ch1_Docked_Trade_Hint"/>
+                </cue>
+
+                <cue name="Ch1_Docked_Trade_Hint">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="not $TradeMenuAlreadyOpened?"/>
+                  </conditions>
+                  <actions>
+                    <show_help_overlay id="'docked_trade'" highlightonly="true" comment="hilight the 'trade' entry"/>
+                    <show_help line="25002" position="18" force="true" comment="Open the TRADE interface to deliver the wares to the station." allowclose="true"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_Docked_Trade_Menu_Opened">
+                      <conditions>
+                        <event_ui_triggered screen="'DockedMenu'" control="'docked_trade'"/>
+                        <check_value value="Ch1_Docked_Trade_Hint.state == cuestate.waiting"/>
+                      </conditions>
+                      <actions>
+                        <remove_help all="true"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Docked_Trade_Menu_Closed">
+                      <conditions>
+                        <event_ui_triggered screen="'MapMenu'" control="'confirmtrade'"/>
+                      </conditions>
+                      <actions>
+                        <remove_help_overlay id="'docked_trade'"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Docked_Trade_Menu_Opened_Prematurely">
+                  <conditions>
+                    <event_ui_triggered screen="'DockedMenu'" control="'docked_trade'"/>
+                    <check_value value="Ch1_Docked_Trade_Hint.state == cuestate.waiting"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$TradeMenuAlreadyOpened"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Vig_Hostile">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Ch1_Done"/>
+                <cancel_cue cue="Ch1_Docked"/>
+                <cancel_cue cue="Ch1_PlayerWandering"/>
+                <cancel_cue cue="Ch1_Vig_Harassment"/>
+                <cancel_cue cue="Ch2_AuroraCasino" comment="Mission failed / Aurora can't accept the delivery anymore"/>
+
+                <!--<find_object_component name="$engines" object="player.ship" class="[class.engine]" multiple="true"/>
+                <do_for_each name="$engine" in="$engines">
+                  <add_effect object="$engine" effect="'scuttle_s_single'"/>
+                </do_for_each>-->
+                <!--<disable_travel_mode ship="player.ship" duration="15min"/>-->
+                <do_for_each in ="$Ch1_LoanSharkAttackers" name="$CurrentShip">
+                  <cancel_all_orders object="$CurrentShip"/>
+                  <create_order object="$CurrentShip" id="'Attack'">
+                    <param name="primarytarget" value="player.ship" />
+                    <param name="pursuetargets" value="true" />
+                    <param name="allowothertargets" value="false"/>
+                    <param name="checkrelation" value="false"/>
+                    <param name="debugchance" value="0"/>
+                  </create_order>
+                </do_for_each>
+                <signal_cue cue="Ch1_Failed"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_Vig_Hostile_Hold_Fire">
+                  <conditions>
+                    <event_object_hull_damaged group="global.$PlayerContainerGroup"/>
+                    <check_value value="event.object.hullpercentage lt 50"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$LoansharkPirateActor" line="30287113" priority="100" comment="Hold fire"/>
+
+                    <signal_cue cue="Cleanup_Vig_Hostiles"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_Vig_Hostile_Hold_Fire_Player_Dialog">
+                      <conditions>
+                        <event_speak_finished actor="$LoansharkPirateActor" line="30287113"/>
+                      </conditions>
+                      <cues>
+
+                        <cue name="Ch1_Vig_Player_Defeated_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="IsInMission"       value="false"/>
+                          <param name="Actor"             value="$LoansharkPirateActor"/>
+                          <param name="DelayInitial"      value="2s"/>
+                          <param name="Lines"             value="[[30287114],[30287116]]"/>
+                          <param name="EndSignalCue"      value="Ch1_Vig_Hostile_Aurora_Dialog"/>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Vig_Hostile_Player_Fled">
+                  <conditions>
+                    <event_object_changed_sector object="player.entity" previous="$PirateLandmarkSector"/>
+                  </conditions>
+                  <actions>
+                    <unlock_achievement name="TOA_AURORA_2" comment="Running Hot" />
+                    <signal_cue cue="Cleanup_Vig_Hostiles"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_Vig_Player_Fled_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="IsInMission"       value="false"/>
+                      <param name="Actor"             value="$LoansharkPirateActor"/>
+                      <param name="DelayInitial"      value="7s" comment="Give Betty enough time to announce the new sector name."/>
+                      <param name="Lines"             value="[[30287115],[30287116]]"/>
+                      <param name="EndSignalCue"      value="Ch1_Vig_Hostile_Aurora_Dialog"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <!--<cue name="Ch1_Vig_Hostile_Victory">
+                  <conditions>
+                    <event_object_destroyed object="player.ship"/>
+                  </conditions>
+                  <delay exact="6s" comment="Avoid overlapping with Betty saying 'ejecting'"/>
+                  <actions>
+                    <signal_cue_instantly cue="Vig_Comments" param="[[30287113]]" comment="Vig handles Traitors"/>
+                  </actions>
+                </cue>-->
+
+                <cue name="Ch1_Vig_Hostile_Aurora_Dialog">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <speak actor="$LoansharkPirateActor" priority="100">
+                      <text line="30287117" comment="Runner wasn't up to the task."/>
+                      <text line="30287118" delay="2s" comment="Compensation? Want to talk to the boss?"/>
+                      <text line="30287119" delay="2s" comment="Thought so, bye."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Vig_Hostile_Dialog_Finished">
+                  <conditions>
+                    <event_speak_finished actor="$LoansharkPirateActor" line="30287117"/>
+                  </conditions>
+                  <actions>
+                    <!-- This is important, because it re-enables the Prelude_Scavenger cutscene in story_pirate_prelude.xml -->
+                    <cancel_cue cue="Ch1_Intro"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Failed">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <remove_from_list name="md.$MissionDND" exact="Ch1_Intro"/>
+                <signal_cue_instantly cue="Ch1_SetupTrader_MoveDie" check="false" comment="cleanup trader"/>
+                <write_to_logbook category="missions" faction="faction.player" title="{30287,1041}" text="{30287,1042}"/>
+                <!-- This should put the player from +5 to -5 -->
+                <add_faction_relation faction="faction.loanshark" otherfaction="faction.player" value="-0.0064" reason="relationchangereason.missionfailed"/>
+                <remove_mission cue="$MissionCue" type="failed" />
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Done">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <remove_from_list name="md.$MissionDND" exact="Ch1_Intro"/>
+                <set_value name="$ObjectiveStep" operation="add" exact="$DeliveryTable.keys.count" comment="skip 2, to avoid the previous delivery objectives"/>
+
+                <do_if value="(player.ship) and (player.occupiedship)" comment="sitting in the cockpit chair">
+                  <show_help line="3053" position="4" force="true" allowclose="true" comment="...select 'Get Up'..."/>
+                  <show_help_overlay id="'docked_getup'" highlightonly="true"/>
+                </do_if>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.wait" updatebriefing="true"/>
+
+                <signal_cue_instantly cue="Ch1_SetupTrader_MoveDie" check="false" comment="cleanup trader"/>
+                <!-- escort squad server their purpose, goodbye and cleanup -->
+                <do_for_each name="$VigAttacker" in ="$Ch1_LoanSharkAttackers">
+                  <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                    <param name="Object" value="$VigAttacker"/>
+                    <param name="RequesterCue" value="namespace"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                  </run_actions>
+                </do_for_each>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_Vig_Goodbye_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$LoansharkPirateActor"/>
+                  <param name="Lines"             value="[[30287150],[30287151],[30287152]]"/>
+                  <param name="EndSignalCue"      value="Ch2_AuroraCasino"/>
+                </cue>
+
+                <cue name="Ch1_Done_Player_Got_Up" checkinterval="1s">
+                  <conditions>
+                    <check_value value="not player.occupiedship"/>
+                  </conditions>
+                  <actions>
+                    <remove_help line="3053" comment="Remove hint about getting up."/>
+                    <remove_help_overlay id="'docked_getup'"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch2_AuroraCasino" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <cancel_cue cue="Ch1_Intro"/>
+
+            <signal_cue cue="Cleanup_Vig_Hostiles" check="false"/>
+
+            <remove_help line="3053" comment="Remove hint about getting up, if for some reason the dialog played while they were still sitting."/>
+            <remove_help_overlay id="'docked_getup'"/>
+
+            <!-- Determine interior macros and names. -->
+            <!--<get_room_definition macro="$OfficeCorridorMacro" doors="$OfficeDoors" race="faction.loanshark.primaryrace" tags="tag.corridor" />-->
+            <set_value name="$OfficeRoomMacro" exact="macro.room_gen_managersoffice_01_macro"/>
+            <set_value name="$OfficeInteriorName" exact="readtext.{20007}.{3051}" comment="Room A113"/>
+            <!-- Create persistent interior -->
+            <create_dynamic_interior roomname="$OfficeRoom" object="$PirateLandmark02" name="$OfficeInteriorName" corridor="macro.room_arg_corridor_05_macro" room="$OfficeRoomMacro" corridorname="$OfficeCorridor" interiorname="$OfficeInterior" persistent="true"/>
+
+            <!-- shady contact -->
+            <set_value name="$ShadyBarContactActor" exact="md.$PersistentCharacters.$ShadyBarContactActor"/>
+            <assert value="$ShadyBarContactActor != null" text="'Shady Bar Contact from Criminal Storyline not found?!'"/>
+            <!--find_room object="$PirateLandmark02" name="$OfficeRoom" roomtype="roomtype.office" required="true"/-->
+            <!--<set_value name="$OfficeRoom" exact="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup.$OfficeRoom"/>-->
+
+            <set_value name="$DeepDebugChance" exact="0"/>
+
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $ShadyBarContactActor,
+                                                                                      table[
+                                                                                      $requestercue = namespace,
+                                                                                      $location = $OfficeRoom,
+                                                                                      $slottags = [tag.sit],
+                                                                                      $priority = 100,
+                                                                                      $debugchance = $DeepDebugChance,
+                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                      ]"/>
+
+            <!-- shady guy -->
+            <do_if value="not $PirateLandmark02.controlentity.{controlpost.shadyguy}.exists" comment="Make sure there's a shady guy on the aurora casino">
+              <debug_text text="'Spawning shady guy on aurora casino'" chance="$DebugChance"/>
+              <signal_cue_instantly cue="md.NPC_ShadyGuy.AddShadyGuys" param="table[$stations = [$PirateLandmark02], $definition = 'shadyguy_argon_random']" comment="place shady actor on specified station (sets controlpost.shadyguy)"/>
+            </do_if>
+            <set_value name="$ShadyActor" exact="$PirateLandmark02.controlentity.{controlpost.shadyguy}"/>
+            <set_entity_traits entity="$ShadyActor" tradesvisible="true" comment="shady guys with trades not visible are not placed"/>
+            <signal_objects object="$PirateLandmark02" param="'npc_instantiation__mission'" comment="needed in case of near attention"/>
+            <set_object_sound_override object="$ShadyActor.room" volume="0.2" type="ambient"/>
+
+            <!-- objective -->
+
+          </actions>
+          <patch sinceversion="2">
+            <do_if value="$OfficeRoomMacro != macro.room_gen_managersoffice_01_macro">
+
+              <!-- save old office values -->
+              <set_value name="$OfficeRoom_OLD"           exact="$OfficeRoom"/>
+              <set_value name="$OfficeRoomMacro_OLD"      exact="$OfficeRoomMacro"/>
+              <set_value name="$OfficeInterior_OLD"       exact="$OfficeInterior"/>
+
+              <!-- create new office -->
+              <set_value name="$OfficeRoomMacro" exact="macro.room_gen_managersoffice_01_macro"/>
+              <create_dynamic_interior roomname="$OfficeRoom" object="$PirateLandmark02" name="$OfficeInteriorName" corridor="macro.room_arg_corridor_05_macro" room="$OfficeRoomMacro" corridorname="$OfficeCorridor" interiorname="$OfficeInterior" persistent="true"/>
+
+              <!-- move character -->
+              <do_if value="(cuestate.disabled == Ch2_Complete_Disconnect_Actor.state)
+                         or (cuestate.waiting == Ch2_Complete_Disconnect_Actor.state)">
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $ShadyBarContactActor,
+                                                                                      table[
+                                                                                      $requestercue = namespace,
+                                                                                      $location = $OfficeRoom,
+                                                                                      $slottags = [tag.sit],
+                                                                                      $priority = 100,
+                                                                                      $debugchance = $DeepDebugChance,
+                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                      ]"/>
+              </do_if>
+
+              <!-- clean up old office -->
+              <run_actions ref="md.LIB_Generic.Cleanup_Mission_Interior_Call">
+                <param name="Object"      value="$PirateLandmark02"/>
+                <param name="Interior"    value="$OfficeInterior_OLD"/>
+                <param name="DebugChance" value="$DebugChance"/>
+              </run_actions>
+
+              <!-- set talk to objective -->
+              <do_if value="(cuestate.complete == Ch2_Welcome_Update_Objective.state)
+                        and (cuestate.waiting == Ch2_ShadyActorObjective.state)
+                        and (cuestate.waiting == Ch2_Complete.state)">
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" updatebriefing="true" object="$ShadyBarContactActor"/>
+              </do_if>
+
+            </do_if>
+          </patch>
+          <cues>
+
+            <cue name="Ch2_Welcome">
+              <cues>
+
+                <cue name="Ch1_Contact_Welcome_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="Actor"             value="$ShadyBarContactActor"/>
+                  <param name="DelayInitial"      value="3s"/>
+                  <param name="Lines"             value="[[30287001],[30287002]]"/>
+                  <param name="EndSignalCue"      value="Ch2_Welcome_Update_Objective"/>
+                </cue>
+
+                <cue name="Ch2_Welcome_Update_Objective">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- Don't add an objective step, overwrite existing "Wait" objective -->
+                    <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" updatebriefing="true" object="$ShadyBarContactActor"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <library name="Ch2_ShadyContact__Conversation_DefaultChoices">
+              <actions>
+                <!-- Lore -->
+                <add_player_choice text="{30287,1020}" section="shadycontact_main" choiceparam="'choice_introduce'" position="top_left" comment="Who are you?" />
+
+                <add_player_choice text="{30287,1021}" section="shadycontact_main" choiceparam="'choice_syndicate_1'" position="bottom_left" comment="What do you know about the Syndicate?" />
+
+                <do_if value="$ShadyContactSyndicateAsked?">
+                  <add_player_choice text="{30287,1022}" section="shadycontact_main" choiceparam="'choice_syndicate_2'" position="top_right" comment="What does the Syndicate do?" />
+                </do_if>
+
+                <add_player_choice text="{30287,1023}" section="shadycontact_main" choiceparam="'choice_windfall'" position="left" comment="What is Windfall's history?" />
+
+                <!-- Mod explanation -->
+                <do_if value="$ShadyContactDeliveryConfirmed?">
+                  <add_player_choice text="{30287,1026}" section="shadycontact_main" choiceparam="'choice_mod'" position="right" comment="How does the mod work?" />
+                </do_if>
+
+                <!-- Objective explanation -->
+                <do_if value="not $ShadyContactDeliveryConfirmed?">
+                  <add_player_choice text="{30287,1024}" section="shadycontact_main" choiceparam="'choice_confirm'" position="bottom_right" highlighted="true" comment="Confirming delivery." />
+                </do_if>
+                <do_elseif value="not $ShadyContactObjectiveGot?">
+                  <add_player_choice text="{30287,1025}" section="shadycontact_main" choiceparam="'choice_objective'" position="bottom_right" highlighted="true" comment="Where do I go?" />
+                </do_elseif>
+                <do_else>
+                  <add_player_choice text="{30287,1027}" section="shadycontact_main" choiceparam="'leave'" position="bottom_right" highlighted="true" comment="Goodbye."/>
+                </do_else>
+              </actions>
+            </library>
+
+            <cue name="Ch2_ShadyContact_Conversation_Started" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_conversation_started actor="$ShadyBarContactActor"/>
+                  <event_conversation_next_section actor="$ShadyBarContactActor" section="shadycontact_main"/>
+                  <event_conversation_next_section actor="$ShadyBarContactActor" section="shadycontact_substory"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'ConvStarted event=%s e.p=%s e.p2=%s '.[event.name, event.param, event.param2]" chance="$DebugChance"/>
+
+                <allow_conversation_escape enabled="false"/>
+
+                <do_if value="event.name == 'event_conversation_started'">
+                  <do_if value="not $ShadyContactGreeted?" comment="First time greeting.">
+                    <add_npc_line speaker="$ShadyBarContactActor" line="30287010" hidechoices="true"/>
+                    <set_value name="$ShadyContactGreeted"/>
+                  </do_if>
+                  <do_elseif value="$ModRewardGot? or $AltRewardGot?" comment="Greeting after getting the mod.">
+                    <add_npc_line speaker="$ShadyBarContactActor" line="30287090" hidechoices="true"/>
+                  </do_elseif>
+                  <do_else comment="Greeting when player comes back before getting the mod.">
+                    <add_npc_line speaker="$ShadyBarContactActor" line="30287013" hidechoices="true"/>
+                  </do_else>
+                </do_if>
+
+                <!-- Default conversation. -->
+                <do_if value="event.param == 'shadycontact_main' or event.param == 'default'">
+
+                  <!-- Goodbye dialog. -->
+                  <do_if value="event.param2 == 'leave'">
+                    <do_if value="not $ShadyContactSaidGoodbye?">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287011" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287012" hidechoices="true"/>
+                      <set_value name="$ShadyContactSaidGoodbye"/>
+                    </do_if>
+                    <do_else>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287014" hidechoices="true"/>
+                    </do_else>
+                  </do_if>
+
+                  <!-- Other dialog. -->
+                  <do_else>
+                    <do_if value="event.param2 == 'choice_introduce'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287020" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287021" hidechoices="true"/>
+                    </do_if>
+
+                    <do_elseif value="event.param2 == 'choice_syndicate_1'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287030" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287031" hidechoices="true"/>
+                      <set_value name="$ShadyContactSyndicateAsked"/>
+                    </do_elseif>
+
+                    <do_elseif value="event.param2 == 'choice_syndicate_2'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287040" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287041" hidechoices="true"/>
+                    </do_elseif>
+
+                    <do_elseif value="event.param2 == 'choice_windfall'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287050" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287051" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287052" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287053" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287054" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287055" hidechoices="true"/>
+                    </do_elseif>
+
+                    <do_elseif value="event.param2 == 'choice_confirm'">
+                      <unlock_achievement name="TOA_AURORA_1" comment="With Due Diligence"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287060" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287061" hidechoices="true"/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287062" hidechoices="true"/>
+
+                      <find_object_component name="$DockedShips" object="$PirateLandmark02" class="class.ship_s" owner="faction.player" includeobjects="true" multiple="true" docked="true"/>
+                      <set_value name="$CanInstallMod" exact="($DockedShips.count == 1) and (not $DockedShips.{1}.hasshipmod)"/>
+                      <do_if value="not $CanInstallMod">
+                        <add_npc_line speaker="$ShadyBarContactActor" line="30287073" hidechoices="true" comment="(1/2)On closer inspection... it appears that the station cannot identify a suitable ship to apply the improvement."/>
+                        <add_npc_line speaker="$ShadyBarContactActor" line="30287074" hidechoices="true" comment="(2/2)You will therefore receive multiple parts for ship modification instead, to be used at your own discretion."/>
+                      </do_if>
+                      <set_value name="$ShadyContactDeliveryConfirmed"/>
+                    </do_elseif>
+
+                    <do_elseif value="event.param2 == 'choice_objective'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287070" hidechoices="true" comment="I have transferred the location of a local recreational establishment to your navigational device."/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287071" hidechoices="true" comment="Once there, you will discreetly meet with a certificate broker to update your ship registration."/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287072" hidechoices="true" comment="In the meantime, Aurora station personnel will perform routine maintenance on the dock."/>
+                      <set_value name="$ShadyContactObjectiveGot"/>
+                      <signal_cue cue="Ch2_ShadyActorObjective"/>
+                    </do_elseif>
+
+                    <do_elseif value="event.param2 == 'choice_mod'">
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287080" hidechoices="true" comment="I'm not aware of the specifics, but it appears that the modification will reduce the distance at which other ships will be able to spot you on their gravidar."/>
+                      <add_npc_line speaker="$ShadyBarContactActor" line="30287081" hidechoices="true" comment="Do not treat this as a free pass for customs checks. I have caught runners who thought themselves invisible. They were not."/>
+                    </do_elseif>
+
+                    <do_else>
+                      <debug_text text="'No dialog specified for conversation option `%s`.'.[event.param2]" chance="$DebugChance"/>
+                    </do_else>
+
+                    <include_actions ref="Ch2_ShadyContact__Conversation_DefaultChoices"/>
+                  </do_else>
+                </do_if>
+
+                <do_else>
+                  <debug_text text="'Conversation section not handled.'" chance="$DebugChance"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ShadyActorObjective">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" updatebriefing="true" object="$ShadyActor"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ShadyActor_Talk" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_conversation_started actor="$ShadyActor" />
+                  <event_conversation_next_section actor="$ShadyActor" section="shadyactor_main"/>
+                  <!--event_conversation_returned_to_section actor="$ShadyActor" section="shadyactor_main"/-->
+                  <event_conversation_next_section actor="$ShadyActor" section="default"/>
+                  <event_conversation_returned_to_section actor="$ShadyActor" section="default"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!--debug_text text="'e.p=%s e.p2=%s'.[event.param, event.param2] " chance="$DebugChance"/-->
+                <allow_conversation_escape enabled="false"/>
+                <do_if value="event.param == 'shadyactor_main'">
+                  <do_any comment="speak signals Ch2_Complete">
+                    <speak actor="$ShadyActor" line="2007" weight="50" comment="Goodbye"/>
+                    <speak actor="$ShadyActor" line="2112" weight="50" comment="You're welcome"/>
+                  </do_any>
+                  <do_if value="not ($ModRewardGot? or $AltRewardGot?)">
+                    <signal_cue cue="Ch2_ModReward"/>
+                  </do_if>
+                </do_if>
+                <do_elseif value="not ($ModRewardGot? or $AltRewardGot?)" comment="only add this playerchoice if player didn't get the mod/alt yet">
+                  <add_player_choice text="{30287,1030}" section="shadyactor_main" choiceparam="'shadyactor_main'" position="bottom_left" highlighted="true" comment="One registration update, please."/>
+                </do_elseif>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ModReward">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <find_object_component name="$DockedShips" object="$PirateLandmark02" class="class.ship_s" owner="faction.player" includeobjects="true" multiple="true" docked="true"/>
+
+                <!--set_value name="$CanInstallMod" exact="($DockedShips.count == 1) and (not $DockedShips.{1}.hasshipmod)"/-->
+                <do_for_each name="$DockedShip" in ="$DockedShips" comment="any docked playership on which a mod can be installed?">
+                  <do_if value="not $DockedShip.hasshipmod">
+                    <set_value name="$CanInstallMod" exact="true"/>
+                    <break/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+            
+            <cue name="Ch2_Mod_Install_v2">
+              <conditions>
+                <event_cue_completed cue="Ch2_ModReward"/>
+                <check_value value="$CanInstallMod"/>
+              </conditions>
+              <actions>
+                <!-- Install mod an docked playerships (smart players can dock multiple ships) -->
+                <set_value name="$ModRewardGot" exact="true"/>
+                <set_value name="$RadarCloadModsInstalled" exact="0"/>
+                <do_for_each name="$DockedShip" in="$DockedShips" comment="any docked playership on which a mod can be installed?">
+                  <do_if value="not $DockedShip.hasshipmod">
+                    <set_value name="$RadarCloadModsInstalled" operation="add"/>
+                    <add_equipment_mods object="$DockedShip">
+                      <ship ware="ware.mod_ship_radarcloak_01_mk1"/>
+                    </add_equipment_mods>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+            <cue name="Ch2_Mod_Parts_v2">
+              <conditions>
+                <event_cue_completed cue="Ch2_ModReward"/>
+                <check_value value="not $CanInstallMod"/>
+              </conditions>
+              <actions>
+                <set_value name="$AltRewardGot" exact="true"/>
+                <add_inventory entity="player.entity" ware="modpart_shipnanoweave_t1"/>
+                <add_inventory entity="player.entity" ware="modpart_nividiumcrystallite" exact="3"/>
+                <reward_player money="250000Cr" />
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Complete">
+              <conditions>
+                <check_any>
+                  <event_speak_finished actor="$ShadyActor" line="2007"/>
+                  <event_speak_finished actor="$ShadyActor" line="2112"/>
+                </check_any>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <remove_mission cue="$MissionCue" type="completed"/>
+                <write_to_logbook category="missions" faction="faction.player" title="{30287,1041}" text="{30287,1043}"/>
+                <remove_value name="md.$GlobalHintsDND"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <show_help_multi allowclose="true" position="1" log="true" force="true">
+                  <text line="842" comment="Congratulations, you have completed your contract and are now free to conduct your own business in Windfall!"/>
+                  <text line="843" comment="Try trading between the stations that are already known to you, searching for mission offers, or simply exploring your surroundings."/>
+                  <text line="844" comment="You may also want to learn how to identify profitable trades by using the map. Once you have talked to and hired a relief pilot, open the Help menu with $INPUT_ACTION_HELP$ and start the '{30191,1}' tutorial."/>
+                </show_help_multi>
+              </actions>
+              <cues>
+
+                <!-- Let the player go back to $ShadyBarContactActor and ask questions until he's despawned. -->
+                <cue name="Ch2_Complete_Disconnect_Actor">
+                  <conditions>
+                    <event_object_changed_sector object="player.entity" previous="$PirateLandmarkSector"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $ShadyBarContactActor,
+                                                                                      table[
+                                                                                      $requestercue = namespace,
+                                                                                      $location = 'disconnect',
+                                                                                      $priority = 100,
+                                                                                      $debugchance = $DeepDebugChance,
+                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                      ]"/>
+                  </actions>
+                  <cues>
+
+                    <!-- Need a remove request, not just a disconnect. Otherwise this requester is blocking placement in story_criminal.xml -->
+                    <cue name="Ch2_RemoveRequest_Check" onfail="cancel">
+                      <conditions>
+                        <check_value value="not $ShadyBarContactActor.exists"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Ch2_RemoveRequest_Event"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch2_RemoveRequest_Event">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                          <event_object_changed_attention object="$ShadyBarContactActor" attention="attention.unknown"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $ShadyBarContactActor, namespace]"/>
+                        <cancel_cue cue="Ch2_AuroraCasino"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Patch_RemoveActorRequest" onfail="cancel">
+          <conditions>
+            <check_value value="not @$ShadyBarContactActor.exists"/>
+            <cue_is_cancelled cue="Ch2_AuroraCasino"/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $ShadyBarContactActor, namespace]"/>            
+          </actions>
+        </cue>
+        
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

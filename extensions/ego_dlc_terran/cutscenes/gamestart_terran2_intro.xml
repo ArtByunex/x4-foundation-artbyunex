@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="gamestart_terran2_intro" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence" start="0">
+        <shot name="PanOver" environment="scenezone" duration="70000">
+          <camera_panover reference="target_object" elevation="-35" showing="back" pan_direction="leftwards" panstart="40" panend="50" interpolation="linear" distance="90"/>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+</cutscene>
+

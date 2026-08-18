@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2024-07-01 13:56:45-->
+<components>
+  <component name="missile_flagship_heavy_mk1" class="missile">
+    <source geometry="extensions\ego_dlc_timelines\assets\props\weaponsystems\missile\missile_flagship_heavy_mk1_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="Point" shadow="0" r="255" g="255" b="255" intensity="1.375809" specularintensity="1" range="2" shadowrange="2" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="0" y="1" z="-0.5920675" />
+            </offset>
+          </omni>
+        </lights>
+        <trailemitters>
+          <emitter name="trail_missile_flagship_heavy_mk1" type="trail_missile_flagship_heavy_mk1">
+            <offset>
+              <position x="0" y="0" z="-0.5165241" />
+              <quaternion qx="-1" qy="0" qz="0" qw="-1.629e-07" />
+            </offset>
+          </emitter>
+        </trailemitters>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="missile" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="ConnectionForanim_booster" tags="animation nocollision part textureanimation ">
+        <offset>
+          <position x="0" y="0" z="-0.9678618" />
+        </offset>
+        <animations>
+          <animation name="loop" start="1" end="100" />
+        </animations>
+        <parts>
+          <part name="anim_booster">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="effects.booster" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.1473436" y="0.1473436" z="2.01588" />
+              <center x="0" y="-5.96e-08" z="-1.531954" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="100" value="0" />
+                </uv_property>
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="100" value="-10" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_main" tags="part ">
+        <parts>
+          <part name="part_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.1032457" y="0.1032457" z="0.8501485" />
+              <center x="-1.434e-07" y="1.416e-07" z="0.3673407" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_engine_01" tags="engine ">
+        <offset>
+          <position x="0" y="0" z="-0.4883923" />
+        </offset>
+      </connection>
+    </connections>
+  </component>
+</components>

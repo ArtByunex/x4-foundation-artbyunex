@@ -1,0 +1,3342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Hyperion" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" mapeditor="false">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy"/>
+        <check_value value="player.module != 'x4ep1_gamestart_hyperion'"/>
+      </conditions>
+
+      <actions>
+        <set_value name="$DebugChance"      exact="100"/>
+        <set_value name="$DeepDebugChance"  exact="0"/>
+        <set_value name="$MissionCue"       exact="this"/>
+        <set_value name="$Page"             exact="30254"/>
+
+        <debug_text text="'Initializing Hyperion Story'" chance="$DebugChance"/>
+
+        <!-- Story States -->
+        <do_if value="gamestart.storystate.story_hyperion_par
+                   or gamestart.storystate.story_hyperion_hop">
+          <!-- HOP -->
+          <do_if value="gamestart.storystate.story_hyperion_hop">
+            <signal_cue cue="md.Setup_DLC_Mini_01.Activate_Hyperion_Faction_HolyOrder"/>
+          </do_if>
+          <!-- PAR -->
+          <do_if value="gamestart.storystate.story_hyperion_par">
+            <signal_cue cue="md.Setup_DLC_Mini_01.Activate_Hyperion_Faction_Paranid"/>
+          </do_if>
+          <!-- BOTH -->
+          <cancel_cue cue="Start"/>
+        </do_if>
+
+        <!-- Chapter List for Force Cues to abort -->
+        <set_value name="$Chapters" exact="[Ch1_Sightings, Ch2_Contact]"/>
+        <create_group groupname="$HyperionTriggerSectors"/>
+        <set_value name="$WayHomeTable" exact="table[]"/>
+        <set_value name="$SectorsInvestigated" exact="0" comment="counter, reducing the chance to have to investigate more sectors"/>
+
+        <!-- NPC Usecase Setup - Actors Table -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <create_list name="$MyrnaSaid"     comment="List of Lines $CryptidHuntress has said which should not be repeated"/>
+        <create_list name="$AncientSaid"   comment="List of Lines $AncientPilotActor has said which should not be repeated"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup">
+          <cues>
+            <cue name="Setup_Locations" version="2">
+              <actions>
+                <set_value name="$Sector_Hyperion"        exact="md.Setup_DLC_Mini_01.Setup.$Cluster730Sector1"/>
+                <set_value name="$Sector_BeforeHyperion"  exact="md.Setup_DLC_Mini_01.Setup.$Cluster720Sector1"/>
+                <find_sector name="$BaseSectors" extension="''" multiple="true" sortbygatedistanceto="$Sector_Hyperion"/>
+
+                <find_station name="$CommStation" space="$Sector_Hyperion" godstationentry="'landmark_abandoned_communications_facility_730_01'" multiple="false" required="true"/>
+
+                <find_sector name="$Sector_HereticsEnd"      macro="macro.cluster_31_sector001_macro"  required="true" />
+
+                <find_gate name="$Gates_HyperionSector"         multiple="true" space="$Sector_Hyperion"/>
+                <find_gate name="$Gates_BeforeHyperionSector"   multiple="true" space="$Sector_BeforeHyperion"/>
+
+                <do_for_each in="$Gates_HyperionSector" name="$gate">
+                  <do_if value="$gate.exit.sector == $Sector_BeforeHyperion">
+                    <set_value name="$Gate_HyperionSector_Exit"   exact="$gate"/>
+                    <set_value name="$Gate_HyperionSector_Entry"  exact="$gate.exit"/>
+                    <break/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+              <patch sinceversion="2">
+                <find_sector name="$BaseSectors" extension="''" multiple="true" sortbygatedistanceto="$Sector_Hyperion"/>
+              </patch>
+              <cues>
+
+                <cue name="Debug_WayHomeTable3" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="HyperionTriggerSectors"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <debug_text text="'%s %s trigger sectors'.[$result.{3}, $HyperionTriggerSectors.count]"/>
+                    <do_for_each in="$WayHomeTable" name="$sector" valuename="$gates" chance="100">
+                      <do_for_each in="$gates" name="$gate">
+                        <debug_text text="'WayHomeTable: %s :TO: %s'.[$sector.knownname, $gate.exit.sector.knownname]" chance="100"/>
+                        <set_object_name object="$gate" name="'NEW EXITING: ' + $sector.knownname"/>
+                      </do_for_each>
+                    </do_for_each>
+                    <do_for_each in="$HyperionTriggerSectors" name="$ts">
+                      <debug_text text="'TRIGGER SECTOR %s %s'.[$ts.knownname, $ts.trueowner]"/>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="HyperionTriggerSectors">
+                  <!-- during breadcrumb: make this trigger -->
+                  <actions>
+                    <!-- Sectors in which the Hyperion Sectors trigger -->
+                    <!-- Prefers Sectors which have a Path to Hyperion Sector without going through Paranid Space (if there are ge 20 of those) -->
+                    <!-- Backup Case considers weird game states i.e. "all sectors par owned" -->
+                    <!-- Hyperion Sector and Neighbouring Sectors (Depth 3) are excluded -->
+                    <create_group groupname="$HyperionTriggerSectors"/>
+                    <run_actions ref="Set_HyperionTriggerSectors" result="$result">
+                      <param name="Sector_Hyperion" value="$Sector_Hyperion"/>
+                      <param name="DebugChance" value="0"/>
+                    </run_actions>
+                    <add_to_group groupname="$HyperionTriggerSectors" group="$result.{1}"/>
+                    <set_value name="$WayHomeTable" exact="$result.{2}"/>
+                    <debug_text text="'Sector Selection Case: %s'.[$result.{3}]" chance="$DeepDebugChance"/>
+
+                    <!-- DEBUG: Each sector should be pointing at gates leading to Sector_Hyperion -->
+                    <do_for_each in="$WayHomeTable" name="$sector" valuename="$gates" chance="0">
+                      <do_for_each in="$gates" name="$gate">
+                        <set_object_name object="$gate" name="'EXITING: ' + $sector.knownname"/>
+                        <debug_text text="'WayHomeTable: %s %s %s'.[$sector.knownname, $gates, $gate.exit.sector.knownname]" chance="$DeepDebugChance"/>
+                      </do_for_each>
+                    </do_for_each>
+
+                    <do_for_each in="$HyperionTriggerSectors" name="$sector" chance="0">
+                      <debug_text text="'TRIGGER SECTOR [%s] : %s'.[$HyperionTriggerSectors.count, $sector.knownname]" chance="0"/>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <library name="Set_HyperionTriggerSectors" purpose="run_actions">
+                  <params>
+                    <param name="Sector_Hyperion"/>
+                    <param name="DebugChance"/>
+                  </params>
+                  <actions>
+                    <!-- Find Sectors which have a route to $Sector_Hyperion without going through Paranid Sectors -->
+                    <!-- Recursive Search for all legal sectors -->
+                    <find_sector name="$AllSectors"                 multiple="true" sortbygatedistanceto="$Sector_Hyperion"/>
+                    <find_sector name="$BaseSectors" extension="''" multiple="true" sortbygatedistanceto="$Sector_Hyperion"/>
+
+                    <!-- Create WayHomeTable pointing to the gates pointing to Sector_Hyperion -->
+
+
+                    <!-- find $HyperionNeighbourSectors to exclude those -->
+                    <create_group groupname="$HyperionNeighbourSectors" comment="sectors which are too close to Hyperion Sector and should not trigger the Hyperion Event"/>
+                    <add_to_group groupname="$HyperionNeighbourSectors" object="$Sector_Hyperion"/>
+
+                    <do_all exact="4" comment="depth">
+                      <create_list name="$temp_sectors"/>
+                      <do_for_each in="$HyperionNeighbourSectors" name="$sector">
+                        <find_gate name="$gates" active="true" multiple="true" space="$sector"/>
+                        <do_for_each in="$gates" name="$gate">
+                          <append_to_list name="$temp_sectors" unique="true" exact="$gate.exit.sector" comment="avoid increasing group during iteration"/>
+                          <debug_text text="'Adding to %s NeighbourSectors'.[$gate.exit.sector.knownname]" chance="0"/>
+                        </do_for_each>
+                      </do_for_each>
+                      <add_to_group groupname="$HyperionNeighbourSectors" list="$temp_sectors"/>
+                    </do_all>
+                    <sort_group group="$HyperionNeighbourSectors" sortbydistanceto="$Sector_Hyperion"/>
+                    <debug_text text="'$HyperionNeighbourSectors.count: %s'.[$HyperionNeighbourSectors.count]" chance="0"/>
+
+                    <!-- CASE 1 -->
+                    <!-- All Sectors which lead Home but not through Paranid owned space! -->
+                    <create_group groupname="$HyperionTriggerSectors" comment="sectors which have a path to Sector_Hyperion without crossing any Paranid space"/>
+
+                    <set_value name="$WayHomeTable" exact="table[]"/>
+                    <do_for_each in="$AllSectors" name="$sector">
+                      <do_if value="$WayHomeTable.{$sector}?">
+                        <debug_text text="'Skipping: %s - Already Populated by earlier Pathfinding'.[$sector.knownname]" chance="0"/>
+                        <continue/>
+                      </do_if>
+                      <debug_text text="'TESTING: %s'.[$sector.knownname]" chance="0"/>
+                      <run_actions ref="Recursive_WayfindingToHyperionHomeSector" result="$result_sector">
+                        <param name="sector"            value="$sector"/>
+                        <param name="targetsector"      value="$Sector_Hyperion"/>
+                        <param name="exemptionsectors"  value="[]"/>
+                        <param name="avoidfactionspace" value="[faction.paranid, faction.holyorder, faction.trinity]"/>
+                        <param name="wayhometable"      value="$WayHomeTable"/>
+                      </run_actions>
+                      <do_if value="@$result_sector">
+                        <!-- Found a legal way from $sector to $targetsector -->
+                        <debug_text text="'Adding %s %s'.[$sector.knownname, $sector.knownname]" chance="0" comment="identical"/>
+                        <!--<assert value="$sector == $result_sector.keys.last"/>-->
+                        <!-- table: key:sector value:[list of gates home] -->
+                        <do_for_each in="$result_sector" name="$pathing_sector" valuename="$pathing_sector_gatelist">
+                          <do_if value="[faction.paranid, faction.holyorder, faction.trinity].indexof.{$pathing_sector.trueowner}">
+                            <debug_text text="'Skipping: %s - Paranid Owned Starting Sector'.[$pathing_sector.knownname]" chance="0"/>
+                            <continue/>
+                          </do_if>
+                          <do_if  value="not $WayHomeTable.{$pathing_sector}?">
+                            <debug_text text="'$pathing_sector: %s %s %s %s'.[$pathing_sector.trueowner, $pathing_sector, $pathing_sector.knownname, $pathing_sector_gatelist]" chance="0"/>
+                            <set_value name="$WayHomeTable.{$pathing_sector}" exact="[]"/>
+                            <do_if value="$Sector_Hyperion != $pathing_sector">
+                              <append_to_list name="$WayHomeTable.{$pathing_sector}" exact="$pathing_sector_gatelist.last"/>
+                            </do_if>
+                            <debug_text text="'Adding to WayHomeTable: %s'.[$pathing_sector.knownname]" chance="0"/>
+                            <do_if value="(not $HyperionNeighbourSectors.indexof.{$pathing_sector})">
+                              <add_to_group groupname="$HyperionTriggerSectors" object="$pathing_sector"/>
+                            </do_if>
+                          </do_if>
+                        </do_for_each>
+                      </do_if>
+                    </do_for_each>
+
+                    <do_for_each in="$WayHomeTable" name="$key" valuename="$value" chance="0">
+                      <debug_text text="'WayHomeTable: %s %s %s'.[$key.knownname, $value, $value.{1}.knownname]" chance="$DeepDebugChance"/>
+                    </do_for_each>
+
+                    <!-- Find out if using those is fine or we are in a weird game state with not enough trigger sectors -->
+                    <debug_text text="'%s out of %s sectors found; %s percent'.[$HyperionTriggerSectors.count, $AllSectors.count, (100.0 * ($HyperionTriggerSectors.count)f / ($AllSectors.count)f)]" chance="$DebugChance"/>
+
+                    <!-- CASE 1: Over 20 trigger sectors: fine; else try case 2 -->
+                    <do_if value="$HyperionTriggerSectors.count ge 20">
+                      <return value="[$HyperionTriggerSectors, $WayHomeTable, 'case 1']"/>
+                    </do_if>
+
+
+                    <!-- CASE 2: find all non-par sectors as trigger sectors (excluding the neighbouring ones) -->
+                    <set_value name="$WayHomeTable" exact="table[]"/>
+                    <create_group groupname="$HyperionTriggerSectors" comment="sectors which trigger Hyperion Event"/>
+                    <do_for_each in="$AllSectors" name="$sector">
+                      <do_if value="$WayHomeTable.{$sector}?">
+                        <debug_text text="'Skipping: %s - Already Populated by earlier Pathfinding'.[$sector.knownname]" chance="0"/>
+                        <continue/>
+                      </do_if>
+                      <do_if value="[faction.paranid, faction.holyorder, faction.trinity].indexof.{$sector.trueowner}">
+                        <debug_text text="'Skipping: %s - Paranid Owned Starting Sector'.[$sector.knownname]" chance="0"/>
+                        <continue/>
+                      </do_if>
+                      <!-- Allow going through Paranid Space -->
+                      <run_actions ref="Recursive_WayfindingToHyperionHomeSector" result="$result_sector">
+                        <param name="sector"            value="$sector"/>
+                        <param name="targetsector"      value="$Sector_Hyperion"/>
+                        <param name="exemptionsectors"  value="[]"/>
+                        <param name="avoidfactionspace" value="[]"/>
+                        <param name="wayhometable"      value="$WayHomeTable"/>
+                      </run_actions>
+                      <do_if value="@$result_sector">
+                        <!-- Found a legal way from $sector to $targetsector -->
+                        <debug_text text="'Adding %s %s'.[$sector.knownname, $sector.knownname]" chance="0" comment="identical"/>
+                        <!--<assert value="$sector == $result_sector.keys.last"/>-->
+                        <!-- table: key:sector value:[list of gates home] -->
+                        <do_for_each in="$result_sector" name="$pathing_sector" valuename="$pathing_sector_gatelist">
+                          <do_if  value="(not $WayHomeTable.{$pathing_sector}?)">
+                            <debug_text text="'$pathing_sector: %s %s %s %s'.[$pathing_sector.trueowner, $pathing_sector, $pathing_sector.knownname, $pathing_sector_gatelist]" chance="0"/>
+                            <set_value name="$WayHomeTable.{$pathing_sector}" exact="[]"/>
+                            <do_if value="$Sector_Hyperion != $pathing_sector">
+                              <append_to_list name="$WayHomeTable.{$pathing_sector}" exact="$pathing_sector_gatelist.last"/>
+                            </do_if>
+                            <debug_text text="'Adding to WayHomeTable: %s'.[$pathing_sector.knownname]" chance="0"/>
+                            <do_if value="(not $HyperionNeighbourSectors.indexof.{$pathing_sector}) and (not [faction.paranid, faction.holyorder, faction.trinity].indexof.{$pathing_sector.trueowner})">
+                              <add_to_group groupname="$HyperionTriggerSectors" object="$pathing_sector"/>
+                            </do_if>
+                          </do_if>
+                        </do_for_each>
+                      </do_if>
+                    </do_for_each>
+                    <do_if value="$HyperionTriggerSectors.count ge 20">
+                      <return value="[$HyperionTriggerSectors, $WayHomeTable, 'case 2']"/>
+                    </do_if>
+
+                    <!-- CASE 3: ignore all paranid restrictions -->
+                    <set_value name="$WayHomeTable" exact="table[]"/>
+                    <create_group groupname="$HyperionTriggerSectors" comment="sectors which trigger Hyperion Event"/>
+                    <do_for_each in="$AllSectors" name="$sector">
+                      <do_if value="$WayHomeTable.{$sector}?">
+                        <debug_text text="'Skipping: %s - Already Populated by earlier Pathfinding'.[$sector.knownname]" chance="0"/>
+                        <continue/>
+                      </do_if>
+                      <!-- Allow going through Paranid Space -->
+                      <run_actions ref="Recursive_WayfindingToHyperionHomeSector" result="$result_sector">
+                        <param name="sector"            value="$sector"/>
+                        <param name="targetsector"      value="$Sector_Hyperion"/>
+                        <param name="exemptionsectors"  value="[]"/>
+                        <param name="avoidfactionspace" value="[]"/>
+                        <param name="wayhometable"      value="$WayHomeTable"/>
+                      </run_actions>
+                      <do_if value="@$result_sector">
+                        <!-- Found a legal way from $sector to $targetsector -->
+                        <debug_text text="'Adding %s %s'.[$sector.knownname, $sector.knownname]" chance="0" comment="identical"/>
+                        <!--<assert value="$sector == $result_sector.keys.last"/>-->
+                        <!-- table: key:sector value:[list of gates home] -->
+                        <do_for_each in="$result_sector" name="$pathing_sector" valuename="$pathing_sector_gatelist">
+                          <do_if  value="not $WayHomeTable.{$pathing_sector}?">
+                            <debug_text text="'$pathing_sector: %s %s %s %s'.[$pathing_sector.trueowner, $pathing_sector, $pathing_sector.knownname, $pathing_sector_gatelist]" chance="0"/>
+                            <set_value name="$WayHomeTable.{$pathing_sector}" exact="[]"/>
+                            <do_if value="$Sector_Hyperion != $pathing_sector">
+                              <append_to_list name="$WayHomeTable.{$pathing_sector}" exact="$pathing_sector_gatelist.last"/>
+                            </do_if>
+                            <debug_text text="'Adding to WayHomeTable: %s'.[$pathing_sector.knownname]" chance="0"/>
+                            <do_if value="not $HyperionNeighbourSectors.indexof.{$pathing_sector}">
+                              <add_to_group groupname="$HyperionTriggerSectors" object="$pathing_sector"/>
+                            </do_if>
+                          </do_if>
+                        </do_for_each>
+                      </do_if>
+                    </do_for_each>
+                    <return value="[$HyperionTriggerSectors, $WayHomeTable, 'case 3']"/>
+                  </actions>
+                </library>
+
+                <library name="Recursive_WayfindingToHyperionHomeSector" purpose="run_actions">
+                  <params>
+                    <param name="sector"/>
+                    <param name="targetsector"/>
+                    <param name="exemptionsectors"/>
+                    <param name="avoidfactionspace"/>
+                    <param name="wayhometable"/>
+                  </params>
+                  <actions>
+                    <debug_text text="'testing: %s'.[$sector.knownname]" chance="0"/>
+                    <!-- attempt to find a way from sector to targetsector without going through PAR space -->
+                    <!-- failed:  return null -->
+                    <!-- success: return sector which has a legal way to targetsector as table[$sector = gate]-->
+
+                    <!-- case: sector is targetsector -->
+                    <do_if value="$sector == $targetsector">
+                      <return value="table[{$sector} = []]"/>
+                    </do_if>
+
+                    <!-- case: sector is par space -->
+                    <do_if value="$avoidfactionspace.indexof.{$sector.trueowner}">
+                      <return value="null"/>
+                    </do_if>
+
+                    <!-- case: sector already found a way home in previous iterations; we accept that solution and don't want to add a conflicting way home -->
+                    <do_if value="$wayhometable.{$sector}?">
+                      <return value="table[{$sector} = [$wayhometable.{$sector}]]"/>
+                    </do_if>
+
+                    <!-- prevent looping back -->
+                    <append_to_list name="$exemptionsectors" exact="$sector"/>
+
+                    <!-- case: find all connected sectors -->
+                    <find_gate name="$gates" multiple="true" space="$sector" active="true"/>
+                    <do_for_each in="$gates" name="$gate">
+                      <do_if value="not $exemptionsectors.indexof.{$gate.exit.sector}">
+                        <!-- for each connected sector, find way to Hyperion home sector -->
+                        <run_actions ref="Recursive_WayfindingToHyperionHomeSector" result="$result_sector">
+                          <param name="sector"            value="$gate.exit.sector"/>
+                          <param name="targetsector"      value="$targetsector"/>
+                          <param name="exemptionsectors"  value="$exemptionsectors"/>
+                          <param name="avoidfactionspace" value="$avoidfactionspace"/>
+                          <param name="wayhometable"      value="$wayhometable"/>
+                        </run_actions>
+                        <!-- TODO: Check if keys.last is still correct; -->
+                        <do_if value="@$result_sector.keys.last == $gate.exit.sector" comment="found a way home!">
+                          <!-- return the whole way home found to prevent Sector A finding a way through B
+                               and then B acknowledging that A knows a way and pointing at A wrongfully while it itself would be the way and should be pointing at C  -->
+                          <set_value name="$result_sector.{$sector}" exact="[$gate]"/>
+                          <return value="$result_sector"/>
+                        </do_if>
+                      </do_if>
+                    </do_for_each>
+
+                    <!-- no way home found -->
+                    <return value="null"/>
+                  </actions>
+                </library>
+
+              </cues>
+            </cue>
+
+            <cue name="Setup_Characters">
+              <cues>
+
+                <cue name="Setup_Character_CryptidHuntressActor">
+                  <actions>
+                    <!-- Cryptid Hunter -->
+                    <create_cue_actor name="$CryptidHuntressActor" cue="namespace" macro="character_story_argon_cryptid_hunter_macro">
+                      <page exact="10147"/>
+                      <owner exact="faction.civilian"/>
+                      <skills>
+                        <skill type="management"  exact="6"/>
+                        <skill type="morale"      exact="14"/>
+                        <skill type="piloting"    exact="3"/>
+                        <skill type="engineering" exact="8"/>
+                        <skill type="boarding"    exact="0"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_entity_traits    entity="$CryptidHuntressActor" missionactor="true" customhandler="true" subtitlename="false" comment="subtitlename true will be updated after introduction"/>
+                    <set_entity_overrides entity="$CryptidHuntressActor" title="'{30254,151}'" icon="'specialist'"/>
+
+                    <!-- NPC Usecase Setup -->
+                    <set_value name="$MissionActors.$CryptidHuntressActor" exact="table[
+                                              $entity = $CryptidHuntressActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowPilot',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                    <!-- ShowPilot instead of ShowFace since she talks a lot while traversing sectors leading to her targetmonitor cutscene breaking -->
+                    <set_value name="$CutsceneKey_CryptidHunter"  exact="$MissionActors.$CryptidHuntressActor.$monitor.$cutscenekey"/>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=namespace, $actor=$CryptidHuntressActor]"/>
+                    <signal_cue cue="Generic_Conversation_CryptidHuntress"/>
+                  </actions>
+                </cue>
+
+                <cue name="Setup_Character_AncientPilotActor" version="2">
+                  <actions>
+                    <!-- Ancient Pilot -->
+                    <create_cue_actor name="$AncientPilotActor" cue="namespace" macro="character_story_paranid_hyperion_pilot_macro">
+                      <page exact="10370"/>
+                      <owner exact="faction.civilian"/>
+                      <skills>
+                        <skill type="management"  exact="4"/>
+                        <skill type="morale"      exact="0"/>
+                        <skill type="piloting"    exact="15"/>
+                        <skill type="engineering" exact="8"/>
+                        <skill type="boarding"    exact="3"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_value name="$AncientPilotActor.$MissionCue"  exact="$MissionCue"/>
+                    <set_entity_traits    entity="$AncientPilotActor" missionactor="true" customhandler="true" subtitlename="false" comment="subtitlename true will be updated after introduction"/>
+                    <set_entity_overrides entity="$AncientPilotActor" title="'{30254,161}'" icon="'specialist'"/>
+
+                    <!-- NPC Usecase Setup -->
+                    <set_value name="$MissionActors.$AncientPilotActor" exact="table[
+                                              $entity = $AncientPilotActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNoise',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=namespace, $actor=$AncientPilotActor]"/>
+                    <signal_cue cue="Generic_Conversation_AncientPilotActor"/>
+                  </actions>
+                  <patch sinceversion="2">
+                    <set_value name="$AncientPilotActor.$MissionCue"  exact="$MissionCue"/>
+                  </patch>
+                </cue>
+
+                <cue name="Setup_Character_AncientPilotCloneActor" version="2">
+                  <actions>
+                    <!-- Clone Actor for Hyperion Sightings -->
+                    <create_cue_actor name="$AncientPilotCloneActor" cue="namespace" macro="character_story_paranid_hyperion_pilot_macro">
+                      <page exact="10370"/>
+                      <owner exact="faction.civilian"/>
+                      <skills>
+                        <skill type="management"  exact="4"/>
+                        <skill type="morale"      exact="0"/>
+                        <skill type="piloting"    exact="15"/>
+                        <skill type="engineering" exact="8"/>
+                        <skill type="boarding"    exact="3"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_value name="$AncientPilotCloneActor.$MissionCue"  exact="$MissionCue"/>
+                    <set_entity_traits    entity="$AncientPilotCloneActor" missionactor="true" customhandler="true" subtitlename="false" comment="subtitlename true will be updated after introduction"/>
+                    <set_entity_overrides entity="$AncientPilotCloneActor" title="'{30254,161}'" icon="'specialist'"/>
+                    <set_value name="$AncientPilotCloneActor.$cutscenekey" exact="table[ $key = 'ShowNoise']"/>
+
+                    <set_value name="$AncientPilotCloneActor.$noattackresponse"/>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <signal_cue cue="Generic_Conversation_AncientPilotCloneActor"/>
+                  </actions>
+                  <patch sinceversion="2">
+                    <set_value name="$AncientPilotCloneActor.$MissionCue"  exact="$MissionCue"/>
+                  </patch>
+                </cue>
+
+                <cue name="Setup_Character_ReliefPilotActor">
+                  <actions>
+                    <create_cue_actor name="$ReliefPilotActor" cue="$MissionCue" macro="character_paranid_generic_02_macro">
+                      <page exact="10305"/>
+                      <owner exact="faction.civilian"/>
+                      <skills>
+                        <skill type="management"  exact="0"/>
+                        <skill type="morale"      exact="15"/>
+                        <skill type="piloting"    exact="12"/>
+                        <skill type="engineering" exact="9"/>
+                        <skill type="boarding"    exact="0"/>
+                      </skills>
+                    </create_cue_actor>
+                  </actions>
+                </cue>
+
+                <cue name="Setup_Character_BettyActor">
+                  <actions>
+                    <debug_text text="'Creating Betty Actor'" chance="$DebugChance"/>
+
+                    <create_cue_actor name="$BettyActor" cue="$MissionCue">
+                      <select race="race.drone"/>
+                      <owner exact="faction.civilian"/>
+                      <page exact="10002"/>
+                      <name name="'{20101,33101}'"/>
+                    </create_cue_actor>
+                    <set_entity_traits entity="$BettyActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                    <set_entity_overrides entity="$BettyActor" icon="'factionrepresentative'" title="'{30224,154}'"/>
+                    <set_value name="md.$PersistentCharacters.$BettyActor" exact="$BettyActor"/>
+                    <set_value name="$BettyActorCutsceneKey"   exact="table[ $key = 'ShowNoise']"/>
+                    <set_value name="$BettyActor.$cutscenekey" exact="table[ $key = 'ShowNoise']"/>
+                  </actions>
+                  <cues>
+                    <cue name="Cleanup_BettyActor">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <!-- get rid of the yellow map icon for Betty -->
+                        <destroy_object object="$BettyActor"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Hyperion_Sightings">
+              <cues>
+
+                <cue name="Reset_Offer">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="this" chance="$DeepDebugChance"/>
+                    <!-- Remove Offer -->
+                    <signal_cue cue="Ch1_ClearOffer" check="false"/>
+
+                    <!-- Cleanup Offer Ship -->
+                    <do_if value="(not $MissionAccepted?) and ($CryptidHuntressShip_Active)">
+                      <remove_value name="$CryptidHuntressShip_Active"/>
+                      <dismiss_control_entity actor="$CryptidHuntressActor" object="$CryptidHuntressShip"/>
+                      <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                        <param name="Object" value="$CryptidHuntressShip"/>
+                        <param name="RequesterCue" value="namespace"/>
+                        <param name="DebugChance" value="$DebugChance"/>
+                      </run_actions>
+                      <destroy_object object="$CryptidHuntressShip" explosion="false"/>
+                    </do_if>
+
+                    <!-- Reset Mission Cutscene and Offer -->
+                    <reset_cue cue="Hyperion_Sightings"/>
+                  </actions>
+                </cue>
+
+                <cue name="Debug_Hyperion_Trigger_Sectors">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'not $MissionAccepted?: %s'.[not $MissionAccepted?]"/>
+                    <debug_text text="'$BaseSectors count: %s'.[$BaseSectors.count]"/>
+                    <do_for_each in="$BaseSectors" name="$s">
+                      <debug_text text="'Testing: %s'.[$s.name]"/>
+                      <do_if value="$WayHomeTable.{$s}?">
+                        <debug_text text="'Testing: %s - WayHomeTable'.[$s.name]"/>
+                        <do_if value="not (md.$DLCBoronFactions? and md.$DLCBoronFactions.count)">
+                          <debug_text text="'Testing: %s - WayHomeTable - No Boron DLC Found'.[$s.name]"/>
+                        </do_if>
+                        <do_elseif value="md.$DLCBoronFactions? and md.$DLCBoronFactions.count">
+                          <debug_text text="'Testing: %s - WayHomeTable - Boron DLC Found'.[$s.name]"/>
+                        </do_elseif>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="Hyperion_Sighting_Triggers">
+                  <conditions>
+                    <event_object_changed_sector object="player.entity"/>
+                    <check_value value="$BaseSectors.indexof.{event.param}"/>
+                    <check_value value="$WayHomeTable.{event.param}?"/>
+                    <check_value value="not $MissionAccepted?" comment="dont trigger breadcrumbs sightings from here"/>
+                    <!-- block boron story case -->
+                    <check_any>
+                      <!-- no boron dlc active -->
+                      <check_all>
+                        <check_value value="not (md.$DLCBoronFactions? and md.$DLCBoronFactions.count)"/>
+                        <!--<debug_text chance="0" text="'no dlc active'"/>-->
+                      </check_all>
+                      <!-- dlc active -->
+                      <check_all>
+                        <check_value value="md.$DLCBoronFactions?"/>
+                        <check_value value="md.$DLCBoronFactions.count"/>
+                        <!--<debug_text chance="0" text="'dlc active:'"/>
+                        <debug_text chance="0" text="'Ch1_MissionOffer: %s'.[md.Story_Boron.Ch1_MissionOffer.state]"/>
+                        <debug_text chance="0" text="'Activate_Story_Explicit_Proximity_Call: %s'.[md.Story_Boron.Activate_Story_Explicit_Proximity_Call.state]"/>
+                        <debug_text chance="0" text="'not $OfferSectorGroup: %s'.[not md.Story_Boron.Start.$OfferSectorGroup.indexof.{event.param}]"/>
+                        <debug_text chance="0" text="'not $Sector_HereticsEnd: %s'.[$Sector_HereticsEnd != event.param]"/>-->
+                        <check_any>
+                          <!-- story has not started yet => don't offer in boron offer space -->
+                          <check_all>
+                            <cue_is_waiting cue="md.Story_Boron.Ch1_MissionOffer"/>
+                            <check_value value="$Sector_HereticsEnd != event.param"/>
+                            <check_value value="not md.Story_Boron.Start.$OfferSectorGroup.indexof.{event.param}"/>
+                            <!--<debug_text chance="0" text="'dlc active - boron story not started yet'"/>-->
+                          </check_all>
+                          <!-- offer still outstanding => don't offer in Boron Story Offer space -->
+                          <check_all>
+                            <cue_is_waiting cue="md.Story_Boron.Activate_Story_Explicit_Proximity_Call"/>
+                            <check_value value="$Sector_HereticsEnd != event.param"/>
+                            <check_value value="not md.Story_Boron.Start.$OfferSectorGroup.indexof.{event.param}"/>
+                            <!--<debug_text chance="0" text="'dlc active - offer not started yet'"/>-->
+                          </check_all>
+                          <!-- offer already done -->
+                          <check_all>
+                            <check_value value="cuestate.waiting != md.Story_Boron.Activate_Story_Explicit_Proximity_Call.state"/>
+                            <check_value value="cuestate.active != md.Story_Boron.Activate_Story_Explicit_Proximity_Call.state"/>
+                            <check_value value="$Sector_HereticsEnd != event.param"/>
+                            <!--<debug_text chance="0" text="'dlc active - offer done, offer not in heretics end'"/>-->
+                          </check_all>
+                          <!-- story running done -->
+                          <check_all>
+                            <check_value value="cuestate.waiting != md.Story_Boron.Ch1_MissionOffer.state"/>
+                            <!--<debug_text chance="0" text="'dlc active - boron story running, offer anywhere'"/>-->
+                          </check_all>
+                        </check_any>
+                      </check_all>
+                    </check_any>
+                    <!-- dnd things -->
+                    <check_value value="not player.isinfullscreenmenu"/>
+                    <check_value value="not player.isinconversation"/>
+                    <check_value value="not player.isscreenshotmode"/>
+                    <check_value value="not md.$MissionDND.count"/>
+                    <check_value value="player.age ge (md.$LastMentorSpeak + 300s)"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="this" chance="$DeepDebugChance"/>
+                    <debug_text text="'Hyperion Story: Player entered suitable sector.'" chance="$DeepDebugChance"/>
+
+                    <find_gate name="$Gates_CurrentTriggerSector" multiple="true" active="true" space="event.param"/>
+
+                    <do_for_each in="$WayHomeTable.{event.param}" name="$gate">
+                      <do_if value="$Gates_CurrentTriggerSector.indexof.{$gate}">
+                        <signal_cue_instantly cue="Hyperion_Sighting_Start" param="$gate"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <!-- Ship Sighting Cutscene -->
+                <cue name="Hyperion_Sighting_Start">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="this" chance="$DeepDebugChance"/>
+                    <set_value name="$HyperionCloneShip_TargetGate" exact="event.param"/>
+                    <set_value name="$Sector_HyperionSighting"      exact="event.param.sector"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Create_CryptidHuntressShip">
+                      <conditions>
+                        <event_cue_signalled/>
+                        <check_value value="not $CryptidHuntressShip_Active?"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <get_safe_pos result="$pos" min="30km" max="50km" object="$HyperionCloneShip_TargetGate" sector="$Sector_HyperionSighting" space="$Sector_HyperionSighting" comment="Position relative to Sector"/>
+
+                        <set_value name="$CryptidHuntressShip_Active"/>
+                        <!-- Create Cryptid Hunter Ship -->
+                        <run_actions ref="Cryptid_Huntress_Create_Ship" result="$CryptidHuntressShip">
+                          <param name="sector"                value="$Sector_HyperionSighting"/>
+                          <param name="position"              value="$pos"/>
+                          <param name="orientation_lookat"    value="$HyperionCloneShip_TargetGate"/>
+                          <param name="pilot"                 value="$CryptidHuntressActor"/>
+                          <param name="namespace"             value="namespace"/>
+                        </run_actions>
+
+                        <cancel_all_orders object="$CryptidHuntressShip"/>
+                        <get_safe_pos result="$targetpos" min="10km" max="20km" object="$HyperionCloneShip_TargetGate" sector="$Sector_HyperionSighting"/>
+                        <create_order name="$order" id="'MoveGeneric'" object="$CryptidHuntressShip" immediate="true">
+                          <param name="destination" value="$Sector_HyperionSighting"/>
+                          <param name="position"    value="$targetpos"/>
+                          <param name="traveltoend" value="true"/>
+                          <param name="precise"     value="false"/>
+                          <param name="noboost"     value="false"/>
+                          <param name="disablecollisionavoidance" value="false"/>
+                          <param name="debugchance" value="0"/>
+                        </create_order>
+                        <do_if value="(cuestate.complete == Ch1_2_Conversation.state)
+                                  and (cuestate.waiting == Ch1_3_Breadcrumbs.state)">
+                          <!-- reset conversation events after character reconnection -->
+                          <reset_cue cue="Ch1_2_Conversation"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <!-- Case 1: Breadcrumbs Sighting -->
+                    <cue name="Breadcrumbs_Sighting" onfail="cancel">
+                      <conditions>
+                        <check_value value="$MissionAccepted?"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                      </actions>
+                      <cues>
+                        <cue name="Breadcrumbs_Sighting_CorrectSector_Check" onfail="cancel">
+                          <conditions>
+                            <check_value value="player.sector == $Sector_HyperionSighting"/>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="BreadCrumbs_Sighting_CorrectSector_Event"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="BreadCrumbs_Sighting_CorrectSector_Event">
+                          <conditions>
+                            <check_any>
+                              <event_object_changed_sector object="player.entity" sector="$Sector_HyperionSighting"/>
+                              <event_cue_signalled/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="Hyperion_Create_Setting"/>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                    <!-- Case 2: Interaction Prompt -->
+                    <cue name="Hyperion_Sighting_Noise_Cutscene_Prompt" onfail="cancel">
+                      <conditions>
+                        <check_value value="not $MissionAccepted?" comment="skip for breadcrumbs sightings"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <!-- Cutscene (press F to interact) -->
+                        <play_cutscene key="'ShowNoise'" result="parent.$CutsceneID" targetmonitor="true" timeout="20s" caption="{30254,180}" missioncue="$MissionCue">
+                          <interaction text="''" param="$CryptidHuntressActor" param2="'accept_interaction_story_hyperion'"/>
+                          <param name="npcref" object="$CryptidHuntressActor" />
+                        </play_cutscene>
+                      </actions>
+                      <cues>
+
+                        <!-- Start F Cutscene Dialog -->
+                        <cue name="Hyperion_Sighting_Noise_Cutscene_Started">
+                          <conditions>
+                            <event_cutscene_started cutscene="parent.parent.$CutsceneID"/>
+                            <check_value value="event.param2" comment="So that we're not listening for null before the cutscene starts"/>
+                          </conditions>
+                          <!-- Speak -->
+                          <actions>
+                            <do_any>
+                              <speak actor="$CryptidHuntressActor" priority="90" line="302540101" delay="0.6s" comment="Sighting Noise Broadcast Abortable Line"/>
+                              <speak actor="$CryptidHuntressActor" priority="90" line="302540102" delay="0.6s" comment="Sighting Noise Broadcast Abortable Line Variation"/>
+                            </do_any>
+                            <signal_cue_instantly cue="Create_CryptidHuntressShip" comment="required for mission"/>
+                            <signal_cue cue="Ch1_CreateOffer" check="false"/>
+                          </actions>
+                        </cue>
+
+                        <!-- Accept Call -->
+                        <cue name="Hyperion_Sighting_Noise_Cutscene_Accepted">
+                          <conditions>
+                            <check_any>
+                              <event_player_interaction param="$CryptidHuntressActor" param2="'accept_interaction_story_hyperion'"/>
+                              <event_object_signalled object="$CryptidHuntressActor" param="'accept'" comment="Accepting on BB"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <cancel_cue cue="Hyperion_Sighting_Noise_Cutscene_Stopped"/>
+                            <stop_cutscene cutscene="parent.parent.$CutsceneID"/>
+                            <signal_cue cue="Hyperion_Create_Setting"/>
+                            <signal_cue cue="Ch1_AcceptMission" check="false"/>
+                          </actions>
+                        </cue>
+
+                        <!-- Cutscene Stopped -->
+                        <cue name="Hyperion_Sighting_Noise_Cutscene_Stopped">
+                          <conditions>
+                            <event_cutscene_stopped cutscene="parent.parent.$CutsceneID"/>
+                          </conditions>
+                          <actions>
+                            <!-- Reset Mission Cutscene and Offer -->
+                            <signal_cue cue="Reset_Offer"/>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                    <!-- Create Hyperion & MoveTo Gate -->
+                    <cue name="Hyperion_Create_Setting">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <get_safe_pos result="$pos" min="60km" max="80km" object="$HyperionCloneShip_TargetGate" sector="$Sector_HyperionSighting" space="$Sector_HyperionSighting" comment="Position relative to Sector"/>
+
+                        <!-- Create Fake Hyperion -->
+                        <run_actions ref="Hyperion_Create_Ship" result="$HyperionCloneShip">
+                          <param name="sector"                value="$Sector_HyperionSighting"/>
+                          <param name="position"              value="$pos"/>
+                          <param name="orientation_lookat"    value="$HyperionCloneShip_TargetGate"/>
+                          <param name="pilot"                 value="$AncientPilotCloneActor"/>
+                          <param name="namespace"             value="namespace"/>
+                        </run_actions>
+                        <precache_hint target="$HyperionCloneShip"/>
+
+                        <get_safe_pos result="$pos" min="15km" max="30km" object="$HyperionCloneShip_TargetGate" sector="$Sector_HyperionSighting" space="$Sector_HyperionSighting" comment="Position relative to Sector"/>
+
+                        <!-- Set Hyperion Movement Order -->
+                        <cancel_all_orders object="$HyperionCloneShip"/>
+                        <create_order name="$order" id="'MoveGeneric'" object="$HyperionCloneShip" immediate="true">
+                          <param name="destination" value="$HyperionCloneShip_TargetGate.sector"/>
+                          <param name="position" value="$HyperionCloneShip_TargetGate.relativeposition.{$HyperionCloneShip_TargetGate.sector}"/>
+                          <param name="traveltoend" value="true"/>
+                          <param name="precise"     value="false"/>
+                          <param name="noboost"     value="false"/>
+                          <param name="disablecollisionavoidance" value="false"/>
+                          <param name="debugchance" value="0"/>
+                        </create_order>
+                        <force_start_travel_mode ship="$HyperionCloneShip" fullspeed="true"/>
+
+                        <signal_cue cue="Hyperion_Sighting_Cutscene_Start"/>
+                      </actions>
+                      <cues>
+                        <cue name="Hyperion_Force_Speed" instantiate="true" checkinterval="0.9s">
+                          <conditions>
+                            <check_value value="$HyperionCloneShip.exists"/>
+                            <cue_is_waiting cue="Hyperion_Sighting_End"/>
+                          </conditions>
+                          <actions>
+                            <force_start_travel_mode ship="$HyperionCloneShip" fullspeed="true"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="Hyperion_Reached_Jump_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                          <param name="ApproachObject"    value="$HyperionCloneShip"/>
+                          <param name="ApproachTarget"    value="$HyperionCloneShip_TargetGate"/>
+                          <param name="ApproachDistance"  value="7km"/>
+                          <param name="SuccessSignalCue"  value="Hyperion_Reached_Jump_Gate"/>
+                        </cue>
+                        <cue name="Hyperion_Reached_Jump_Gate">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                        </cue>
+                        <cue name="Hyperion_Stuck_Timeout">
+                          <delay exact="20s"/>
+                          <actions>
+                            <signal_cue cue="Hyperion_Sighting_End" check="false"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <!-- Hyperion Sighting Cutscene -->
+                    <cue name="Hyperion_Sighting_Cutscene_Start">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <!-- Set Orbital Targetmonitor Cam -->
+                        <do_if value="$FirstHyperionCutsceneDone?">
+                          <play_cutscene key="'OrbitIndefinitelySlower'" targetmonitor="true" result="$CutsceneID_HyperionSighting" caption="{30254,181}">
+                            <param name="targetobject" object="$HyperionCloneShip"/>
+                          </play_cutscene>
+                        </do_if>
+                        <do_else>
+                          <play_cutscene key="'OrbitIndefinitelySlower'" targetmonitor="false" result="$CutsceneID_HyperionSighting" abortable="true">
+                            <param name="targetobject" object="$HyperionCloneShip"/>
+                          </play_cutscene>
+                        </do_else>
+                        <set_value name="$FirstHyperionCutsceneDone"/>
+                      </actions>
+                      <cues>
+
+                        <cue name="Hyperion_Sighting_Cutscene_Started">
+                          <conditions>
+                            <event_cutscene_started cutscene="$CutsceneID_HyperionSighting"/>
+                            <check_value value="event.param2" comment="So that we're not listening for null before the cutscene starts"/>
+                          </conditions>
+                          <!-- Speak -->
+                          <!-- Play Voiceover -->
+                          <actions>
+                            <do_any>
+                              <speak actor="$CryptidHuntressActor" priority="90" line="302540103" delay="0.6s" comment="Sighting Video Broadcast Narration"/>
+                              <speak actor="$CryptidHuntressActor" priority="90" line="302540104" delay="0.6s" comment="Sighting Video Broadcast Narration Variation 1"/>
+                              <speak actor="$CryptidHuntressActor" priority="90" line="302540105" delay="0.6s" comment="Sighting Video Broadcast Narration Variation 2"/>
+                            </do_any>
+                          </actions>
+                        </cue>
+
+                        <!-- Cutscene Stopped -->
+                        <cue name="Hyperion_Sighting_Cutscene_Stopped">
+                          <conditions>
+                            <event_cutscene_stopped cutscene="$CutsceneID_HyperionSighting"/>
+                          </conditions>
+                          <actions>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                    <!-- Hyperion Sighting Cleanup -->
+                    <cue name="Hyperion_Sighting_End">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled comment="timeout trigger"/>
+                          <event_cue_signalled cue="Hyperion_Reached_Jump_Gate"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <!-- CleanUp -->
+                        <run_actions ref="Ship_Jump_Effect">
+                          <param name="ship" value="$HyperionCloneShip"/>
+                          <param name="gate" value="$HyperionCloneShip_TargetGate"/>
+                        </run_actions>
+                      </actions>
+                      <delay  min="1s" max="1.5s"/>
+                      <actions>
+                        <stop_cutscene cutscene="$CutsceneID_HyperionSighting"/>
+                        <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                          <param name="Object" value="$HyperionCloneShip"/>
+                          <param name="RequesterCue" value="namespace"/>
+                          <param name="DebugChance" value="$DebugChance"/>
+                        </run_actions>
+                        <destroy_object object="$HyperionCloneShip" explosion="false"/>
+                        <!-- Reset Mission Cutscene and Offer -->
+                        <signal_cue cue="Reset_Offer"/>
+                      </actions>
+                      <cues>
+
+                        <!-- Voice Line Cutscene End -->
+                        <cue name="Hyperion_Sighting_Catchphrase_End">
+                          <conditions>
+                            <event_cue_completed cue="Hyperion_Sighting_End"/>
+                          </conditions>
+                          <actions>
+                            <!-- voice line about the mystery broadcaster -->
+                            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540106, $recipient = 'player']
+                                              ]
+                                  ]" />
+                          </actions>
+                        </cue>
+
+                        <!-- Player Left - Clear Mission Offer -->
+                        <cue name="Hyperion_Sighting_CleanUp">
+                          <conditions>
+                            <event_object_changed_sector object="player.entity"/>
+                            <check_value value="event.param != $Sector_HyperionSighting"/>
+                            <check_value value="event.param != $HyperionCloneShip_TargetGate.exit.sector"/>
+                            <check_value value="not $MissionAccepted?"/>
+                            <cue_is_complete cue="Hyperion_Sighting_End"/>
+                          </conditions>
+                          <actions>
+                            <!-- Reset Mission Cutscene and Offer -->
+                            <signal_cue cue="Reset_Offer"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <library name="Ship_Jump_Effect" purpose="run_actions">
+              <params>
+                <param name="gate"/>
+                <param name="ship"/>
+              </params>
+              <actions>
+                <!-- Jump In Effects For Gates -->
+                <do_if value="$gate.isaccelerator">
+                  <add_effect object="$gate"  effect="'jump_acceleratoreffect'"/>
+                </do_if>
+                <do_elseif value="$gate.isclass.{class.gate}">
+                  <add_effect object="$gate"  effect="'jump_gateeffect'"/>
+                </do_elseif>
+
+                <!-- Jump In Effects For Capital Ships -->
+                <do_if value="$ship.isclass.ship_l">
+                  <set_value name="$jumpeffect" exact="'jump_jumpin_capship'"/>
+                  <set_value name="$warpeffect" exact="'warpteleport'"/>
+                </do_if>
+                <do_if value="$ship.isclass.ship_xl">
+                  <set_value name="$jumpeffect" exact="'jump_jumpin_capship_xl'"/>
+                  <set_value name="$warpeffect" exact="'warpteleport_xl'"/>
+                </do_if>
+                <do_if value="$jumpeffect?">
+                  <add_effect object="$ship.zone" effect="$jumpeffect">
+                    <position value="$ship.position"/>
+                    <rotation value="$ship.rotation"/>
+                  </add_effect>
+                </do_if>
+                <do_if value="$warpeffect?">
+                  <add_effect object="$ship" effect="$warpeffect"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Hyperion_Create_Ship" purpose="run_actions">
+              <params>
+                <param name="sector"/>
+                <param name="position"/>
+                <param name="orientation_lookat"/>
+                <param name="pilot"/>
+                <param name="namespace"/>
+                <param name="ignoresafepos" default="false"/>
+              </params>
+              <actions>
+                <set_value name="$shipMacro" exact="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion"/>
+
+                <do_if value="$ignoresafepos">
+                  <create_ship name="$ship" macro="$shipMacro" sector="$sector" capturable="false" sellable="false">
+                    <owner exact="faction.civilian"/>
+                    <paint ware="md.Setup_DLC_Mini_01.Setup.$PaintCastAsunder"/>
+                    <loadout ref="story_hyperion_reward_special"/>
+                    <equipmentmods>
+                      <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Hyperion_Original"/>
+                    </equipmentmods>
+                    <pilot actor="$pilot"/>
+                    <orientation orientation="look_at" refobject="$orientation_lookat"/>
+                    <position space="$sector" x="$position.x" y="$position.y" z="$position.z"/>
+                  </create_ship>
+                </do_if>
+                <do_else>
+                  <create_ship name="$ship" macro="$shipMacro" sector="$sector" capturable="false" sellable="false">
+                    <owner exact="faction.civilian"/>
+                    <paint ware="md.Setup_DLC_Mini_01.Setup.$PaintCastAsunder"/>
+                    <loadout ref="story_hyperion_reward_special"/>
+                    <equipmentmods>
+                      <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Hyperion_Original"/>
+                    </equipmentmods>
+                    <pilot actor="$pilot"/>
+                    <orientation orientation="look_at" refobject="$orientation_lookat"/>
+                    <safepos space="$sector" x="$position.x" y="$position.y" z="$position.z"/>
+                  </create_ship>
+                </do_else>
+
+                <set_object_relation_behaviour        object="$ship" disable="true"/>
+                <set_object_docking_enabled           object="$ship" enabled="false"/>
+                <set_object_affected_by_force_effect  object="$ship" affected="false"/>
+                <set_value name="$ship.pilot.$donotscan" comment="prevents police from scanning the ship"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$ship"/>
+                  <param name="RequesterCue" value="$namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="ReachedThresholdSignalCue" value="null"/>
+                  <param name="IncludeEngines" value="true"/>
+                  <param name="IncludeTurrets" value="true"/>
+                  <param name="DebugChance" value="0"/>
+                </run_actions>
+                <cancel_all_orders object="$ship"/>
+                <create_order object="$ship" id="'Wait'"/>
+
+                <return value="$ship"/>
+              </actions>
+            </library>
+
+            <library name="Cryptid_Huntress_Create_Ship" purpose="run_actions">
+              <params>
+                <param name="sector"/>
+                <param name="position"/>
+                <param name="orientation_lookat"/>
+                <param name="pilot"/>
+                <param name="namespace"/>
+              </params>
+              <actions>
+                <set_value name="$shipMacro" exact="macro.ship_tel_s_scout_01_b_macro"/>
+
+                <create_ship name="$ship" macro="$shipMacro" sector="$sector" capturable="false" sellable="false">
+                  <owner exact="faction.civilian"/>
+                  <paint ware="ware.paintmod_0002"/>
+                  <loadout ref="story_hyperion_cryptid_scout"/>
+                  <pilot actor="$pilot"/>
+                  <orientation orientation="look_at" refobject="$orientation_lookat"/>
+                  <safepos space="$sector" x="$position.x" y="$position.y" z="$position.z"/>
+                </create_ship>
+                <set_object_relation_behaviour        object="$ship" disable="false"/>
+                <set_object_docking_enabled           object="$ship" enabled="false"/>
+                <set_object_affected_by_force_effect  object="$ship" affected="false"/>
+                <set_value name="$ship.pilot.$donotscan" comment="prevents police from scanning the ship"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$ship"/>
+                  <param name="RequesterCue" value="$namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="ReachedThresholdSignalCue" value="null"/>
+                  <param name="IncludeEngines" value="true"/>
+                  <param name="IncludeTurrets" value="true"/>
+                  <param name="DebugChance" value="0"/>
+                </run_actions>
+                <cancel_all_orders object="$ship"/>
+                <create_order object="$ship" id="'Wait'"/>
+                <return value="$ship"/>
+              </actions>
+            </library>
+
+          </cues>
+        </cue>
+
+
+        <cue name="Hyperion_Characters" namespace="this" comment="Characters used in hyperion story">
+          <cues>
+            <cue name="Hyperion_CharacterShowcase_Circle">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="player.station or player.ship"/>
+              </conditions>
+              <actions>
+                <set_value name="$DebugChance" exact="100"/>
+                <set_value name="this.$actors" exact="[
+                      parent.parent.$CryptidHuntressActor,
+                      parent.parent.$AncientPilotActor
+                   ]"/>
+
+                <do_if value="player.station">
+                  <!-- commented out timelines dependency -->
+                  <!--<find_room name="this.$room" object="player.station" multiple="false" macro="macro.room_gen_common_02_macro"/>-->
+                </do_if>
+                <do_elseif value="player.ship">
+                  <set_value name="this.$room" exact="player.room"/>
+                </do_elseif>
+
+                <set_value name="this.$roomx" exact="14" comment="left/right"/>
+                <set_value name="this.$roomz" exact="-23"/>
+                <set_value name="this.$anglestep" exact="(2.0*pi) / this.$actors.count"/>
+                <set_value name="this.$angle" exact="-this.$anglestep" comment="so we end on 0 the first time"/>
+                <set_value name="this.$radius" exact="19"/>
+                <set_value name="this.$tmpx" exact="this.$roomx - 20"/>
+                <set_value name="this.$tmpz" exact="this.$roomz"/>
+
+                <do_for_each name="$StoryActor" in="this.$actors">
+                  <do_if value="false">
+                    <!-- spawn in circle -->
+                    <set_value name="this.$tmpx" exact="this.$radius*sin(this.$angle) - this.$roomx"/>
+                    <set_value name="this.$tmpy" exact="0.0"/>
+                    <set_value name="this.$tmpz" exact="this.$radius*cos(this.$angle) - this.$roomz"/>
+                    <set_value name="this.$angle" exact="this.$anglestep" operation="add"/>
+                    <set_value name="this.$finalangle" exact="this.$angle + 180deg"/>
+                  </do_if>
+                  <do_else>
+                    <!-- spawn in line -->
+                    <set_value name="this.$tmpx" operation="add" exact="4"/>
+                    <set_value name="this.$tmpy" exact="8" comment="up"/>
+                    <set_value name="this.$tmpz" exact="16" comment="fwd/back"/>
+                    <set_value name="this.$finalangle" exact="0"/>
+                  </do_else>
+                  <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager"
+                    param="['add_definition', $StoryActor, table[
+                            $requestercue = namespace, $priority = 200, $location = this.$room,
+                            $position = position.[this.$tmpx, this.$tmpy, this.$tmpz], $rotation = rotation.[this.$finalangle, 0deg, 0deg],
+                            $debugchance = 0, $debugcaller = if $DebugChance == 100 then this else null]
+                        ]"/>
+                  <debug_text text="'room=%s pos=%s,%s,%s, angle=%s character=%s'.[this.$room, this.$tmpx, this.$tmpy, this.$tmpz, this.$finalangle, $StoryActor.knownname]" chance="100"/>
+                </do_for_each>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Debug">
+          <cues>
+          </cues>
+        </cue>
+
+        <cue name="GenericConversations">
+          <cues>
+            <cue name="Generic_Conversation_CryptidHuntress">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Generic_Conversation_CryptidHuntress_Greeting" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$CryptidHuntressActor"/>
+                    <check_value value="cuestate.complete != Ch1_2_Conversation.state"/>
+                    <check_value value="cuestate.complete != Ch1_3_Breadcrumbs_Onboarding.state"/>
+                    <check_value value="cuestate.complete != Ch2_1_Conversation.state"/>
+                    <check_value value="cuestate.complete != Ch2_2_Conversation.state"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="2001" comment="Greetings"/>
+                    </add_npc_line>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Generic_Conversation_AncientPilotActor">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="cuestate.complete != Ch2_1_Conversation.state"/>
+                <check_value value="cuestate.complete != Ch2_2_Conversation.state"/>
+                <check_value value="cuestate.complete != Ch2_3_Conversation.state"/>
+              </conditions>
+              <cues>
+                <cue name="Generic_Conversation_AncientPilotActor_Greeting" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$AncientPilotActor"/>
+                    <check_value value="not ($ch2_intro_done? and (not $ch2_choice?))" comment="technical new conversation mid dialog; no greetings for this"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$AncientPilotActorTalking? and $ch2_choice?">
+                      <!-- NPC Usecase Setup -->
+                      <set_value name="$MissionActors.$AncientPilotActor" exact="table[
+                                              $entity = $AncientPilotActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                      <set_value name="$AncientPilotActor.$cutscenekey" exact="table[ $key = 'ShowNPCFace']"/>
+                      <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                        <text line="2001" comment="Greetings"/>
+                      </add_npc_line>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$AncientPilotActor.$cutscenekey" exact="table[ $key = 'ShowNoise']"/>
+                      <set_value name="$BettyActor.$cutscenekey" exact="table[ $key = 'ShowNoise']"/>
+                      <add_npc_line speaker="$BettyActor" hidechoices="true">
+                        <text line="302540201" comment="readtext.{10002}.{302540201} (QuickLookup) static noise"/>
+                      </add_npc_line>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Generic_Conversation_AncientPilotCloneActor">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Generic_Conversation_AncientPilotCloneActor_Greeting" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$AncientPilotCloneActor"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$BettyActor" hidechoices="true">
+                      <text line="302540201" comment="readtext.{10002}.{302540201} (QuickLookup) static noise"/>
+                    </add_npc_line>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!-- *** LIBRARY FUNCTIONS *** -->
+
+        <!-- *** STORY MANAGER INTERACTION *** -->
+
+        <cue name="Story_Activation_Manager">
+          <cues>
+
+            <cue name="Activate_Immediately" onfail="cancel">
+              <conditions>
+                <check_value value="true" comment="no preconditions"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Activate_Story"/>
+              </actions>
+            </cue>
+
+            <!-- Cues checking preconditions, if any -->
+            <!-- Cue which activates the story (all preconditions met) -->
+
+            <cue name="Activate_Story">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch1_Sightings"/>
+                <cancel_cue cue="Story_Activation_Manager"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+
+        <!-- *** STORY CHAPTERS *** -->
+
+        <!-- Chapter 1: brief description -->
+
+        <cue name="Ch1_Sightings_Force">
+          <conditions>
+            <event_cue_cancelled cue="this" comment="could contain force content and should not be signallable"/>
+          </conditions>
+          <force name="Plot_Hyperion_Ch1">
+            <!-- Cancelling Previous Chapters, signalling the correct one -->
+            <set_value name="$CurrentChapter" exact="Ch1_Sightings"/>
+            <do_for_each in="$Chapters" name="$Chapter">
+              <do_if value="$Chapter == $CurrentChapter">
+                <signal_cue cue="$CurrentChapter"/>
+                <break/>
+              </do_if>
+              <cancel_cue cue="$Chapter"/>
+            </do_for_each>
+
+            <!-- Special setup actions when you "fast-forward" into a chapter (skipping earlier ones) -->
+          </force>
+        </cue>
+
+        <cue name="Ch1_Sightings">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Chapter ' + this" chance="$DebugChance"/>
+            <set_value name="$CurrentChapter" exact="this"/>
+            <set_value name="$ObjectiveStep" exact="1"/>
+          </actions>
+          <cues>
+
+            <!-- Scene 1: Sightings and Mission Offer -->
+            <cue name="Ch1_CreateOffer" version="2">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="not $MissionAccepted?"/>
+              </conditions>
+              <actions>
+                <show_help line="833" position="1" force="true" comment="A new story mission is now available in the MISSION OFFERS tab of your map menu." allowclose="true"/>
+                <create_offer comment="Mission: Hyperion Sighting" actor="$CryptidHuntressActor" group="missiongroup.story_hyperion"
+                             name="{30254,1001}" location="$CryptidHuntressShip" description="{30254,1002}" rewardtext="{30254,1011}"
+                             icon="'briefing_myrna_rae_01'" iconcaption="$CryptidHuntressActor.name"
+                             faction="faction.civilian" difficulty="level.easy"
+                             cue="$MissionCue" abortable="false" type="missiontype.plot">
+                  <briefing>
+                    <objective step="1" action="objective.talkto" object="$CryptidHuntressActor" text="readtext.{30254}.{151}"/>
+                  </briefing>
+                </create_offer>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="$MissionCue.hasmissionoffer">
+                  <update_offer cue="$MissionCue" group="missiongroup.story_hyperion"/>
+                </do_if>
+              </patch>
+              <cues>
+                <cue name="Ch1_AcceptMission" version="2">
+                  <conditions>
+                    <check_any>
+                      <event_object_signalled object="$CryptidHuntressActor" param="'accept'" comment="Accepting on BB"/>
+                      <event_cue_signalled/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$MissionAccepted"/>
+                    <create_mission cue="$MissionCue" offercue="$MissionCue" abortable="false"/>
+                    <set_objective_from_briefing cue="$MissionCue" step="$ObjectiveStep"/>
+                    <remove_help line="833"/>
+                    <remove_offer cue="$MissionCue"/>
+                  </actions>
+                  <patch sinceversion="2">
+                    <update_mission cue="$MissionCue" group="missiongroup.story_hyperion"/>
+                  </patch>
+                </cue>
+
+                <cue name="Ch1_ClearOffer">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <remove_offer cue="$MissionCue"/>
+                    <reset_cue cue="parent"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- Scene 2: Talk to Broadcaster and Onboarding -->
+            <cue name="Ch1_2_Conversation">
+              <cues>
+                <cue name="Ch1_2_Conv_Start" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$CryptidHuntressActor"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch1_AcceptMission" check="false"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="2001" comment="Greetings"/>
+                    </add_npc_line>
+
+                    <!-- skip already heard lines -->
+                    <!-- Declined -->
+                    <do_if value="$MyrnaSaid.indexof.{302540115}" comment="readtext.{10147}.{302540115} (QuickLookup)">
+                      <signal_cue_instantly cue="Ch1_2_Conv_6" comment="help me?"/>
+                    </do_if>
+                    <do_elseif value="$Triggered_conv_historian?">
+                      <signal_cue_instantly cue="Ch1_2_Conv_2" comment="readtext.{10147}.{302540108} (QuickLookup)"/>
+                    </do_elseif>
+                    <!-- else normal progression -->
+                    <do_else>
+                      <add_player_choice text="{30254,302540101}" section="conv_broadcast"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_1" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_broadcast"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_broadcast"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540107" comment="readtext.{10147}.{302540107} (QuickLookup)"/>
+                    </add_npc_line>
+                    <set_entity_overrides entity="$CryptidHuntressActor" title="'{30254,152}'" icon="'specialist'"/>
+                    <add_player_choice text="{30254,302540102}" section="conv_historian"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_2" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_historian"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_historian"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540108" comment="readtext.{10147}.{302540108} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_player_choice text="{30254,302540103}" section="conv_hyperion"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_3" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_hyperion"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_hyperion"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540109" comment="readtext.{10147}.{302540109} (QuickLookup)"/>
+                      <text line="302540110" comment="readtext.{10147}.{302540110} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_player_choice text="{30254,302540104}" section="conv_congratulations"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_4" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_congratulations"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_congratulations"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540111" comment="readtext.{10147}.{302540111} (QuickLookup)"/>
+                      <text line="302540112" comment="readtext.{10147}.{302540112} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_player_choice text="{30254,302540105}" section="conv_assistance"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_5" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_assistance"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_assistance"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540113" comment="readtext.{10147}.{302540113} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_player_choice text="{30254,302540106}" section="conv_decide"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_6" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_decide"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Triggered_conv_decide"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540114" comment="readtext.{10147}.{302540114} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_player_choice text="{30254,302540108}" section="conv_accept"/>
+                    <add_player_choice text="{30254,302540107}" section="conv_decline"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_7_decline" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_decline"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540115" comment="readtext.{10147}.{302540115} (QuickLookup)"/>
+                    </add_npc_line>
+                    <append_to_list name="$MyrnaSaid" exact="302540115" unique="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_2_Conv_7" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$CryptidHuntressActor" section="conv_accept"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540116" comment="readtext.{10147}.{302540116} (QuickLookup)"/>
+                    </add_npc_line>
+                  </actions>
+                  <cues>
+                    <cue name="Ch1_2_Conv_7_Finished">
+                      <conditions>
+                        <event_conversation_finished actor="$CryptidHuntressActor"/>
+                        <!--<event_speak_line_finished actor="$CryptidHuntressActor" line="302540116"/>-->
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Ch1_2_Conv_Complete"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Complete -->
+                <cue name="Ch1_2_Conv_Complete">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Ch1_2_Conversation"/>
+                    <signal_cue cue="Ch1_3_Breadcrumbs"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- Scene 3: Breadcrumbs Mission to find Hyperion -->
+            <cue name="Ch1_3_Breadcrumbs">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="this" chance="$DeepDebugChance"/>
+                <set_value name="$ObjectiveStep" exact="1" operation="add"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_3_Breadcrumbs_Onboarding">
+                  <actions>
+                    <set_value name="$DownloadText" exact="readtext.{30224}.{3100}" comment="Connecting"/>
+                    <set_value name="$DownloadProgress_Onboarding" exact="0"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_3_Downloading">
+                      <delay exact="0.1s"/>
+                      <actions>
+                        <set_objective cue="$MissionCue" action="objective.await" text="$DownloadText" silent="true">
+                          <progress progress="$DownloadProgress_Onboarding" max="100"/>
+                        </set_objective>
+                        <set_value name="$DownloadProgress_Onboarding" operation="add"/>
+                        <do_if value="$DownloadProgress_Onboarding gt 5">
+                          <set_value name="$DownloadText" exact="readtext.{30224}.{3101}" comment="Connection Established"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 20">
+                          <set_value name="$DownloadText" exact="readtext.{30254}.{1504}" comment="downloading hyperion data"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 38">
+                          <set_value name="$DownloadText" exact="readtext.{30254}.{1505}" comment="downloading hyperion data 2"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 62">
+                          <set_value name="$DownloadText" exact="readtext.{30254}.{1506}" comment="downloading hyperion data 3"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 77">
+                          <set_value name="$DownloadText" exact="readtext.{30254}.{1507}" comment="downloading hyperion data 4"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 95">
+                          <set_value name="$DownloadText" exact="readtext.{30224}.{3108}" comment="Finalising"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding gt 99">
+                          <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.await" object="$CryptidHuntressActor" updatebriefing="true"/>
+                        </do_if>
+                        <do_if value="$DownloadProgress_Onboarding lt 100">
+                          <reset_cue cue="this"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_3_Breadcrumbs_Onboarding_Conv_Start">
+                      <actions>
+                        <set_value name="$conv_breadcrumbs"/>
+                        <start_conversation actor="$CryptidHuntressActor" conversation="breadcrumbs" missioncue="$MissionCue"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_3_Breadcrumbs_Onboarding_Conv_Started" instantiate="true">
+                      <conditions>
+                        <check_any>
+                          <event_conversation_started actor="$CryptidHuntressActor"/>
+                          <event_conversation_started actor="$CryptidHuntressActor" conversation="breadcrumbs"/>
+                        </check_any>
+                        <check_value value="$conv_breadcrumbs?"/>
+                      </conditions>
+                      <actions>
+                        <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                          <text line="302540117" comment="readtext.{10147}.{302540117} (QuickLookup)"/>
+                          <text line="302540118" comment="readtext.{10147}.{302540118} (QuickLookup)"/>
+                          <text line="302540119" comment="readtext.{10147}.{302540119} (QuickLookup)"/>
+                          <text line="302540120" comment="readtext.{10147}.{302540120} (QuickLookup)"/>
+                          <text line="302540121" comment="readtext.{10147}.{302540121} (QuickLookup)"/>
+                          <text line="302540122" comment="readtext.{10147}.{302540122} (QuickLookup)"/>
+                        </add_npc_line>
+                      </actions>
+                      <cues>
+                        <cue name="Ch1_3_Breadcrumbs_Conv_Finished">
+                          <conditions>
+                            <event_conversation_finished actor="$CryptidHuntressActor"/>
+                            <!--<event_speak_line_finished actor="$CryptidHuntressActor" line="302540122"/>-->
+                          </conditions>
+                          <actions>
+                            <set_value name="$Sector_Next"                                  exact="$HyperionCloneShip_TargetGate.sector" comment="prevent gate back to where you came from being an objective"/>
+                            <set_value name="$Sector_HyperionSighting_Accepted"             exact="$HyperionCloneShip_TargetGate.sector" comment="prevent playing lines for that"/>
+                            <set_value name="$Sector_HyperionSighting_FirstSearch"          exact="$HyperionCloneShip_TargetGate.exit.sector" comment="prevent skipping gate search in the first"/>
+                            <signal_cue_instantly cue="Ch1_3_Investigate_Gates_Next_Sector" param="$HyperionCloneShip_TargetGate.exit.sector"/>
+                            <cancel_cue cue="Ch1_3_Breadcrumbs_Onboarding"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_3_Investigate_Gates_Next_Sector" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="this" chance="$DeepDebugChance"/>
+                    <set_value name="$Sector_Last" exact="$Sector_Next"/>
+                    <set_value name="$Sector_Next" exact="event.param"/>
+                    <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.flyto" object="$Sector_Next" updatebriefing="true"/>
+
+                    <do_if value="$Sector_Hyperion != $Sector_Next">
+                      <!-- Move Cryptid Huntress -->
+                      <cancel_all_orders object="$CryptidHuntressShip"/>
+                      <create_order name="$order" id="'MoveGeneric'" object="$CryptidHuntressShip" immediate="true">
+                        <param name="destination" value="$Sector_Next"/>
+                        <param name="position"    value="$Sector_Next.coreposition"/>
+                        <param name="traveltoend" value="true"/>
+                        <param name="precise"     value="false"/>
+                        <param name="noboost"     value="false"/>
+                        <param name="disablecollisionavoidance" value="false"/>
+                        <param name="debugchance" value="0"/>
+                      </create_order>
+                    </do_if>
+
+                    <reset_cue cue="Ch1_3_Investigate_Gates"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="$Sector_Hyperion != $Sector_Next">
+                      <signal_cue_instantly cue="Ch1_3_Investigate_Gates" param="$Sector_Next"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="Ch1_3_Hyperion_Sector"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <cue name="Debug_Ch1_3_Investigate_Gates_ResetOnPlayerSector">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Ch1_3_Investigate_Gates" param="player.sector"/>
+                  </actions>
+                </cue>
+
+                <!-- Investigate all Gates in a Sector -->
+                <cue name="Ch1_3_Investigate_Gates">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="this" chance="$DeepDebugChance"/>
+                    <set_value name="$Sector_Investigation" exact="event.param"/>
+                    <debug_text text="'NEW Sector: ' + $Sector_Investigation.knownname" chance="$DeepDebugChance"/>
+
+                    <!-- Find Gates -->
+                    <create_list name="$Gates_CurrentInvestigationSector"/>
+                    <find_gate name="$Gates_CurrentInvestigationSector" multiple="true" active="true" space="$Sector_Investigation"/>
+                    <!-- Ignore gate from $Sector_Last (where we come from) -->
+                    <do_for_each in="$Gates_CurrentInvestigationSector" name="$target" reverse="true">
+                      <do_if value="$target.exit.sector == $Sector_Last">
+                        <remove_from_list name="$Gates_CurrentInvestigationSector" exact="$target"/>
+                      </do_if>
+                    </do_for_each>
+
+                    <remove_value name="$Investigation_CorrectGate"/>
+                    <do_for_each in="$WayHomeTable.{$Sector_Investigation}" name="$gate">
+                      <do_if value="$Gates_CurrentInvestigationSector.indexof.{$gate}">
+                        <set_value name="$Investigation_CorrectGate" exact="$gate"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+
+
+                    <!-- Chance for sighting instead -->
+                    <do_if value="@$Investigation_CorrectGate.isknown and (Hyperion_Sighting_Start.state == cuestate.waiting) and ($Sector_Investigation != $Sector_HyperionSighting_FirstSearch)"
+                           chance="[[20 * $Gates_CurrentInvestigationSector.count, (30 * $SectorsInvestigated)].max, 100].min" comment="higher chance if there are more gates to check">
+                      <remove_value name="$Play_Ch1_3_Scan_Gates_Line"/>
+                      <signal_cue_instantly cue="Hyperion_Sighting_Start" param="$Investigation_CorrectGate"/>
+                      <set_value name="$Flag_SightingSkip"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$SectorsInvestigated" operation="add"/>
+                      <set_value name="$Play_Ch1_3_Scan_Gates_Line"/>
+                      <!-- Comment on Highway Exits -->
+                      <!--<create_list name="$HighwayExitGates_CurrentInvestigationSector"/>
+                      <find_highway_exit_gate name="$HighwayExitGates_CurrentInvestigationSector" multiple="true" active="true" space="$Sector_Investigation"/>-->
+
+                      <remove_value name="$InvestigationTargets"/>
+                      <create_group groupname="$InvestigationTargets"/>
+                      <add_to_group groupname="$InvestigationTargets" list="$Gates_CurrentInvestigationSector"/>
+                      <!--<add_to_group groupname="$InvestigationTargets" list="$HighwayExitGates_CurrentInvestigationSector"/>-->
+
+                      <remove_value name="$InvestigationTargets_Known"/>
+                      <create_group groupname="$InvestigationTargets_Known"/>
+                      <do_for_each in="$InvestigationTargets" name="$i">
+                        <do_if value="$i.isknown">
+                          <add_to_group groupname="$InvestigationTargets_Known" object="$i"/>
+                        </do_if>
+                        <debug_text text="'Investigation Target %s in %s to %s'.[$i.knownname, $i.sector.knownname, $i.exit.sector.knownname]" chance="$DeepDebugChance"/>
+                      </do_for_each>
+
+                      <include_actions ref="Objective_Investigate_Gates"/>
+
+                      <!--
+                      - on close up: objective: scan gate
+                      - or analyse "gate nacelle" or something from Boron plot; familiarity
+                      - increase range
+                      - final case: "Find: Jump Gates and Accelerators in :$Sector..."
+                      -->
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <library name="Objective_Investigate_Gates" purpose="include_actions">
+                      <actions>
+                        <do_if value="$InvestigationTargets_Known.count">
+                          <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.scan" group="$InvestigationTargets_Known" updatebriefing="true"/>
+                        </do_if>
+                        <do_else>
+                          <substitute_text text="$text" source="readtext.{30254}.{1503}">
+                            <replace string="'$SECTOR$'" with="$Sector_Investigation.knownname"/>
+                          </substitute_text>
+                          <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.find" text="$text" object="$Sector_Investigation" updatebriefing="true"/>
+                        </do_else>
+                      </actions>
+                    </library>
+
+                    <cue name="Ch1_3_Scan_Gates_SetKnown" instantiate="true">
+                      <conditions>
+                        <event_object_known_to_player group="$InvestigationTargets"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <add_to_group groupname="$InvestigationTargets_Known" object="event.object"/>
+                        <include_actions ref="Objective_Investigate_Gates"/>
+                      </actions>
+                    </cue>
+
+                    <!-- "new sector, same deal - go scan -->
+                    <cue name="Ch1_3_Scan_Gates_Line">
+                      <conditions>
+                        <event_object_changed_sector object="player.entity"/>
+                        <check_value value="event.param == $Sector_Investigation"/>
+                        <check_value value="event.param != $Sector_HyperionSighting_Accepted"/>
+                        <check_value value="$Play_Ch1_3_Scan_Gates_Line?"/>
+                      </conditions>
+                      <actions>
+                        <!-- prevent other stories from jumping in -->
+                        <do_if value="not $Flag_ScanGates?">
+                          <set_value name="md.$LastMentorSpeak" exact="player.age"/>
+                          <set_value name="md.$LastMentorStory" exact="namespace"/>
+                          <set_value name="md.$LastMentor"      exact="$CryptidHuntressActor"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="6s"/>
+                      <actions>
+                        <do_if value="(md.$LastMentor == $CryptidHuntressActor)
+                                  or ((md.$LastMentor != $CryptidHuntressActor) and player.age ge (md.$LastMentorSpeak + 30s))">
+                          <debug_text text="this" chance="$DeepDebugChance"/>
+                          <!-- readtext.{10147}.{302540123}  readtext.{10147}.{302540124}  readtext.{10147}.{302540131} -->
+                          <do_if value="$Flag_ScanGates? and (not $Flag_KnowTheDrill?)">
+                            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 89, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540131, $recipient = 'player']
+                                                    ]]
+                                              ]
+                                  ]" />
+                            <set_value name="$Flag_KnowTheDrill"/>
+                          </do_if>
+                          <do_else>
+                            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 89, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540123, $recipient = 'player'],
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540124, $recipient = 'player']
+                                                    ]]
+                                              ]
+                                  ]" />
+                            <set_value name="$Flag_ScanGates"/>
+                          </do_else>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_3_Investigate_Gates_Set_Targets">
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <create_list name="$GateListeners"/>
+                        <do_for_each in="$InvestigationTargets" name="$target">
+                          <signal_cue_instantly cue="Ch1_3_Investigate_Gate" param="$target"/>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_3_Investigate_Gate" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="this" chance="$DeepDebugChance"/>
+                        <append_to_list name="$GateListeners" exact="this"/>
+                        <set_value name="this.$gate" exact="event.param"/>
+                      </actions>
+                      <cues>
+
+                        <cue name="Ch1_3_Scan_Gate_Resetable">
+                          <cues>
+                            <cue name="Ch1_3_Scan_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                              <param name="ApproachTarget"    value="parent.parent.$gate"/>
+                              <param name="ApproachDistance"  value="5000m"/>
+                              <param name="SuccessSignalCue"  value="Ch1_3_Scan_Gate_Scanning"/>
+                            </cue>
+
+                            <cue name="Ch1_3_Scan_Gate_Scanning">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <cues>
+                                <cue name="Ch1_3_Scan_Gate_Scanning_Progress">
+                                  <actions>
+                                    <debug_text text="''" chance="$DeepDebugChance"/>
+                                    <do_if value="player.activity != activity.scan">
+                                      <show_help line="14101" position="1" duration="20s" allowclose="true" force="true"/>
+                                    </do_if>
+                                    <set_value name="$EstablishingConnection" exact="0"/>
+                                    <set_value name="$DownloadProgress" exact="0"/>
+                                    <set_value name="$DownloadStuck" exact="0"/>
+                                  </actions>
+                                  <cues>
+                                    <cue name="Ch1_3_Scan_In_Progress">
+                                      <delay exact="0.1s"/>
+                                      <actions>
+                                        <set_value name="$DownloadText" exact="readtext.{30224}.{3100}" comment="Establishing Connection"/>
+
+                                        <do_if value="player.activity == activity.scan">
+                                          <remove_help line="14101"/>
+                                          <set_value name="$EstablishingConnection" operation="add" exact="2"/>
+                                        </do_if>
+
+                                        <do_if value="$EstablishingConnection lt 10">
+                                          <set_value name="$DownloadText" exact="parent.parent.parent.parent.$gate.knownname" comment="scan gate"/>
+                                        </do_if>
+                                        <do_if value="$EstablishingConnection ge 10">
+                                          <set_value name="$DownloadText" exact="readtext.{30224}.{3101}" comment="Connection Established"/>
+                                        </do_if>
+                                        <do_if value="$EstablishingConnection ge 20">
+                                          <do_if value="player.activity == activity.scan">
+                                            <set_value name="$DownloadProgress" operation="add" exact="3"/>
+                                          </do_if>
+
+                                          <do_if value="$DownloadProgress ge 54">
+                                            <set_value name="$DownloadStuck" exact="3" operation="add"/>
+                                            <do_if value="($DownloadStuck le 40) and (not [26,27,28,29,36].indexof.{$DownloadStuck})">
+                                              <set_value name="$DownloadProgress" operation="subtract" exact="1"/>
+                                            </do_if>
+                                          </do_if>
+                                        </do_if>
+
+                                        <!-- Text Updates throughout percentiles -->
+                                        <do_if value="$DownloadProgress le 7">
+                                          <set_value name="$DownloadText" exact="parent.parent.parent.parent.$gate.knownname" comment="scan gate"/>
+                                        </do_if>
+                                        <do_elseif value="$DownloadProgress le 19">
+                                          <set_value name="$DownloadText" exact="readtext.{30254}.{1501}" comment="Collecting Data"/>
+                                        </do_elseif>
+                                        <do_elseif value="$DownloadProgress le 39">
+                                          <set_value name="$DownloadText" exact="readtext.{30254}.{1502}" comment="Uploading"/>
+                                        </do_elseif>
+                                        <do_elseif value="$DownloadProgress le 57">
+                                          <set_value name="$DownloadText" exact="readtext.{30254}.{1501}" comment="Collecting Data"/>
+                                        </do_elseif>
+                                        <do_elseif value="$DownloadProgress le 100">
+                                          <set_value name="$DownloadText" exact="readtext.{30254}.{1502}" comment="Uploading"/>
+                                        </do_elseif>
+
+                                        <set_objective cue="$MissionCue" action="objective.scan" text="$DownloadText" silent="true">
+                                          <!-- removed  object="parent.parent.parent.parent.$gate" to prevent flickering -->
+                                          <progress progress="$DownloadProgress" max="100"/>
+                                        </set_objective>
+
+                                        <do_if value="$DownloadProgress ge 100">
+                                          <signal_cue cue="Ch1_3_Scan_Gate_Complete"/>
+                                          <cancel_cue cue="parent"/>
+                                        </do_if>
+                                        <do_else>
+                                          <reset_cue cue="this"/>
+                                        </do_else>
+                                      </actions>
+                                    </cue>
+
+                                    <cue name="Ch1_3_Scan_Gate_Aborted_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                                      <param name="ApproachTarget"    value="parent.parent.parent.parent.$gate"/>
+                                      <param name="ApproachDistance"  value="6000m"/>
+                                      <param name="Invert"            value="true"/>
+                                      <param name="SuccessSignalCue"  value="Ch1_3_Scan_Gate_Aborted"/>
+                                    </cue>
+
+                                    <cue name="Ch1_3_Scan_Gate_Aborted">
+                                      <conditions>
+                                        <event_cue_signalled/>
+                                      </conditions>
+                                      <actions>
+                                        <!-- revert objective -->
+                                        <remove_help line="14101"/>
+                                        <include_actions ref="Objective_Investigate_Gates"/>
+                                        <!-- reset gate -->
+                                        <reset_cue cue="parent.parent.parent"/>
+                                      </actions>
+                                    </cue>
+                                  </cues>
+                                </cue>
+                              </cues>
+                            </cue>
+
+                            <cue name="Ch1_3_Scan_Gate_Complete">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <!-- Scan Completed for This Gate -->
+                                <remove_help line="14101"/>
+                                <remove_from_group group="$InvestigationTargets" object="parent.parent.$gate"/>
+                                <remove_from_group group="$InvestigationTargets_Known" object="parent.parent.$gate"/>
+                                <include_actions ref="Objective_Investigate_Gates"/>
+
+                                <!-- Success -->
+                                <do_if value="$Investigation_CorrectGate == parent.parent.$gate">
+                                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $weight = (if $MyrnaSaid.indexof.{302540126} then 0 else 100), $actor = '$CryptidHuntressActor', $speak = 302540126, $recipient = 'player']
+                                                    ]
+                                           ],
+                                      table[ $select = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540129, $recipient = 'player'],
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540130, $recipient = 'player']
+                                                    ]
+                                           ]
+                                              ]
+                                  ]" />
+                                  <!-- Cleanup all Listeners on the Sector -->
+                                  <do_for_each in="$GateListeners" name="$listener">
+                                    <remove_from_list name="$GateListeners" exact="$listener"/>
+                                    <cancel_cue cue="$listener"/>
+                                  </do_for_each>
+                                  <signal_cue_instantly cue="Ch1_3_Investigate_Gates_Next_Sector" param="$Investigation_CorrectGate.exit.sector"/>
+                                </do_if>
+                                <!-- Negative Result -->
+                                <do_else>
+                                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $weight = (if $MyrnaSaid.indexof.{302540126} then 0 else 100), $actor = '$CryptidHuntressActor', $speak = 302540126, $recipient = 'player']
+                                                    ]
+                                           ],
+                                      table[ $select = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540127, $recipient = 'player'],
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540128, $recipient = 'player']
+                                                    ]]
+                                              ]
+                                  ]" />
+                                  <!-- Cleanup This Listener -->
+                                  <remove_from_list name="$GateListeners" exact="parent.parent"/>
+                                  <cancel_cue cue="parent.parent"/>
+                                </do_else>
+                                <!-- Prevent Line Repetition -->
+                                <append_to_list name="$MyrnaSaid" exact="302540126" unique="true"/>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch1_3_SightingSkip">
+                      <conditions>
+                        <event_cue_activated cue="Hyperion_Sighting_End"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'hyperion sighting complete - update objective to next sector'" chance="$DeepDebugChance"/>
+                        <signal_cue_instantly cue="Ch1_3_Investigate_Gates_Next_Sector" param="$Investigation_CorrectGate.exit.sector"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_3_Hyperion_Sector">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <substitute_text text="$text" source="readtext.{30254}.{1503}">
+                      <replace string="'$SECTOR$'" with="$Sector_Hyperion.knownname"/>
+                    </substitute_text>
+                    <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.find" text="$text" object="$Sector_Hyperion" updatebriefing="true"/>
+
+                    <!-- Move Cryptid Huntress -->
+                    <cancel_all_orders object="$CryptidHuntressShip"/>
+                    <create_order name="$order" id="'MoveGeneric'" object="$CryptidHuntressShip" immediate="true">
+                      <param name="destination" value="$Sector_Next"/>
+                      <param name="position"    value="$Gate_HyperionSector_Exit.relativeposition.{$Sector_Next}"/>
+                      <param name="traveltoend" value="true"/>
+                      <param name="precise"     value="false"/>
+                      <param name="noboost"     value="false"/>
+                      <param name="disablecollisionavoidance" value="false"/>
+                      <param name="debugchance" value="0"/>
+                    </create_order>
+
+                    <!-- create hyperion -->
+                    <create_position name="$hyppos" x="-260m" y="1280m" z="0m" object="$CommStation" space="$Sector_Hyperion"/>
+                    <run_actions ref="Hyperion_Create_Ship" result="$HyperionOriginalShip">
+                      <param name="sector"                value="$Sector_Hyperion"/>
+                      <param name="position"              value="$hyppos"/>
+                      <param name="orientation_lookat"    value="$Gate_HyperionSector_Exit"/>
+                      <param name="pilot"                 value="$BettyActor"/>
+                      <param name="namespace"             value="namespace"/>
+                      <param name="ignoresafepos"         value="true"/>
+                    </run_actions>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch1_3_Hyperion_ScanEffect" instantiate="true">
+                      <conditions>
+                        <check_any>
+                          <event_long_range_scan_ping object="$HyperionOriginalShip"/>
+                          <event_long_range_scan_ping object="$CommStation"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <add_effect object="player.zone" effect="'scfx_result_good_01'" comment="golden ping">
+                          <position object="$HyperionOriginalShip"/>
+                        </add_effect>
+                        <add_effect object="player.zone" effect="'scfx_wave_02'" comment="long range scan effect">
+                          <position object="$HyperionOriginalShip"/>
+                        </add_effect>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_3_Hyperion_Scan_Gates_Line_Final">
+                      <conditions>
+                        <event_object_changed_sector object="player.entity"/>
+                        <check_value value="event.param == $Sector_Hyperion"/>
+                        <cue_is_waiting cue="Ch1_3_Hyperion_Found"/>
+                      </conditions>
+                      <actions>
+                        <!-- fake "scan all gates" (she doesn't know) -->
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540123, $recipient = 'player'],
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540124, $recipient = 'player'],
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540131, $recipient = 'player']
+                                                    ]]
+                                              ]
+                                  ]" />
+                      </actions>
+                    </cue>
+
+                    <!-- hyperion approach handler -->
+                    <cue name="Ch1_3_Hyperion_Found_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$HyperionOriginalShip"/>
+                      <param name="ApproachDistance"  value="40000m"/>
+                      <param name="SuccessSignalCue"  value="Ch1_3_Hyperion_Found"/>
+                    </cue>
+
+                    <cue name="Ch1_3_Hyperion_Found">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <!-- set objective to Hyperion so player can point ship in the right direction -->
+                        <set_value name="$ObjectiveStep" operation="add"/>
+                        <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.investigate" object="$HyperionOriginalShip" updatebriefing="true"/>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                                  table[ $actor = '$CryptidHuntressActor', $speak = 302540132, $recipient = 'player']
+                                              ],
+                                    $callbackcue = Ch1_3_Breadcrumbs_Complete,
+                                    $abortcallbackcue = Ch1_3_Breadcrumbs_Complete
+                                  ]" />
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Complete -->
+                <cue name="Ch1_3_Breadcrumbs_Complete">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Ch1_3_Breadcrumbs"/>
+                    <signal_cue cue="Ch1_Complete"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="this" chance="$DeepDebugChance"/>
+                <!-- cleanup and logging -->
+                <remove_mission cue="$MissionCue" type="completed"/>
+                <write_to_logbook category="missions" faction="faction.civilian" title="{30254,1021}" text="{30254,1031}"/>
+
+                <!-- cancel current chapter and trigger the next -->
+                <signal_cue cue="Ch2_Contact"/>
+                <cancel_cue cue="Ch1_Sightings" />
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch2_Contact_Force">
+          <conditions>
+            <event_cue_cancelled cue="this" comment="could contain force content and should not be signallable"/>
+          </conditions>
+          <force name="Plot_Hyperion_Ch2">
+
+            <do_if value="not @$HyperionOriginalShip">
+              <!-- create hyperion -->
+              <create_position name="$hyppos" x="201.561844m" y="1423.190063m" z="-12.132456m" object="$CommStation" space="$Sector_Hyperion"/>
+
+              <run_actions ref="Hyperion_Create_Ship" result="$HyperionOriginalShip">
+                <param name="sector"                value="$Sector_Hyperion"/>
+                <param name="position"              value="$hyppos"/>
+                <param name="orientation_lookat"    value="$Gate_HyperionSector_Exit"/>
+                <param name="pilot"                 value="$BettyActor"/>
+                <param name="namespace"             value="namespace"/>
+              </run_actions>
+            </do_if>
+
+            <!-- Cancelling Previous Chapters, signalling the correct one -->
+            <set_value name="$CurrentChapter" exact="Ch2_Contact"/>
+            <do_for_each in="$Chapters" name="$Chapter">
+              <do_if value="$Chapter == $CurrentChapter">
+                <signal_cue cue="$CurrentChapter"/>
+                <break/>
+              </do_if>
+              <cancel_cue cue="$Chapter"/>
+            </do_for_each>
+
+            <!-- Special setup actions when you "fast-forward" into a chapter (skipping earlier ones) -->
+          </force>
+        </cue>
+
+        <cue name="Ch2_Contact">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Chapter ' + this" chance="$DebugChance"/>
+            <set_value name="$CurrentChapter" exact="this"/>
+            <set_value name="$ObjectiveStep" exact="1"/>
+          </actions>
+          <cues>
+
+            <cue name="Ch2_Mission" version="2">
+              <actions>
+                <debug_text text="this" chance="$DeepDebugChance"/>
+                <create_mission comment="Mission: Reclaiming What Was Lost" group="missiongroup.story_hyperion"
+                                name="{30254,2001}" description="{30254,2002}" rewardtext="{30254,2011}"
+                                icon="'briefing_olmancketslat_01'" iconcaption="$AncientPilotActor.name"
+                                faction="faction.civilian" difficulty="level.trivial"
+                                cue="$MissionCue" abortable="false" type="missiontype.plot">
+                  <briefing>
+                    <objective step="$ObjectiveStep" action="objective.investigate" object="$HyperionOriginalShip"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="$ObjectiveStep"/>
+              </actions>
+              <patch sinceversion="2">
+                <update_mission cue="$MissionCue" group="missiongroup.story_hyperion"/>
+              </patch>
+              <cues>
+                <cue name="Patch_Ch2_Mission_Update" onfail="cancel" comment="fixing missing step 2 case">
+                  <conditions>
+                    <check_value value="$ObjectiveStep ge 2"/>
+                    <check_value value="$ArrivalText?"/>
+                  </conditions>
+                  <actions>
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="2" action="objective.await" text="$ArrivalText" silent="true"/>
+                      </briefing>
+                    </update_mission>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- hyperion approach handler -->
+            <cue name="Ch2_1_Hyperion_Found_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget"    value="$HyperionOriginalShip"/>
+              <param name="ApproachDistance"  value="20000m"/>
+              <param name="SuccessSignalCue"  value="Ch2_1_Conversation_Start"/>
+            </cue>
+
+            <cue name="Ch2_1_Conversation_Start">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <start_conversation actor="$BettyActor" conversation="conv_2_1_intro" missioncue="$MissionCue"/>
+              </actions>
+            </cue>
+
+            <!-- Scene 1: Talk To Hyperion Pilot -->
+            <cue name="Ch2_1_Conversation">
+              <cues>
+                <cue name="Ch2_Conv_Intro" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_conversation_started actor="$BettyActor"/>
+                      <event_conversation_started actor="$BettyActor" conversation="conv_2_1_intro"/>
+                    </check_any>
+                    <check_value value="not $ch2_intro_done?"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540201" comment="readtext.{10147}.{302540201} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$BettyActor" hidechoices="true">
+                      <text line="302540201" comment="readtext.{10002}.{302540201} (QuickLookup) static noise"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540202" comment="readtext.{10147}.{302540202} (QuickLookup)"/>
+                      <text line="302540203" comment="readtext.{10147}.{302540203} (QuickLookup)"/>
+                      <text line="302540204" comment="readtext.{10147}.{302540204} (QuickLookup)"/>
+                      <text line="302540205" comment="readtext.{10147}.{302540205} (QuickLookup)"/>
+                      <text line="302540206" comment="readtext.{10147}.{302540206} (QuickLookup)"/>
+                      <text line="302540208" comment="readtext.{10147}.{302540208} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$BettyActor" hidechoices="true">
+                      <text line="302540201" comment="readtext.{10002}.{302540201} (QuickLookup) static noise"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540201" comment="readtext.{10370}.{302540201} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540209" comment="readtext.{10147}.{302540209} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540202" comment="readtext.{10370}.{302540202} (QuickLookup)"/>
+                      <text line="302540203" comment="readtext.{10370}.{302540203} (QuickLookup)"/>
+                      <text line="302540204" comment="readtext.{10370}.{302540204} (QuickLookup)"/>
+                    </add_npc_line>
+                    <do_if value="faction.trinity.isactive">
+                      <!-- Trinity Case -->
+                      <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                        <text line="302540206" comment="readtext.{10370}.{302540206} (QuickLookup)"/>
+                      </add_npc_line>
+                    </do_if>
+                    <do_else>
+                      <!-- HOP-Par Schism Case -->
+                      <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                        <text line="302540205" comment="readtext.{10370}.{302540205} (QuickLookup)"/>
+                      </add_npc_line>
+                    </do_else>
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540207" comment="readtext.{10370}.{302540207} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540210" comment="readtext.{10147}.{302540210} (QuickLookup)"/>
+                      <text line="302540211" comment="readtext.{10147}.{302540211} (QuickLookup)"/>
+                      <text line="302540212" comment="readtext.{10147}.{302540212} (QuickLookup)"/>
+                      <text line="302540213" comment="readtext.{10147}.{302540213} (QuickLookup)"/>
+                    </add_npc_line>
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540208" comment="readtext.{10370}.{302540208} (QuickLookup)"/>
+                    </add_npc_line>
+                  </actions>
+                  <cues>
+                    <cue name="Ch2_1_Done">
+                      <conditions>
+                        <event_conversation_finished actor="$BettyActor"/>
+                        <!--<event_speak_line_finished actor="$AncientPilotActor" line="302540208"/>-->
+                      </conditions>
+                      <actions>
+                        <set_value name="$ch2_intro_done"/>
+                        <start_conversation actor="$AncientPilotActor" conversation="faction_choice" missioncue="$MissionCue"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_Conv_Choice" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_conversation_started actor="$AncientPilotActor"/>
+                      <event_conversation_started actor="$AncientPilotActor" conversation="faction_choice"/>
+                    </check_any>
+                    <check_value value="$ch2_intro_done?"/>
+                    <check_value value="not $ParanidFactionChoice?"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$AncientPilotActorTalking"/>
+                    <set_value name="$ch2_choice"/>
+
+                    <!-- switch pilot -->
+                    <dismiss_control_entity actor="$BettyActor" object="$HyperionOriginalShip"/>
+                    <signal_cue cue="Cleanup_BettyActor" comment="get rid of the yellow map icon for Betty"/>
+                    <assign_control_entity object="$HyperionOriginalShip" actor="$AncientPilotActor" post="controlpost.aipilot" init="true" transfer="true"/>
+                    <signal_objects object="$AncientPilotActor" param="'npc_state_reinit'"/>
+
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540209" comment="readtext.{10370}.{302540209} (QuickLookup)"/>
+                      <text line="302540210" comment="readtext.{10370}.{302540210} (QuickLookup)"/>
+                    </add_npc_line>
+
+                    <!-- station check -->
+                    <find_station space="player.galaxy" name="$Stations_PAR" sortbydistanceto="$AncientPilotActor" owner="faction.paranid">
+                      <match_dock size="$HyperionOriginalShip.docksize" />
+                      <!--<match_hull min="20"/>-->
+                    </find_station>
+                    <find_station space="player.galaxy" name="$Stations_HOP" sortbydistanceto="$AncientPilotActor" owner="faction.holyorder">
+                      <match_dock size="$HyperionOriginalShip.docksize" />
+                      <!--<match_hull min="20"/>-->
+                    </find_station>
+                    <do_if value="faction.trinity.isactive">
+                      <find_station space="player.galaxy" name="$Stations_TRI" sortbydistanceto="$AncientPilotActor" owner="faction.trinity">
+                        <match_dock size="$HyperionOriginalShip.docksize" />
+                        <!--<match_hull min="20"/>-->
+                      </find_station>
+                    </do_if>
+
+                    <!-- locations -->
+                    <do_if value="$Stations_PAR != null">
+                      <set_value name="$Stations_PAR_Location" exact="$Stations_PAR.sector"/>
+                    </do_if>
+                    <do_if value="$Stations_HOP != null">
+                      <set_value name="$Stations_HOP_Location" exact="$Stations_HOP.sector"/>
+                    </do_if>
+                    <do_if value="faction.trinity.isactive and $Stations_TRI != null">
+                      <set_value name="$Stations_TRI_Location" exact="$Stations_TRI.sector"/>
+                    </do_if>
+
+                    <do_if value="faction.trinity.isactive">
+                      <add_player_choice text="{30254,302540202}" section="choice_trinity"    selectable="$Stations_TRI != null" tooltip="if ($Stations_TRI != null) then '' else {30254,2501}"/>
+                    </do_if>
+                    <do_else>
+                      <add_player_choice text="{30254,302540201}" section="choice_paranid"    selectable="$Stations_PAR != null" tooltip="if ($Stations_PAR != null) then '' else {30254,2501}"/>
+                      <add_player_choice text="{30254,302540203}" section="choice_holyorder"  selectable="$Stations_HOP != null" tooltip="if ($Stations_HOP != null) then '' else {30254,2501}"/>
+                    </do_else>
+                    <add_player_choice text="{30254,302540204}" section="choice_none"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Conv_Choice_Paranid" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$AncientPilotActor" section="choice_paranid"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ParanidFactionChoice" exact="faction.paranid"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540214" comment="readtext.{10147}.{302540214} (QuickLookup)"/>
+                      <text line="302540215" comment="readtext.{10147}.{302540215} (QuickLookup)"/>
+                      <text line="302540220" comment="readtext.{10147}.{302540220} (QuickLookup)"/>
+                    </add_npc_line>
+                    <signal_cue_instantly cue="Ch2_Conv_Outro"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Conv_Choice_HolyOrder" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$AncientPilotActor" section="choice_holyorder"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ParanidFactionChoice" exact="faction.holyorder"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540216" comment="readtext.{10147}.{302540216} (QuickLookup)"/>
+                      <text line="302540217" comment="readtext.{10147}.{302540217} (QuickLookup)"/>
+                      <text line="302540221" comment="readtext.{10147}.{302540221} (QuickLookup)"/>
+                    </add_npc_line>
+                    <signal_cue_instantly cue="Ch2_Conv_Outro"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Conv_Choice_Trinity" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$AncientPilotActor" section="choice_trinity"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ParanidFactionChoice" exact="faction.trinity"/>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540218" comment="readtext.{10147}.{302540218} (QuickLookup)"/>
+                      <text line="302540219" comment="readtext.{10147}.{302540219} (QuickLookup)"/>
+                    </add_npc_line>
+                    <signal_cue_instantly cue="Ch2_Conv_Outro"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Conv_Choice_Thinking" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$AncientPilotActor" section="choice_none"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                      <text line="302540222" comment="readtext.{10147}.{302540222} (QuickLookup)"/>
+                      <text line="302540223" comment="readtext.{10147}.{302540223} (QuickLookup)"/>
+                    </add_npc_line>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Conv_Outro" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                      <text line="302540211" comment="readtext.{10370}.{302540211} (QuickLookup)"/>
+                      <text line="302540212" comment="readtext.{10370}.{302540212} (QuickLookup)"/>
+                      <text line="302540213" comment="readtext.{10370}.{302540213} (QuickLookup)"/>
+                    </add_npc_line>
+                    <signal_cue_instantly cue="Ch2_2_HyperionPilot_FlyHome"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_2_HyperionPilot_FlyHome">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- activate hyperion for faction of player choice -->
+                <do_if value="$ParanidFactionChoice == faction.holyorder">
+                  <signal_cue cue="md.Setup_DLC_Mini_01.Activate_Hyperion_Faction_HolyOrder"/>
+                </do_if>
+                <do_if value="$ParanidFactionChoice == faction.paranid">
+                  <signal_cue cue="md.Setup_DLC_Mini_01.Activate_Hyperion_Faction_Paranid"/>
+                </do_if>
+                <do_if value="$ParanidFactionChoice == faction.trinity">
+                  <signal_cue cue="md.Setup_DLC_Mini_01.Activate_Hyperion_Faction_Trinity"/>
+                </do_if>
+
+                <set_value name="$ObjectiveStep" exact="1" operation="add"/>
+                <update_mission cue="$MissionCue">
+                  <briefing>
+                    <objective step="$ObjectiveStep" action="objective.await" object="$HyperionOriginalShip" silent="true"/>
+                  </briefing>
+                </update_mission>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_2_Target_Station_Set">
+                  <actions>
+                    <!-- find station -->
+                    <do_if value="($ParanidFactionChoice.representative != null) and ($ParanidFactionChoice.representative.container.hullpercentage gt 50)">
+                      <set_value name="$TargetStation" exact="$ParanidFactionChoice.representative.container"/>
+                    </do_if>
+                    <do_else>
+                      <find_station space="player.galaxy" name="$ParanidFactionStation" owner="$ParanidFactionChoice" sortbydistanceto="$AncientPilotActor">
+                        <match_dock size="$HyperionOriginalShip.docksize" />
+                        <match_hull min="50"/>
+                      </find_station>
+                      <do_if value="$ParanidFactionStation">
+                        <set_value name="$TargetStation" exact="$ParanidFactionStation"/>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$TargetStation" exact="null"/>
+                        <!-- no more stations -->
+                        <do_if value="$ParanidFactionChoice == faction.paranid">
+                          <set_value name="$Sector_HyperionFinalDestination" exact="$Stations_PAR_Location"/>
+                        </do_if>
+                        <do_if value="$ParanidFactionChoice == faction.holyorder">
+                          <set_value name="$Sector_HyperionFinalDestination" exact="$Stations_HOP_Location"/>
+                        </do_if>
+                        <do_if value="$ParanidFactionChoice == faction.trinity">
+                          <set_value name="$Sector_HyperionFinalDestination" exact="$Stations_TRI_Location"/>
+                        </do_if>
+                      </do_else>
+                    </do_else>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch2_2_Hyperion_Moving_Objective">
+                      <actions>
+                        <!-- Await: Arrival of Hyperion in $Sector (loading bar by gate distance) -->
+                        <do_if value="$TargetStation">
+                          <set_value name="$DestinationSector" exact="$TargetStation.sector"/>
+                        </do_if>
+                        <do_else>
+                          <set_value name="$DestinationSector" exact="$Sector_HyperionFinalDestination"/>
+                        </do_else>
+
+                        <!-- distance in hops -->
+                        <set_value name="$HyperionJourneyMaxDistance" exact="$Sector_Hyperion.gatedistance.{$DestinationSector}"/>
+                        <set_value name="$HyperionJourneyCurrentDistance" exact="$Sector_Hyperion.gatedistance.{$DestinationSector} - $HyperionOriginalShip.gatedistance.{$DestinationSector}"/>
+
+                        <substitute_text text="$ArrivalText" source="readtext.{30254}.{1508}">
+                          <replace string="'$SECTOR$'" with="$DestinationSector.knownname"/>
+                        </substitute_text>
+
+                        <do_if value="Ch2_Scene_Station.state == cuestate.waiting">
+                          <set_objective cue="$MissionCue" action="objective.await" text="$ArrivalText" silent="true" step="$ObjectiveStep" updatebriefing="true">
+                            <progress progress="[0, $HyperionJourneyCurrentDistance - 0.5].max" max="$HyperionJourneyMaxDistance"/>
+                          </set_objective>
+                        </do_if>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_2_Hyperion_Moving_Objective_Update">
+                          <conditions>
+                            <event_object_changed_sector object="$HyperionOriginalShip"/>
+                          </conditions>
+                          <actions>
+                            <reset_cue cue="parent"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_2_TargetStation_Invincibility" onfail="cancel">
+                      <conditions>
+                        <check_value value="$TargetStation != null"/>
+                      </conditions>
+                      <actions>
+                        <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                          <param name="Object" value="$TargetStation"/>
+                          <param name="RequesterCue" value="namespace"/>
+                          <param name="ReachedThresholdSignalCue" value="Ch2_2_TargetStation_Destroyed"/>
+                          <param name="DebugChance" value="$DebugChance"/>
+                        </run_actions>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_2_TargetStation_Destroyed_Event">
+                          <conditions>
+                            <event_object_destroyed object="@$TargetStation"/>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="Ch2_2_TargetStation_Destroyed"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_2_TargetStation_Destroyed">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <!-- TODO: Pier destroyed / Removed / Dismantled but station okay? -->
+                      <actions>
+                        <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                          <param name="Object" value="$TargetStation"/>
+                          <param name="RequesterCue" value="namespace"/>
+                          <param name="DebugChance" value="$DebugChance"/>
+                        </run_actions>
+                        <reset_cue cue="parent"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Debug_Destroy_Faction_Stations">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="22s"/>
+                      <actions>
+                        <cancel_cue cue="Debug_Destroy_Faction_Stations_Loop"/>
+                      </actions>
+                      <cues>
+                        <cue name="Debug_Destroy_Faction_Stations_Loop">
+                          <delay exact="0.05s"/>
+                          <actions>
+                            <find_ship space="player.galaxy" owner="faction.xenon" name="$XenonAttacker"/>
+                            <find_station space="player.galaxy" name="$ParanidFactionStations" owner="$ParanidFactionChoice" sortbydistanceto="$AncientPilotActor" multiple="true"/>
+                            <do_for_each in="$ParanidFactionStations" name="$station">
+                              <do_if value="$station != $TargetStation">
+                                <do_for_each name="$module" in="$station.modules.all.list">
+                                  <do_if value="$module.hullpercentage gt 1">
+                                    <set_object_hull object="$module" exact="$module.hullpercentage - 1"/>
+                                    <apply_attackstrength object="$module" strength="1" attacker="$XenonAttacker"/>
+                                  </do_if>
+                                  <do_else>
+                                    <destroy_object object="$module"/>
+                                  </do_else>
+                                </do_for_each>
+                              </do_if>
+                            </do_for_each>
+                            <reset_cue cue="this"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Debug_Destroy_TargetStation">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="22s"/>
+                      <actions>
+                        <cancel_cue cue="Debug_Destroy_TargetStation_Loop"/>
+                      </actions>
+                      <cues>
+                        <cue name="Debug_Destroy_TargetStation_Loop">
+                          <delay exact="0.05s"/>
+                          <actions>
+                            <do_for_each name="$module" in="$TargetStation.modules.all.list">
+                              <do_if value="$module.hullpercentage gt 1">
+                                <set_object_hull object="$module" exact="$module.hullpercentage - 1"/>
+                                <find_ship space="player.galaxy" owner="faction.xenon" name="$XenonAttacker"/>
+                                <apply_attackstrength object="$module" strength="1" attacker="$XenonAttacker"/>
+                              </do_if>
+                              <do_else>
+                                <destroy_object object="$module"/>
+                              </do_else>
+                            </do_for_each>
+                            <reset_cue cue="this"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_2_TargetStation_MoveTo" version="2">
+                      <actions>
+                        <cancel_all_orders object="$HyperionOriginalShip"/>
+                        <do_if value="$TargetStation != null">
+                          <create_order id="'DockAndWait'" object="$HyperionOriginalShip">
+                            <param name="destination" value="$TargetStation" comment="stay docked"/>
+                          </create_order>
+                        </do_if>
+                        <do_else>
+                          <get_safe_pos result="$pos" min="10km" max="60km" object="$Sector_HyperionFinalDestination" sector="$Sector_HyperionFinalDestination" space="$Sector_HyperionFinalDestination" comment="Position relative to Sector"/>
+
+                          <create_order name="$order" id="'MoveWait'" object="$HyperionOriginalShip" immediate="true">
+                            <param name="destination" value="[$Sector_HyperionFinalDestination, $pos]"/>
+                            <param name="debugchance" value="0"/>
+                          </create_order>
+                        </do_else>
+                      </actions>
+                      <patch sinceversion="2">
+                        <do_if value="($HyperionOriginalShip.sector == $Sector_HyperionFinalDestination)
+                                  and (not $TargetStation) and (Ch2_Scene_Station.state == cuestate.waiting)">
+                          <!-- arrived but wasn'T caught by 'event_object_changed_sector' condition as it was added in r556099  -->
+                          <set_value name="$Patch_TargetSector_Reached_Edgecase"/>
+                          <signal_cue cue="Ch2_Scene_Station"/>
+                        </do_if>
+                      </patch>
+                      <cues>
+                        <cue name="Ch2_2_TargetSector_Reached">
+                          <conditions>
+                            <check_any>
+                              <event_object_order_finished object="$HyperionOriginalShip"/>
+                              <check_all>
+                                <event_object_changed_sector object="$HyperionOriginalShip"/>
+                                <check_value value="event.param == $Sector_HyperionFinalDestination"/>
+                                <check_value value="not $TargetStation"/>
+                              </check_all>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <do_if value="Ch2_Scene_Station.state != cuestate.waiting">
+                              <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" object="$AncientPilotActor" updatebriefing="true"/>
+                            </do_if>
+                            <signal_cue cue="Ch2_Scene_Station" check="false"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_2_TargetStation_Docked">
+                      <conditions>
+                        <event_object_docked object="$HyperionOriginalShip"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="Ch2_Scene_Station.state != cuestate.waiting">
+                          <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" object="$AncientPilotActor" updatebriefing="true"/>
+                        </do_if>
+                        <signal_cue cue="Ch2_Scene_Station" check="false"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_2_AncientPilot_IdleChatter" instantiate="true">
+                  <conditions>
+                    <event_object_changed_sector object="$AncientPilotActor"/>
+                  </conditions>
+                  <actions>
+                    <do_any chance="50">
+                      <signal_cue_instantly cue="AncientSaid1" weight="if $AncientSaid.indexof.{302540239} then 0 else 100" check="false"/>
+                      <signal_cue_instantly cue="AncientSaid2" weight="if $AncientSaid.indexof.{302540240} then 0 else 100" check="false"/>
+                      <signal_cue_instantly cue="AncientSaid3" weight="if $AncientSaid.indexof.{302540241} then 1 else 100" check="false" param="event.param"/>
+                    </do_any>
+                  </actions>
+                </cue>
+
+                <cue name="AncientSaid1">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <append_to_list name="$AncientSaid" exact="302540239"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540239, $recipient = 'player']
+                                              ]
+                                  ]" />
+                  </actions>
+                </cue>
+
+                <cue name="AncientSaid2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <append_to_list name="$AncientSaid" exact="302540240"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540240, $recipient = 'player']
+                                              ]
+                                  ]" />
+                  </actions>
+                </cue>
+
+                <cue name="AncientSaid3">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.owner == $ParanidFactionChoice"/>
+                  </conditions>
+                  <actions>
+                    <append_to_list name="$AncientSaid" exact="302540241"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540241, $recipient = 'player']
+                                              ]
+                                  ]" />
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- Scene 2: Conversation at Hyperion Station, Thanks and Rewards -->
+            <cue name="Ch2_Scene_Station" version="2">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" exact="1" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" object="$AncientPilotActor" updatebriefing="true"/>
+                <set_object_docking_enabled           object="$HyperionOriginalShip" enabled="true"/>
+
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $missioncue = $MissionCue,
+                                    $script = [
+                                      table[ $select = [
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540214, $recipient = 'player'],
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540215, $recipient = 'player'],
+                                                  table[ $actor = '$AncientPilotActor', $speak = 302540216, $recipient = 'player']
+                                                    ]]
+                                              ]
+                                  ]" />
+
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="Ch2_3_Scene_Sink.state == cuestate.waiting">
+                  <set_value name="$Patch_ObjectiveFix"/>
+                  <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" object="$AncientPilotActor" updatebriefing="true"/>
+                </do_if>
+              </patch>
+              <cues>
+                <cue name="Ch2_2_AncientPilot_Placement">
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager"
+                      param="['add_definition', $AncientPilotActor, table[
+                            $requestercue = $MissionCue,
+                            $priority = 100,
+                            $location = $HyperionOriginalShip.controlroom,
+                            $position = position.[0, 2.761, 30],
+                            $rotation = rotation.[-180deg, 0deg, 0deg],
+                            $debugchance = 0,
+                            $debugcaller = if $DebugChance == 100 then this else null]
+                        ]"/>
+                  </actions>
+                  <cues>
+                    <cue name="Ch2_2_ReliefPilot">
+                      <actions>
+                        <dismiss_pilot object="$HyperionOriginalShip"/>
+                        <assign_control_entity object="$HyperionOriginalShip" post="controlpost.aipilot" actor="$ReliefPilotActor" transfer="true" init="true"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- station +  -->
+                <cue name="Ch2_2_Conversation">
+                  <cues>
+                    <cue name="Ch2_2_Convo_Started" instantiate="true">
+                      <conditions>
+                        <event_conversation_started actor="$AncientPilotActor"/>
+                      </conditions>
+                      <actions>
+                        <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                          <text line="302540217" comment="readtext.{10370}.{302540217} (QuickLookup)"/>
+                        </add_npc_line>
+                        <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                          <text line="3001" comment="readtext.{10147}.{3001} (QuickLookup)"/>
+                        </add_npc_line>
+                        <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                          <text line="302540218" comment="readtext.{10370}.{302540218} (QuickLookup)"/>
+                          <text line="302540219" comment="readtext.{10370}.{302540219} (QuickLookup)"/>
+                        </add_npc_line>
+                        <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                          <text line="302540224" comment="readtext.{10147}.{302540224} (QuickLookup)"/>
+                          <text line="302540225" comment="readtext.{10147}.{302540225} (QuickLookup)"/>
+                          <text line="302540226" comment="readtext.{10147}.{302540226} (QuickLookup)"/>
+                        </add_npc_line>
+                        <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                          <text line="302540220" comment="readtext.{10370}.{302540220} (QuickLookup)"/>
+                          <text line="302540221" comment="readtext.{10370}.{302540221} (QuickLookup)"/>
+                          <text line="302540222" comment="readtext.{10370}.{302540222} (QuickLookup)"/>
+                          <text line="302540223" comment="readtext.{10370}.{302540223} (QuickLookup)"/>
+                          <text line="302540224" comment="readtext.{10370}.{302540224} (QuickLookup)"/>
+                        </add_npc_line>
+                        <add_npc_line speaker="$CryptidHuntressActor" hidechoices="true">
+                          <text line="302540227" comment="readtext.{10147}.{302540227} (QuickLookup)"/>
+                        </add_npc_line>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_2_Convo_Finished">
+                          <conditions>
+                            <event_conversation_finished actor="$AncientPilotActor"/>
+                            <!--<event_speak_line_finished actor="$CryptidHuntressActor" line="302540227"/>-->
+                          </conditions>
+                          <actions>
+                            <cancel_cue cue="Ch2_2_Conversation"/>
+                            <signal_cue cue="Ch2_3_Scene_Sink"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- Scene 3: Sink Mission to get the original Hyperion -->
+            <cue name="Ch2_3_Scene_Sink">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" object="$AncientPilotActor" updatebriefing="true"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch2_3_Conversation">
+                  <cues>
+                    <cue name="Ch2_3_Convo_Start">
+                      <actions>
+                        <set_value name="$conv_sink_start"/>
+                        <!--<start_conversation actor="$AncientPilotActor" conversation="sink_intro"/>-->
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch2_3_Convo_Started" instantiate="true">
+                      <conditions>
+                        <check_any>
+                          <event_conversation_started actor="$AncientPilotActor"/>
+                          <event_conversation_started actor="$AncientPilotActor" conversation="sink_intro"/>
+                        </check_any>
+                        <check_value value="$conv_sink_start?"/>
+                      </conditions>
+                      <actions>
+                        <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                          <!--<text line="302540225" comment="readtext.{10370}.{302540225} (QuickLookup)"/>-->
+                          <text line="302540226" comment="readtext.{10370}.{302540226} (QuickLookup)"/>
+                          <text line="302540227" comment="readtext.{10370}.{302540227} (QuickLookup)"/>
+                          <text line="302540228" comment="readtext.{10370}.{302540228} (QuickLookup)"/>
+                          <text line="302540229" comment="readtext.{10370}.{302540229} (QuickLookup)"/>
+                          <text line="302540230" comment="readtext.{10370}.{302540230} (QuickLookup)"/>
+                          <text line="302540231" comment="readtext.{10370}.{302540231} (QuickLookup)"/>
+                          <text line="302540232" comment="readtext.{10370}.{302540232} (QuickLookup)"/>
+                          <text line="302540233" comment="readtext.{10370}.{302540233} (QuickLookup)"/>
+                        </add_npc_line>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_3_Convo_Finished">
+                          <conditions>
+                            <event_conversation_finished actor="$AncientPilotActor"/>
+                            <!--<event_speak_line_finished actor="$AncientPilotActor" line="302540233"/>-->
+                          </conditions>
+                          <actions>
+                            <cancel_cue cue="Ch2_3_Conversation"/>
+                            <signal_cue cue="Ch2_3_Hyperion_First_Reward"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Skipped; testing one ship reward only -->
+                <cue name="Ch2_3_Hyperion_First_Reward">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- spawn during conversation or so so player doesn't notice -->
+                    <!-- todo: cleanup, i.e. no "player sectors"; Not special reward here  -->
+                    <get_safe_pos result="$pos" min="0km" max="30km" object="player.entity" sector="player.entity.sector" space="player.entity.sector" comment="Position relative to Sector"/>
+
+                    <do_if value="$ParanidFactionChoice == faction.paranid">
+                      <set_value name="$FactionPaint" exact="ware.paintmod_0009"/>
+                    </do_if>
+                    <do_elseif value="$ParanidFactionChoice == faction.holyorder">
+                      <set_value name="$FactionPaint" exact="ware.paintmod_0010"/>
+                    </do_elseif>
+                    <do_else comment="trinity">
+                      <set_value name="$FactionPaint" exact="ware.paintmod_0102"/>
+                    </do_else>
+
+                    <!-- attempt to spawn at dock -->
+                    <do_if value="$TargetStation.exists">
+                      <find_dockingbay name="$docks" object="$TargetStation" multiple="true">
+                        <match_dock size="tag.dock_l" free="true"/>
+                      </find_dockingbay>
+                    </do_if>
+
+                    <do_if value="$TargetStation.exists and $docks.count">
+                      <create_ship name="$ShipHyperionGeneric" macro="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion" dock="$docks.random" commandeerable="false">
+                        <owner exact="$ParanidFactionChoice"/>
+                        <paint ware="$FactionPaint"/>
+                        <loadout ref="story_hyperion_reward_generic"/>
+                        <pilot group="paranid.pilot"/>
+                      </create_ship>
+                      <cancel_all_orders object="$ShipHyperionGeneric"/>
+                      <create_order id="'DockAndWait'" object="$ShipHyperionGeneric">
+                        <param name="destination" value="$TargetStation" comment="stay docked"/>
+                      </create_order>
+                    </do_if>
+                    <do_else>
+                      <create_ship name="$ShipHyperionGeneric" macro="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion" sector="player.entity.sector" commandeerable="false">
+                        <owner exact="$ParanidFactionChoice"/>
+                        <paint ware="$FactionPaint"/>
+                        <loadout ref="story_hyperion_reward_generic"/>
+                        <pilot group="paranid.pilot"/>
+                        <!--<orientation orientation="look_at" refobject="$orientation_lookat"/>-->
+                        <safepos space="player.entity.sector" x="$pos.x" y="$pos.y" z="$pos.z"/>
+                      </create_ship>
+                      <cancel_all_orders object="$ShipHyperionGeneric"/>
+                    </do_else>
+                    <set_value name="$Flag_GenericRewardCreated" exact="player.age"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <!-- daughter ship type -->
+                    <do_if value="$ParanidFactionChoice == faction.paranid">
+                      <set_value name="$DaughterShipType" exact="'vanguard'"/>
+                    </do_if>
+                    <do_elseif value="$ParanidFactionChoice == faction.holyorder">
+                      <set_value name="$DaughterShipType" exact="'sentinel'"/>
+                    </do_elseif>
+                    <do_else>
+                      <do_any>
+                        <set_value name="$DaughterShipType" exact="'vanguard'"/>
+                        <set_value name="$DaughterShipType" exact="'sentinel'"/>
+                      </do_any>
+                    </do_else>
+
+                    <!-- daughter ship dock -->
+                    <find_dockingbay name="$DockHyperionGeneric" object="$ShipHyperionGeneric" checkoperational="true" multiple="false">
+                      <match_dock size="tag.dock_s" storage="true"/>
+                    </find_dockingbay>
+
+                    <!-- daughter ship spawn -->
+                    <do_if value="$DaughterShipType == 'vanguard'">
+                      <set_value name="$ShipMacroDaughter" exact="macro.ship_par_s_fighter_02_a_macro"/>
+                      <create_ship name="$ShipDaughterGeneric" macro="$ShipMacroDaughter" dock="$DockHyperionGeneric">
+                        <owner exact="faction.player"/>
+                        <paint ware="$FactionPaint"/>
+                        <loadout ref="story_hyperion_daughter_vanguard"/>
+                        <pilot group="paranid.pilot"/>
+                        <people>
+                          <fillpercent exact="0"/>
+                        </people>
+                      </create_ship>
+                    </do_if>
+                    <do_else comment="sentinel">
+                      <set_value name="$ShipMacroDaughter" exact="macro.ship_par_s_fighter_02_b_macro"/>
+                      <create_ship name="$ShipDaughterGeneric" macro="$ShipMacroDaughter" dock="$DockHyperionGeneric">
+                        <owner exact="faction.player"/>
+                        <paint ware="$FactionPaint"/>
+                        <loadout ref="story_hyperion_daughter_sentinel"/>
+                        <pilot group="paranid.pilot"/>
+                        <people>
+                          <fillpercent exact="0"/>
+                        </people>
+                      </create_ship>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Ch2_3_Hyperion_Claim_Reward" version="2">
+                      <actions>
+                        <set_value name="$ObjectiveStep" exact="1" operation="add"/>
+                        <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.claim" object="$ShipHyperionGeneric.controlroom" text="$ShipHyperionGeneric.knownname" updatebriefing="true"/>
+                        <set_relation_boost value="0" decay="0" object="$ShipHyperionGeneric" otherobject="player.entity"/>
+                      </actions>
+                      <patch sinceversion="2">
+                        <do_if value="$ShipHyperionGeneric.owner != faction.player">
+                          <set_relation_boost value="0" decay="0" object="$ShipHyperionGeneric" otherobject="player.entity"/>
+                        </do_if>
+                      </patch>
+                      <cues>
+                        <cue name="Ch2_3_Hyperion_Reward_Claimed">
+                          <conditions>
+                            <check_any>
+                              <event_object_changed_object object="player.entity" newobject="$ShipHyperionGeneric"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <run_actions ref="md.LIB_Generic.TransferShipOwnership">
+                              <param name="Ship" value="$ShipDaughterGeneric"/>
+                              <param name="Faction" value="faction.player"/>
+                            </run_actions>
+                            <run_actions ref="md.LIB_Generic.TransferShipOwnership">
+                              <param name="Ship" value="$ShipHyperionGeneric"/>
+                              <param name="Faction" value="faction.player"/>
+                            </run_actions>
+                            <show_notification text="{30004,7004} + '\n' + $ShipDaughterGeneric.name" sound="notification_achievement" comment="Reward received"/>
+                            <show_notification text="{30004,7004} + '\n' + $ShipHyperionGeneric.name" sound="notification_achievement" comment="Reward received"/>
+                            <signal_cue cue="Ch2_3_Deliver_Inventory"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Ch2_3_Failsafe">
+                      <conditions>
+                        <event_object_destroyed object="$ShipHyperionGeneric"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$Flag_GenericRewardDestroyed" exact="player.age"/>
+                        <signal_cue cue="Ch2_3_Deliver_Inventory"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_3_Deliver_Inventory">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ObjectiveStep" exact="1" operation="add"/>
+                  </actions>
+                  <cues>
+                    <cue name="Ch2_3_Deliver_Sink_Ref" ref="md.RML_Deliver_Inventory.Deliver_Inventory">
+                      <param name="EndSignalCue"    value="Ch2_3_Delivered_Conversation"/>
+                      <param name="MissionCue"      value="$MissionCue"/>
+                      <param name="StartStep"       value="$ObjectiveStep"           comment="Briefing step to start the mission on"/>
+                      <param name="UpdateBriefing"  value="true"        comment="Update the briefing objective step when the objective is updated"/>
+
+                      <!--Delivery params-->
+                      <param name="WaresTableParam"         value="table[{ware.inv_agidevice_01} = 9,
+                                                                         {ware.inv_agidevice_02} = 9,
+                                                                         {ware.inv_agidevice_03} = 9,
+                                                                         {ware.inv_programmablefieldarray} = 3,
+                                                                         {ware.inv_securitybypasssystem} = 3,
+                                                                         {ware.inv_securitydecryptionsystem} = 3]"/>
+                      <param name="DeliveryNPC"             value="$AncientPilotActor"      comment="The NPC to which the items should be delivered." />
+                      <param name="DeliveryObject"          value="$AncientPilotActor.container"  comment="The object on which to point to before the NPC is placed. Also used to create the interior with the below parameters" />
+                      <param name="ProgressBarText"         value="{30004,1054}" comment="Text to be displayed next to the ware delivery progress bar e.g. ('Delivered')"/>
+                      <param name="ConversationOptionText"  value="{30135,104}" comment="(Conversation option)Deliver: $AMOUNT$x $WARE$"/>
+                      <param name="ConversationTipText"     value="{30221,2152}" comment="(Tooltip for an unselectable Player Choice)Insufficient Inventory"/>
+                      <!--<param name="DeliveryNPCLine"         value="30221256"/>-->
+                      <param name="PlaceNPC"                value="false" comment="we place them ourselves now"/>
+                      <param name="DebugChance"             value="$DeepDebugChance"/>
+                    </cue>
+
+                    <cue name="Debug_Delivery_Add_Player_Inventory">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <add_inventory ware="ware.inv_agidevice_01" exact="10"/>
+                        <add_inventory ware="ware.inv_agidevice_02" exact="10"/>
+                        <add_inventory ware="ware.inv_agidevice_03" exact="10"/>
+                        <add_inventory ware="ware.inv_fluxcapacitor" exact="10"/>
+                        <add_inventory ware="ware.inv_programmablefieldarray" exact="10"/>
+                        <add_inventory ware="ware.inv_securitybypasssystem" exact="10"/>
+                        <add_inventory ware="ware.inv_securitydecryptionsystem" exact="10"/>
+                        <add_inventory ware="ware.inv_timewarp" exact="10"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Debug_Delivery_Remove_Player_Inventory">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <add_inventory ware="ware.inv_agidevice_01" exact="-1 * (player.entity.inventory.{ware.inv_agidevice_01}.count)"/>
+                        <add_inventory ware="ware.inv_agidevice_02" exact="-1 * (player.entity.inventory.{ware.inv_agidevice_02}.count)"/>
+                        <add_inventory ware="ware.inv_agidevice_03" exact="-1 * (player.entity.inventory.{ware.inv_agidevice_03}.count)"/>
+                        <add_inventory ware="ware.inv_fluxcapacitor" exact="-1 * (player.entity.inventory.{ware.inv_fluxcapacitor}.count)"/>
+                        <add_inventory ware="ware.inv_programmablefieldarray" exact="-1 * (player.entity.inventory.{ware.inv_programmablefieldarray}.count)"/>
+                        <add_inventory ware="ware.inv_securitybypasssystem" exact="-1 * (player.entity.inventory.{ware.inv_securitybypasssystem}.count)"/>
+                        <add_inventory ware="ware.inv_securitydecryptionsystem"  exact="-1 * (player.entity.inventory.{ware.inv_securitydecryptionsystem}.count)"/>
+                        <add_inventory ware="ware.inv_timewarp"  exact="-1 * (player.entity.inventory.{ware.inv_timewarp}.count)"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch2_3_Delivered_Conversation" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <set_objective cue="$MissionCue" action="objective.talkto" object="$AncientPilotActor" silent="true"/>
+                        <add_npc_line speaker="$AncientPilotActor" hidechoices="true">
+                          <!--<text line="302540234" comment="readtext.{10370}.{302540234} (QuickLookup)"/>-->
+                          <text line="302540235" comment="readtext.{10370}.{302540235} (QuickLookup)"/>
+                          <text line="302540236" comment="readtext.{10370}.{302540236} (QuickLookup)"/>
+                          <text line="302540237" comment="readtext.{10370}.{302540237} (QuickLookup)"/>
+                          <text line="302540238" comment="readtext.{10370}.{302540238} (QuickLookup)"/>
+                        </add_npc_line>
+                      </actions>
+                      <cues>
+                        <cue name="Ch2_3_Delivered_Conversation_Finished">
+                          <conditions>
+                            <event_conversation_finished actor="$AncientPilotActor"/>
+                            <!--<event_speak_line_finished actor="$AncientPilotActor" line="302540238"/>-->
+                          </conditions>
+                          <actions>
+                            <cancel_cue cue="Ch2_3_Delivered_Conversation"/>
+                            <signal_cue cue="Ch2_3_Hyperion_Reward"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch2_3_Hyperion_Reward">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- set ship to normal -->
+                    <set_object_relation_behaviour        object="$HyperionOriginalShip" disable="false"/>
+                    <set_object_docking_enabled           object="$HyperionOriginalShip" enabled="true"/>
+                    <set_object_affected_by_force_effect  object="$HyperionOriginalShip" affected="true"/>
+                    <remove_value name="$HyperionOriginalShip.pilot.$donotscan" comment="prevents police from scanning the ship"/>
+
+                    <!-- remove old pilot -->
+                    <do_if value="$HyperionOriginalShip.pilot == $AncientPilotActor">
+                      <dismiss_control_entity actor="$AncientPilotActor" object="$HyperionOriginalShip" />
+                    </do_if>
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager"
+                                          param="['add_definition', $AncientPilotActor,
+                                                          table[
+                                                            $requestercue = $MissionCue,
+                                                            $priority = 100,
+                                                            $location = 'disconnect',
+                                                            $debugchance = $DeepDebugChance,
+                                                            $debugcaller = if $DebugChance == 100 then this else null]
+                                                          ]"/>
+
+                    <!-- add daughter ship -->
+                    <do_if value="$ParanidFactionChoice == faction.paranid">
+                      <set_value name="$DaughterShipType" exact="'vanguard'"/>
+                    </do_if>
+                    <do_elseif value="$ParanidFactionChoice == faction.holyorder">
+                      <set_value name="$DaughterShipType" exact="'sentinel'"/>
+                    </do_elseif>
+                    <do_else>
+                      <do_any>
+                        <set_value name="$DaughterShipType" exact="'vanguard'"/>
+                        <set_value name="$DaughterShipType" exact="'sentinel'"/>
+                      </do_any>
+                    </do_else>
+
+                    <!-- daughter ship dock -->
+                    <find_dockingbay name="$DockHyperionOriginal" object="$HyperionOriginalShip" checkoperational="true" multiple="false">
+                      <match_dock size="tag.dock_s" storage="true"/>
+                    </find_dockingbay>
+
+                    <!-- daughter ship spawn -->
+                    <do_if value="$DaughterShipType == 'vanguard'">
+                      <set_value name="$ShipMacroDaughter" exact="macro.ship_par_s_fighter_02_a_macro"/>
+                      <create_ship name="$ShipDaughterOriginal" macro="$ShipMacroDaughter" dock="$DockHyperionOriginal">
+                        <owner exact="faction.player"/>
+                        <paint ware="md.Setup_DLC_Mini_01.Setup.$PaintCastAsunder"/>
+                        <loadout ref="story_hyperion_daughter_vanguard"/>
+                        <equipmentmods>
+                          <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Daughter_Original"/>
+                        </equipmentmods>
+                        <pilot group="paranid.pilot"/>
+                        <people>
+                          <fillpercent exact="0"/>
+                        </people>
+                      </create_ship>
+                    </do_if>
+                    <do_else comment="sentinel">
+                      <set_value name="$ShipMacroDaughter" exact="macro.ship_par_s_fighter_02_b_macro"/>
+                      <create_ship name="$ShipDaughterOriginal" macro="$ShipMacroDaughter" dock="$DockHyperionOriginal">
+                        <owner exact="faction.player"/>
+                        <paint ware="md.Setup_DLC_Mini_01.Setup.$PaintCastAsunder"/>
+                        <loadout ref="story_hyperion_daughter_sentinel"/>
+                        <equipmentmods>
+                          <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Daughter_Original"/>
+                        </equipmentmods>
+                        <pilot group="paranid.pilot"/>
+                        <people>
+                          <fillpercent exact="0"/>
+                        </people>
+                      </create_ship>
+                    </do_else>
+
+                    <!-- transfer hyperion -->
+                    <unlock_achievement name="M1_HYPERION" comment="The Mighty Galleon"/>
+
+                    <run_actions ref="md.LIB_Generic.TransferShipOwnership">
+                      <param name="Ship" value="$ShipDaughterOriginal"/>
+                      <param name="Faction" value="faction.player"/>
+                      <param name="ReleaseSubordinates" value="false"/>
+                    </run_actions>
+                    <run_actions ref="md.LIB_Generic.TransferShipOwnership">
+                      <param name="Ship" value="$HyperionOriginalShip"/>
+                      <param name="Faction" value="faction.player"/>
+                      <param name="ReleaseSubordinates" value="false"/>
+                    </run_actions>
+                    <show_notification text="{30004,7004} + '\n' + $ShipDaughterOriginal.name" sound="notification_achievement" comment="Reward received"/>
+                    <show_notification text="{30004,7004} + '\n' + $HyperionOriginalShip.name" sound="notification_achievement" comment="Reward received"/>
+
+                    <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                      <param name="Object" value="$HyperionOriginalShip"/>
+                      <param name="RequesterCue" value="namespace"/>
+                      <param name="DebugChance" value="$DebugChance"/>
+                    </run_actions>
+
+                    <!-- add bonus paint mods -->
+                    <substitute_text text="$PaintModRewardText" source="{30004,10001}">
+                      <replace string="'$MODNAME$'" with="ware.paintmod_0185.name"/>
+                    </substitute_text>
+                    <add_inventory entity="player.entity" ware="ware.paintmod_0185" exact="9"/>
+                    <show_notification text="{1015,90} + '\n' + $PaintModRewardText" sound="notification_achievement" comment="Reward received"/>
+
+                    <signal_cue cue="Ch2_Complete"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Complete">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- cleanup and logging -->
+                <do_if value="$TargetStation != null">
+                  <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                    <param name="Object" value="$TargetStation"/>
+                    <param name="RequesterCue" value="namespace"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                  </run_actions>
+                </do_if>
+                <set_userdata storystate="'story_hyperion_hop'" value="1"/>
+                <set_userdata storystate="'story_hyperion_par'" value="1"/>
+                <remove_mission cue="$MissionCue" type="completed"/>
+                <write_to_logbook category="missions" faction="faction.civilian" title="{30254,2021}" text="{30254,2031}"/>
+
+                <!-- cancel current chapter and trigger the next -->
+                <cancel_cue cue="Ch2_Contact" />
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="Patch_Userdata" instantiate="true">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="Ch2_Complete.state == cuestate.complete or Ch2_Complete.state == cuestate.cancelled">
+          <set_userdata storystate="'story_hyperion_hop'" value="1"/>
+          <set_userdata storystate="'story_hyperion_par'" value="1"/>
+        </do_if>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

@@ -1,0 +1,450 @@
+<?xml version="1.0"?>
+<components>
+	<component name="interactive_pir_doorcontrol_01" class="destructible">
+		<properties>
+			<hull max="100"/>
+		</properties>
+		<source geometry="extensions\ego_dlc_pirate\assets\props\interactive\interactive_pir_doorcontrol_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="Connection02" tags="functionactivation trigger_parent detail_xxl animation  ">
+				<offset>
+					<position x="1.192093E-07" y="3.840798E-02" z="-0.5602368"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<animations>
+					<animation name="active" start="0" end="120"/>
+					<animation name="deactivating" start="120" end="180"/>
+					<animation name="deactivated" start="180" end="300"/>
+					<animation name="activating" start="300" end="360"/>
+				</animations>
+				<parts>
+					<part name="part_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.383102" y="1.056265" z="3.325063"/>
+							<center x="-1.192093E-07" y="5.960464E-08" z="0.5"/>
+						</size>
+						<size_raw>
+							<max x="2.383102" y="1.056265" z="3.325063"/>
+							<center x="-1.192093E-07" y="5.960464E-08" z="0.5"/>
+						</size_raw>
+						<lights>
+							<arealight name="XU AreaLight01" areax="0.5" areay="0.5" radius="0" r="18" g="216" b="52" lighteffect="1" range="250" spotattenuation="0.9166667" specularintensity="0.125" trigger="1" intensity="150">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="150" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="60" value="165" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="120" value="150" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="240" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="300" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="360" value="150" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-8.176789E-04" y="0.2635478" z="0.2258258"/>
+									<quaternion qx="-1" qy="-0" qz="-0" qw="-7.549789E-08"/>
+								</offset>
+							</arealight>
+							<arealight name="XU AreaLight002" areax="0.5" areay="0.5" radius="0" r="230" g="18" b="56" lighteffect="1" range="250" spotattenuation="0.9166667" specularintensity="0.125" trigger="1" intensity="0">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="120" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="150" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="240" value="165" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="300" value="150" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="360" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.212914E-04" y="0.2635478" z="-0.1572442"/>
+									<quaternion qx="-1" qy="-0" qz="-0" qw="-7.549789E-08"/>
+								</offset>
+							</arealight>
+							<omni name="XU Omni002" shadow="0" r="0" g="216" b="0" range="8" shadowrange="8" lighteffect="1" trigger="1" intensity="1" specularintensity="1">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="60" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="120" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="0.1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="300" value="0.1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="360" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-8.176789E-04" y="0.2635478" z="0.2258258"/>
+									<quaternion qx="-0.7071066" qy="2.107343E-08" qz="-2.107342E-08" qw="-0.7071069"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni01" shadow="0" r="201" g="0" b="0" range="8" shadowrange="8" lighteffect="1" trigger="1" intensity="0.1" specularintensity="1">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0.1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="120" value="0.1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="240" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="300" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="360" value="0.1" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.212914E-04" y="0.2635478" z="-0.1572442"/>
+									<quaternion qx="-0.7071066" qy="2.107343E-08" qz="-2.107342E-08" qw="-0.7071069"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part nocollision forceoutline detail_m  ">
+				<offset>
+					<position x="0" y="3.840798E-02" z="-0.4491199"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<parts>
+					<part name="fx_decals">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.160194" y="1.957637E-02" z="3.002697"/>
+							<center x="0" y="5.960464E-08" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part animation  ">
+				<offset>
+					<position x="0" y="2.630177" z="-3.972379E-03"/>
+				</offset>
+				<animations>
+					<animation name="doors_open" start="0" end="30"/>
+					<animation name="doors_closing" start="30" end="60"/>
+					<animation name="doors_closed" start="60" end="90"/>
+					<animation name="doors_opening" start="90" end="120"/>
+				</animations>
+				<parts>
+					<part name="part_lid_upper">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.446937" y="1.977962" z="1.559621"/>
+							<center x="0" y="-0.613807" z="-1.237639"/>
+						</size>
+						<size_raw>
+							<max x="1.446937" y="0.6545934" z="1.456876"/>
+							<center x="5.960464E-08" y="0.7095616" z="-1.134893"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection05" tags="part noshadowcaster  " parent="part_lid_upper">
+				<offset>
+					<position x="0" y="1.244986" z="-2.237532"/>
+				</offset>
+				<parts>
+					<part name="part_lid_upper_glass">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1interiors.p1_glass_interior_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.337171" y="1.950461" z="0.8121538"/>
+							<center x="0" y="-1.839536" z="0.2913177"/>
+						</size>
+						<size_raw>
+							<max x="0.337171" y="0.1109247" z="0.3074794"/>
+							<center x="0" y="0" z="-4.768372E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="part animation  ">
+				<offset>
+					<position x="0" y="-2.563596" z="-3.972379E-03"/>
+				</offset>
+				<animations>
+					<animation name="doors_open" start="0" end="30"/>
+					<animation name="doors_closing" start="30" end="60"/>
+					<animation name="doors_closed" start="60" end="90"/>
+					<animation name="doors_opening" start="90" end="120"/>
+				</animations>
+				<parts>
+					<part name="part_lid_lower">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.446937" y="1.98308" z="1.558123"/>
+							<center x="0" y="0.6189245" z="-1.246376"/>
+						</size>
+						<size_raw>
+							<max x="1.446937" y="0.6545936" z="1.456875"/>
+							<center x="5.960464E-08" y="-0.7095621" z="-1.145129"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection07" tags="part noshadowcaster  " parent="part_lid_lower">
+				<offset>
+					<position x="0" y="-1.244767" z="-2.246525"/>
+					<quaternion qx="-1" qy="-0" qz="-0" qw="-1.947072E-07"/>
+				</offset>
+				<parts>
+					<part name="part_lid_lower_glass">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1interiors.p1_glass_interior_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.3370197" y="1.954116" z="0.8147386"/>
+							<center x="0" y="1.843411" z="0.2977259"/>
+						</size>
+						<size_raw>
+							<max x="0.3370197" y="0.1107056" z="0.3062358"/>
+							<center x="0" y="0" z="2.384186E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part  ">
+				<offset>
+					<position x="-5.777359E-02" y="7.072371E-02" z="-0.394543"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<parts>
+					<part name="part_thermistors">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.166445" y="0.2263801" z="1.794437"/>
+							<center x="4.242873E-02" y="1.490116E-07" z="-0.1051929"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="part detail_xxl animation textureanimation nocollision  ">
+				<offset>
+					<position x="0" y="3.840798E-02" z="-0.8260735"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<animations>
+					<animation name="active" start="0" end="120"/>
+					<animation name="deactivating" start="120" end="180"/>
+					<animation name="deactivated" start="180" end="300"/>
+					<animation name="activating" start="300" end="360"/>
+				</animations>
+				<parts>
+					<part name="part_holoplane_a">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_terminal_repair_displays_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.15323" y="4.835056E-07" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-5.960464E-08"/>
+						</size>
+						<size_raw>
+							<max x="12.15323" y="4.650296E-07" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-5.960464E-08"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="0.01"/>
+									<key frame="120" value="0"/>
+									<key frame="180" value="0"/>
+									<key frame="240" value="0"/>
+									<key frame="300" value="0"/>
+									<key frame="360" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="120" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="180" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="300" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="360" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection10" tags="part detail_xxl animation textureanimation nocollision  ">
+				<offset>
+					<position x="0" y="3.840798E-02" z="-0.8041008"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<animations>
+					<animation name="active" start="0" end="120"/>
+					<animation name="deactivating" start="120" end="180"/>
+					<animation name="deactivated" start="180" end="300"/>
+					<animation name="activating" start="300" end="360"/>
+				</animations>
+				<parts>
+					<part name="part_holoplane_b">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_terminal_repair_displays_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.15323" y="3.667772E-04" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-3.667474E-04"/>
+						</size>
+						<size_raw>
+							<max x="12.15323" y="3.667587E-04" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-3.667474E-04"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="0.01"/>
+									<key frame="120" value="0"/>
+									<key frame="180" value="0"/>
+									<key frame="240" value="0"/>
+									<key frame="300" value="0"/>
+									<key frame="360" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="120" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="180" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="300" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="360" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection11" tags="part detail_xxl animation textureanimation nocollision  ">
+				<offset>
+					<position x="0" y="3.840798E-02" z="-0.7821282"/>
+					<quaternion qx="0.7071068" qy="-0" qz="-0" qw="-0.7071068"/>
+				</offset>
+				<animations>
+					<animation name="active" start="0" end="120"/>
+					<animation name="deactivating" start="120" end="180"/>
+					<animation name="deactivated" start="180" end="300"/>
+					<animation name="activating" start="300" end="360"/>
+				</animations>
+				<parts>
+					<part name="part_holoplane_c">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_terminal_repair_displays_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.15323" y="7.332861E-04" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-7.333159E-04"/>
+						</size>
+						<size_raw>
+							<max x="12.15323" y="7.332677E-04" z="10.33353"/>
+							<center x="-9.536743E-07" y="1.251698E-06" z="-7.332563E-04"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="0.01"/>
+									<key frame="120" value="0"/>
+									<key frame="180" value="0"/>
+									<key frame="240" value="0"/>
+									<key frame="300" value="0"/>
+									<key frame="360" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="120" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="180" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="300" value="-0.585" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="360" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection12" tags="part geometryinvisible nocollision  ">
+				<offset/>
+				<parts>
+					<part name="part_invisible">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="dummy.transparent"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="50" y="50" z="50"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<pivot>
+							<offset>
+								<position x="0" y="-50" z="0"/>
+							</offset>
+						</pivot>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection01" tags="component destructible detailxxs ">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

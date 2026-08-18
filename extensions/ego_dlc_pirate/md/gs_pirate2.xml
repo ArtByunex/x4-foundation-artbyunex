@@ -1,0 +1,2064 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Pirate2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    
+    <!-- 
+      $EscapeCell         - Set if player escaped from the cell (opened the door)
+      $EscapeCommDevice	  - Set if you have a "Deal" with Axiom
+      $WasNotArmed		    - Set if you already were near the lower airlock, but didn't have a spacesuit laser yet
+      $AxiomFreed			    - Set if powerswitch was repaired
+      $EscapeWithoutAxiom - Set if the player escaped without Axiom
+      $EscapeSpacesuit	  - Set if the player escaped, but left in the spacesuit while Axiom was flying to the AE
+    
+      Ch2_PowerSwitch_Functional - repaired
+	      Ch2_Axiom_Freed_NoCutscene	- player repaired the switch, but no "Deal" with Axiom (Axiom still escapes, just no comments from him)
+	      Ch2_Axiom_Freed_Cutscene	- player repaired the switch, "Deal" with Axiom (player has $EscapeCommDevice)
+	      signals Ch2_Axiom_Hacking in both cases which updates the objective (Axiom speak is optional depending on communicator)
+	
+      Ch2_LowerAirlock_NearbyNotArmed 
+	      - If you are nearby, objective will switch to 'get laser' (this overwrites the repair switch objective! you are on the way to ignore Axiom)
+
+      Ch2_LowerAirlock_NearbyAndArmed
+	      - Axiom only comments if you have $EscapeCommDevice
+
+      Ch2_LowerAirlockPipe_Inside checkinterval
+	      - you entered the exit-tunnel, the gate will close behind you so you can't get back in  
+ 		      - if $AxiomFreed he contact you and calls the escapeship 
+		      - if NOT $AxiomFreed, the mission failed 
+			      - You can still continue, try and get a ship and fly to the AE 
+			      - Escapeship will MoveDie towards AE (to clean up)
+            - If you have $EscapeCommDevice Axiom will complain about you leaving him behind
+			      - Axiom will escape by himself and appear in the criminal story ch2 (we don't visualize him escaping)
+	
+      Ch2_LowerAirlockPipe_Exit	checkinterval
+	      - you are leaving the exit-tunnel, only triggers if $AxiomFreed
+	      - calls Ch2_AxiomSpacesuit_Spawn (get Axiom in his spacesuit and going towards the escapeship)
+	
+      Ch2_OnBoard
+	      - Player can only enter the ship 
+    -->
+    
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_pirate2" version="2">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Pirate_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="0"/>
+        <set_value name="$DeepDebugChance" exact="0"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="30288"/>
+        <set_value name="md.Signal_Leaks.Manager.$SuppressSignalLeakGeneration" exact="true"/>
+      </actions>
+      <delay exact="0.1s"/>
+      <actions>
+        <signal_cue cue="Setup"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="$MissionCue.hasmission">
+          <update_mission cue="$MissionCue" group="missiongroup.gs_pirate2"/>
+        </do_if>
+      </patch>
+      <cues>
+
+        <cue name="Setup" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <find_sector name="$18BilSector"  macro="macro.cluster_02_sector001_macro"    required="true" />
+            <find_sector name="$S1a_North"    macro="macro.Cluster_501_Sector001_macro"   required="true" />
+            <find_gate name="$Gate18toS1a" space="$18BilSector" destination="$S1a_North" required="true"/>
+            <set_value name="$AxiomActor" exact="md.$PersistentCharacters.$AxiomActor"/>
+            <set_value name="$AxiomActorCutsceneKey"   exact="table[ $key = 'ShowNPCFace']"/>
+          </actions>
+          <delay exact="0.1s"/>
+          <actions>
+            <signal_cue cue="Ch0_Wait"/>
+            <append_to_list name="md.$MissionDND" exact="Setup"/>
+          </actions>
+          <patch sinceversion="2">
+            <do_if value="$EscapeSpacesuit? or $EscapeWithoutAxiom?">
+              <!-- Previously MissionDND was not cleaned up properly if the player interrupted the escape in certain ways -->
+              <remove_from_list name="md.$MissionDND" exact="Setup"/>
+            </do_if>
+          </patch>
+          <cues>
+
+            <cue name="Setup_Map">
+              <actions>
+                <set_value name="$InitialMap" exact="[
+                    macro.cluster_02_sector001_macro
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Prison_Station">
+              <actions>
+                <find_sector name="$EighteenBillionSector" macro="macro.cluster_02_sector001_macro" required="true"/>
+                <find_station name="$PrisonStation" space="$EighteenBillionSector" godstationentry="'story_prison_station_id'" required="true"/>
+
+                <find_object_component name="$PrisonModule"   object="$PrisonStation" macro="macro.landmarks_gen_prison_01_macro" recursive="true"/>
+                <find_object_component name="$PrisonCorridor" object="$PrisonModule"  macro="macro.prison_escape_v2_macro" recursive="true"/>
+                <find_object_component name="$PrisonEmitter"  object="$PrisonModule"  macro="macro.room_gen_prison_forceemitter_macro" recursive="true"/>
+                <set_object_active object="$PrisonEmitter" activate="false" comment="No push effect, during the gamestart"/>
+
+                <!-- dynamic rooms already created in setup_dlc_pirate.xml -->
+                <set_value name="$PrisonRoom2" exact="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup.$PrisonRoom2" comment="prison-room on the 1B floor"/>
+                <set_value name="$PrisonRoom3" exact="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup.$PrisonRoom3" comment="prison-room on the 1B floor"/>
+                <set_value name="$PrisonRoom4" exact="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup.$PrisonRoom4" comment="prison-room on the 1B floor"/>
+                <set_value name="$OtherPrisoner" exact="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup.$OtherPrisoner" comment="teladi prisoner"/>
+
+                <set_object_relation_behaviour object="$PrisonStation" disable="true"/>
+
+                <set_value name="$PrisonRoom" exact="player.room"/>
+
+                <!-- setup cell doors -->
+                <set_triggers_locked object="$PrisonRoom" group="tag.door_01" locked="true" comment="left cell / door button"/>
+                <!--set_triggers_locked object="$PrisonRoom" group="tag.door_03" locked="true" comment="right cell / door button (don't lock, because this results in a double-lock in Ch6_Axiom_HackingConsole_HackDone (see TOA-216)"/-->
+                <!-- setup door-switches -->
+                <find_object_component groupname="this.$PrisonSwitches" object="$PrisonModule" macro="[macro.props_special_doorclamp_01_macro, macro.interactive_pir_doorcontrol_01_macro]" multiple="true" required="true" />
+                <do_for_each name="this.$switch" in="this.$PrisonSwitches">
+                  <set_object_min_hull object="this.$switch" exact="1" comment="don't allow destruction of switches"/>
+                </do_for_each>
+                <!-- setup triggers -->
+                <trigger_animation object="$PrisonRoom" group="tag.light_01" trigger="activate"/>
+
+              </actions>
+            </cue>
+
+            <cue name="Setup_Other_Player_Prisoner">
+              <actions>
+                <create_cue_actor name="$PirateGS1PlayerActor" cue="namespace" macro="character_argon_male_plot_pirate_gamestart1_actor_macro">
+                  <select race="race.argon" />
+                  <page exact="10175"/>
+                  <owner exact="faction.civilian"/>
+                  <skills>
+                    <skill type="management"  exact="15"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="15"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="15"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$PirateGS1PlayerActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$PirateGS1PlayerActor" icon="'pilot'"/>
+
+                <find_npc_slot name="$NPCSlot" object="$PrisonRoom2" tags="tag.prisoner" multiple="true" excludefilled="false" />
+                <do_all exact="$NPCSlot.count" counter="$i">
+                  <do_if value="$NPCSlot.{$i}.group == tag.door_03">
+                    <add_actor_to_room result="$PirateGS1PlayerActorPlaced" actor="$PirateGS1PlayerActor" slot="$NPCSlot.{$i}"/>
+                    <debug_text text="'adding other pirate GS player prisoner: ' + $PirateGS1PlayerActorPlaced" chance="$DebugChance"/>
+                    <do_if value="$PirateGS1PlayerActorPlaced == false">
+                      <debug_text text="'Adding actor failed?!'" filter="error"/>
+                    </do_if>
+                  </do_if>
+                </do_all>
+              </actions>
+              <cues>
+
+                <cue name="Other_Player_Prisoner_Conversation_Started" comment="Don't instantiate. Axiom wants to say something after the conversation finishes, and being able to restart it breaks that dialog.">
+                  <conditions>
+                    <event_conversation_started actor="$PirateGS1PlayerActor"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$PirateGS1PlayerActor" line="30288101"/>
+                    <add_npc_line speaker="$PirateGS1PlayerActor" line="30288102"/>
+                    <add_npc_line speaker="$PirateGS1PlayerActor" line="30288103"/>
+                  </actions>
+                </cue>
+
+                <cue name="Other_Player_Prisoner_Despawn">
+                  <conditions>
+                    <event_cue_completed cue="Ch3_Raider"/>
+                  </conditions>
+                  <actions>
+                    <remove_actor_from_room actor="$PirateGS1PlayerActor"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+            
+            <cue name="LockedDoorsHandler" checktime="10s" checkinterval="1s">
+              <conditions>
+                <check_value value="(player.sector == $18BilSector) and $EscapeCommDevice?"/>
+                <check_any>
+                  <check_value value="player.entity.distanceto.{$PrisonMarker_15} lt 3m"/>
+                  <check_value value="player.entity.distanceto.{$PrisonMarker_16} lt 3m"/>
+                  <check_value value="player.entity.distanceto.{$PrisonMarker_17} lt 3m"/>
+                  <check_value value="player.entity.distanceto.{$PrisonMarker_18} lt 3m"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="Axiom_Comments" param="[[30288137]]" comment="That door is locked shut, don't bother trying to get through."/>
+              </actions>
+              <delay exact="15s" comment="slow down before warning again"/>
+              <actions>
+                <reset_cue cue="LockedDoorsHandler"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Axiom">
+              <!--conditions>
+                <event_cue_signalled/>
+              </conditions-->
+              <actions>
+                <set_entity_traits entity="$AxiomActor" hidden="true"/>
+                <find_npc_slot name="$NPCSlot" object="$PrisonRoom" tags="tag.prisoner" multiple="true" excludefilled="false" />
+                <do_all exact="$NPCSlot.count" counter="$i">
+                  <do_if value="$NPCSlot.{$i}.group == tag.door_01">
+                    <add_actor_to_room result="$Prisoner1result" actor="$AxiomActor" slot="$NPCSlot.{$i}"/>
+                    <debug_text text="'adding axiom: ' + $Prisoner1result" chance="$DebugChance"/>
+                    <do_if value="$Prisoner1result == false">
+                      <debug_text text="'Adding actor failed?!'" filter="error"/>
+                    </do_if>
+                    <!-- TODO @Owen: Try to make Axiom face the cell door. -->
+                    <!--<signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $AxiomActor, table[
+                                                                                                                                      $requestercue = $MissionCue,
+                                                                                                                                      $priority = 100,
+                                                                                                                                      $location = $NPCSlot.{$i},
+                                                                                                                                      $rotation = rotation.[225deg, 0deg, 0deg],
+                                                                                                                                      $debugchance = $DeepDebugChance,
+                                                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                                                      ]"/>-->
+                  </do_if>
+                </do_all>
+              </actions>
+            </cue>
+            
+            <!--<cue name="DEBUG_Disconnect_Axiom">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $AxiomActor, table[
+                                                                                                                                  $requestercue = $MissionCue,
+                                                                                                                                  $priority = 100,
+                                                                                                                                  $location = 'disconnect'
+                                                                                                                                  $debugchance = $DeepDebugChance,
+                                                                                                                                  $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                                                  ]"/>
+              </actions>
+            </cue>-->
+
+
+          </cues>
+        </cue>
+
+        <cue name="Axiom_Comments" instantiate="true" comment="fire and forget speaks (no callbacks!) forced to be on target monitor">
+          <conditions>
+            <event_cue_signalled comment="event.param contains lines to be spoken!"/>
+            <check_value value="md.$PersistentCharacters.$AxiomActor"/>
+          </conditions>
+          <actions>
+            <run_actions ref="md.LIB_Dialog.Speak_Actor_Run">
+              <param name="MissionCue"        value="$MissionCue"/>
+              <param name="Actor"             value="md.$PersistentCharacters.$AxiomActor"/>
+              <param name="Lines"             value="event.param"/>
+              <param name="ForceCutscene"     value="true" comment="ignore distance-check, we know better"/>
+              <param name="DelayInitial"      value="0.1s"/>
+            </run_actions>
+          </actions>
+        </cue>
+        
+        <cue name="Ch0_Wait">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Ch0_Wait_Axiom_Whisper">
+              <delay exact="8s"/>
+              <actions>
+                <do_if value="(Ch0_Wait_View.state == cuestate.waiting) and not $EscapeCell?">
+                  <speak actor="$AxiomActor">
+                    <text line="30288101"/>
+                    <text line="30288102" delay="2s"/>
+                  </speak>
+                </do_if>
+                <do_else>
+                  <set_value name="$AxiomWhisperFinished"/>
+                </do_else>
+              </actions>
+            </cue>
+            <cue name="Ch0_Wait_Axiom_Whisper_Finished">
+              <conditions>
+                <event_speak_finished actor="$AxiomActor" line="30288101"/>
+              </conditions>
+              <actions>
+                <set_value name="$AxiomWhisperFinished"/>
+              </actions>
+            </cue>
+            <cue name="Ch0_Wait_View" checkinterval="1s" comment="wait until player turns around and looks at the cell door">
+              <conditions>
+                <check_any>
+                  <check_all>
+                    <check_value value="(player.entity.rotation.yaw gt -0.58rad) and (player.entity.rotation.yaw lt 0.58rad)"/>
+                    <check_value value="(player.entity.rotation.pitch gt -0.58rad) and (player.entity.rotation.pitch lt 0.58rad) "/>
+                  </check_all>
+                  <!-- The player can theoretically open the cell door very quickly. -->
+                  <check_value value="$EscapeCell?"/>
+                </check_any>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <signal_cue cue="Ch1_Intro"/>
+              </actions>
+              <cues>
+                <cue name="Ch0_Axiom_Chatter_Interruptible">
+                  <actions>
+                    <!-- Lines about the "golden ticket" story, ending with instructions for breaking out. -->
+                    <do_if value="not $EscapeCell?">
+                      <speak actor="$AxiomActor" priority="100">
+                        <text line="30288103" delay="1s" comment="Looks like this is your lucky day, two-eyes. That's the bunk of Hinu Hurricane, legendary pirate. ..."/>
+                        <text line="30288104" delay="1s"/>
+                        <text line="30288105" delay="1s"/>
+                        <text line="30288106" delay="2s"/>
+                        <text line="30288107" delay="6s"/>
+                      </speak>
+                    </do_if>
+                  </actions>
+                  <cues>
+
+                    <cue name="Ch0_Axiom_Chatter_Interruptible_Instructions_Started">
+                      <conditions>
+                        <!-- @Klaus: This cue only wants to check whether the speak in the parent cue has made it to a specific line when it gets interrupted by the player leaving their cell.
+                                     This cue is not responsible for making the story continue, and is fully expected to sometimes not trigger, depending on what the player does. -->
+                        <event_speak_line_finished actor="$AxiomActor" line="30288106"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$InstructionsStarted"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch0_Update_Objective">
+              <conditions>
+                <check_any>
+                  <event_speak_line_finished actor="$AxiomActor" line="30288105" comment="unreliable (but nicer timing)"/>
+                  <event_speak_finished actor="$AxiomActor" line="30288103" comment="reliable"/>
+                </check_any>
+                <check_value value="not $EscapeCell?"/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.custom" customaction="{30288,1011}" updatebriefing="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Trigger_VentPlate">
+              <conditions>
+                <event_player_activated_platform_trigger component="$PrisonRoom" group="tag.vent_cover_01"/>
+              </conditions>
+              <actions>
+                <debug_text text="'onetime-callback %s %s'.[event.param, event.param2]" chance="0"/>
+              </actions>
+            </cue>
+
+            <cue name="Trigger_VentSwitch">
+              <conditions>
+                <event_player_activated_platform_trigger component="$PrisonRoom" group="tag.door_02"/>
+              </conditions>
+              <actions>
+                <debug_text text="'onetime-callback %s %s'.[event.param, event.param2]" chance="0"/>
+                <set_value name="$EscapeCell" exact="true"/>
+                <set_entity_traits entity="$AxiomActor" hidden="false"/>
+                <signal_cue cue="Ch0_Axiom_Chatter_Wrap_Up"/>
+              </actions>
+            </cue>
+
+            <!-- Signalled by Ch1_Trigger_VentSwitch -->
+            <cue name="Ch0_Axiom_Chatter_Wrap_Up">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- If the player escaped, wrap up the dialog. -->
+                <do_if value="$InstructionsStarted?">
+                  <speak actor="$AxiomActor" priority="100">
+                    <text line="30288108" comment="Praise the twinkling stars, you did it!"/>
+                    <text line="30288110" comment="Let's have a little chat, shall we?"/>
+                  </speak>
+                </do_if>
+                <do_else>
+                  <!-- Player escaped the cell before Axiom could finish his story. -->
+                  <speak actor="$AxiomActor" priority="100">
+                    <text line="30288109" comment="Well, draw a square on my forehead and brand me a heretic, you figured"/>
+                    <text line="30288110" comment="Let's have a little chat, shall we?"/>
+                  </speak>
+                </do_else>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Not using Lib_Dialog intentionally in Ch1, player doesn't have communicator-device with Axiom -->
+        <cue name="Ch1_Intro">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Pirate gamestart 2'" chance="$DebugChance"/>
+            <set_value name="$ObjectiveStep" exact="1"/>
+
+            <create_mission cue="$MissionCue" name="{30288,1000}" description="{30288,1001}" type="missiontype.plot" group="missiongroup.gs_pirate2" faction="faction.civilian" difficulty="level.trivial" abortable="false" activate="true" icon="'briefing_axiom_01'">
+              <briefing>
+                <objective step="1" action="objective.custom" customaction="{30288,1010}"/>
+              </briefing>
+            </create_mission>
+            <set_objective_from_briefing cue="$MissionCue" step="$ObjectiveStep"/>
+
+            <find_object_component name="$PrisonSwitchCellPower"    object="$PrisonModule" macro="macro.interactive_pir_doorcontrol_01_macro" grouptag="tag.cellpower"    required="true" />
+            <find_object_component name="$PrisonSwitchLowerAirlock" object="$PrisonModule" macro="macro.props_special_doorclamp_01_macro" grouptag="tag.lowerairlock" required="true" />
+            <set_object_hull object="$PrisonSwitchCellPower" exact="50" comment="player-goal is to repair it (player only has repair-laser initially)"/>
+            <add_to_group groupname="$PrisonStation.engineer.$ExcludedRepairElements" object="$PrisonSwitchCellPower" comment="avoid station engineer from repairing it"/>
+            <add_to_group groupname="$PrisonStation.engineer.$ExcludedRepairElements" object="$PrisonSwitchLowerAirlock"  comment="avoid station engineer from repairing it"/>
+
+            <!-- silence global hints -->
+            <set_value name="md.$GlobalHintsDND" exact="true" />
+          </actions>
+          <cues>
+
+            <cue name="Ch1_SetupCrate">
+              <actions>
+                <find_crate_slot name="$CrateSlots" object="$PrisonRoom3" tags="[tag.crate_s, tag.crate_ontable]" multiple="true"/>
+                <debug_text text="'Found #crateslots:' + $CrateSlots.count" chance="$DebugChance"/>
+                <create_crate name="$ToolboxCrate" macro="macro.crate_gen_s_01_macro" slot="$CrateSlots.random" />
+                <add_cargo object="$ToolboxCrate" ware="ware.weapon_gen_spacesuit_laser_01_mk1" exact="1"/>
+                <!--add_cargo object="$ToolboxCrate" ware="ware.weapon_gen_spacesuit_laser_02_mk1" exact="1"/-->
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupRemoveLeaks" comment="remove voice-leaks, during the spacesuit parts they repeat every few seconds endlessly and it becomes annoying very quickly ">
+              <actions>
+                <find_object_component name="$Leaks" object="$PrisonStation" signalleaktype="signalleaktype.voice" multiple="true"/>
+                <do_for_each name="$leak" in="$Leaks">
+                  <destroy_object object="$leak" explosion="false"/>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupPrisonEffects">
+              <delay exact="2s"/>
+              <actions>
+
+                <!-- cell door buttons -->
+                <!--add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_tiny'">
+                      <position space="$PrisonRoom" x="1.89m" y="1.34m" z="-4.88m"/>
+                    </add_effect-->
+
+                <add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_tiny'">
+                      <position space="$PrisonRoom" x="-1.9m" y="1.34m" z="-4.88m"/>
+                    </add_effect>
+
+                <!-- console buttons -->
+                <add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_tiny'">
+                  <position space="$PrisonRoom" x="3.01m" y="0.87m" z="-2.4m"/>
+                </add_effect>
+
+                <!--add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_tiny'">
+                  <position space="$PrisonRoom" x="2.75m" y="0.87m" z="-2.4m"/>
+                </add_effect-->
+
+                <!-- Axioms lightswitch-->
+                <!--add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_tiny'">
+                  <position space="$PrisonRoom" x="3.96m" y="1.36m" z="-5.3m"/>
+                </add_effect-->
+
+              </actions>
+            </cue>
+
+            <cue name="Ch1_SetupEscape">
+              <actions>
+                <find_object_component name="$PrisonMarker_02" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy2_macro"  required="true" comment="exit tunnel corner"/>
+                <find_object_component name="$PrisonMarker_03" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy3_macro"  required="true" comment="exit tunnel axiom-spawn"/>
+                <find_object_component name="$PrisonMarker_04" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy4_macro"  required="true" comment="First t-split after gamestart cell"/>
+                <find_object_component name="$PrisonMarker_05" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy5_macro"  required="true" comment="transition tunnel into space"/>
+                <find_object_component name="$PrisonMarker_07" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy7_macro"  required="true" comment="Junction in front of transporter room on Floor 1"/>
+                <find_object_component name="$PrisonMarker_08" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy8_macro"  required="true" comment="Immediately in front of transporter room on Floor 1"/>
+
+                <find_object_component name="$PrisonMarker_15" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy15_macro"  required="true" comment="Floor 1 circledoor 1"/>
+                <find_object_component name="$PrisonMarker_16" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy16_macro"  required="true" comment="Floor 1 circledoor 2"/>
+                <find_object_component name="$PrisonMarker_17" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy17_macro"  required="true" comment="Floor 2 circledoor 1"/>
+                <find_object_component name="$PrisonMarker_18" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy16_macro"  required="true" comment="Floor 2 circledoor 2"/>
+                <find_object_component name="$PrisonMarker_20" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy20_macro"  required="true" comment="Floor 1 in front of the airlock into 'the tower'"/>
+
+                <find_object_component name="$PrisonMarker_21" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy21_macro"  required="true" comment="Slightly behind the first corridor-split"/>
+                <find_object_component name="$PrisonMarker_22" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy22_macro"  required="true" comment="Airlock-tower Floor 1"/>
+                <find_object_component name="$PrisonMarker_23" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy23_macro"  required="true" comment="Airlock-tower Floor 2"/>
+                <find_object_component name="$PrisonMarker_24" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy24_macro"  required="true" comment="Airlock-tower Floor 3"/>
+                <find_object_component name="$PrisonMarker_25" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy25_macro"  required="true" comment="In the upward curve of the escape-pipe (for navigating Axiom)"/>
+
+                <find_object_component name="$PrisonMarker_26" groupname="$PrisonMarkerGroup" object="$PrisonModule" macro="macro.positiondummy26_macro"  required="true" comment="Hallways 'far' intersection"/>
+
+                <!-- switch to noclip in first-person and flew to a position visible from the cell-window, if the station constructionplan ever changes this will need to be updated -->
+                <create_position name="$WaitposCellFar" object="$PrisonRoom" space="$PrisonRoom.sector" x="-460m" y="27m" z="-843m" />
+
+                <!-- spawn ship in hidden near station, visible from cell window (.ship.cargo.capacity.all = 650) -->
+                <create_ship name="$EscapeShip2" macro="ship_pir_s_fighter_01_a_macro" sector="$EighteenBillionSector" commandeerable="false" capturable="false">
+                  <owner exact="faction.civilian"/>
+                  <loadout ref="story_kyd_prison_gamestart"/>
+                  <paint ware="ware.paintmod_0098"/> <!-- ="Cobalt" -->
+                  <pilot>
+                    <select faction="faction.civilian" tags="tag.pilot"/>
+                  </pilot>
+                  <loadout>
+                    <level exact="1.0f"/>
+                  </loadout>
+                  <position value="$WaitposCellFar"/>
+                  <rotation yaw="0deg"/>
+                </create_ship>
+
+                <create_order object="$EscapeShip2" id="'Wait'">
+                  <param name="noattackresponse" value="true"/>
+                </create_order>
+
+                <set_object_name object="$EscapeShip2" page="30226" line="231"/>
+                <set_object_min_hull object="$EscapeShip2" exact="100" comment="Indestructible initially"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_LightBlink" checkinterval="1s" instantiate="true">
+              <delay exact="[0.8s, 1.5s, 3s].random"/>
+              <actions>
+                <do_if value="@$Light1Status">
+                  <trigger_animation object="$PrisonRoom" group="tag.light_01" trigger="activate"/>
+                  <remove_value name="$Light1Status"/>
+
+                  <add_effect object="$PrisonRoom" effect="'sparks_90deg_bursts_v1_single'">
+                    <position space="$PrisonRoom" x="3.0m" y="2.9m" z="-6.4m"/>
+                  </add_effect>
+
+                </do_if>
+                <do_else>
+                  <trigger_animation object="$PrisonRoom" group="tag.light_01" trigger="deactivate"/>
+                  <set_value name="$Light1Status" exact="true"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Axiom_Conversation3">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <speak actor="$AxiomActor" priority="100">
+                  <text line="30288120" comment="Leaving so soon? And I thought you'd share your good fortune with a fellow inmate."/>
+                  <text line="30288121" comment="Suit yourself, but you won't get far without me"/>
+                </speak>
+              </actions>
+            </cue>
+
+            <library name="Ch1_Axiom__Conversation_DefaultChoices">
+              <actions>
+                <do_if value="(not $EscapeCommDevice?) and (not $AxiomFreed?)">
+                  <add_player_choice text="{30288,1020}" section="axiom_main" choiceparam="'choice_introduce'" position="top_left" comment="Who are you?"/>
+                  <add_player_choice text="{30288,1021}" section="axiom_main" choiceparam="'choice_progress'" position="left" comment="What's the plan?"/>
+                  <add_player_choice text="{30288,1022}" section="axiom_main" choiceparam="'choice_later'" position="top_right" comment="Maybe later."/>
+                  <do_if value="$EscapeTalkAxiom?">
+                    <add_player_choice text="{30288,1023}" section="axiom_main" choiceparam="'leave'" position="bottom_right" highlighted="true" comment="Deal!"/>
+                  </do_if>
+                </do_if>
+                <do_elseif value="not $AxiomFreed?">
+                  <add_player_choice text="{30288,1024}" section="axiom_main" choiceparam="'choice_progress'" comment="What was the plan?"/>
+                  <add_player_choice text="{30288,1025}" section="axiom_main" choiceparam="'leave'" position="bottom_right" highlighted="true" comment="See you soon."/>
+                </do_elseif>
+              </actions>
+            </library>
+
+            <cue name="Ch1_Axiom_Conversation_Started" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_conversation_started actor="$AxiomActor"/>
+                  <event_conversation_next_section actor="$AxiomActor" section="axiom_main"/>
+                </check_any>
+                <check_value value="$EscapeCell?"/>
+              </conditions>
+              <actions>
+                <debug_text text="'ConvStarted event=%s e.p=%s e.p2=%s '.[event.name, event.param, event.param2]" chance="0"/>
+
+
+                <do_if value="Ch2_AirlockSwitch_Broken.state == cuestate.complete">
+                  <do_if value="$AxiomActor.ship == $EscapeShip2" comment="Axiom already onboard his own ship?">
+                    <add_npc_line speaker="$AxiomActor" line="30288172" hidechoices="true" comment="I have boarded our noble craft. What are you waiting for, chosen one?"/>
+                  </do_if>
+                  <do_else>
+                    <add_npc_line speaker="$AxiomActor" line="30288171" hidechoices="true" comment="Keep a few eyes out, I'm on my way."/>
+                  </do_else>
+                </do_if>
+                <do_elseif value="not $AxiomGreeted?">
+                  <set_value name="$AxiomGreeted"/>
+                  <add_npc_line speaker="$AxiomActor" line="30288111" hidechoices="true" comment="welcome"/>
+                </do_elseif>
+                <do_elseif value="event.name == 'event_conversation_started'">
+                  <add_npc_line speaker="$AxiomActor" line="30288124" hidechoices="true" comment="back so soon?"/>
+                </do_elseif>
+
+                <do_if value="Ch2_AirlockSwitch_Broken.state == cuestate.waiting">
+                  <do_if value="not $EscapeCommDevice?">
+                    <do_if value="event.param == 'axiom_main' or event.param == 'default'">
+                      <debug_text text="'axiom_main/default'" chance="0"/>
+                      <do_if value="event.param2 == 'leave'">
+                        <do_if value="not $EscapeCommDevice?">
+                          <add_npc_line speaker="$AxiomActor" line="30288116" hidechoices="true" comment="take communicator"/>
+                          <add_npc_line speaker="$AxiomActor" line="30288117" hidechoices="true" comment="will guide you through prison"/>
+                          <add_npc_line speaker="$AxiomActor" line="30288118" hidechoices="true" comment="I'll wait here"/>
+                          <do_if value="not $AxiomFreed?" comment="If Axiom was already freed, don't overwrite the objective">
+                            <set_value name="$ObjectiveStep" operation="add"/>
+                            <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.find" text="{30288,1013}" updatebriefing="true" comment="Find: Power Switch"/>
+                          </do_if>
+                          <set_value name="$EscapeCommDevice" exact="true"/>
+                        </do_if>
+                        <do_else>
+                          <add_npc_line speaker="$AxiomActor" line="30288115" hidechoices="true" comment="essential part of the plan"/>
+                        </do_else>
+                      </do_if>
+                      <do_elseif value="event.param2 == 'choice_progress'">
+                        <set_value name="$EscapeTalkAxiom" exact="true"/>
+                        <add_npc_line speaker="$AxiomActor" line="30288113" hidechoices="true"/>
+                        <add_npc_line speaker="$AxiomActor" line="30288114" hidechoices="true"/>
+                        <add_npc_line speaker="$AxiomActor" line="30288115" hidechoices="true"/>
+                        <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                      </do_elseif>
+                      <do_elseif value="event.param2 == 'choice_introduce'">
+                        <add_npc_line speaker="$AxiomActor" line="30288112" hidechoices="true"/>
+                        <set_value name="$Introduced" exact="true"/>
+                        <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                      </do_elseif>
+                      <do_elseif value="event.param2 == 'choice_later'">
+                        <add_npc_line speaker="$AxiomActor" line="30288119" hidechoices="true"/>
+                      </do_elseif>
+                      <do_else>
+                        <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                      </do_else>
+                    </do_if>
+                    <do_elseif value="event.name == 'event_conversation_returned_to_section'">
+                      <debug_text text="'return2section'" chance="0"/>
+                      <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                    </do_elseif>
+                    <do_else>
+                      <debug_text text="'fallthrough 3a'" chance="0"/>
+                    </do_else>
+                  </do_if>
+                  <do_else>
+                    <do_if value="not $ReturnedToAxiom?">
+                      <add_npc_line speaker="$AxiomActor" line="30288125" hidechoices="true" comment="stop wasting time"/>
+                      <set_value name="$ReturnedToAxiom"/>
+                    </do_if>
+                    <do_if value="event.param == 'axiom_main' or event.param == 'default'">
+                      <debug_text text="'axiom_main/default'" chance="0"/>
+                      <do_if value="event.param2 == 'leave'">
+                        <add_npc_line speaker="$AxiomActor" line="30288126" hidechoices="true" comment="on with you"/>
+                      </do_if>
+                      <do_elseif value="event.param2 == 'choice_progress'">
+                        <add_npc_line speaker="$AxiomActor" line="30288115" hidechoices="true" comment="essential part of the plan"/>
+                        <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                      </do_elseif>
+                      <do_else>
+                        <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                      </do_else>
+                    </do_if>
+                    <do_elseif value="event.name == 'event_conversation_returned_to_section'">
+                      <debug_text text="'return2section'" chance="0"/>
+                      <include_actions ref="Ch1_Axiom__Conversation_DefaultChoices"/>
+                    </do_elseif>
+                    <do_else>
+                      <debug_text text="'fallthrough 3b'" chance="0"/>
+                    </do_else>
+                  </do_else>
+                </do_if>
+                
+              </actions>
+              <cues>
+                <cue name="Ch1_Axiom_Conversation_Finished">
+                  <conditions>
+                    <event_conversation_finished actor="$AxiomActor"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'ConvFinished event=%s e.p=%s e.p2=%s '.[event.name, event.param, event.param2]" chance="0"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Escape_LeaveCell" checkinterval="0.5s">
+              <conditions>
+                <check_value value="player.entity.position.z gt -4.8m"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.talkto" text="$AxiomActor.name" object="$AxiomActor" updatebriefing="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Escape_NearConsole" checkinterval="1s">
+              <conditions>
+                <check_value value="(player.room == $PrisonRoom) and (player.entity.position.distanceto.{position.[2.878159m, 1.650568m, -0.980074m]} lt 0.5m)"/>
+              </conditions>
+              <actions>
+                <speak actor="$AxiomActor" line="30288123" comment="Console is broken"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Escape_LeaveRoom" instantiate="true">
+              <conditions>
+                <event_object_changed_room object="player.entity" room="$PrisonCorridor" previous="$PrisonRoom"/>
+                <!--event_object_changed_room object="player.entity" room="macro.prison_escape_v2_macro" previous="macro.room_gen_detentioncell_01_macro"/-->
+              </conditions>
+              <actions>
+                <debug_text text="'Changeroom to:%s from:%s (talk=%s comms=%s)'.[event.param.macro, event.param2.macro, $EscapeTalkAxiom?, $EscapeCommDevice?]" chance="$DebugChance"/>
+
+                <do_if value="$EscapeTalkAxiom?" negate="true">
+                  <!--<do_if value="$AxiomChatterFinished?">-->
+                    <signal_cue cue="Ch1_Axiom_Conversation3" check="false"/>
+                  <!--</do_if>
+                  <do_else>
+                    <speak actor="$AxiomActor">
+                      <text line="30288120" comment="You won't get far"/>
+                      <text line="30288121"/>
+                    </speak>
+                  </do_else>-->
+                </do_if>
+                <do_elseif value="$EscapeCommDevice?">
+                  <speak actor="$AxiomActor" line="30288122" comment="good luck"/>
+                  <cancel_cue cue="this.static"/>
+                </do_elseif>
+                
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Other_Prisoner_Conversation_Axiom_Comment">
+              <conditions>
+                <check_any>
+                  <event_conversation_finished actor="$OtherPrisoner"/>
+                  <event_conversation_finished actor="$PirateGS1PlayerActor"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$SilenceOtherPrisoner"/>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288174]]" comment="Leave the other prisoners, we can always come back later. It won't do them any good if we let ourselves get captured now."/>
+                </do_if>
+              </actions>
+              <delay exact="8s"/>
+              <actions>
+                <remove_value name="$SilenceOtherPrisoner"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Corridor_Guidance1" checkinterval="0.25s">
+              <conditions>
+                <check_value value="player.entity.distanceto.{$PrisonMarker_04} lt 7.0m"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288130]]" comment="Turn left"/>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Ch2_Corridor_04" checkinterval="0.25s" instantiate="true">
+                  <conditions>
+                    <check_value value="player.entity.distanceto.{$PrisonMarker_04} lt 7.0m"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$LastMarker" exact="4"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Corridor_21" checkinterval="0.25s" instantiate="true">
+                  <conditions>
+                    <check_value value="player.entity.distanceto.{$PrisonMarker_21} lt 7.0m"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$LastMarker" exact="21"/>
+                    <signal_cue cue="Ch2_Corridor_21_Left" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Corridor_21_Left">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$EscapeCommDevice?">
+                      <signal_cue_instantly cue="Axiom_Comments" param="[[30288130]]" comment="Take the left corridor"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_Corridor_26" checkinterval="0.25s">
+                  <conditions>
+                    <check_value value="player.entity.distanceto.{$PrisonMarker_26} lt 8.0m"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$EscapeCommDevice?">
+                      <do_if value="$LastMarker?">
+                        <do_if value="$LastMarker == 4">
+                          <signal_cue_instantly cue="Axiom_Comments" param="[[30288134]]" comment="Go Straight ahead (player did go left first corridor)"/>
+                        </do_if>
+                        <do_elseif value="$LastMarker == 21">
+                          <signal_cue_instantly cue="Axiom_Comments" param="[[30288132]]" comment="Go right (player went straight first, left 2nd corridor)"/>
+                        </do_elseif>
+                      </do_if>
+                    </do_if>
+                    <cancel_cue cue="Ch2_Corridor_Guidance1"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Corridor_Guidance2" checkinterval="0.5s">
+              <conditions>
+                <check_value value="player.entity.distanceto.{$PrisonMarker_07} lt 6.0m"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288134]]" comment="Go straight"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Corridor_Guidance3" checkinterval="1s">
+              <conditions>
+                <check_value value="player.entity.distanceto.{$PrisonMarker_20} lt 3.0m" comment="hallway just before the airlock on floor 1"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288138],[30288135]]" comment="Power switch nearby / airlock into spacesuit"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_PowerSwitch_Objective">
+              <conditions>
+                <event_speak_finished actor="$AxiomActor" line="30288138" comment="The power switch should be somewhere nearby."/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.repair" text="{30288,1013}" suggestdocking="false" updatebriefing="true" object="$PrisonSwitchCellPower" comment="Power Switch"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_EnteredSpacesuit" instantiate="true">
+              <conditions>
+                <event_object_changed_room object="player.entity"/>
+                <check_value value="player.ship.isclass.spacesuit"/>
+              </conditions>
+              <actions>
+                <find_object_component groupname="$SpaceSuitRepairWeapons" object="player.ship" weapontype="repair" multiple="true"/>
+                <find_object_component groupname="$SpaceSuitCombatWeapons" object="player.ship" weapontype="combat" multiple="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_PowerSwitch_Nearby" checkinterval="3s">
+              <conditions>
+                <check_value value="(player.entity.sector == $PrisonSwitchCellPower.sector) and (player.entity.distanceto.{$PrisonSwitchCellPower} lt 10m)"/>
+              </conditions>
+              <actions>
+                <show_help position="1" duration="15s" force="true" line="27403" comment="Use your repair laser on the panel."/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_PowerSwitch_Functional">
+              <conditions>
+                <event_object_hull_above_function_threshold object="$PrisonSwitchCellPower"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Ch2_PowerSwitch_Nearby"/>
+              </actions>
+              <delay exact="2s" comment="Otherwise the switch to the cutscene is so instantanous you don't even see the repair-laser doing any repairs"/>
+              <actions>
+                <set_value name="$AxiomFreed" exact="true"/>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue cue="Ch2_Axiom_Freed_Cutscene"/>
+                </do_if>
+                <do_else>
+                  <signal_cue cue="Ch2_Axiom_Freed_NoCutscene"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Axiom_WalkToConsole_v2">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <find_npc_waypoint name="$PrisonCorridorWaypoints" object="$PrisonCorridor" multiple="true" tags="tag.prisonconsole"/>
+                <do_if value="$PrisonCorridorWaypoints.count">
+                  <set_value name="$MovementTable" exact="table[$slot = $PrisonCorridorWaypoints.random]"/>
+                  <signal_objects object="$AxiomActor" param="'npc_move_to'" param2="$MovementTable.clone"/>
+                  <!--signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', event.param, table[$requestercue = namespace, $location = this.$DespawnWaypoints.random, $priority = 100, $debugchance = $DeepDebugChance] ]"/-->
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Axiom_Freed_NoCutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.door_01" trigger="activate"/>
+                <!-- no need to call escape-ship to the window (only nice for the cutscene), it'll be called to the pipe exit later -->
+              </actions>
+              <delay exact="8s"/>
+              <actions>
+                <signal_cue cue="Ch2_Axiom_WalkToConsole_v2"/>
+              </actions>
+              <delay exact="5s"/>
+              <actions>
+                <signal_cue cue="Ch2_Axiom_Hacking"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Axiom_Freed_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="1.0s" fadein="1.0s" realtime="true"/>
+              </actions>
+              <delay exact="1.0s"/>
+              <actions>
+                <force_player_speed speed="0" comment="avoid crashing into walls, during cutscene"/>
+
+                <play_cutscene result="this.$CutsceneID" key="'Story_Gamestart2_Intro2'">
+                  <param name="target_prisonroom" object="$PrisonRoom"/>
+                  <param name="target_npc" object="$AxiomActor"/>
+                  <param name="target_player" object="player.entity"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+                <cue name="Ch2_Axiom_Freed_Cutscene_Started">
+                  <conditions>
+                    <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <trigger_animation object="$PrisonRoom" group="tag.door_01" trigger="activate"/>
+                    <signal_cue cue="Ch2_Call_EscapeShip"/>
+                  </actions>
+                  <delay exact="1.5s"/>
+                  <actions>
+                    <speak actor="$AxiomActor">
+                      <text line="30288150" comment="Well done"/>
+                      <text line="30288151" delay="1s" comment="There is our ride out"/>
+                    </speak>
+                  </actions>
+                  <delay exact="8s"/>
+                  <actions>
+                    <signal_cue cue="Ch2_Axiom_WalkToConsole_v2"/>
+                  </actions>
+                  <delay exact="5s"/>
+                  <actions>
+                    <do_if value="Ch2_Axiom_Freed_Cutscene_Finished.state == cuestate.waiting" comment="cutscene not aborted?">
+                      <fade_screen fadeout="0.5s" fadein="9s" realtime="true"/>
+                    </do_if>
+                    <signal_cue cue="Ch2_Axiom_Hacking"/>
+                  </actions>
+                </cue>
+                <cue name="Ch2_Axiom_Freed_Cutscene_Finished">
+                  <conditions>
+                    <check_any>
+                      <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Cutscene completed'" chance="$DebugChance"/>
+                    <fade_screen fadeout="0s" fadein="0.5s" comment="now fade in" realtime="true"/>
+                  </actions>
+                </cue>
+                <cue name="Ch2_Call_EscapeShip" comment="call to cell window">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_position name="$WaitposCell" object="$PrisonRoom" space="$PrisonRoom.sector" x="-12m" y="-12m" z="-80m" />
+                    <cancel_all_orders object="$EscapeShip2"/>
+                    <create_order object="$EscapeShip2" id="'MoveWait'" immediate="true">
+                      <param name="destination" value="[$PrisonRoom.sector, $WaitposCell]"/>
+                      <param name="precise" value="true"/>
+                      <param name="noattackresponse" value="true"/>
+                    </create_order>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Axiom_Hacking">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="3s"/>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288160],[30288161,2s],[30288162,0.5s]]" comment="Triangulating possible escape vectors / And found it / Sending you the coordinates now"/>
+                </do_if>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <signal_cue cue="Ch2_AirlockSwitch_Objective"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_AirlockSwitch_Objective">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.find" text="{30288,1014}" suggestdocking="false" updatebriefing="true" object="$PrisonSwitchLowerAirlock" comment="Find lower airlock"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_PickupCrate">
+              <conditions>
+                <event_player_opened_crate/>
+                <check_value value="event.param == $ToolboxCrate"/>
+              </conditions>
+              <actions>
+                <do_if value="$WasNotArmed?">
+                  <!-- Airlock was approached without weapon - which changed the objective to find a weapon. Now that we have one, lead back to the airlock -->
+                  <reset_cue cue="Ch2_AirlockSwitch_Objective" comment="reset, was called before"/>
+                  <signal_cue cue="Ch2_AirlockSwitch_Objective"/>
+                </do_if>
+                <set_value name="$SilenceOtherPrisoner"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <speak actor="$OtherPrisoner" comment="player is in the room, don't use lib_dialog">
+                  <text line="30288110"/>
+                  <text line="30288111"/>
+                </speak>
+              </actions>
+              <delay exact="10s"/>
+              <actions>
+                <signal_cue cue="Ch2_PickupCrate_Dialog_Finished" check="false" comment="Just in case something went wrong with the prisoner's speak."/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_PickupCrate_Dialog_Finished">
+              <conditions>
+                <check_any>
+                  <event_speak_finished actor="$OtherPrisoner" line="30288110"/>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <remove_value name="$SilenceOtherPrisoner"/>
+                <do_if value="$WasNotArmed? and $EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288164]]" comment="That will do it, now return to the airlock!"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_LowerAirlock_NearbyNotArmed" checkinterval="1s">
+              <conditions>
+                <check_value value="@player.controlled.isclass.spacesuit" comment="only when in spacesuit"/>
+                <check_value value="player.ship.distanceto.{$PrisonSwitchLowerAirlock} lt 10.0"/>
+                <check_value value="($SpaceSuitCombatWeapons?) and ($SpaceSuitCombatWeapons.count == 0)"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288165],[30288166],[30288167],[30288168]]"/>
+                </do_if>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.find" text="{30288,1016}" suggestdocking="false" updatebriefing="true" object="$ToolboxCrate" comment="find weapon (with guidance to it)"/>
+                <set_value name="$WasNotArmed" exact="true"/>
+                <!--reset_cue cue="Ch2_AirlockSwitch_Objective" comment="reset, because will be called once more when weapon is found"/-->
+              </actions>
+            </cue>
+
+            <cue name="Ch2_LowerAirlock_NearbyAndArmed" checkinterval="0.5s">
+              <conditions>
+                <check_value value="@player.controlled.isclass.spacesuit" comment="only when in spacesuit"/>
+                <check_value value="player.ship.distanceto.{$PrisonSwitchLowerAirlock} lt 15.0"/>
+                <check_value value="($SpaceSuitCombatWeapons?) and ($SpaceSuitCombatWeapons.count gt 0)"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <signal_cue_instantly cue="Axiom_Comments" param="[[30288169]]" comment="Your new laser is low powered, but if you keep it aimed at the lock, it will break eventually."/>
+                </do_if>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.destroy" text="{30288,1013}" updatebriefing="true" object="$PrisonSwitchLowerAirlock" suggestdocking="false" comment="Destroy"/>
+                <cancel_cue cue="Ch2_LowerAirlock_NearbyNotArmed"/>
+                <signal_cue cue="Ch2LowerAirlock_WeaponChanged" comment="initial hint"/>
+              </actions>
+              <cues>
+                <cue name="Ch2LowerAirlock_WeaponChanged" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_player_activated_weapongroup primary="true"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <remove_value name="$CombatWeaponActive"/>
+                    <do_for_each in="$SpaceSuitCombatWeapons">
+                      <do_if value="loop.element.isreadytofire">
+                        <set_value name="$CombatWeaponActive" exact="true"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                    <remove_help all="true"/>
+                    <do_if value="$CombatWeaponActive?">
+                      <show_help position="1" duration="14s" force="true" line="27406" comment="Destroy the marked target by shooting at it with your hand laser."/>
+                    </do_if>
+                    <do_elseif value="$SpaceSuitCombatWeapons.count == 0">
+                      <!-- no weapons (objective is pointing to find one) -->
+                    </do_elseif>
+                    <do_else>
+                      <show_help position="1" duration="10s" force="true" line="27404" comment="Switch to your hand laser."/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_AirlockSwitch_Broken">
+              <conditions>
+                <event_object_hull_below_function_threshold object="$PrisonSwitchLowerAirlock"/>
+              </conditions>
+              <actions>
+                <do_if value="$EscapeCommDevice?">
+                  <do_if value="$AxiomFreed?">
+                    <signal_cue_instantly cue="Axiom_Comments" param="[[30288149]]" comment="Yeah! Take that, inanimate object!"/>
+                  </do_if>
+                  <do_else>
+                    <signal_cue_instantly cue="Axiom_Comments" param="[[30288142],[30288143]]" comment="Hey, don't forget about me! / You're supposed to cause a power outage so that I can escape my cell!"/>
+                  </do_else>
+                </do_if>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.custom" customaction="{30288,1015}" updatebriefing="true" object="$PrisonMarker_02" comment="Escape" suggestdocking="false"/>
+                <remove_help line="[27404,27406]"/>
+                <cancel_cue cue="Ch2_LowerAirlock_NearbyAndArmed" comment="player broke through, no need for that hint anymore"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_LowerAirlockPipe_Inside" checkinterval="1s" comment="escaped through the fence, you enter the pipe leading to the outside">
+              <conditions>
+                <check_value value="@player.controlled.isclass.spacesuit" comment="only when in spacesuit"/>
+                <check_value value="player.ship.distanceto.{$PrisonMarker_02} lt 5.0"/>
+              </conditions>
+              <actions>
+                <set_object_hull object="$PrisonSwitchLowerAirlock" exact="100" comment="repair airlock switch, closing the way back into the tower"/>
+                <!--trigger_animation object="$PrisonCorridor" group="tag.lowerairlock" trigger="activate" comment="airlock closes"/-->
+                <set_value name="md.Signal_Leaks.Manager.$SuppressSignalLeakGeneration" exact="false"/>
+              </actions>
+              <cues>
+                <cue name="Ch2_LowerAirlockPipe_Inside_AxiomNotFreed" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $AxiomFreed?"/>
+                  </conditions>
+                  <actions>
+                    <!-- Mission failed (but you can still continue playing!)
+                      Player can dock at the staation and we'll put a ship there for him to steal
+                      Player can pick up the criminal story by going to the AE himself (just like from any other gamestart)
+                      Dock at the station, capture a ship and fly to the AE at some point, Axiom will escape by himself 
+                    -->
+                    <set_value name="$EscapeWithoutAxiom" exact="true"/>
+                    <remove_from_list name="md.$MissionDND" exact="Setup"/>
+                    <remove_value name="md.$GlobalHintsDND"/>
+                    <remove_mission cue="$MissionCue" type="failed"/>
+                    <write_to_logbook category="missions" faction="faction.player" title="{30288,1031}" text="{30288,1034}"/>
+                  </actions>
+                </cue>
+                <cue name="Ch2_LowerAirlockPipe_Inside_AxiomFreed" onfail="cancel">
+                  <conditions>
+                    <check_value value="$AxiomFreed?"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$EscapeCommDevice?">
+                      <signal_cue_instantly cue="Axiom_Comments" param="[[30288170],[30288171]]"/>
+                    </do_if>
+                    <set_value name="$ObjectiveStep" operation="add"/>
+                    <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.custom" customaction="{30288,1015}" updatebriefing="true" object="$EscapeShip2" comment="escape"/>
+                  </actions>
+                  <delay exact="3s"/>
+                  <actions>
+                    <signal_cue cue="Ch2_Call_EscapeShip2"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_Call_EscapeShip_CreatePosition_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_position name="$WaitposExitTmp" object="player.entity" space="$PrisonCorridor" comment="current playerposition relative-tostation"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Call_EscapeShip2" comment="call escape ship to pipe exit">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_position name="$WaitposExit" object="$PrisonCorridor" space="$PrisonCorridor.sector" x="0.3m" y="-6m" z="-80m" comment="from relative-to-station to sector-coords"/>
+                <cancel_all_orders object="$EscapeShip2"/>
+                <create_order object="$EscapeShip2" id="'MoveWait'" immediate="true">
+                  <param name="destination" value="[$PrisonCorridor.sector, $WaitposExit]"/>
+                  <param name="precise" value="true"/>
+                  <param name="noattackresponse" value="true"/>
+                </create_order>
+              </actions>
+              <cues>
+                <cue name="Ch2_DockingHint" checkinterval="1s">
+                  <conditions>
+                    <check_value value="@player.controlled.isclass.spacesuit" comment="only when in spacesuit"/>
+                    <check_value value="player.ship.distanceto.{$EscapeShip2} lt 20m"/>
+                    <check_value value="$EscapeCommDevice?"/>
+                  </conditions>
+                  <actions>
+                    <show_help line="3020" position="18" duration="15s" log="true"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch2_LowerAirlockPipe_Exit" checkinterval="1s">
+              <conditions>
+                <check_value value="@player.controlled.isclass.spacesuit" comment="only when in spacesuit"/>
+                <check_value value="player.ship.distanceto.{$PrisonMarker_05} lt 5.0"/>
+              </conditions>
+              <delay exact="5s"/>
+              <actions>
+                <set_object_relation_behaviour object="$PrisonStation" disable="false"/>
+                <do_if value="$AxiomFreed?">
+                  <cancel_cue cue="LockedDoorsHandler"/>
+                  <signal_cue cue="Ch2_AxiomSpacesuit_Spawn"/>
+                </do_if>
+                <do_else>
+                  <do_if value="$EscapeCommDevice?">
+                    <signal_cue_instantly cue="Axiom_Comments" param="[[30288144],[30288145]]" comment="(1/2, grumbling, just got left behind by the player)That's one terrific cell neighbour I ended up with. (2/2) ..."/>
+                  </do_if>
+                  <signal_cue cue="Ch2_Failed_AxiomNotFreed"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_Failed_AxiomNotFreed">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Ch2_Alternative"/>
+                <cancel_cue cue="Ch1_Intro" />
+                <cancel_cue cue="Ch3_Raider" />
+                <set_value name="$RaiderHubShip" exact="md.Story_Criminal.Start.$RaiderHubShip"/>
+                <assert value="$RaiderHubShip.exists" text="'RaiderShip should exist?!'"/>
+                <create_order object="$EscapeShip2" id="'MoveDie'" immediate="true" comment="Cleanup the escapeship">
+                  <param name="atstation" value="$RaiderHubShip" comment="also works for ships"/>
+                  <param name="mintime" value="300s" comment="stay alive for specified time"/>
+                </create_order>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_AxiomSpacesuit_Spawn">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- spawn axiom in spacesuit and move towards escapeship -->
+                <!--create_position name="$AxiomSpacesuitPos" object="$PrisonCorridor" space="$PrisonCorridor.sector" x="-0.667482m" y=" -6.166141m" z="-0.043143m" /-->
+                <debug_text text="'Axiom Spacesuit created'" chance="$DebugChance"/>
+                <create_ship name="$AxiomSpacesuit" sector="$EighteenBillionSector" capturable="false" commandeerable="false" missioncue="namespace" macro="ship_par_xs_spacesuit_01_a_macro">
+                  <!--owner exact="faction.scavenger"/-->
+                  <pilot actor="$AxiomActor"/>
+                  <!--position value="$AxiomSpacesuitPos"/-->
+                  <position value="$PrisonMarker_03.position" object="$PrisonModule" />
+                  <rotation yaw="-103deg" pitch="0deg" roll="0deg"/>
+                </create_ship>
+                <disable_collision_response object="$AxiomSpacesuit" comment="avoid bouncing"/>
+                
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$AxiomSpacesuit"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_relation_behaviour object="$AxiomSpacesuit" disable="true" comment="ignore friendly-fire"/>
+
+              </actions>
+              <cues>
+                <cue name="Ch2_AxiomSpacesuit_Order">
+                  <actions>
+                  <debug_text text="'Axiom Spacesuit-order apply'" chance="$DebugChance"/>
+                    <cancel_all_orders object="$AxiomSpacesuit"/>
+                    <create_order id="'MoveGeneric'" object="$AxiomSpacesuit">
+                      <param name="destination" value="$PrisonModule"/>
+                      <param name="position" value="$PrisonMarker_02.position"/>
+                      <param name="precise" value="true"/>
+                      <param name="disablecollisionavoidance" value="true"/>
+                    </create_order>
+                    <create_order id="'MoveGeneric'" object="$AxiomSpacesuit">
+                      <param name="destination" value="$PrisonModule"/>
+                      <param name="position" value="$PrisonMarker_05.position" comment="escape pipe, down below before it goes up (counterpart of marker 25)"/>
+                      <param name="precise" value="true"/>
+                      <param name="disablecollisionavoidance" value="true"/>
+                    </create_order>
+                    <create_order id="'MoveGeneric'" object="$AxiomSpacesuit">
+                      <param name="destination" value="$PrisonModule"/>
+                      <param name="position" value="$PrisonMarker_25.position" comment="escape pipe, at the upper point (counterpart of marker 05)"/>
+                      <param name="precise" value="true"/>
+                      <param name="disablecollisionavoidance" value="true"/>
+                    </create_order>
+
+                    <create_order id="'DockAndWait'" object="$AxiomSpacesuit">
+                      <param name="destination" value="$EscapeShip2"/>
+                      <param name="noattackresponse" value="true"/>
+                      <param name="debugchance" value="0"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_AxiomSpacesuit_Approach" checkinterval="0.5s">
+                  <conditions>
+                    <check_value value="($AxiomSpacesuit.exists) and ($AxiomSpacesuit.sector == $EscapeShip2.sector) and ($AxiomSpacesuit.distanceto.{$EscapeShip2} lt 10m)"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="player.ship == $EscapeShip2" comment="player can't see the dock, keep him updated on what is going on">
+                      <signal_cue_instantly cue="Axiom_Comments" param="[[30288173]]" comment="Approaching the Dock, I'll be with you in a moment"/>
+                    </do_if>
+
+                    <signal_cue cue="Ch2_DismissPilot" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_AxiomSpaceSuit_ForceDock" comment="in case the spaceuit-AI doesn't manage to get near the ship">
+                  <delay exact="60s"/>
+                  <actions>
+                    <debug_text text="'Clear spacesuit orders and skip to misfit'" chance="$DebugChance"/>
+                    <cancel_all_orders object="$AxiomSpacesuit"/>
+                    <signal_objects object="$AxiomSpacesuit" param="'dockat_abort'"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <abort_scripts entity="$AxiomActor"/>
+                    <cancel_cue cue="Ch2_AxiomSpacesuit_Approach"/>
+                    <cancel_cue cue="Ch2_AxiomSpaceSuit_Docked"/>
+                    <signal_cue cue="Ch2_AxiomPilot"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_AxiomSpaceSuit_DockingStarted">
+                  <conditions>
+                    <event_object_docking_started object="$AxiomSpacesuit"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Axiom Docking started'" chance="$DebugChance"/>
+                    <cancel_cue cue="Ch2_AxiomSpaceSuit_ForceDock"/>
+                  </actions>
+                </cue>
+
+
+                <cue name="Ch2_AxiomSpaceSuit_Docked">
+                  <conditions>
+                    <event_object_docked object="$AxiomSpacesuit"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Axiom Docked'" chance="$DebugChance"/>
+                    <signal_cue cue="Ch2_AxiomPilot"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_DismissPilot">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_object_changed_room object="player.entity" room="$EscapeShip2.controlroom"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <remove_help line="3020" comment="Remove docking permission hint."/>
+                    <!-- dismiss old pilot -->
+                    <set_value name="$oldpilot" exact="$EscapeShip2.pilot"/>
+                    <do_if value="$oldpilot.exists">
+                      <create_npc_template object="$EscapeShip2" entity="$oldpilot" role="entityrole.service"/>
+                      <dismiss_control_entity actor="$oldpilot" object="$EscapeShip2" />
+
+                      <!-- Old code line, use in emergency to get the pilot to disappear. -->
+                      <!--<signal_objects object="$oldpilot" param="'npc_despawn'"/>-->
+
+                      <!-- Actual code, works except that the pilot doesn't walk to the transporter room. But the transporter room still closes as if he walked in. -->
+                      <find_npc_waypoint name="$DespawnSlot" object="$EscapeShip2" tags="tag.npctransport"/>
+                      <do_if value="$DespawnSlot">
+                        <signal_objects object="$oldpilot" param="'npc_despawn'" param2="table[$slot = $DespawnSlot]"/>
+                      </do_if>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Ch2_AxiomPilot">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Ch2_DismissPilot" check="false"/>
+                    <debug_text text="'Axiom piloting Misfit'" chance="$DebugChance"/>
+
+                    <!-- destroy the spacesuit, this closes the dock -->
+                    <do_if value="$AxiomSpacesuit.exists" comment="doesn't exist if we force this cue">
+                      <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                        <param name="Object" value="$AxiomSpacesuit"/>
+                        <param name="RequesterCue" value="namespace"/>
+                        <param name="DebugChance" value="$DebugChance"/>
+                      </run_actions>
+                      <remove_actor_from_room actor="$AxiomActor"/>
+                      <destroy_object object="$AxiomSpacesuit" explosion="false"/>
+                    </do_if>
+                  </actions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <!-- Axiom onboard, what about player? -->
+                    <do_if value="not (player.ship == $EscapeShip2)">
+                      <signal_cue_instantly cue="Axiom_Comments" param="[[30288172]]" comment="what are you waiting for?"/>
+                    </do_if>
+                    <!-- axiom takes over -->
+                    <assign_control_entity object="$EscapeShip2" actor="$AxiomActor" post="controlpost.aipilot" transfer="false" init="false"/>
+                    <find_npc_waypoint name="$EscapeShip2CabinSlot" object="$EscapeShip2" tags="tag.npctransport"/>
+                    <do_if value="$EscapeShip2CabinSlot">
+                      <set_entity_traits entity="$AxiomActor" hidden="true"/>
+                      <add_actor_to_room actor="$AxiomActor" slot="$EscapeShip2CabinSlot"/>
+                    </do_if>
+                    <do_else>
+                      <add_actor_to_post_location actor="$AxiomActor"/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            
+            <cue name="Ch2_OnBoard">
+              <conditions>
+                <event_object_changed_room object="player.entity" room="$EscapeShip2.controlroom"/>
+              </conditions>
+              <actions>
+                <set_value name="$ObjectiveStep" operation="add"/>
+                <do_if value="$AxiomActor.room != $EscapeShip2.controlroom" comment="Axiom not yet onboard?">
+                  <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.custom" customaction="{30288,1017}" updatebriefing="true" object="$EscapeShip2" comment="wait for Axiom"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_AxiomPlayerReady" checkinterval="1s">
+              <conditions>
+                <check_value value="(player.ship == $EscapeShip2) and ($AxiomActor.ship == $EscapeShip2)"/>
+              </conditions>
+              <delay exact="3s"/>
+              <actions>
+                <unlock_achievement name="TOA_PRISON_1" />
+                <signal_cue cue="Ch3_Raider"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch2_Alternative" comment="hardcore/left axiom behind">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <remove_from_list name="md.$MissionDND" exact="Setup"/>
+            <unlock_achievement name="TOA_PRISON_2" comment="Unlock early, creative player might find another way besides stealing the ship" />
+
+            <set_value name="$StealShipMacro" exact="macro.ship_tel_s_fighter_02_b_macro"/>
+            <find_dockingbay name="this.$PrisonDock" object="$PrisonStation">
+              <match_dock storage="true" size="$StealShipMacro.docksize"/>
+            </find_dockingbay>
+            <do_if value="not this.$PrisonDock.exists" comment="fallback">
+              <find_object_component name="this.$PrisonDock" object="$PrisonStation" required="true">
+                <match_dock storage="true" size="$StealShipMacro.docksize"/>
+              </find_object_component>
+            </do_if>
+            <create_ship name="$StealShip" macro="$StealShipMacro" dock="this.$PrisonDock">
+              <owner exact="faction.civilian" overridenpc="true" />
+              <loadout ref="story_buzzard_prison_gamestart"/>
+              <paint ware="ware.paintmod_0045"/> <!-- Ministry Camo 1 / -->
+            </create_ship>
+          </actions>
+          <cues>
+
+            <cue name="Ch2_AxiomSad" instantiate="true">
+              <conditions>
+                <event_conversation_started actor="$AxiomActor"/>
+              </conditions>
+              <actions>
+                <speak actor="$AxiomActor">
+                  <text line="30288120" comment="Leaving so soon? And I thought you'd share your good fortune with a fellow inmate"/>
+                </speak>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ResponseActor">
+              <actions>
+                <create_cue_actor name="$ResponseActor" cue="Ch2_Alternative">
+                  <select race="race.teladi" />
+                  <page exact="10501"/>
+                  <owner exact="faction.ministry"/>
+                  <skills>
+                    <skill type="management"  exact="7"/>
+                    <skill type="morale"      exact="4"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="5"/>
+                    <skill type="boarding"    exact="7"/>
+                  </skills>
+                </create_cue_actor>
+              </actions>
+            </cue>
+            <cue name="Ch2_ShipToSteal_Guidance_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$MissionCue" exact="this"/>
+                <create_mission cue="$MissionCue" name="'Story Debug StealShip'" description="'Set Guidance to the StealShip in Stranded.'"
+                                type="missiontype.plot" group="missiongroup.gs_pirate2" faction="faction.civilian"  difficulty="level.trivial" abortable="false" activate="false">
+                  <briefing>
+                    <objective step="1" action="objective.flyto" object="$StealShip"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+            </cue>
+            <cue name="Ch2_ShipToSteal_Recall" comment="needs to be outside the ch1-root-cue, otherwise recall would stop when ch1 is cancelled">
+              <actions>
+                <do_if value="$StealShip.isoperational and $StealShip.dock and $StealShip.dock.isstorage">
+                  <request_retrieval queuedresult="$QueuedResult1" grantedresult="$GrantedResult1" ship="$StealShip" highpriority="false" allowplayeronly="true" />
+                  <debug_text text="'request_retrieval for %s (%s) request=%s granted=%s'.[$StealShip, $StealShip.name, $QueuedResult1, $GrantedResult1]" chance="$DebugChance"/>
+                </do_if>
+              </actions>
+              <delay exact="37s"/>
+              <actions>
+                <reset_cue cue="Ch2_ShipToSteal_Recall" comment="periodically re-request, to avoid ship being put back in storage permanently, if player takes long"/>
+              </actions>
+            </cue>
+            <cue name="Ch2_ShipToSteal_Enter">
+              <conditions>
+                <event_object_changed_room object="player.entity" room="$StealShip.controlroom"/>
+              </conditions>
+              <actions>
+                <set_owner object="$StealShip" faction="faction.player"/>
+                <cancel_cue cue="Ch2_ShipToSteal_Cleanup"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch2_ShipToSteal_Undock">
+              <conditions>
+                <event_object_undocked object="$StealShip"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <speak actor="$ResponseActor" broadcast="true" backgroundcomm="true">
+                  <text line="1000051" comment="Thief! Stop them!"/>
+                  <text line="1000053" comment="Don't let them get away!"/>
+                </speak>
+              </actions>
+            </cue>
+            
+            <cue name="Ch2_ShipToSteal_Cleanup" comment="limit window of opportunity">
+              <delay exact="60min"/>
+              <actions>
+                <cancel_cue cue="Ch2_ShipToSteal_Enter"/>
+                <destroy_object object="$StealShip"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ch3_Raider">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$RaiderHubShip" exact="md.Story_Criminal.Start.$RaiderHubShip"/>
+            <assert value="$RaiderHubShip.exists" text="'RaiderShip should exist?!'"/>
+            <cancel_cue cue="Ch1_Intro"/>
+            <set_value name="$ObjectiveStep" operation="add"/>
+            <set_objective cue="$MissionCue" step="$ObjectiveStep" action="objective.custom" customaction="{30288,1018}" updatebriefing="true" comment="Wait for arrival at ..."/>
+          </actions>
+          <cues>
+
+            <library name="Ch3_Axiom__Conversation_DefaultChoices">
+              <actions>
+                <add_player_choice text="{30288,1027}" section="axiom_main" choiceparam="'choice_destination'" />
+                <do_if value="$EscapeMaestroMentioned?">
+                  <add_player_choice text="{30288,1029}" section="axiom_main" choiceparam="'choice_maestro'" />
+                </do_if>
+                <add_player_choice text="{30288,1028}" section="axiom_main" choiceparam="'leave'" position="bottom_right" highlighted="true"/>
+              </actions>
+            </library>
+
+            <cue name="Ch3_Axiom_Conversation_Started" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_conversation_started actor="$AxiomActor"/>
+                  <event_conversation_next_section actor="$AxiomActor" section="axiom_main"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'ConvStarted event=%s e.p=%s e.p2=%s '.[event.name, event.param, event.param2]" chance="0"/>
+
+                <do_if value="event.param == 'axiom_main' or event.param == 'default'">
+                  <debug_text text="'axiom_main/default'" chance="0"/>
+                  <do_if value="event.param2 == 'leave'">
+                    <!--add_npc_line speaker="$AxiomActor" line="30288xxx" hidechoices="true" comment="goodbye"/-->
+                  </do_if>
+                  <do_elseif value="event.param2 == 'choice_maestro'">
+                    <add_npc_line speaker="$AxiomActor" line="30288184" hidechoices="true"/>
+                    <include_actions ref="Ch3_Axiom__Conversation_DefaultChoices"/>
+                  </do_elseif>
+                  <do_elseif value="event.param2 == 'choice_destination'">
+                    <add_npc_line speaker="$AxiomActor" line="30288185" hidechoices="true"/>
+                    <add_npc_line speaker="$AxiomActor" line="30288186" hidechoices="true"/>
+                    <include_actions ref="Ch3_Axiom__Conversation_DefaultChoices"/>
+                  </do_elseif>
+                  <do_else>
+                    <include_actions ref="Ch3_Axiom__Conversation_DefaultChoices"/>
+                  </do_else>
+                </do_if>
+                <do_elseif value="event.name == 'event_conversation_returned_to_section'">
+                  <debug_text text="'return2section'" chance="0"/>
+                  <include_actions ref="Ch3_Axiom__Conversation_DefaultChoices"/>
+                </do_elseif>
+                <do_else>
+                  <debug_text text="'fallthrough 3'" chance="0"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="Ch3_Axiom_Conversation_Finished">
+                  <conditions>
+                    <event_conversation_finished actor="$AxiomActor"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'ConvFinished event=%s e.p=%s e.p2=%s '.[event.name, event.param, event.param2]" chance="0"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            
+            <cue name="Ch3_FlyToRaider">
+              <actions>
+                <!--set_value name="player.entity.$x4ep1_teleporter_malfunctioning" exact="true"/-->
+                <speak actor="$AxiomActor" line="30288180"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <create_position name="$RaiderPos" object="$RaiderHubShip" space="$RaiderHubShip.sector"/>
+                <cancel_all_orders object="$EscapeShip2" comment="cancels the 'MoveWait' order"/>
+                <!-- This order would work without noattackresponce (AI would return to DockAndWait after attacking), but we want to guarantee the time the 
+                    player is out of control is as short as possible, so ignore attacks and get to the dock-destination asap" -->
+                <create_order id="'DockAndWait'" object="$EscapeShip2" immediate="true">
+                  <param name="destination" value="$RaiderHubShip"/>
+                  <param name="noattackresponse" value="true"/>
+                  <param name="debugchance" value="0"/>
+                </create_order>
+                <signal_cue cue="Ch3_TravelChatter"/>
+              </actions>
+            </cue>
+            
+            <cue name="Ch3_TravelChatter">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="20s"/>
+              <actions>
+                <do_if value="player.ship == $AxiomActor.ship">
+                  <speak actor="$AxiomActor">
+                    <text line="30288181"/>
+                    <text line="30288182" delay="2s"/>
+                    <text line="30288183" delay="2s"/>
+                  </speak>
+                  <set_value name="$EscapeMaestroMentioned" exact="true"/>
+                </do_if>
+              </actions>
+            </cue>
+            
+            <cue name="Ch3_TransporterMenu">
+              <conditions>
+                <event_ui_triggered screen="'TransporterMenu'" control="''"/>
+              </conditions>
+              <actions>
+                <speak actor="$AxiomActor">
+                  <text line="30288175"/>
+                  <text line="30288176"/>
+                </speak>
+              </actions>
+              <cues>
+
+                <!--cue name="Ch3_UserQuestionMenu_Selected" instantiate="true">
+                  <conditions>
+                    <event_ui_triggered screen="'UserQuestionMenu'" control="''"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="$AxiomActor" line="30288174"/>
+                  </actions>
+                </cue-->
+
+                <cue name="Ch3_EnteredSpacesuit">
+                  <conditions>
+                    <event_object_changed_room object="player.entity"/>
+                    <check_value value="player.ship.isclass.spacesuit"/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <run_actions ref="md.LIB_Dialog.Speak_Actor_Run">
+                      <param name="MissionCue"        value="$MissionCue"/>
+                      <param name="Actor"             value="$AxiomActor"/>
+                      <param name="Lines"             value="[[30288178],[30288179]]" comment="good luck in your spacesuit"/>
+                    </run_actions>
+                  </actions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <set_value name="$EscapeSpacesuit" exact="true"/>
+                    <remove_value name="md.$GlobalHintsDND"/>
+                    <remove_from_list name="md.$MissionDND" exact="Setup"/>
+                    <write_to_logbook category="missions" faction="faction.player" title="{30288,1031}" text="{30288,1033}"/>
+                    <remove_mission cue="$MissionCue" type="completed" />
+                    <cancel_cue cue="Ch3_Raider"/>
+                  </actions>
+                </cue>
+                
+              </cues>
+            </cue>
+            
+            
+            <cue name="Ch3_NearGateChatter" checkinterval="4s">
+              <conditions>
+                <check_value value="($EscapeShip2.sector == $Gate18toS1a.sector) and ($EscapeShip2.distanceto.{$Gate18toS1a} lt 30km)"/>
+              </conditions>
+              <actions>
+                <do_if value="player.ship == $AxiomActor.ship">
+                  <speak actor="$AxiomActor" line="30288187"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Ch3_NearRaiderChatter" checkinterval="4s">
+              <conditions>
+                <check_value value="($EscapeShip2.sector == $RaiderHubShip.sector) and ($RaiderHubShip.distanceto.{$EscapeShip2} lt 6km)"/>
+              </conditions>
+              <actions>
+                <do_if value="player.ship == $AxiomActor.ship">
+                  <speak actor="$AxiomActor" line="30288188"/>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Ch3_NearRaiderAdditionalChatter" checkinterval="2s">
+                  <conditions>
+                    <check_value value="($EscapeShip2.sector == $RaiderHubShip.sector) and ($RaiderHubShip.distanceto.{$EscapeShip2} lt 1km)"/>
+                  </conditions>
+                  <actions>
+                      <speak actor="$AxiomActor" line="30288189"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch3_DockedAtRaider">
+              <conditions>
+                <event_object_docked_at container="$RaiderHubShip"/>
+                <check_value value="event.param == $EscapeShip2"/>
+              </conditions>
+              <actions>
+                <set_value name="$AxiomDock" exact="$EscapeShip2.dock"/>
+                <!--set_value name="player.entity.$x4ep1_teleporter_malfunctioning" exact="false"/-->
+                <cancel_cue cue="Ch3_TransporterMenu" comment="we arrived, warning about spacesuit not needed anymore"/>
+                <signal_cue cue="Ch3_TransferShip_Dialog"/>
+              </actions>
+              <delay exact="6s"/>
+              <actions>
+                <signal_cue cue="Ch3_Axiom_Unboard"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch3_TransferShip_Dialog">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <speak actor="$AxiomActor">
+                  <text line="30288190"/>
+                  <text line="30288191"/>
+                  <text line="30288192"/>
+                  <text line="30288193"/>
+                </speak>
+              </actions>
+            </cue>
+            
+            <cue name="Ch3_Axiom_Unboard">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                  <event_speak_finished actor="$AxiomActor" line="30288190" comment="reliable"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <create_position name="$AxiomPos" x="2.05" z="18.58"/>
+                <create_rotation name="$AxiomRot" yaw="180.0deg"/>
+                <dismiss_control_entity actor="$AxiomActor" object="$EscapeShip2" comment="avoid player getting control over Axiom, when ship is transferred" />
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $AxiomActor,
+                                                                                              table[
+                                                                                              $requestercue = namespace,
+                                                                                              $location = $AxiomDock,
+                                                                                              $priority = 100,
+                                                                                              $rotation = $AxiomRot,
+                                                                                              $position = $AxiomPos,
+                                                                                              $debugchance = $DebugChance,
+                                                                                              $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                              ]"/>
+              </actions>
+            </cue>
+  
+            <cue name="Ch3_Axiom_Unboarded" version="2">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                  <event_speak_finished actor="$AxiomActor" line="30288190"/>
+                </check_any>
+              </conditions>
+              <delay exact="1.5s"/>
+              <actions>
+                <!-- Make sure Axiom is not onboard, before transferring ownership -->
+                <speak actor="$AxiomActor">
+                  <text line="30288195"/>
+                </speak>
+                <set_owner object="$EscapeShip2" faction="faction.player"/>
+                <set_known object="$EscapeShip2.cluster" known="true" comment="otherwise you don't get map uncoverage, until you leave the sector"/>
+                <set_known object="$EscapeShip2.sector" known="true" comment="otherwise you don't get map uncoverage, until you leave the sector"/>
+                <set_object_min_hull object="$EscapeShip2" exact="0"/>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="$EscapeShip2.exists">
+                  <set_object_min_hull object="$EscapeShip2" exact="0"/>
+                </do_if>
+              </patch>
+              <patch sinceversion="2" state="cancelled">
+                <do_if value="$EscapeShip2.exists">
+                  <set_object_min_hull object="$EscapeShip2" exact="0"/>
+                </do_if>
+              </patch>
+            </cue>
+
+            <cue name="Ch3_Complete">
+              <conditions>
+                <event_speak_finished actor="$AxiomActor" line="30288195"/>
+              </conditions>
+              <actions>
+                <remove_from_list name="md.$MissionDND" exact="Setup"/>
+                <create_position name="$AxiomPos" x="-2.55" z="-7.126"/>
+                <create_rotation name="$AxiomRot" yaw="145.0deg"/>
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $AxiomActor,
+                                                                                              table[
+                                                                                              $requestercue = namespace,
+                                                                                              $location = $RaiderHubShip.controlroom,
+                                                                                              $priority = 100,
+                                                                                              $rotation = rotation.[2.45, 0deg, 0deg],
+                                                                                              $position = position.[-4.26881, -1.60791, 7.954296],
+                                                                                              $debugchance = $DebugChance,
+                                                                                              $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                              ]"/>
+
+                <remove_value name="md.$GlobalHintsDND"/>
+                <remove_mission cue="$MissionCue" type="completed"/>
+                <write_to_logbook category="missions" faction="faction.player" title="{30288,1031}" text="{30288,1032}"/>
+                <signal_cue cue="md.Story_Criminal.Ch1_1_Briefing" comment="gamestart leads directly into the criminal story"/>
+                <cancel_cue cue="Ch3_Raider" />
+              </actions>
+            </cue>
+          
+          </cues>
+        </cue>
+          
+        <cue name="Prison_DEBUG">
+          <cues>
+
+            <cue name="TriggerVentCover">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.vent_cover_01" trigger="activate"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.vent_cover_01" trigger="deactivate"/>
+              </actions>
+            </cue>
+
+            <cue name="TriggerCellDoorAxiom">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.door_01" trigger="activate"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.door_01" trigger="deactivate"/>
+              </actions>
+            </cue>
+
+            <cue name="TriggerCellDoorPlayer">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.door_02" trigger="activate"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <trigger_animation object="$PrisonRoom" group="tag.door_02" trigger="deactivate"/>
+              </actions>
+            </cue>
+            
+          <cue name="TriggerCellDoorOtherPrisoner">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonRoom3" group="tag.door_03" trigger="activate"/>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <trigger_animation object="$PrisonRoom3" group="tag.door_03" trigger="deactivate"/>
+              </actions>
+            </cue>              
+
+            <cue name="PowerSwitchToggle" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$PrisonSwitchCellPower.hull lt 50">
+                  <set_object_hull object="$PrisonSwitchCellPower" exact="100"/>
+                </do_if>
+                <do_else>
+                  <set_object_hull object="$PrisonSwitchCellPower" exact="1"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="AirlockSwitchToggle" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$PrisonSwitchLowerAirlock.hull lt 50">
+                  <set_object_hull object="$PrisonSwitchLowerAirlock" exact="100"/>
+                </do_if>
+                <do_else>
+                  <set_object_hull object="$PrisonSwitchLowerAirlock" exact="1"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="LowerAirlockClose" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonCorridor" group="tag.lowerairlock" trigger="activate" comment="airlock closes"/>
+              </actions>
+            </cue>
+
+            <cue name="LowerAirlockOpen" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonCorridor" group="tag.lowerairlock" trigger="deactivate" comment="airlock opens"/>
+              </actions>
+            </cue>
+
+            <cue name="FindWaypoints" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <find_npc_waypoint name="$PrisonRoomWaypoints" object="$PrisonRoom" multiple="true"/>
+                <debug_text text="'PrisonRoom-Waypoints: ' + $PrisonRoomWaypoints" chance="$DebugChance"/>
+                <find_npc_waypoint name="$PrisonCorridorWaypoints" object="$PrisonCorridor" multiple="true"/>
+                <debug_text text="'PrisonCorridor-Waypoints: ' + $PrisonCorridorWaypoints" chance="$DebugChance"/>
+              </actions>
+            </cue>
+            
+            <cue name="UpperLockOpen" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonCorridor" group="tag.upperlock" trigger="deactivate" comment="open upper large airlock"/>
+              </actions>
+            </cue>
+            
+            <cue name="UpperLockClose" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <trigger_animation object="$PrisonCorridor" group="tag.upperlock" trigger="activate" comment="close upper large airlock"/>
+              </actions>
+            </cue>
+
+            <cue name="PrisonFanToggle" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$PrisonEmitter.isactive">
+                  <set_object_active object="$PrisonEmitter" activate="false"/>
+                </do_if>
+                <do_else>
+                  <set_object_active object="$PrisonEmitter" activate="true"/>
+                </do_else>
+                <debug_text text="'physics emitter=`%s` active=%s'.[$PrisonEmitter, $PrisonEmitter.isactive]" chance="0"/>
+              </actions>
+            </cue>
+
+            <cue name="PrisonFanTest">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Ch6_PrisonFan_Control">
+                  <actions>
+                    <set_object_active object="$PrisonEmitter" activate="false" comment="No push effect"/>
+                    <debug_text text="'Fan disabled'" chance="$DebugChance"/>
+                  </actions>
+                  <delay exact="10s"/>
+                  <actions>
+                    <set_object_active object="$PrisonEmitter" activate="true" comment="No push effect"/>
+                    <debug_text text="'Fan enabled'" chance="$DebugChance"/>
+                  </actions>
+                  <delay exact="6s"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

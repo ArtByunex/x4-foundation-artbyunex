@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Hub Story Intro Cutscene -->
+  <director key="scenario_hub_intro_cutscene">
+    <params>
+      <param name="target_player_tradeship"  object="true" />
+      <param name="target_player_NPC"  object="true" />
+      <param name="target_lissa"  object="true" />
+      <param name="target_NPC_trader"  object="true" />
+      <param name="target_pirateship_1"  object="true" />
+      <param name="target_pirateship_2"  object="true" />
+      <param name="target_pirateship_3"  object="true" />
+      <param name="target_missileobject"  object="true" />
+      <param name="target_missileobject_2"  object="true" />
+      <param name="player_cockpit_room" object="true" />
+      <param name="station_m_dock" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="station_scenezone" zone="@auto:station" />
+    <environment_implicit name="fight_scenezone" zone="@auto:target_pirateship_1" />
+    <object_group name="target_group">
+      <reference object="target_player_tradeship" />
+      <reference object="target_player_NPC" />
+      <reference object="target_lissa" />
+      <reference object="target_NPC_trader" />
+      <reference object="target_pirateship_1" />
+      <reference object="target_pirateship_2" />
+      <reference object="target_missileship" />
+      <reference object="target_missileobject" />
+      <reference object="player_cockpit_room" />
+      <reference object="station_m_dock" />
+      <reference object="station" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0" endevent="onevent:TriggerSequence02Start">
+        
+        <!-- Shot 1: Orbiting the station -->
+        <shot name="OrbitStationShot1" environment="station_scenezone" duration="10400">
+          <camera_orbit reference="station" orient_to="ecliptic" cycle="none" z="0" y="5">
+            <begin angle="210">
+              <distance>
+                <value exact="5200"/>
+              </distance>
+              <elevation>
+                <value exact="130"/>
+              </elevation>
+            </begin>
+            <end angle="221" time="9500">
+              <distance>
+                <value exact="4800"/>
+              </distance>
+              <elevation>
+                <value exact="150"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+
+        <!-- Shot 2: Moving from Big Trader to Player Ship -->
+        <shot name="FlyFromTraderToPlayerShipShot2" environment="station_scenezone" duration="26000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_NPC_trader" distance="86" flyto_reference="target_player_NPC" flyto_distance="124" interpolation="smooth" time_firstobject="7500" time_fly="4500" cycle="none"
+                            orbit1_yaw_start="-130" orbit1_yaw_end="-155" orbit1_elevation="-15"
+                            orbit2_yaw_start="55" orbit2_yaw_end="50" orbit2_pitch="0.6"/>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        
+        <shot name="CloseupPlayerCharacterShot11" environment="station_scenezone" duration="3000">
+          <camera>
+            <position>
+              <reference object="target_player_NPC" x="0.9" z="-2.2" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_NPC" head="true" z="3"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <!-- Triggered after 302930104, Shot 3: Showing Player sitting in cockpit -->
+        <shot name="CloseupPlayerCharacterShot3" environment="station_scenezone" duration="4500">
+          <camera>
+            <position>
+              <reference object="target_player_NPC" z="1.2" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_NPC" head="true"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        
+        <!-- Shot 4: From the dock to the Player Ship, trading  -->
+        <shot name="TrackingPlayerTraderShot4" environment="station_scenezone" duration="onevent:TriggerSequence02Done">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="station" x="73.72802" y="59.2220" z="-1452.88867"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="station" x="19.951950" y="89.57101" z="-1503.5512"/>
+                </keyframe>
+                <keyframe timestamp="12000" interpolation="linear">
+                  <reference object="station" x="19.951950" y="89.57101" z="-1503.5512"/>
+                </keyframe>
+                <keyframe timestamp="18000" interpolation="linear">
+                  <reference object="station" x="19.951950" y="78.8" z="-1493.5512"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        
+        <!-- Shot 5: Trader in open space with pirates, fighting -->
+        <shot name="PiratePursuitShot5" environment="fight_scenezone" duration="12000">
+          <camera_flyfromto reference="target_player_tradeship" distance="100" flyto_reference="target_pirateship_1" flyto_distance="104" interpolation="smooth" time_firstobject="6000" time_fly="3000" orient_to="object" cycle="none"
+                            orbit1_yaw_start="90" orbit1_yaw_end="87" orbit1_elevation="-6"
+                            orbit2_yaw_start="240" orbit2_yaw_end="270" orbit2_pitch="-3"/>
+        </shot>
+
+        <!-- Shot 6: Pirate Ship 1 being destroyed -->
+        <shot name="TrackingFromGunToPirateShipShot6" environment="fight_scenezone" duration="onevent:TriggerSequence03Done">
+          <camera>
+            <position>
+              <reference object="target_player_tradeship" x="-21.92" y="-3.29" z="-51.596"/>
+            </position>
+            <lookdirection>
+              <reference object="target_pirateship_2" x="0" y="0" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+      </sequence>
+
+      <sequence name="Sequence04" start="onevent:TriggerSequence04Start">
+
+        <!-- Shot 7: Pirate Ship 2 shooting -->
+        <shot name="TrackingFromPirateTowardsTraderShot07" environment="fight_scenezone" duration="5000">
+          <camera>
+            <position>
+              <reference object="target_pirateship_1" x="-5.99" y="-0.48" z="-2.87"/>
+            </position>
+            <lookdirection>
+              <reference object="target_pirateship_1" x="0" y="0" z="800"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        <!-- Shot 8: Pirate Ship 2 being destroyed -->
+        <shot name="ShowingTraderAndPirateShot08" environment="fight_scenezone" duration="onevent:TriggerSequence04Done">
+          <camera_panto reference="target_player_tradeship" panto_reference="target_pirateship_1" time_firstobject="1500" time_pan="2000" interpolation="smooth" orient_to="object"/>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence05" start="onevent:TriggerSequence05Start">
+        <!--Shot 9: Close Up of Launching a torpedo-->
+        <shot name="DetailOfMissileShootingShot09" environment="fight_scenezone" duration="3000">
+          <camera>
+            <position>
+              <reference object="target_missileship" x="-3.82" y="1.21" z="21.11"/>
+            </position>
+            <lookdirection>
+              <reference object="target_missileship" x="0.69" y="-1.09" z="9.77"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="DetailOfMissileShootingShot10" environment="fight_scenezone" duration="2500">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_missileobject" x="0" y="0.2" z="0"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_missileobject" x="0" y="0.8" z="-6.8"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+        <!--Shot 10: Missile impact with player Trader half-exploding (from within or into copckpit?)-->
+        <shot name="MissileImpactShot10" environment="fight_scenezone" duration="onevent:TriggerSequence05Done">
+          <camera>
+            <position>
+              <reference object="target_player_tradeship" x="6.9246" y="1.2724" z="77.296"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_tradeship" x="22.22" y="1.064" z="-25.649"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence06" start="onevent:TriggerSequence06Start">
+        <!-- Shot 11: Cockpit with Lissa appearing -->
+        <shot name="BridgeConversationShot11" environment="fight_scenezone" duration="8500">
+          <camera_orbit reference="player_cockpit_room" orient_to="ecliptic" cycle="none" z="0" y="0.6">
+            <begin angle="60">
+              <distance>
+                <value exact="2.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.3"/>
+              </elevation>
+            </begin>
+            <end angle="117" time="8000">
+              <distance>
+                <value exact="8.4"/>
+              </distance>
+              <elevation>
+                <value exact="0.5"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+        <!-- Shot 12: Torpedo supsended in flight, player trader standing still (but with engine burn enabled) -->
+        <shot name="MissileHeadingTowardsShipShot12" environment="fight_scenezone" duration="5000">
+          <camera>
+            <position>
+              <reference object="target_missileobject_2" x="0.68" y="0.15" z="-1.55"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_NPC" x="0" y="0" z="-16"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        <!-- Shot 12b: Showing ship suspended in flight -->
+        <shot name="FromTradeshipTowardsEnemyShipShot13" environment="fight_scenezone" duration="onevent:TriggerSequence06Done">
+          <camera>
+            <position>
+              <reference object="target_player_tradeship" x="83.79" y="25.22" z="-138.64"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_tradeship" x="52.56" y="10.03" z="-40.2"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence07" start="onevent:TriggerSequence07Start">
+        <!-- Shot 14: Back to Lissa -->
+        <shot name="ShowingLissaActorShot14" environment="fight_scenezone" duration="onevent:TriggerSequence07Done">
+          <camera>
+            <position>
+              <reference object="target_lissa" x="0" y="1.4" z="1.5"/>
+            </position>
+            <lookdirection>
+              <reference object="target_lissa" x="0" y="1.5" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence08" start="onevent:TriggerSequence08Start">
+        <!-- Shot 15: Showing player in cockpit -->
+        <shot name="ShowingLissaActorShot15" environment="fight_scenezone" duration="onevent:TriggerSequence08Done">
+          <camera>
+            <position>
+              <reference object="target_player_NPC" x="0.2" z="1.6" y=".0.1" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="target_lissa" x="-0.2" y="1.6" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence09" start="onevent:TriggerSequence09Start">
+        <!-- Shot 16: Showing ship being destroyed -->
+        <shot name="OrbitTradeShip16" environment="fight_scenezone" duration="12400">
+          <camera_orbit reference="target_player_tradeship" orient_to="ecliptic" cycle="none" z="0" y="0">
+            <begin angle="10">
+              <distance>
+                <value exact="1300"/>
+              </distance>
+              <elevation>
+                <value exact="5"/>
+              </elevation>
+            </begin>
+            <end angle="30" time="8000">
+              <distance>
+                <value exact="1000"/>
+              </distance>
+              <elevation>
+                <value exact="5"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

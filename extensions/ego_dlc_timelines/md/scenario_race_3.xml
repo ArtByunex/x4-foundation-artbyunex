@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Race_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Philipp Geyer"/>
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Timelines_Scenario_Race_3" namespace="this">
+      <conditions>
+        <event_game_started/>
+        <check_value value="player.module == 'scenario_race_3' or player.module == 'scenario_race_3b'"/>
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <set_value name="$CheckpointLeniency" exact="[100, 80,
+                                                      100, 200,
+                                                      100,
+                                                      20, 10, 10, 10,
+                                                      100, 200, 100, 50]"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <include_actions ref="md.Scenario_Race_LIB.Setup_Racing_Data" />
+
+        <set_value name="$Race_Data.$MaxTime"             exact="240" />
+        <set_value name="$Race_Data.$MaxTimeScore"        exact="200"/>
+        <set_value name="$Race_Data.$MaxLapTime"          exact="60" />
+        <set_value name="$Race_Data.$MaxLapTimeScore"     exact="150" />
+        <set_value name="$Race_Data.$FirstScore"          exact="10000"/>
+        <set_value name="$Race_Data.$SecondScore"         exact="5000"/>
+        <set_value name="$Race_Data.$ThirdScore"          exact="2500"/>
+        
+        <set_value name="$OpponentData.{6}" exact="table[$shipmacro = macro.ship_gen_s_racer_01_a_macro,
+                                                   $shiploadout = 'scenario_race_dart',
+                                                   $shippaintmod = ware.paintmod_0001,
+                                                   $shipfaction = faction.argon,
+                                                   $pilotrating=16,
+                                                   $pilotmacro=macro.character_timelines_racer_7_macro]"/>
+
+
+        <append_list_elements name="$AnnouncerBanter" other="[306200410, 306200411, 306200412]"/>
+        <shuffle_list list="$AnnouncerBanter"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="md.Scenario_Race_LIB.Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Race_LIB.Setup_Ships" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Race_LIB.Setup_Checkpoints" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Race_LIB.Setup_Level" chance="if $HasError then 0 else 100"/>
+
+                <run_actions ref="md.Scenario_Race_LIB.Setup_Character_Announcer" result="$AnnouncerActor"/>
+
+                <!-- NPC Usecase Setup -->
+                <do_if value="not $MissionActors?">
+                  <set_value name="$MissionActors" exact="table[]"/>
+                </do_if>
+                <set_value name="$MissionActors.$AnnouncerActor" exact="table[
+                                                                        $entity = $AnnouncerActor,
+                                                                        $monitor = table[
+                                                                          $cutscenekey = 'ShowNPCFace',
+                                                                          $caption = true
+                                                                        ]
+                                                                        ]"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+
+          <!-- TODO: Probably do a cutscene fly through the level, rather than wait an arbitrary time here -->
+          <delay exact="1ms"/>
+          <actions>
+            <play_music music="'music_soundtrack_timelines_race_intro'" loop="true"/>
+            <signal_cue cue="Intro_Cutscene"/>
+          </actions>
+          <cues>
+
+            <cue name="Intro_Cutscene">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+
+              <actions>
+                <signal_cue_instantly cue="Call_Announcer_Intro"/>
+
+
+                <set_value name="$IntroCutscene" exact="[table[$type='orbit',
+                                                               $target=$Checkpoints.{12},
+                                                               $angle=[180,30],
+                                                               $distance=[1000,1000],
+                                                               $final=0],
+                                                         table[$type='orbit',
+                                                               $target=$Checkpoints.{5},
+                                                               $angle=[-100,80],
+                                                               $distance=[1000,1000],
+                                                               $final=0],
+                                                         table[$type='orbit',
+                                                               $target=player.ship,
+                                                               $angle=[0,-120],
+                                                               $distance=[1000,1000],
+                                                               $final=0],
+                                                         table[$type='orbit',
+                                                               $target=$Checkpoints.{9},
+                                                               $angle=[0,120],
+                                                               $distance=[1000,1000],
+                                                               $final=0],
+                                                         table[$type='orbit',
+                                                               $target=$Race_Data.$Opponents.{5},
+                                                               $angle=[0,-120],
+                                                               $distance=[80,80],
+                                                               $final=0],
+                                                         table[$type='orbit',
+                                                               $target=$Checkpoints.{2},
+                                                               $angle=[0,-120],
+                                                               $distance=[1000,1000],
+                                                               $final=0]]"/>
+
+
+                <signal_cue cue="Enqueue_Intro_Shot"/>
+              </actions>
+            </cue>
+
+            <cue name="Calls">
+              <cues>
+                <cue name="AbortCallbackCue">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+
+                <cue name="Enqueue_Intro_Shot" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$IntroCutscene.{1}.$type == 'orbit'">
+                      <play_cutscene cinematicmode="true" result="$Race_IntroCutscene" key="'scenario_race_intro_orbit'">
+                        <param name="anchor"        object="player.zone"/>
+                        <param name="target"        object="$IntroCutscene.{1}.$target"/>
+                        <param name="beginangle"    number="$IntroCutscene.{1}.$angle.{1}"/>
+                        <param name="endangle"      number="$IntroCutscene.{1}.$angle.{2}"/>
+                        <param name="begindistance" number="$IntroCutscene.{1}.$distance.{1}"/>
+                        <param name="enddistance"   number="$IntroCutscene.{1}.$distance.{2}"/>
+                      </play_cutscene>
+                    </do_if>
+                    <do_elseif value="$IntroCutscene.{1}.$type == 'zoom'">
+                      <play_cutscene cinematicmode="true" result="$Race_IntroCutscene" key="'scenario_race_intro_zoom'">
+                        <param name="anchor"        object="player.zone"/>
+                        <param name="from_x"        number="$IntroCutscene.{1}.$from.position.x"/>
+                        <param name="from_y"        number="$IntroCutscene.{1}.$from.position.y"/>
+                        <param name="from_z"        number="$IntroCutscene.{1}.$from.position.z"/>
+                        <param name="to_x"          number="$IntroCutscene.{1}.$to.position.x"/>
+                        <param name="to_y"          number="$IntroCutscene.{1}.$to.position.y"/>
+                        <param name="to_z"          number="$IntroCutscene.{1}.$to.position.z"/>
+                        <param name="lookat_x"          number="($IntroCutscene.{1}.$to.position.x*2) - $IntroCutscene.{1}.$from.position.x"/>
+                        <param name="lookat_y"          number="($IntroCutscene.{1}.$to.position.y*2) - $IntroCutscene.{1}.$from.position.y"/>
+                        <param name="lookat_z"          number="($IntroCutscene.{1}.$to.position.z*2) - $IntroCutscene.{1}.$from.position.z"/>
+                        <param name="duration"      number="2000"/>
+                      </play_cutscene>
+                    </do_elseif>
+                    <do_elseif value="$IntroCutscene.{1}.$type == 'end'">
+                      <signal_cue cue="Start_Race"/>
+                      <signal_cue_instantly cue="AbortCallbackCue"/>
+                    </do_elseif>
+
+                    <set_value name="$CurrentCutscene" exact="$IntroCutscene.{1}" />
+                    <remove_from_list name="$IntroCutscene" exact="$IntroCutscene.{1}" />
+                    <append_to_list name="$IntroCutscene" exact="$CurrentCutscene" />
+                  </actions>
+                </cue>
+
+                <cue name="Call_Announcer_Intro">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <cue_is_waiting cue="AbortCallbackCue"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                               $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                               $script = [
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200101, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200401, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200402, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200403, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200405, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200406, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200407, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200408, $recipient = 'player', $monitor=false, $voiceover = true, $speakcallbackcue = TriggerFinalIntro],
+                                                                               table[ $actor = '$AnnouncerActor', $speak = 306200409, $recipient = 'player', $monitor=false, $voiceover = true],
+                                                                               ],
+                                                                               $abortonsignalledcue = AbortCallbackCue,
+                                                                               ]" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="DetectCollision">
+              <conditions>
+                <event_object_collided group="$PlayerShipGroup"/>
+              </conditions>
+
+              <actions>
+                <do_if value="$Race_Data.$Opponents.indexof.{event.param}">
+                  <unlock_achievement name="TL_RUBBING_IS_RACING" scenario="true"/>
+                </do_if>
+                <do_else>
+                  <reset_cue cue="DetectCollision"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="TriggerFinalIntro">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <set_value name="$IntroCutscene" exact="[table[
+                $type='zoom',
+                $from=$Checkpoints.{11},
+                $to=player.ship,
+                $final=1
+                ],
+                table[
+                $type='end'
+                ]]"  />
+              </actions>
+            </cue>
+
+            <cue name="Cutscene_Stopped">
+              <conditions>
+                <check_any>
+                  <event_cutscene_stopped key="'scenario_race_intro_orbit'"/>
+                  <event_cutscene_stopped key="'scenario_race_intro_zoom'"/>
+              </check_any>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="0s" fadein="0.2s" realtime="true"/>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <do_if value="event.param3">
+                  <signal_cue cue="Start_Race"/>
+                  <signal_cue_instantly cue="AbortCallbackCue"/>
+                </do_if>
+                <do_elseif value="$CurrentCutscene.$final == 1">
+                  <signal_cue cue="Start_Race"/>
+                  <signal_cue_instantly cue="AbortCallbackCue"/>
+                </do_elseif>
+                <do_else>
+                  <signal_cue_instantly cue="Enqueue_Intro_Shot" />
+                  <reset_cue cue="Cutscene_Stopped" />
+                </do_else>
+              </actions>
+            </cue>
+
+            <!-- The cues that make up the scenario will go here -->
+
+            <cue name="Start_Race">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <include_actions ref="md.Scenario_Race_LIB.Setup_Mission" />
+              </actions>
+              <cues>
+
+                <cue name="Racing_Test" ref="md.RML_Race_Timetrial.RaceTimetrial">
+                  <param name="EndSignalCue" value="Time_Trial_End"/>
+                  <param name="MissionCue" value="$MissionCue"/>
+                  <param name="ReportSignalCue" value="Time_Trial_RML_Signal"  comment="Cue to be signalled during the mission with various feedback"/>
+
+                  <param name="StartStep"       value="4"/>
+                  <param name="ObjectiveText"   value="{30222,1785}"                         comment="Objective text. Objective action is 'Race'"/>
+                  <param name="TrackObjects"    value="$Checkpoints"                         comment="List of trigger objects to fly through" />
+                  <param name="Laps"            value="$Race_Data.$NumLaps"                  comment="Number of laps to complete"/>
+                  <param name="StartSector"     value="player.sector"                        comment="Sector to start the race from"/>
+                  <param name="StartPos"        value="$playerstartpos"                      comment="Sector position to start the race from"/>
+
+                  <param name="DebugChance"     value="100" />
+                </cue>
+
+                <cue name="Time_Trial_RML_Signal" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <include_actions ref="md.Scenario_Race_LIB.Start_Race" />
+                  </actions>
+                </cue>
+
+                <cue name="Time_Trial_End">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Time_Trial_End_Ref"  ref="md.Scenario_Race_LIB.End_Race">
+                      <param name="Race_Data" value="$Race_Data"/>
+                      <param name="MissionActors" value="$MissionActors"/>
+                      <param name="AnnouncerActor" value="$AnnouncerActor"/>
+                      <param name="FinalWords" value="[306200413, 306200414, 306200414, 306200415, 306200415, 306200415]"/>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+
+        <cue name="Update" instantiate="true" checkinterval="100ms">
+          <conditions>
+          </conditions>
+          <actions>
+            <include_actions ref="md.Scenario_Race_LIB.Update_Position"/>
+          </actions>
+        </cue>
+
+        <cue name="MenuOpened">
+          <conditions>
+            <event_ui_triggered/>
+          </conditions>
+          <actions>
+            <remove_overlay_text force="true"/>
+            <reset_cue cue="MenuOpened"/>
+          </actions>
+        </cue>
+
+        <cue name="UpdateBanter" instantiate="true" checkinterval="90s">
+          <conditions>
+          </conditions>
+          <actions>
+            <include_actions ref="md.Scenario_Race_LIB.Update_Banter"/>
+          </actions>
+        </cue>
+        
+        <cue name="RaceBanterComplete" instantiate="true">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <set_music_volume volume="1.0"/>
+          </actions>
+        </cue>
+
+        <cue name="PlayerDied">
+          <conditions>
+              <event_object_destroyed object="player.entity"/>
+          </conditions>
+          <actions>
+            <include_actions ref="md.Scenario_Race_LIB.End_Race" />
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Covert Ops Briefing Cutscene -->
+  <director key="story_terran_covert_ops">
+    <params>
+      <param name="target_agent" object="true" />
+      <param name="target_pirate" object="true" />
+      <param name="target_player" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_agent" />
+    <object_group name="target_group">
+      <reference object="target_agent" />
+      <reference object="target_pirate" />
+      <reference object="target_player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+
+          <camera_orbit reference="target_agent" orient_to="ecliptic" cycle="none" startangle="0" stopangle="360" z="-0.8" y="0.3" delay="1">
+            <begin angle="130">
+              <distance>
+                <value exact="1.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.2"/>
+              </elevation>
+            </begin>
+            <end angle="480" time="190000">
+              <distance>
+                <value exact="2"/>
+              </distance>
+              <elevation>
+                <value exact="-0.2"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="target_pirate"  x="3.2" y="1.6" z="0.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_pirate" head="true" y="1" z="1.2"/>
+            </lookdirection>
+          </camera>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+
+          <camera_orbit reference="target_player" orient_to="ecliptic" cycle="none" y="-1.2">
+            <begin distance="2" angle="115"/>
+            <end distance="5.5" angle="115" time="15000" elevation="-0.8" />
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="PanInCameraShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+
+          <camera_orbit reference="target_pirate" orient_to="ecliptic" cycle="none" y="0.25">
+            <begin distance="3.2" angle="90" elevation="1" />
+            <end distance="1.5" angle="90.5" time="34000" elevation="-0.5"/>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="PanOutCameraShot5" environment="scenezone" duration="onevent:TriggerSequence5Done">
+
+          <camera_orbit reference="target_agent" orient_to="ecliptic" cycle="none" y="0.3" x="-0.5">
+            <begin distance="2" angle="100" elevation="0.15" />
+            <end distance="2.9" angle="103" time="13000" elevation="0.38"/>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_pan_behind">
+    <params>
+      <param name="duration" number="true" default="5.0" comment="default was 5000ms, when using params specified in seconds!"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PanOverSequence" start="0">
+
+        <shot name="PanOverDefault" environment="scenezone" duration="param:duration">
+          <camera_panover reference="target_object" showing="back" pan_direction="leftwards" panstart="50" panend="50" interpolation="linear" distance="200" elevation="0" orient_to="ecliptic"/>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

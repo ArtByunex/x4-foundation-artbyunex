@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/actions/set_value[@name='$PastStationMaxScoreTableOverrides']" pos="after">
+    <do_if value="$Faction == faction.boron">
+      <!--Give larger boost to previous Boron trading station locations-->
+      <set_value name="$PastStationMaxScoreTableOverrides.$IsTradeStation" exact="table[
+                               $WasTradeStation = 100.0f,
+                               $WasEquipmentDock = 0.25f,
+                               $WasShipyard = 0.25f,
+                               $WasWharf = 0.25f]"/>
+    </do_if>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredShipyardPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.boron">
+      <set_value name="$DesiredShipyards" exact="1"/>
+    </do_elseif>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredWharfPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.boron">
+      <set_value name="$DesiredWharfs" exact="2"/>
+    </do_elseif>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredEquipmentDockPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.boron">
+      <set_value name="$DesiredEquipmentDocks" exact="1"/>
+    </do_elseif>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredTradeStationPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.boron">
+      <set_value name="$DesiredTradeStation" exact="6"/>
+    </do_elseif>
+  </add>
+
+</diff>

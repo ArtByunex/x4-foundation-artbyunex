@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Door into the torus closes when player is inside -->
+  <director key="Story_Terraforming_Torus_2" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:torus" />
+    <object_group name="target_group">
+      <reference object="torus" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="2000">
+          <camera>
+
+            <position>
+              <reference object="torus" x="3238.265625" y="325.693115" z="-90.107422" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="torus" x="3237.439453" y="325.524414" z="-89.570313" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.002687"/>
+            </roll>
+
+            
+            <!--position>
+              <reference object="torus" x="-19003.207031" y="-3655.817871" z="-19131.880859" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="torus" x="-19003.919922" y="-3655.885986" z="-19131.183594" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.077643"/>
+            </roll-->
+          </camera>
+        </shot>
+
+        <shot name="StaticCameraShot2" environment="scenezone" duration="5000">
+          <takeover_position duration="4000"/>
+          <camera>
+
+            <position>
+              <reference object="torus" x="3209.191406" y="307.265869" z="-78.75" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="torus" x="3209.490234" y="307.145996" z="-77.802734" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.079924"/>
+            </roll>
+
+            <!--position>
+              <reference object="torus" x="-19023.115234" y="-3655.942383" z="-19138.148438" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="torus" x="-19022.712891" y="-3656.047119" z="-19137.238281" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.012702"/>
+            </roll-->
+          </camera>
+        </shot>
+
+        <shot name="StaticCameraShot3" environment="scenezone" duration="4000">
+          <camera>
+            <position>
+              <reference object="torus" x="3248.759766" y="305.089355" z="-893.597656" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="torus" x="3248.015625" y="304.915283" z="-894.242188" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.073272"/>
+            </roll>
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

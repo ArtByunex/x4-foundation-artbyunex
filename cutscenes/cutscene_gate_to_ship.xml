@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- For best results, position the playership well away from the sector center before playback. -->
+  <director key="Cutscene_gate_to_ship" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence2" start="0">
+
+        <shot name="AtGate" environment="scenezone" duration="12000">
+          <camera_orbit reference="target_gate" time="12000" elevation="50%">
+            <begin distance="20000" angle="180"/>
+            <end distance="7000" angle="90"/>
+          </camera_orbit>
+        </shot>
+        <shot name="PanShip" environment="scenezone" duration="8000">
+          <camera_panover reference="target_ship" showing="back" pan_direction="rightwards" panstart="50" panend="0" interpolation="linear">
+            <begin distance="60"/>
+            <end distance="60"/>
+          </camera_panover>
+        </shot>
+        <shot name="ToBridge" environment="scenezone" duration="8000">
+          <takeover_position duration="8000" interpolation="smooth"/>
+          <camera_orbit reference="target_ship" time="8000" startangle="-90" stopangle="-210" interpolation="smooth">
+            <distance>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value exact="0"/>
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="linear">
+                  <value exact="180"/>
+                </keyframe>
+                <keyframe timestamp="8000" interpolation="linear">
+                  <value exact="300"/>
+                </keyframe>
+              </keyframes>
+            </distance>
+            <elevation>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value exact="0"/>
+                </keyframe>
+                <keyframe timestamp="8000" interpolation="linear">
+                  <value exact="30"/>
+                </keyframe>
+              </keyframes>
+            </elevation>
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

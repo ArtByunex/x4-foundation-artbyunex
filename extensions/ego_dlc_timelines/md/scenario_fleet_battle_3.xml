@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Fleet_Battle_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+
+    <cue name="Start" namespace="this" module="scenario_fleet_battle_3">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <set_value name="$TimeBonusPerSecond" exact="1"/>
+        <set_value name="$TimeBonusThreshold" exact="30min"/>
+        <find_sector name="$MookyesRevenge" macro="macro.timelines_map_fleet_battle_3_cluster_001_sector_001_macro" space="player.galaxy"/>
+        <find_station name="$MiningOutpost" groupname="$Stations" space="$MookyesRevenge" godstationentry="'par_mining_outpost_cluster001_001'" required="1"/>
+        <find_station name="$Refinery" groupname="$Stations" space="$MookyesRevenge" godstationentry="'par_refinery_cluster001_001'" required="1"/>
+        <set_known object="$MiningOutpost" known="1" updatesnapshot="true"/>
+        <set_known object="$Refinery" known="1" updatesnapshot="true"/>
+        <set_known object="$MookyesRevenge" known="true"/>
+        <set_known object="$MookyesRevenge.cluster" known="true"/>
+        <create_position name="$StartPosition" x="156500" y="0" z="111700"/>
+        <create_position name="$PatrolPosition1" object="$MiningOutpost" space="$MookyesRevenge"/>
+        <create_position name="$PatrolPosition2" object="$Refinery" space="$MookyesRevenge"/>
+        <create_position name="$PatrolPosition3" space="$MookyesRevenge" x="140000" y="0" z="-76000"/>
+        <clear_fog_of_war sector="$MookyesRevenge" range="300km">
+          <position space="$MookyesRevenge" x="0" y="0" z="0"/>
+        </clear_fog_of_war>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_EnemyFleet" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <!-- CPU Fleet -->
+                <run_actions ref="md.Scenario_Fleet_Battle_Lib.Setup_CPUFleet" result="$CPUfleet">
+                  <param name="player" value="true"/>
+                  <param name="XenonLocation" value="$MookyesRevenge"/>
+                  <param name="PatrolDestination" value="$MookyesRevenge"/>
+                  <param name="PatrolPosition2" value="$PatrolPosition2"/>
+                </run_actions>
+                <do_for_each in="$CPUfleet" name="$ship">
+                  <set_allow_drop object="$ship" allow="false"/>
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'EnemyShips ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <!-- Xenon I Fleet -->
+                <run_actions ref="md.Scenario_Fleet_Battle_Lib.Setup_XenonCarrierFleet" result="$XenonCarrierfleet">
+                  <param name="player" value="true"/>
+                  <param name="XenonLocation" value="$MookyesRevenge"/>
+                  <param name="PatrolDestination" value="$MookyesRevenge"/>
+                  <param name="PatrolPosition1" value="$PatrolPosition1"/>
+                </run_actions>
+                <do_for_each in="$XenonCarrierfleet" name="$ship">
+                  <set_allow_drop object="$ship" allow="false"/>
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'EnemyShips ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <!-- Terraformers -->
+                <run_actions ref="md.Scenario_Fleet_Battle_Lib.Setup_XenonTerraformerFleet" result="$Terraformerfleet">
+                  <param name="player" value="true"/>
+                  <param name="XenonLocation" value="$MookyesRevenge"/>
+                  <param name="PatrolDestination" value="$MookyesRevenge"/>
+                  <param name="PatrolPosition3" value="$PatrolPosition3"/>
+                </run_actions>
+                <add_to_group groupname="$PlayerFleet" group="$CPUfleet"/>
+                <add_to_group groupname="$PlayerFleet" group="$XenonCarrierfleet"/>
+                <add_to_group groupname="$PlayerFleet" group="$Terraformerfleet"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <do_for_each in="$Terraformerfleet" name="$ship">
+                  <set_allow_drop object="$ship" allow="false"/>
+                  <do_if value="$ship.isclass.ship_l">
+                    <set_drone_mode object="$ship" category="unitcategory.defence" mode="dronemode.attackenemies"/>
+                    <set_drone_armed object="$ship" category="unitcategory.defence" armed="true"/>
+                  </do_if>
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'EnemyShips ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_EnemyFleet">
+              <actions>
+                <run_actions ref="md.Scenario_Fleet_Battle_Lib.Setup_ParanidFleet" result="$EnemyFleet">
+                  <param name="player" value="false"/>
+                  <param name="ParanidLocation" value="$MookyesRevenge"/>
+                  <param name="PatrolDestination" value="$MookyesRevenge"/>
+                  <param name="PatrolPosition1" value="$PatrolPosition1"/>
+                </run_actions>
+
+                <do_for_each in="$EnemyFleet" name="$ship">
+                  <set_allow_drop object="$ship" allow="false"/>
+                  <set_object_capturable object="$ship" capturable="false"/>
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!--TODO: if this scenario is finished and re-enabled, enable this achievement as well (also notify Klaus to re-add it on Steam)-->
+            <!--<unlock_achievement name="TL_MACHINA_IN_MACHINA" scenario="true"/>-->
+          </actions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+
+            <cue name="SetupMission">
+              <actions>
+                <set_value name="$BonusDuration" exact="30min"/>
+                <set_value name="$StartTime" exact="player.age"/>
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false"
+                                name="{30622,3301}" description="{30622,3302}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                  <briefing>
+                    <objective step="1" action="objective.defeat" offset="$PatrolPosition" text="{30622,3311}"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+            </cue>
+
+            <cue name="EnemyDestroyed" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$EnemyFleet"/>
+              </conditions>
+              <actions>
+                <remove_from_group group="$EnemyFleet" object="event.object"/>
+                <do_if value="$EnemyFleet.count == 0">
+                  <signal_cue cue="Finish"/>
+                </do_if>
+                <do_elseif value="$EnemyFleet.count le 10">
+                  <set_objective cue="$MissionCue" step="1" action="objective.destroy" group="$EnemyFleet" updatebriefing="true"/>
+                </do_elseif>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Finish">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!--Calculate score, speak line appropriate to rating-->
+            <set_value name="$Duration" exact="player.age - $StartTime"/>
+            <set_value name="$TimeRemaining" exact="if $Duration lt $TimeBonusThreshold then ($TimeBonusThreshold - $Duration) else 0s"/>
+            <set_value name="$Score_Time" exact="$TimeBonusPerSecond * ($TimeRemaining)f"/>
+            <set_value name="$Survivors_XL" exact="0"/>
+            <!--<set_value name="$Survivors_L" exact="0"/>-->
+            <set_value name="$Survivors_M" exact="0"/>
+            <set_value name="$Survivors_S" exact="0"/>
+            <set_value name="$Survivors_Outpost" exact="0"/>
+            <set_value name="$Score_Survivors_XL" exact="0"/>
+            <set_value name="$Score_Survivors_L" exact="0"/>
+            <set_value name="$Score_Survivors_M" exact="0"/>
+            <set_value name="$Score_Survivors_S" exact="0"/>
+            <set_value name="$Score_Survivors_Outpost" exact="0"/>
+            <do_if value="not $MiningOutpost.exists">
+              <set_value name="$Survivors_Outpost" exact="1" operation="add"/>
+              <set_value name="$Score_Survivors_Outpost" exact="333" operation="add"/>
+            </do_if>
+            <do_for_each name="$survivingship" in="$PlayerFleet">
+              <do_if value="$survivingship.isclass.ship_xl">
+                <set_value name="$Survivors_XL" exact="1" operation="add"/>
+                <set_value name="$Score_Survivors_XL" exact="99" operation="add"/>
+              </do_if>
+              <!--<do_elseif value="$survivingship.isclass.ship_l">
+                <set_value name="$Survivors_L" exact="1" operation="add"/>
+                <set_value name="$Score_Survivors_L" exact="66" operation="add"/>
+              </do_elseif>-->
+              <do_elseif value="$survivingship.isclass.ship_m">
+                <set_value name="$Survivors_M" exact="1" operation="add"/>
+                <set_value name="$Score_Survivors_M" exact="33" operation="add"/>
+              </do_elseif>
+              <do_elseif value="$survivingship.isclass.ship_s">
+                <set_value name="$Survivors_S" exact="1" operation="add"/>
+                <set_value name="$Score_Survivors_S" exact="11" operation="add"/>
+              </do_elseif>
+              <do_if value="not $SurvivingCaptain?">
+                <set_value name="$SurvivingCaptain" exact="$survivingship.aipilot"/>
+              </do_if>
+            </do_for_each>
+            <set_value name="$TotalScore" exact="$Score_Time + $Score_Survivors_XL + $Score_Survivors_L + $Score_Survivors_M + $Score_Survivors_S + $Score_Survivors_Outpost"/>
+            <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$TotalScore}"/>
+            <signal_cue cue="ResultWindow"/>
+          </actions>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <do_if value="$TotalScore?">
+              <substitute_text text="$timebonushinttext" source="{30622,3201}">
+                <replace string="'$SCORE$'" with="$TimeBonusPerSecond"/>
+                <replace string="'$TIME$'" with="$TimeBonusThreshold.formatted.default" />
+              </substitute_text>
+              <add_scenario_stat id="'time'" name="{30622,3202}" uivalue="$Duration.formatted.{'%mm %ss'}" description="$timebonushinttext" score="$Score_Time"/>
+              <add_scenario_stat id="'survivors_xl'" name="{30622,3203}" uivalue="$Survivors_XL" score="$Score_Survivors_XL"/>
+              <!--<add_scenario_stat id="'survivors_l'" name="{30622,3204}" uivalue="$Survivors_L" score="$Score_Survivors_L"/>-->
+              <add_scenario_stat id="'survivors_m'" name="{30622,3205}" uivalue="$Survivors_M" score="$Score_Survivors_M"/>
+              <add_scenario_stat id="'survivors_s'" name="{30622,3206}" uivalue="$Survivors_S" score="$Score_Survivors_S"/>
+              <add_scenario_stat id="'survivors_outpost'" name="{30622,3207}" uivalue="if $Survivors_Outpost ge 1 then {1001,2618} else {1001,2617}" score="$Score_Survivors_Outpost"/>
+              <set_value name="$ResultData.$Score" exact="$TotalScore"/>
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_else>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

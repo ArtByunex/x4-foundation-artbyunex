@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/soundlibrary">
+    <sound id="spl_mg_firing" description="Split Minigun firing loop" repeat="-1" is3d="1" preload="1">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_split\sfx\weapons\repeater\wpn_split_gatling_muzzle_01"/>
+		    <select start="extensions\ego_dlc_split\sfx\weapons\repeater\wpn_split_gatling_muzzle_02"/>
+		    <select start="extensions\ego_dlc_split\sfx\weapons\repeater\wpn_split_gatling_muzzle_03"/>
+      </sample>
+      <volume start="1.0" distance="10"/>
+      <effects>
+        <fade out="0.1"/>
+        <filter mode="lowpass" distance="10"> 
+          <distancecurve>
+           <point distance="0.0" volume="1.0"/>
+           <point distance="0.3" volume="0.5"/>
+           <point distance="0.6" volume="0.1"/>
+           <point distance="1.0" volume="0.05"/>
+          </distancecurve>
+         </filter>
+      </effects>
+    </sound>
+    <sound id="wpn_spl_gatling_startshooting" description="Split Gatling Gun start shooting" repeat="1" is3d="1" preload="1">
+      <sample start="sfx\weapons\mg\minigun_new_03_start"/>
+      <volume start="0.6" distance="1"/>
+    </sound>
+    <sound id="wpn_spl_gatling_stopshooting" description="Split Gatling Gun stop shooting" repeat="1" is3d="1" preload="1">
+      <sample start="sfx\weapons\mg\minigun_new_03_end"/>
+      <volume start="0.5" distance="1"/>
+    </sound>
+    <!--Soundtracks-->
+    <sound id="music_dlc_split_soundtrack_periphery" description="Ambient music shuffle for Split DLC, weighted towards the new tracks." repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="music\cluster\01. Alexei Zakharov - Beyond the Gates"/>
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+        <select weight="10" start="music\cluster\06. Alexei Zakharov - Oblivion's Siren Call"/>
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\09. Alexei Zakharov - Assembled for Eternity"/>
+        <select weight="7" start="extensions\ego_dlc_split\music\cluster\15. Alexei Zakharov - Last Farewell"/>
+        <select weight="3" start="music\cluster\p1_amb_02"/>
+        <select weight="3" start="music\cluster\p1_amb_03"/>
+        <select weight="3" start="music\Menu\p1_amb_06"/>
+        <select weight="3" start="music\cluster\p1_amb_07"/>
+        <!--<select weight="3" start="music\cluster\p1_amb_08"/>-->
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_patriarchy" description="Music for Split DLC Patriarchy core system (clusters 404, 405, 406)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\08. Alexei Zakharov - Dominion of Providence"/>
+        <select weight="3" start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+        <select weight="3" start="extensions\ego_dlc_split\music\cluster\12. Alexei Zakharov - Echoes of Grandeur"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_loyal_families" description="Thematically tailored exploration music for Split DLC loyal family systems (clusters 401, 402, 418)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+        <select start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+        <select start="music\cluster\13. Alexei Zakharov - On Frontier's Blazing Edge"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_argon" description="Music for Split DLC Argon core systems Guiding Star and Eleventh Hour (clusters 416, 417)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\02. Alexei Zakharov - Federation Lost"/>
+        <select weight="3" start="extensions\ego_dlc_split\music\cluster\09. Alexei Zakharov - Assembled for Eternity"/>
+        <select weight="3" start="music\cluster\p1_amb_04"/>
+      </sample>      
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_xenon" description="Music for Split DLC Xenon core systems Rhy's Defiance, Matrix #598 and Tharka's Ravine 4 (clusters 413, 414, 415)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="music\cluster\05. Alexei Zakharov - Where the Ravine Leads"/>
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\07. Alexei Zakharov - Rhy's Defiance"/>
+        <select weight="6" start="music\cluster\p1_amb_03"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_paranid" description="Music for Split DLC Paranid core systems Wretched Skies X, Emperor's Pride (occupied) and Litany of Fury (clusters 422, 423, 424)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <!--Xenon-ish track, because Emperor's Pride is occupied-->
+        <select start="extensions\ego_dlc_split\music\cluster\07. Alexei Zakharov - Rhy's Defiance"/>
+        <select start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+        <select start="music\cluster\p1_amb_03"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_soundtrack_ravine" description="Thematically tailored exploration music for Split DLC system Tharka's Ravine (clusters 409, 410, 412, 413)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+        <select start="music\cluster\05. Alexei Zakharov - Where the Ravine Leads"/>
+        <select start="music\cluster\06. Alexei Zakharov - Oblivion's Siren Call"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <!--Special cluster music-->
+    <sound id="music_dlc_split_cluster_heart_of_acrimony" description="Music for Split DLC system Heart of Acrimony (clusters 411, 425)" repeat="-1" is3d="0" preload="0">
+      <sample selection="random">
+        <select weight="10" start="extensions\ego_dlc_split\music\cluster\03. Alexei Zakharov - Heart of Acrimony"/>
+        <select weight="3" start="extensions\ego_dlc_split\music\cluster\12. Alexei Zakharov - Echoes of Grandeur"/>
+      </sample>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <!--Music on gamestart-->
+    <sound id="music_dlc_split_gamestart_1" description="Music playing during the spacesuit gamestart intro" repeat="1" is3d="0" preload="0">
+      <sample start="music\cluster\13. Alexei Zakharov - On Frontier's Blazing Edge"/>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_dlc_split_gamestart_2" description="Music playing during the battle victory gamestart intro" repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_split\music\cluster\08. Alexei Zakharov - Dominion of Providence"/>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <!--Music for Split Story-->
+    <sound id="music_story_split_funeral" description="Music for the funeral speech in Split Story chapter 2" repeat="1" is3d="0" preload="0">
+      <sample start="music\legacy\Alexei Zakharov - Rebirth - Neutral 11"/>
+      <volume start="0.5"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_story_split_boneyard" description="Music for passing through the funeral accelerator in Split Story chapter 3" repeat="1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+      <volume start="0.2"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_story_split_throneroom" description="Music for the throneroom cutscene" repeat="1" is3d="0" preload="0">
+      <sample start="music\cluster\10. Alexei Zakharov - An Era of Perfect Stillness"/>
+      <volume start="0.6"/>
+      <effects>
+        <fade in="0.1" out="0.666667"/>
+      </effects>
+    </sound>
+    <sound id="music_menu_main_split_music" description="Start menu Music" repeat="-1" is3d="0" preload="0">
+      <sample start="extensions\ego_dlc_split\music\menu\16. Alexei Zakharov - Split Vendetta Main Menu (Bonus Track)"/>
+      <volume start="0.3"/>
+      <effects>
+        <fade in="1.66667" out="0.666667"/>
+      </effects>
+    </sound>
+  </add>
+  <replace sel="/soundlibrary/sound[@id='music_scenario_combat_intro']/sample/@start">extensions\ego_dlc_split\music\cluster\08. Alexei Zakharov - Dominion of Providence</replace>
+  <replace sel="/soundlibrary/sound[@id='music_scenario_combat_station_distress_call']/sample/@start">extensions\ego_dlc_split\music\special\scenario_combat_distress_call</replace>
+  <replace sel="/soundlibrary/sound[@id='music_scenario_combat_victory']/sample/@start">extensions\ego_dlc_split\music\special\scenario_combat_victory</replace>
+  <!--Change menu music when Split DLC is enabled.-->
+  <replace sel="/soundlibrary/sound[@id='music_menu_main_music']/sample/@start">extensions\ego_dlc_split\music\menu\16. Alexei Zakharov - Split Vendetta Main Menu (Bonus Track)</replace>
+  <replace sel="/soundlibrary/sound[@id='music_menu_main_music']/volume/@start">0.3</replace>
+  <!--Add new tracks to the base game galaxy when Split DLC is enabled.-->
+  <add sel="/soundlibrary/sound[@id='music_soundtrack_periphery']/sample">
+    <select weight="5" start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+    <select weight="5" start="extensions\ego_dlc_split\music\cluster\09. Alexei Zakharov - Assembled for Eternity"/>
+    <select weight="5" start="extensions\ego_dlc_split\music\cluster\15. Alexei Zakharov - Last Farewell"/>
+  </add>
+  <add sel="/soundlibrary/sound[@id='music_soundtrack_xenon']/sample">
+    <select weight="2" start="extensions\ego_dlc_split\music\cluster\07. Alexei Zakharov - Rhy's Defiance"/>
+  </add>
+  <add sel="/soundlibrary/sound[@id='music_complete_soundtrack']/sample">
+    <select start="extensions\ego_dlc_split\music\cluster\02. Alexei Zakharov - Federation Lost"/>
+    <select start="extensions\ego_dlc_split\music\cluster\03. Alexei Zakharov - Heart of Acrimony"/>
+    <select start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+    <select start="extensions\ego_dlc_split\music\cluster\07. Alexei Zakharov - Rhy's Defiance"/>
+    <select start="extensions\ego_dlc_split\music\cluster\08. Alexei Zakharov - Dominion of Providence"/>
+    <select start="extensions\ego_dlc_split\music\cluster\09. Alexei Zakharov - Assembled for Eternity"/>
+    <select start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+    <select start="extensions\ego_dlc_split\music\cluster\12. Alexei Zakharov - Echoes of Grandeur"/>
+    <select start="extensions\ego_dlc_split\music\cluster\15. Alexei Zakharov - Last Farewell"/>
+  </add>
+
+  <add sel="/soundlibrary/sound[@id='music_station_designer']/sample">
+    <select start="extensions\ego_dlc_split\music\cluster\03. Alexei Zakharov - Heart of Acrimony"/>
+    <select start="extensions\ego_dlc_split\music\cluster\04. Alexei Zakharov - Guided By Unseen Hands"/>
+    <select start="extensions\ego_dlc_split\music\cluster\07. Alexei Zakharov - Rhy's Defiance"/>
+    <select start="extensions\ego_dlc_split\music\cluster\09. Alexei Zakharov - Assembled for Eternity"/>
+    <select start="extensions\ego_dlc_split\music\cluster\11. Alexei Zakharov - The Stars Bleed Crimson"/>
+    <select start="extensions\ego_dlc_split\music\cluster\12. Alexei Zakharov - Echoes of Grandeur"/>
+    <select start="extensions\ego_dlc_split\music\cluster\15. Alexei Zakharov - Last Farewell"/>
+  </add>
+</diff>

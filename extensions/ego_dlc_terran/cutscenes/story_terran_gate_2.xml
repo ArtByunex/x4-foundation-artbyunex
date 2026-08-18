@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Terran gate cutscene (started on Terran side) -->
+  <director key="Story_Terran_Gate_2" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" comment="xenon" />
+      <reference object="target_ship2" comment="terran" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <signals>
+      <signal name="'Story_Terran_Gate_2_Sequence1_Started'" time="8000"/>
+      <signal name="'Story_Terran_Gate_2_Sequence2_Started'" time="13000"/>
+      <signal name="'Story_Terran_Gate_2_Sequence3_Started'" time="18000"/>
+    </signals>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="StaticGateShot" environment="scenezone" duration="8000">
+          <camera>
+
+            <!-- up slightly angled looking down -->
+            <position>
+              <reference object="target_gate" x="-1173.421265" y="2658.635498" z="225.782043" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="-1173.057983" y="2657.734375" z="226.018555" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.800298"/>
+            </roll>
+
+          </camera>
+        </shot>
+
+        <shot name="StaticCameraShot1" environment="scenezone" duration="5000">
+          <camera>
+            <position>
+              <reference object="target_ship" x="-121.150482" y="40.810310" z="-919.591553" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship" x="-121.343666" y="40.989910" z="-918.626953" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.687086"/>
+            </roll>
+          </camera>
+        </shot>
+
+        <shot name="StaticCameraShot2" environment="scenezone" duration="5000">
+          <camera>
+            <position>
+              <reference object="target_ship" x="-137.619156" y="-645.020447" z="950.992065" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship" x="-137.418762" y="-644.325806" z="950.301208" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-2.149236"/>
+            </roll>
+          </camera>
+        </shot>
+
+        <!--shot name="StaticCameraShot3" environment="scenezone" duration="3000">
+          <camera>
+            <position>
+              <reference object="target_ship2" x="-137.619156" y="-645.020447" z="950.992065" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship2" x="-137.418762" y="-644.325806" z="950.301208" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-2.149236"/>
+            </roll>
+          </camera>
+        </shot-->
+
+        <shot name="StaticCameraShot4" environment="scenezone" duration="17000">
+          <camera>
+            <position>
+              <reference object="target_ship2" x="48.679565" y="35.171829" z="-71.274277" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship2" x="48.431007" y="35.001560" z="-70.320740" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.003147"/>
+            </roll>
+          </camera>
+        </shot>
+
+
+
+        <!--shot name="FollowShip" environment="scenezone" duration="7000">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="200" pitch="0" yaw="0" />
+            <end distance="196" pitch="2" yaw="3" time="7000" />
+          </camera_follow>
+        </shot-->
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Research_Welfare_2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="AddToResearchUserdata" checkinterval="50ms">
+      <conditions>
+        <cue_is_complete cue="md.X4Ep1_Mentor_Subscriptions.Start"/>
+      </conditions>
+      <actions>
+        <set_value name="md.X4Ep1_Mentor_Subscriptions.Start.$ResearchUserDataTable.{ware.research_module_welfare_2}" exact="'story_research_module_welfare_2'"/>
+        <append_to_list name="md.X4Ep1_Mentor_Subscriptions.Start.$ExcludeResearchStartedCommentList" exact="ware.research_module_welfare_2"/>
+      </actions>
+    </cue>
+
+    <cue name="Check_Research_Unlocked" onfail="cancel">
+      <conditions>
+        <cue_is_complete cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+      </conditions>
+    </cue>
+
+    <cue name="Start" namespace="this" version="3">
+      <conditions>
+        <check_any>
+          <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+          <event_cue_completed cue="Check_Research_Unlocked"/>
+        </check_any>
+      </conditions>
+      <actions>
+        <set_value name="$CharacterCutsceneTable" exact="table[]"/>
+
+        <set_value name="$ResearchWare" exact="ware.research_module_welfare_2"/>
+        <set_value name="$AlreadyResearched" exact="$ResearchWare.research.unlocked"/>
+
+        <do_if value="$AlreadyResearched">
+          <add_blueprints wares="ware.module_gen_welfare_casino_01"/>
+        </do_if>
+
+        <set_value name="$TextIDTable" exact="table[
+                   {race.argon} =   table[$MissionTitleID = 1805, $PlantDeviceID = 1812, $FindHabID = 1817],
+                   {race.paranid} = table[$MissionTitleID = 1806, $PlantDeviceID = 1813, $FindHabID = 1818],
+                   {race.split} =   table[$MissionTitleID = 1807, $PlantDeviceID = 1814, $FindHabID = 1819],
+                   {race.teladi} =  table[$MissionTitleID = 1808, $PlantDeviceID = 1815, $FindHabID = 1820],
+                   {race.terran} =  table[$MissionTitleID = 1809, $PlantDeviceID = 1816, $FindHabID = 1821]]"/>
+
+        <set_value name="$LastResearchDescriptionTime" exact="0s"/>
+        <create_group groupname="$ApproachedStations" comment="Stations to exclude when finding stations to investigate"/>
+        <create_group groupname="$ConversationActors"/>
+        <set_value name="$CharacterCutsceneTable" exact="table[]"/>
+        <set_value name="$SubMissionCues" exact="[]"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="@$BlueprintAwarded">
+          <remove_mission cue="$MissionCue"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="3">
+        <set_value name="$AlreadyResearched" exact="$ResearchWare.research.unlocked"/>
+        <do_if value="$AlreadyResearched">
+          <add_blueprints wares="ware.module_gen_welfare_casino_01"/>
+          <debug_text text="'Research was already unlocked. Adding blueprint for ' + $ResearchWare.name" filter="savegame"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Setup" onfail="cancel" version="2">
+          <conditions>
+            <check_value value="not $AlreadyResearched"/>
+          </conditions>
+          <actions>
+            <set_value name="$MissionCue" exact="namespace"/>
+            <set_value name="$HQ" exact="player.headquarters"/>
+            <set_value name="$Boso" exact="md.$PersistentCharacters.$BosoTa"/>
+            <set_value name="$CharacterCutsceneTable.{$Boso}" exact="table[$key = 'ShowCharacterBoron']"/>
+            <set_value name="$DebugChance" exact="0"/>
+          </actions>
+          <patch sinceversion="2" state="cancelled">
+            <do_if value="not $ResearchWare.research.unlocked">
+              <reset_cue cue="Setup"/>
+            </do_if>
+          </patch>
+          <cues>
+            <cue name="First_Research_Done" checkinterval="1s">
+              <conditions>
+                <check_value value="ware.research_module_welfare_1.research.unlocked"/>
+              </conditions>
+              <actions>
+                <add_encyclopedia_entry item="'research_module_welfare_2_pre'" type="researchables"/>
+                <add_encyclopedia_entry item="'research_module_welfare_2'" type="researchables"/>
+              </actions>
+            </cue>
+
+            <cue name="Research_Entry_Selected" instantiate="true">
+              <conditions>
+                <event_object_signalled object="player.entity" param="'research_selected_no_speak'"/>
+                <check_value value="player.age gt $LastResearchDescriptionTime + 30s"/>
+                <check_any>
+                  <check_value value="event.param2 == $ResearchWare"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+
+                <!--$Line + followup line-->
+                <speak actor="$Boso" line="30222151" priority="85" recipient="player.entity" comment="{10201,30222151}"/>
+              </actions>
+            </cue>
+
+            <cue name="Research_Started">
+              <conditions>
+                <event_player_production_started research="true"/>
+                <check_value value="$ResearchWare == event.param2"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Started production for ware ' + $ResearchWare" chance="$DebugChance"/>
+                <signal_cue cue="Start_Mission"/>
+              </actions>
+            </cue>
+
+            <cue name="Start_Mission">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Start_Mission_Init">
+                  <actions>
+                    <set_value name="$InvestigationComplete" exact="false"/>
+                    <set_value name="$BlueprintAwarded" exact="false"/>
+                    <set_value name="$GamblingDenMacro" exact="macro.welfare_gen_gamblinghall_01_macro"/>
+                    <find_station_by_true_owner name="$GamblingDenStation" faction="faction.player" space="player.galaxy">
+                      <match_child macro="$GamblingDenMacro"/>
+                    </find_station_by_true_owner>
+
+                    <set_value name="$ConstructDen" exact="$GamblingDenStation.exists"/>
+                    <create_mission_thread cue="$MissionCue" name="{30222,1801}" description="{30222,1802}" threadtype="parallel" type="missiontype.plot" faction="faction.civilian" difficulty="level.medium" abortable="false" icon="'briefing_boso_ta_01'" iconcaption="{30201,2}"/>
+                    <do_if value="$GamblingDenStation.exists">
+                      <signal_cue cue="Investigate_Habitations"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="Construct_Den"/>
+                    </do_else>
+                  </actions>
+                </cue>
+                <cue name="Construct_Den">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_mission cue="Construct_Den" name="{20104,110201}" description="{10201,30222152}" missionthread="$MissionCue" type="missiontype.plot" faction="faction.civilian" difficulty="level.medium" abortable="false" icon="'briefing_boso_ta_01'" iconcaption="{30201,2}">
+                      <briefing>
+                        <objective step="1" action="objective.build_module" text="$GamblingDenMacro.name"/>
+                      </briefing>
+                      <objective step="1" action="objective.build_module" text="$GamblingDenMacro.name"/>
+                    </create_mission>
+                  </actions>
+                  <cues>
+                    <cue name="Construct_Den_Finished">
+                      <conditions>
+                        <event_player_build_finished_components/>
+                        <check_any exact="event.param2.count" counter="$i">
+                          <check_value value="event.param2.{$i}.macro.ismacro.{$GamblingDenMacro}"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <remove_mission cue="Construct_Den"/>
+                        <signal_cue cue="Investigate_Habitations"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Investigate_Habitations">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+                    <cue name="Investigate_Habitations_Init">
+                      <actions>
+                        <set_value name="$TargetRaces" exact="[]"/>
+                        <set_value name="$CompletedRaces" exact="[]"/>
+                        <set_value name="$MentionedRaces" exact="[]"/>
+                        <set_value name="$PotentialRaces" exact="[race.argon, race.paranid, race.split, race.teladi, race.terran]"/>
+                        <do_for_each name="$PotentialRace" in="$PotentialRaces">
+                          <get_module_definition reference="$HabitationModuleRef" race="$PotentialRace" tags="tag.habitation"/>
+                          <do_if value="$HabitationModuleRef">
+                            <append_to_list name="$TargetRaces" exact="$PotentialRace"/>
+                          </do_if>
+                        </do_for_each>
+                        <do_if value="$TargetRaces.count">
+                          <do_for_each name="$TargetRace" in="$TargetRaces">
+                            <signal_cue_instantly cue="Investigate_Habitation_Inst" param="$TargetRace"/>
+                          </do_for_each>
+                        </do_if>
+                        <do_else>
+                          <assert value="$TargetRaces.count" text="'No habitation modules found for any potential races'"/>
+                        </do_else>
+                      </actions>
+                    </cue>
+
+                    <!--Patch cue as were signalling cues instantly-->
+                    <cue name="Patch_TriggerMissingMissions" onfail="cancel">
+                      <conditions>
+                        <check_value value="Investigate_Habitations_Init.state == cuestate.complete"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$ValidMissionRaces" exact="[]"/>
+                        <do_all exact="$SubMissionCues.count" counter="$patch_i" reverse="true">
+                          <do_if value="$SubMissionCues.{$patch_i}.exists">
+                            <append_to_list name="$ValidMissionRaces" exact="$SubMissionCues.{$patch_i}.$Race"/>
+                          </do_if>
+                          <do_else>
+                            <remove_value name="$SubMissionCues.{$patch_i}"/>
+                          </do_else>
+                        </do_all>
+                        <do_for_each name="$TargetRace" in="$TargetRaces">
+                          <do_if value="$CompletedRaces.indexof.{$TargetRace} == 0 and $ValidMissionRaces.indexof.{$TargetRace} == 0">
+                            <debug_text text="'Triggering missing mission to investigate ' + $TargetRace" filter="savegame"/>
+                            <signal_cue_instantly cue="Investigate_Habitation_Inst" param="$TargetRace"/>
+                          </do_if>
+                        </do_for_each>
+                        <remove_value name="$ValidMissionRaces"/>
+                      </actions>
+                    </cue>
+
+                    <!--event.param = race-->
+                    <cue name="Race_Investigated" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <append_to_list name="$CompletedRaces" exact="event.param"/>
+                        <do_if value="$CompletedRaces.count == $TargetRaces.count">
+                          <do_for_each name="$Precursor" in="$ResearchWare.research.precursors.list">
+                            <add_research ware="$Precursor"/>
+                          </do_for_each>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <cue name="Investigation_Completed" version="2">
+                      <conditions>
+                        <event_player_production_finished ware="$ResearchWare" research="true"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$InvestigationComplete"/>
+                        <create_mission cue="Investigate_Habitations" name="{20104,110101}" description="{30222,1804} + '\n\n' + {30222,1803}" missionthread="$MissionCue" type="missiontype.plot" faction="faction.civilian" difficulty="level.easy" abortable="false" icon="'briefing_boso_ta_01'" iconcaption="{30201,2}">
+                          <briefing>
+                            <objective step="1" action="objective.talkto" object="$Boso"/>
+                          </briefing>
+                          <objective step="1" action="objective.talkto" object="$Boso"/>
+                        </create_mission>
+                      </actions>
+                      <patch sinceversion="2">
+                        <create_mission cue="Investigate_Habitations" name="{20104,110101}" description="{30222,1804} + '\n\n' + {30222,1803}" missionthread="$MissionCue" type="missiontype.plot" faction="faction.civilian" difficulty="level.easy" abortable="false" icon="'briefing_boso_ta_01'" iconcaption="{30201,2}">
+                          <briefing>
+                            <objective step="1" action="objective.talkto" object="$Boso"/>
+                          </briefing>
+                          <objective step="1" action="objective.talkto" object="$Boso"/>
+                        </create_mission>
+                      </patch>
+                    </cue>
+
+                    <cue name="Boso_Player_Station_Warning">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="10min"/>
+                      <actions>
+                        <reset_cue cue="this"/>
+                      </actions>
+                      <cues>
+                        <cue name="Boso_Player_Station_Warning_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="Actor"             value="$Boso"/>
+                          <param name="WaitForFullscreen" value="false"/>
+                          <param name="Cutscene"          value="false"/>
+                          <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                          <param name="Lines"             value="[[30222158]]" comment="{10201,30222158}"/>
+                          <param name="IsInMission"       value="false"/>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <!--event.param = target race-->
+                    <cue name="Investigate_Habitation_Inst" instantiate="true" namespace="this">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$Base" exact="parent.namespace"/>
+                        <set_value name="$Race" exact="event.param"/>
+                        <set_value name="$DebugChance" exact="$Base.$DebugChance"/>
+
+                        <create_mission cue="namespace" name="readtext.{30222}.{$Base.$TextIDTable.{Investigate_Habitation_Inst.$Race}.$MissionTitleID}" description="{30222,1804}" missionthread="$Base.$MissionCue" type="missiontype.plot" faction="faction.civilian" difficulty="level.medium" abortable="false" icon="'briefing_boso_ta_01'" iconcaption="{30201,2}">
+                          <briefing>
+                            <objective step="1" action="objective.find" text="readtext.{30222}.{$Base.$TextIDTable.{Investigate_Habitation_Inst.$Race}.$FindHabID}"/>
+                            <objective step="2" action="objective.investigate" text="{30222,1810}"/>
+                          </briefing>
+                          <objective step="1" action="objective.find" text="readtext.{30222}.{$Base.$TextIDTable.{Investigate_Habitation_Inst.$Race}.$FindHabID}"/>
+                        </create_mission>
+                        <append_to_list name="$Base.$SubMissionCues" exact="namespace"/>
+                      </actions>
+                      <cues>
+                        <cue name="Investigate_Habitation_Inst_Manage_Stations">
+                          <actions>
+                            <create_group groupname="$NearHabModules"/>
+                          </actions>
+                          <cues>
+                            <cue name="Investigate_Habitation_Inst_Update_Nearest_Station">
+                              <actions>
+                                <clear_group group="$NearHabModules"/>
+                                <do_if value="player.sector">
+                                  <find_station name="$NearestStation" excluded="$Base.$ApproachedStations" space="player.sector" sortbydistanceto="player.entity" sortdescending="false"/>
+                                  <do_if value="$NearestStation">
+                                    <find_object_component name="$PotentialHabModules" object="$NearestStation" class="class.habitation" multiple="true" checkoperational="true"/>
+                                    <do_for_each name="$PotentialHabModule" in="$PotentialHabModules">
+                                      <do_if value="$PotentialHabModule.workforce.race == $Race">
+                                        <add_to_group groupname="$NearHabModules" object="$PotentialHabModule"/>
+                                      </do_if>
+                                    </do_for_each>
+                                  </do_if>
+                                </do_if>
+                              </actions>
+                              <delay min="10s" max="15s"/>
+                              <actions>
+                                <reset_cue cue="this"/>
+                              </actions>
+                              <cues>
+                                <cue name="Investigate_Habitation_Inst_Near_Module" checkinterval="1s">
+                                  <conditions>
+                                    <check_value value="$NearestStation and not player.entity.hascontext.{$NearestStation}"/>
+                                    <check_any exact="$NearHabModules.count" counter="$i">
+                                      <check_all>
+                                        <check_value value="player.entity.object.bboxdistanceto.{$NearHabModules.{$i}} lt 1km"/>
+                                        <set_value name="$NearestHabModule" exact="$NearHabModules.{$i}"/>
+                                      </check_all>
+                                    </check_any>
+                                  </conditions>
+                                  <actions>
+                                    <do_if value="$NearestStation.isplayerowned">
+                                      <do_if value="namespace.hasguidance">
+                                        <signal_cue cue="Boso_Player_Station_Warning" check="false"/>
+                                      </do_if>
+                                    </do_if>
+                                    <do_else>
+                                      <set_value name="$PossibleMissions" exact="[]"/>
+                                      <find_signalleak_location name="$LeakLocations" container="$NearestStation" multiple="true" excludefilled="true"/>
+                                      <do_if value="$LeakLocations.count">
+                                        <append_to_list name="$PossibleMissions" exact="Investigate_Habitation_Inst_Scan_Leak"/>
+                                      </do_if>
+                                      <do_if value="$NearestStation.hasrelation.dock.{faction.player}">
+                                        <append_to_list name="$PossibleMissions" exact="Investigate_Habitation_Inst_Plant_Device"/>
+                                      </do_if>
+                                      <add_to_group groupname="$Base.$ApproachedStations" object="$NearestStation"/>
+                                      <do_if value="$PossibleMissions.count">
+                                        <signal_cue cue="$PossibleMissions.random"/>
+                                      </do_if>
+                                      <do_else>
+                                        <assert value="$NearestStation.hasrelation.dock.{faction.player} or $LeakLocations.count" text="'Unable to find a suitable mission for ' + $NearestStation + ' ' + $NearestStation.knownname + ' [Owen]'"/>
+                                        <signal_cue_instantly cue="Race_Investigated" param="$Race"/>
+                                        <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                        <do_if value="$Base.$SubMissionCues.count">
+                                          <activate_mission cue="$Base.$SubMissionCues.{1}"/>
+                                        </do_if>
+                                        <remove_mission cue="namespace"/>
+                                        <cancel_cue cue="Investigate_Habitation_Inst"/>
+                                      </do_else>
+                                      <cancel_cue cue="Investigate_Habitation_Inst_Manage_Stations"/>
+                                    </do_else>
+                                  </actions>
+                                </cue>
+                              </cues>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                        <cue name="Investigate_Habitation_Inst_Plant_Device">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <set_value name="$Station" exact="$NearestStation"/>
+                            <set_value name="$StationSector" exact="$Station.sector"/>
+                            <create_group groupname="$NPCs"/>
+                            <get_room_definition macro="$CorridorMacro" doors="$CorridorDoors" race="$Station.owner.primaryrace" tags="tag.corridor"/>
+                            <get_room_definition macro="$RoomMacro" tags="tag.bar"/>
+                            <create_dynamic_interior object="$Station" corridor="$CorridorMacro" room="$RoomMacro" door="$CorridorDoors.{1}" name="'{20007,1031}'" interiorname="$BarInterior" corridorname="$BarCorridor" roomname="$BarRoom" persistent="true" private="true"/>
+                            <find_npc_slot name="$Slots" object="$BarRoom" multiple="true" tags="tag.npc"/>
+                            <do_all exact="[4, $Slots.count].min">
+                              <!--TODO @Owen other races-->
+                              <get_character_definition reference="$CharacterDef" faction="$Station.owner" race="$Race" tags="tag.casual"/>
+                              <do_if value="not $CharacterDef">
+                                <get_character_definition reference="$CharacterDef" faction="faction.player" race="$Race" tags="tag.casual" comment="Use faction.player here to make sure we select a definition usually suitable to be seen"/>
+                              </do_if>
+                              <do_if value="not $CharacterDef">
+                                <assert value="$CharacterDef" text="'Unable to find a suitable random casual character for race ' + $Race"/>
+                                <get_character_definition reference="$CharacterDef" race="$Race" tags="tag.casual" comment="Use faction.player here to make sure we select a definition usually suitable to be seen"/>
+                              </do_if>
+                              <do_if value="$CharacterDef">
+                                <create_cue_actor name="$NPC" cue="namespace" ref="$CharacterDef"/>
+                                <do_if value="$NPC">
+                                  <set_entity_traits entity="$NPC" missionactor="true"/>
+                                  <set_entity_overrides entity="$NPC" title="'{30222,1742}'" icon="'engineer'"/>
+                                  <add_to_group groupname="$NPCs" object="$NPC"/>
+                                  <set_value name="$Slot" exact="$Slots.random"/>
+                                  <remove_from_list name="$Slots" exact="$Slot"/>
+                                  <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $NPC, 
+                                        table[
+                                        $requestercue = namespace,
+                                        $location = $Slot,
+                                        $priority = 100,
+                                        $debugchance = $DebugChance,
+                                        $debugcaller = if $DebugChance == 100 then this else null]
+                                        ]"/>
+                                </do_if>
+                              </do_if>
+                            </do_all>
+                            <do_if value="$NPCs.count">
+                              <set_objective cue="namespace" action="objective.goto" object="$BarRoom" text="$BarInterior.knownname"/>
+                            </do_if>
+                            <do_else>
+                              <!--TODO @Owen #important failsafe-->
+                            </do_else>
+                          </actions>
+                          <cues>
+                            <cue name="Investigate_Habitation_Inst_Plant_Device_Cleanup_Helper">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <cues>
+                                <cue name="Investigate_Habitation_Inst_Plant_Device_Cleanup">
+                                  <conditions>
+                                    <event_object_changed_sector object="player.entity"/>
+                                    <check_value value="event.param != $StationSector"/>
+                                  </conditions>
+                                  <actions>
+                                    <debug_text text="'Destroying NPC group ' + $NPCs + ' and cancelling instance for ' + $Race" chance="$DebugChance"/>
+                                    <destroy_group group="$NPCs"/>
+                                    <do_if value="$BarInterior.exists">
+                                      <destroy_object object="$BarInterior"/>
+                                    </do_if>
+                                  </actions>
+                                  <delay exact="1ms"/>
+                                  <actions>
+                                    <cancel_cue cue="namespace"/>
+                                  </actions>
+                                </cue>
+                              </cues>
+                            </cue>
+                            <cue name="Investigate_Habitation_Inst_Plant_Device_Reset">
+                              <conditions>
+                                <event_object_destroyed object="$Station"/>
+                                <check_value value="Investigate_Habitation_Inst_Plant_Device_Cleanup_Helper.state == cuestate.waiting"/>
+                              </conditions>
+                              <actions>
+                                <signal_cue_instantly cue="Investigate_Habitation_Inst.static" param="$Race"/>
+                                <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                <remove_mission cue="namespace"/>
+                                <signal_cue cue="Investigate_Habitation_Inst_Plant_Device_Cleanup_Helper"/>
+                              </actions>
+                            </cue>
+
+                            <cue name="Investigate_Habitation_Inst_Plant_Device_In_Room">
+                              <conditions>
+                                <event_object_changed_room object="player.entity" room="$BarRoom"/>
+                              </conditions>
+                              <actions>
+                                <set_objective cue="namespace" action="objective.approach" text="$Race.name"/>
+                              </actions>
+                              <cues>
+                                <cue name="Investigate_Habitation_Inst_Plant_Device_Left_Room">
+                                  <conditions>
+                                    <event_object_changed_room object="player.entity" previous="$BarRoom"/>
+                                  </conditions>
+                                  <actions>
+                                    <set_objective cue="namespace" action="objective.goto" object="$BarRoom" text="$BarInterior.knownname"/>
+                                    <reset_cue cue="Investigate_Habitation_Inst_Plant_Device_In_Room"/>
+                                  </actions>
+                                </cue>
+
+                                <cue name="Investigate_Habitation_Inst_Plant_Device_Initialise" checkinterval="20ms">
+                                  <conditions>
+                                    <check_value value="@player.target.isclass.npc and player.target.race == $Race and player.entity.distanceto.{player.target} lt 2.5m"/>
+                                  </conditions>
+                                  <actions>
+                                    <set_value name="$DelayTime" exact="3s"/>
+                                    <set_value name="$StartTime" exact="player.age + $DelayTime"/>
+                                    <set_value name="$Duration" exact="6s"/>
+                                    <set_value name="$EndTime" exact="$StartTime + $Duration"/>
+                                    <set_value name="$CooldownTime" exact="5s"/>
+                                    <set_value name="$NPC" exact="player.target"/>
+                                    <set_value name="$Progress" exact="0"/>
+                                    <set_value name="$FirstTime" exact="true"/>
+                                    <show_notification text="{30222,1824} + {1001,120} + ' ' + $NPC.knownname" timeout="$DelayTime"/>
+                                  </actions>
+                                  <cues>
+                                    <cue name="Investigate_Habitation_Inst_Plant_Device_Tick" checkinterval="75ms" instantiate="true">
+                                      <conditions>
+                                        <check_value value="player.age ge $StartTime"/>
+                                      </conditions>
+                                      <actions>
+                                        <do_if value="$FirstTime">
+                                          <set_value name="$FirstTime" exact="false"/>
+                                          <set_objective cue="namespace" action="objective.custom" customaction="{30222,1811}" text="readtext.{30222}.{$Base.$TextIDTable.{Investigate_Habitation_Inst.$Race}.$PlantDeviceID}" silent="true"/>
+                                        </do_if>
+
+                                        <do_if value="player.entity.distanceto.{$NPC} lt 2.5m">
+                                          <do_if value="player.age ge $EndTime">
+                                            <update_objective_progress cue="namespace" progress="$EndTime" max="$EndTime"/>
+                                            <signal_cue_instantly cue="Race_Investigated" param="$Race"/>
+                                            <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                            <do_if value="$Base.$SubMissionCues.count">
+                                              <activate_mission cue="$Base.$SubMissionCues.{1}"/>
+                                            </do_if>
+                                            <remove_mission cue="namespace"/>
+                                            <signal_cue cue="Investigate_Habitation_Inst_Plant_Device_Cleanup_Helper"/>
+                                            <cancel_cue cue="Investigate_Habitation_Inst_Plant_Device_In_Room"/>
+                                          </do_if>
+                                          <do_else>
+                                            <update_objective_progress cue="namespace" progress="player.age - $StartTime" max="$Duration"/>
+                                          </do_else>
+                                        </do_if>
+                                        <do_else>
+                                          <show_notification text="{30222,1825}" timeout="$CooldownTime"/>
+                                          <set_objective cue="namespace" action="objective.approach" text="$Race.name"/>
+                                          <signal_cue cue="Investigate_Habitation_Inst_Plant_Device_Cooldown"/>
+                                          <cancel_cue cue="Investigate_Habitation_Inst_Plant_Device_Tick.static"/>
+                                        </do_else>
+                                      </actions>
+                                    </cue>
+                                    <cue name="Investigate_Habitation_Inst_Plant_Device_Cooldown">
+                                      <conditions>
+                                        <event_cue_signalled/>
+                                      </conditions>
+                                      <delay exact="$CooldownTime"/>
+                                      <actions>
+                                        <reset_cue cue="Investigate_Habitation_Inst_Plant_Device_Initialise"/>
+                                      </actions>
+                                    </cue>
+                                  </cues>
+                                </cue>
+                              </cues>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                        <cue name="Investigate_Habitation_Inst_Scan_Leak">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <set_value name="$Station" exact="$NearestStation"/>
+                          </actions>
+                          <cues>
+                            <cue name="Investigate_Habitation_Inst_Scan_Leak_Create">
+                              <actions>
+                                <set_value name="$Leak" exact="null"/>
+                                <find_signalleak_location name="$LeakLocations" container="$NearestStation" multiple="true" excludefilled="true"/>
+                                <shuffle_list list="$LeakLocations"/>
+                                <do_if value="@$NearestHabModule.isoperational">
+                                  <sort_list list="$LeakLocations" sortbyvalue="loop.element.component == $NearestHabModule" sortdescending="true"/>
+                                </do_if>
+                                <set_value name="$LeakLocation" exact="$LeakLocations.{1}"/>
+                                <do_if value="$LeakLocation">
+                                  <set_value name="$LeakMacro" exact="macro.dataleak_s_standard_01_macro"/>
+                                  <find_object_surface posname="$SurfacePos" rotname="$SurfaceRot" object="$LeakLocation.component" height="$LeakMacro.boundingbox.max.y - $LeakMacro.boundingbox.center.y">
+                                    <position value="$LeakLocation.offset" />
+                                    <!-- the rotation created by the normal would look away from the surface, we want a rotation that's looking parallel to the surface -->
+                                    <offsetrotation pitch="-90deg" />
+                                  </find_object_surface>
+                                  <do_if value="@$SurfacePos">
+                                    <create_signal_leak name="$Leak" macro="$LeakMacro" type="signalleaktype.data" object="$LeakLocation.component">
+                                      <position value="$SurfacePos" />
+                                      <rotation value="$SurfaceRot" />
+                                    </create_signal_leak>
+                                  </do_if>
+                                </do_if>
+
+                                <do_if value="$Leak">
+                                  <set_objective cue="namespace" step="2" action="objective.custom" customaction="{30222,1826}" text="{30222,1827}" object="$Leak" updatebriefing="true"/>
+                                </do_if>
+                                <do_else>
+                                  <signal_cue_instantly cue="Investigate_Habitation_Inst.static" param="$Race"/>
+                                  <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                  <remove_mission cue="namespace"/>
+                                  <cancel_cue cue="namespace"/>
+                                </do_else>
+                              </actions>
+                              <cues>
+                                <cue name="Investigate_Habitation_Inst_Scan_Leak_Scanned">
+                                  <conditions>
+                                    <check_any>
+                                      <event_player_repaired_signal_leak signal="$Leak"/>
+                                      <event_player_signal_unlock_impossible signal="$Leak"/>
+                                      <event_player_signal_unlock_finished signal="$Leak"/>
+                                    </check_any>
+                                  </conditions>
+                                  <actions>
+                                    <signal_cue_instantly cue="Race_Investigated" param="$Race"/>
+                                    <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                    <do_if value="$Base.$SubMissionCues.count">
+                                      <activate_mission cue="$Base.$SubMissionCues.{1}"/>
+                                    </do_if>
+                                    <remove_mission cue="namespace"/>
+                                    <cancel_cue cue="Investigate_Habitation_Inst"/>
+                                  </actions>
+                                </cue>
+                              </cues>
+                            </cue>
+                            <cue name="Investigate_Habitation_Inst_Scan_Leak_Reset" version="2">
+                              <conditions>
+                                <event_object_destroyed object="$Leak"/>
+                              </conditions>
+                              <delay exact="5s"/>
+                              <actions>
+                                <signal_cue_instantly cue="Investigate_Habitation_Inst.static" param="$Race"/>
+                                <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                <remove_mission cue="namespace"/>
+                                <cancel_cue cue="namespace"/>
+                              </actions>
+                              <patch sinceversion="2" state="waiting">
+                                <do_if value="not $Leak.exists">
+                                  <debug_text text="'Resetting welfare mission as leak does not exist'" filter="savegame"/>
+                                  <remove_from_list name="$Base.$SubMissionCues" exact="namespace"/>
+                                  <remove_mission cue="namespace"/>
+                                  <cancel_cue cue="namespace"/>
+                                </do_if>
+                              </patch>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Boso_Conversation_Started" instantiate="true">
+                  <conditions>
+                    <event_conversation_started actor="$Boso"/>
+                    <check_value value="$Boso.room"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Dal" exact="@md.$PersistentCharacters.$DalBusta"/>
+                    <do_if value="$InvestigationComplete and not $BlueprintAwarded">
+                      <add_player_choice text="{30222,1801}" section="welfare_2_ask"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Boso_Conversation_Started_Next" instantiate="true">
+                  <conditions>
+                    <event_conversation_next_section actor="$Boso"/>
+                  </conditions>
+                  <actions>
+                    <destroy_group group="$ConversationActors"/>
+                    <set_value name="$BosoRoom" exact="$Boso.room"/>
+                    <do_if value="event.param == 'welfare_2_ask'">
+                      <add_npc_line speaker="$Boso" line="30222163" comment="{10201,30222163}"/>
+                      <do_for_each name="$CompletedRace" in="$CompletedRaces">
+                        <substitute_text text="$ChoiceText" source="{30222,1831}">
+                          <replace string="'$RACE$'" with="$CompletedRace.name"/>
+                        </substitute_text>
+                        <add_player_choice text="$ChoiceText" section="welfare_2_ask_race" choiceparam="$CompletedRace"/>
+                      </do_for_each>
+                    </do_if>
+                    <do_elseif value="event.param == 'welfare_2_ask_race'">
+                      <do_if value="event.param2 == race.argon">
+                        <!--#CreativeSolution #hack Add actors in the room but out of sight so they don't appear in the monitor-->
+                        <get_character_definition macro="$CharacterMacros" faction="faction.argon" tags="tag.casual" multiple="true"/>
+                        <do_for_each name="$CharacterMacro" in="$CharacterMacros">
+                          <do_if value="$CharacterMacro.isfemale">
+                            <create_cue_actor name="$Argon_Actor_1" cue="namespace" macro="$CharacterMacro">
+                              <page exact="10172"/>
+                            </create_cue_actor>
+                            <add_actor_to_room actor="$Argon_Actor_1" object="$BosoRoom">
+                              <position object="player.entity" y="-4m" z="0m"/>
+                            </add_actor_to_room>
+                            <add_to_group groupname="$ConversationActors" object="$Argon_Actor_1"/>
+                            <break/>
+                          </do_if>
+                        </do_for_each>
+                        <do_for_each name="$CharacterMacro" in="$CharacterMacros">
+                          <do_if value="not $CharacterMacro.isfemale">
+                            <create_cue_actor name="$Argon_Actor_2" cue="namespace" macro="$CharacterMacro">
+                              <page exact="10173"/>
+                            </create_cue_actor>
+                            <add_actor_to_room actor="$Argon_Actor_2" object="$BosoRoom">
+                              <position object="player.entity" y="-4m" z="0m"/>
+                            </add_actor_to_room>
+                            <add_to_group groupname="$ConversationActors" object="$Argon_Actor_2"/>
+                            <break/>
+                          </do_if>
+                        </do_for_each>
+                        <add_npc_line speaker="$Boso" line="30222164" hidechoices="true"/>
+                        <do_if value="player.entity.race == race.argon">
+                          <add_npc_line speaker="$Boso" line="30222165" hidechoices="true" comment="{10201,30222165}"/>
+                        </do_if>
+                        <add_npc_line speaker="$Boso" line="30222166" hidechoices="true" comment="{10201,30222166}"/>
+                        <add_npc_line speaker="$Argon_Actor_1" line="30222050" hidechoices="true" comment="{10172,30222050}"/>
+                        <add_npc_line speaker="$Argon_Actor_2" line="30222100" hidechoices="true" comment="{10173,30222100}"/>
+                        <add_npc_line speaker="$Argon_Actor_1" line="30222051" hidechoices="true" comment="{10172,30222051}"/>
+                        <add_npc_line speaker="$Boso" line="30222167" hidechoices="true" comment="{10201,30222167}"/>
+                        <do_if value="@$Dal.room == $BosoRoom">
+                          <add_npc_line speaker="$Dal" line="30222151" hidechoices="true" comment="{10111,30222151}"/>
+                        </do_if>
+                      </do_if>
+                      <do_elseif value="event.param2 == race.paranid">
+                        <create_cue_actor name="$Paranid_Actor" cue="namespace">
+                          <select race="race.paranid" tags="tag.casual"/>
+                          <page exact="10355"/>
+                        </create_cue_actor>
+                        <add_actor_to_room actor="$Paranid_Actor" object="$BosoRoom">
+                          <position object="player.entity" y="-4m" z="0m"/>
+                        </add_actor_to_room>
+                        <add_to_group groupname="$ConversationActors" object="$Paranid_Actor"/>
+                        <add_npc_line speaker="$Boso" line="30222168" hidechoices="true" comment="{10201,30222168}"/>
+                        <add_npc_line speaker="$Paranid_Actor" line="30222050" hidechoices="true" comment="{10355,30222050}"/>
+                        <add_npc_line speaker="$Boso" line="30222169" hidechoices="true" comment="{10201,30222169}"/>
+                      </do_elseif>
+                      <do_elseif value="event.param2 == race.split">
+                        <create_cue_actor name="$Split_Actor" cue="namespace">
+                          <select race="race.split" tags="tag.casual"/>
+                          <page exact="10452"/>
+                        </create_cue_actor>
+                        <add_actor_to_room actor="$Split_Actor" object="$BosoRoom">
+                          <position object="player.entity" y="-4m" z="0m"/>
+                        </add_actor_to_room>
+                        <add_to_group groupname="$ConversationActors" object="$Split_Actor"/>
+                        <add_npc_line speaker="$Boso" line="30222170" hidechoices="true" comment="{10201,30222170}"/>
+                        <add_npc_line speaker="$Boso" line="30222171" hidechoices="true" comment="{10201,30222171}"/>
+                        <add_npc_line speaker="$Split_Actor" line="30222050" hidechoices="true" comment="{10452,30222050}"/>
+                        <add_npc_line speaker="$Boso" line="30222172" hidechoices="true" comment="{10201,30222172}"/>
+                        <add_npc_line speaker="$Boso" line="30222173" hidechoices="true" comment="{10201,30222173}"/>
+                      </do_elseif>
+                      <do_elseif value="event.param2 == race.teladi">
+                        <create_cue_actor name="$Teladi_Actor" cue="namespace">
+                          <select race="race.teladi" tags="tag.casual"/>
+                          <page exact="10558"/>
+                        </create_cue_actor>
+                        <add_actor_to_room actor="$Teladi_Actor" object="$BosoRoom">
+                          <position object="player.entity" y="-4m" z="0m"/>
+                        </add_actor_to_room>
+                        <add_to_group groupname="$ConversationActors" object="$Teladi_Actor"/>
+                        <add_npc_line speaker="$Boso" line="30222174" hidechoices="true" comment="{10201,30222174}"/>
+                        <add_npc_line speaker="$Boso" line="30222175" hidechoices="true" comment="{10201,30222175}"/>
+                        <add_npc_line speaker="$Teladi_Actor" line="30222050" hidechoices="true" comment="{10355,30222050}"/>
+                        <add_npc_line speaker="$Boso" line="30222176" hidechoices="true" comment="{10201,30222176}"/>
+                        <do_if value="@$Dal.room == $BosoRoom">
+                          <add_npc_line speaker="$Dal" line="30222152" hidechoices="true" comment="{10111,30222152}"/>
+                        </do_if>
+                      </do_elseif>
+                      <do_elseif value="event.param2 == race.terran">
+                        <add_npc_line speaker="$Boso" line="30222177" hidechoices="true" comment="{10201,30222177}"/>
+                        <add_npc_line speaker="$Boso" line="30222178" hidechoices="true" comment="{10201,30222178}"/>
+                        <add_npc_line speaker="$Boso" line="30222179" hidechoices="true" comment="{10201,30222179}"/>
+                      </do_elseif>
+                      <do_for_each name="$ConversationActor" in="$ConversationActors">
+                        <set_entity_traits entity="$ConversationActor" missionactor="true"/>
+                        <set_entity_overrides entity="$ConversationActor" icon="'pilot'"/>
+                      </do_for_each>
+
+                      <do_if value="$MentionedRaces.indexof.{event.param2} == 0">
+                        <append_to_list name="$MentionedRaces" exact="event.param2"/>
+                      </do_if>
+                      <do_if value="$MentionedRaces.count ge $CompletedRaces.count">
+                        <add_npc_line speaker="$Boso" line="30222180" hidechoices="true" comment="{10201,30222180}"/>
+                        <set_value name="$BlueprintAwarded" exact="true"/>
+                        <add_blueprints wares="ware.module_gen_welfare_casino_01"/>
+                        <remove_mission cue="$MissionCue"/>
+                      </do_if>
+                      <do_else>
+                        <do_for_each name="$CompletedRace" in="$CompletedRaces">
+                          <substitute_text text="$ChoiceText" source="{30222,1831}">
+                            <replace string="'$RACE$'" with="$CompletedRace.name"/>
+                          </substitute_text>
+                          <add_player_choice text="$ChoiceText" section="welfare_2_ask_race" choiceparam="$CompletedRace" highlighted="if $MentionedRaces.indexof.{$CompletedRace} == 0 then true else false"/>
+                        </do_for_each>
+                      </do_else>
+                    </do_elseif>
+                  </actions>
+                </cue>
+
+                <cue name="Boso_Conversation_Finished" instantiate="true">
+                  <conditions>
+                    <event_conversation_finished actor="$Boso"/>
+                  </conditions>
+                  <actions>
+                    <destroy_group group="$ConversationActors"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

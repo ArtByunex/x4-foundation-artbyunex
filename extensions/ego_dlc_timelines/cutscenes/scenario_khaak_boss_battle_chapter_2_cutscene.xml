@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_khaak_boss_battle_chapter_2_cutscene">
+    <params>
+      <param name="startorbitdist" number="true"/>
+      <param name="endorbitdist" number="true"/>
+    </params>
+  </director>
+    
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_firstshot" zone="@auto:targetobject" />
+    <environment_implicit name="scenezone_secondshot" zone="@auto:targetobject2" />
+    <object_group name="target_group">
+      <reference object="targetobject" />
+      <reference object="targetobject2"/>
+      <reference object="targetobject3"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="OrbitSequence" start="0">
+        <shot name="OrbitShot" environment="scenezone_firstshot" duration="onevent:TriggerArgonFleetShot">
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none" >
+            <begin angle="180">
+              <distance>
+                <value var="startorbitdist"/>
+              </distance>
+            </begin>
+            <end angle="360" time="40000">
+              <distance>
+                <value var="endorbitdist"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="ArgonFleetSequence" start="onevent:TriggerArgonFleetShot">
+        <shot name="ArgonFleetShot" environment="scenezone_secondshot" duration="onevent:TriggerPlayerShipShot">
+          <camera_orbit reference="targetobject2" orient_to="ecliptic" cycle="none" >
+            <begin angle="180">
+              <distance>
+                <value var="startorbitdist"/>
+              </distance>
+            </begin>
+            <end angle="360" time="40000">
+              <distance>
+                <value var="endorbitdist"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="PlayerShipSequence" start="onevent:TriggerPlayerShipShot">
+        <shot name="PlayerShipShot" environment="scenezone_firstshot" duration="onevent:done">
+          <camera_orbit reference="targetobject3" orient_to="object" elevation="50%" cycle="none" >
+            <begin distance="300" angle="90"/>
+            <end distance="200" angle="270" time="5000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+
+    </actions>
+  </presentation>
+
+</cutscene>

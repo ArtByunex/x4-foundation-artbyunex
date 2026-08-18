@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+<!-- Nopileos Memorial 6 -->
+  <macro name="scenario_escort_1_cluster_04_macro" class="cluster">
+    <component ref="standardcluster" />
+    <connections>
+      <connection name="scenario_escort_1_cluster_04_sector001_connection" ref="sectors">
+        <macro ref="scenario_escort_1_cluster_04_sector001_macro" connection="cluster" />
+      </connection>
+
+<!-- New regions -->
+<!-- cloud region -->
+      <connection name="region001_connection" ref="regions">
+        <offset>
+          <position x="0" y="0" z="64400" />
+        </offset>
+        <macro name="region001_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="scenario_escort_1_region002_macro" />
+          </properties>
+        </macro>
+      </connection>
+
+      <!-- <connection name="region002_connection" ref="regions">
+        <offset>
+          <position x="0" y="0" z="60400" />
+        </offset>
+        <macro name="region002_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="scenario_escort_1_region002_macro" />
+          </properties>
+        </macro>
+      </connection> -->
+
+<!-- Leaving original NF regions in -->
+      <connection name="C04S01_Region001_connection" ref="regions">
+        <macro name="C04S01_Region001_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="audioregion_cluster_04_sector_001" />
+          </properties>
+        </macro>
+      </connection>
+      <!-- <connection name="C04S02_Region001_connection" ref="regions">
+        <offset>
+          <position x="1046580.8125" y="0" z="-20353148" />
+        </offset>
+        <macro name="C04S02_Region001_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="audioregion_cluster_04_sector_002" />
+          </properties>
+        </macro>
+      </connection> -->
+      <connection name="C04S01_Region002_connection" ref="regions">
+        <offset>
+          <position x="6155374" y="0" z="8564533" />
+        </offset>
+        <macro name="C04S01_Region002_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="region2_cluster_04_sector_001" />
+          </properties>
+        </macro>
+      </connection>
+      <connection name="C04S01_Region003_connection" ref="regions">
+        <offset>
+          <position x="0" y="-25000" z="0" />
+        </offset>
+        <macro name="C04S01_Region003_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="region3_cluster_04_sector_001" />
+          </properties>
+        </macro>
+      </connection>
+      <connection name="C04S01_Region004_connection" ref="regions">
+        <offset>
+          <position x="2178430" y="-21031" z="2959610" />
+        </offset>
+        <macro name="C04S01_Region004_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="region_highyield_nividium" />
+          </properties>
+        </macro>
+      </connection>
+      <connection ref="content">
+        <macro>
+          <component connection="space" ref="Cluster_04" />
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+
+</macros>

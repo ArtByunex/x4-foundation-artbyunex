@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Diplomacy_Intro_5">
+    <params>
+      <param name="room" object="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scene" zone="@auto:room" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+
+      <!--first sequence starts at 0 - ends on event-->
+      <sequence name="ReenDal1Sequence" start="0">
+        <shot name="ReenDal1" environment="scene" duration="onevent:ReenDal1End">
+          <camera_orbit reference="room" x="-0.5" y="-0.4" z="-2.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="40" distance="5.2" elevation="0.4"/>
+            <end angle="45" distance="4.7" elevation="0.2" time="35000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="DalSlowZoomSequence" start="onevent:DalSlowZoomStart">
+        <shot name="DalSlowZoom" environment="scene" duration="onevent:DalSlowZoomEnd">
+          <camera_orbit reference="room" x="-0.6" y="-0.2" z="-0.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="270" distance="2.2" elevation="-0.3"/>
+            <end angle="275" distance="1.7" elevation="-0.2" time="30000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenLeftSequence" start="onevent:ReenLeftStart">
+        <shot name="ReenLeft" environment="scene" duration="onevent:ReenLeftEnd">
+          <camera_orbit reference="room" x="-0.5" y="-0.5" z="-1.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="240" distance="2.5" elevation="-0.4"/>
+            <end angle="230" distance="2.3" elevation="-0.2" time="40000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenCloseSequence" start="onevent:ReenCloseStart">
+        <shot name="ReenClose2" environment="scene" duration="onevent:ReenCloseEnd">
+          <camera_orbit reference="room" x="-0.5" y="-0.5" z="-4.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="72" distance="2.9" elevation="-0.2"/>
+            <end angle="74" distance="2.3" elevation="-0.2" time="40000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="DalCloseSequence" start="onevent:DalCloseStart">
+        <shot name="DalClose" environment="scene" duration="onevent:DalCloseEnd">
+          <camera_orbit reference="room" x="-0.8" y="-0.4" z="-0.2" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="300" distance="2.1" elevation="0.1"/>
+            <end angle="310" distance="1.9" elevation="0.0" time="40000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenRightSequence" start="onevent:ReenRightStart">
+        <shot name="ReenRight" environment="scene" duration="onevent:ReenRightEnd">
+          <camera_orbit reference="room" x="-0.5" y="-0.4" z="-0.8" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-5" distance="4.9" elevation="0.2"/>
+            <end angle="-15" distance="4.5" elevation="0.2" time="40000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

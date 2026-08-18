@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<diff>
+  <add sel="/jobs">
+    <!--Argon traders for new sector (not locked to it specifically on purpose)-->
+    <job id="argon_generic_trader_m_timelines" name="{20204,501}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="Middleman" default="true">
+          <param name="range" value="5"/>
+        </order>
+      </orders>
+      <basket basket="all_container"/>
+      <category faction="argon" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+      <quota galaxy="3" cluster="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="ally" comparison="ge"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="argon" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+        <owner exact="argon" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- KAORI
+        Starting Clusters: 3
+        Sectors: 3
+      -->
+      <!--Traders-->
+  <job id="kaori_universal_trader_l" name="{20204,501}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="1"/>
+          <param name="minsell" value="3"/>
+          <param name="maxsell" value="6"/>
+        </order>
+      </orders>
+      <basket basket="construction_ships_expanded"/>
+      <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+      <quota galaxy="2" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" stationfaction="kaori" stationtype="[wharf, shipyard]"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+      </ship>
+  </job>
+
+   <job id="kaori_universal_trader_l_refined" name="{20204,501}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="1"/>
+          <param name="minsell" value="3"/>
+          <param name="maxsell" value="6"/>
+        </order>
+      </orders>
+      <basket basket="refined"/>
+      <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+      <quota galaxy="2" sector="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" stationfaction="kaori" stationtype="[wharf, shipyard]"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[trader, container]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.3">
+            <variation exact="0.4"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+      </ship>
+   </job>
+
+   <job id="kaori_bio_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="bio"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="4" cluster="2" sector="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_food_trader_s" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="food"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+    <quota galaxy="4" cluster="2" sector="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_s"/>
+      <quantity exact="1.0"/>
+      <quality exact="0.3">
+        <variation exact="0.4"/>
+      </quality>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_medical_trader_s" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="medicalsupplies"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+    <quota galaxy="3" sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_energycell_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="energycells"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="5" cluster="2" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_equipment_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="equipment"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="2" cluster="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_construction_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="construction_stations"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="2" cluster="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_ship_construction_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="true" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="construction_ships"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="2" cluster="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_refinedgas_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="refined_gas"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="4" cluster="2" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_refinedmineral_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="refined_mineral"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="6" cluster="3" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_tech_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="tech"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="2" cluster="2" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_tech_trader_s" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="tech"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+    <quota galaxy="6" cluster="3" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_water_trader_m" name="{20204,9001}" startactive="false">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="5"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="5"/>
+        <param name="buyfromfactions" value="['own']"/>
+        <param name="selltofactions" value="['own']"/>
+      </order>
+    </orders>
+    <basket basket="water"/>
+    <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="3" />
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+    
+  <!--Miners-->
+    <job id="kaori_free_miner_m_mineral" name="{20204,5601}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="3"/>
+          <param name="minsell" value="0"/>
+          <param name="maxsell" value="3"/>
+        </order>
+      </orders>
+      <basket basket="minerals"/>
+      <category faction="kaori" tags="[factionlogic, freighter, miner]" size="ship_m"/>
+      <quota galaxy="8" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact" regionbasket="minerals"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[miner, solid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell"/>
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+    
+    <job id="kaori_free_miner_m_ice" name="{20204,2001}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="3"/>
+          <param name="minsell" value="0"/>
+          <param name="maxsell" value="3"/>
+        </order>
+      </orders>
+      <basket basket="ice"/>
+      <category faction="kaori" tags="[factionlogic, freighter, miner]" size="ship_m"/>
+      <quota galaxy="5" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact" regionbasket="ice"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[miner, solid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell"/>
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+
+    <job id="kaori_free_miner_m_liquid" name="{20204,5701}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="MiningRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="3"/>
+          <param name="minsell" value="0"/>
+          <param name="maxsell" value="3"/>
+        </order>
+      </orders>
+      <basket basket="gases"/>
+      <category faction="kaori" tags="[factionlogic, freighter, miner]" size="ship_m"/>
+      <quota galaxy="6"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact" regionbasket="gases"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[miner, liquid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+        <cargo>
+          <wares>
+            <fillpercent min="0" max="100" profile="inversebell"/>
+          </wares>
+        </cargo>
+      </ship>
+    </job>
+    
+  <!--Ore/Gas traders-->
+    <job id="kaori_free_miner_s_mineral_trader" name="{20204,9001}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="5"/>
+          <param name="minsell" value="0"/>
+          <param name="maxsell" value="5"/>
+          <param name="buyfromfactions" value="['own']"/>
+          <param name="selltofactions" value="['own']"/>
+        </order>
+      </orders>
+      <basket basket="minerals"/>
+      <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+      <quota galaxy="8" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[miner, solid]" size="ship_s"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <job id="kaori_free_miner_m_liquid_trader" name="{20204,9001}" startactive="false">
+      <modifiers rebuild="false" commandeerable="true"/>
+      <orders>
+        <order order="TradeRoutine" default="true">
+          <param name="minbuy" value="0"/>
+          <param name="maxbuy" value="5"/>
+          <param name="minsell" value="0"/>
+          <param name="maxsell" value="5"/>
+          <param name="buyfromfactions" value="['own']"/>
+          <param name="selltofactions" value="['own']"/>
+        </order>
+      </orders>
+      <basket basket="gases"/>
+      <category faction="kaori" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+      <quota galaxy="3"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact" />
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="kaori" tags="[miner, liquid]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.5"/>
+          </quality>
+        </loadout>
+        <owner exact="kaori" overridenpc="true"/>
+      </ship>
+    </job>
+
+    <!-- Kaori Combat Jobs -->
+  <!-- Mostly small patrols, no L ships -->
+
+  <job id="kaori_mixed_patrol_m_sector" name="{20204,9101}" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[factionlogic, military, mixed]" size="ship_m"/>
+    <quota galaxy="8" sector="4"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[military, mixed]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="kaori_mixed_escort_m"/>
+    </subordinates>
+  </job>
+
+  <job id="kaori_fighter_patrol_s_zone" name="{20204,9101}" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[factionlogic, military, fighter]" size="ship_s"/>
+    <quota galaxy="12"  zone="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[fighter, heavy]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="kaori_fighter_escort_s_patrol"/>
+    </subordinates>
+  </job>
+
+  <job id="kaori_scout_patrol_s" name="{20204,2801}" comment="only few explorers" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Recon" default="true">
+        <param name="deploysatellites" value="true"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[factionlogic, scout]" size="ship_s"/>
+    <quota galaxy="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="lt" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[scout]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- <job id="kaori_police_patrol_s" name="{20204,6101}" comment="each sector, expansion">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Police" default="true"/>
+    </orders>
+    <category faction="kaori" tags="[police]" size="ship_s"/>
+    <quota galaxy="60" sector="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" policefaction="kaori" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <level min="0.1" max="0.7"/>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job> -->
+
+  <!-- Kaori Escorts -->
+  <job id="kaori_mixed_escort_m" name="{20204,9101}" startactive="false">
+    <orders>
+      <order order="Escort" default="true">
+        <param name="formation" value="formationshape.dartvertical"/>
+        <param name="formationparam" value="2500m"/>
+        <param name="overrideformationskill" value="true"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[military]" size="ship_m"/>
+    <quota wing="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <modifiers subordinate="true"/>
+    <ship>
+      <select faction="kaori" tags="[military, medium]" size="ship_m"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.9">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="kaori_fighter_escort_s_mixed"/>
+    </subordinates>
+  </job>
+
+  <job id="kaori_fighter_escort_s_mixed" name="{20204,9101}" startactive="false">
+    <orders>
+      <order order="Escort" default="true">
+        <param name="formation" value="formationshape.pointguard"/>
+        <param name="overrideformationskill" value="true"/>
+      </order>
+    </orders>
+    <quota wing="3" variation="1"/>
+    <category faction="kaori" tags="[military, fighter]" size="ship_s"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <modifiers subordinate="true"/>
+    <ship>
+      <select faction="kaori" tags="[military, fighter, selection]" size="ship_s"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="kaori_fighter_escort_s_patrol" name="{20204,9101}" startactive="false">
+    <orders>
+      <order order="Escort" default="true">
+        <param name="formation" value="formationshape.pointguard"/>
+        <param name="overrideformationskill" value="true"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[military, fighter]" size="ship_s"/>
+    <quota wing="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <modifiers subordinate="true"/>
+    <ship>
+      <select faction="kaori" tags="[military, fighter, light]" size="ship_s"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.7">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!--Kaori Misc-->
+  <job id="kaori_construction_vessel_xl_focused" name="{20204,5101}" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="FindBuildTasks" default="true">
+        <param name="maxjumps" value="3"/>
+        <param name="ownfactiononly" value="true"/>
+      </order>
+    </orders>
+    <category faction="kaori" tags="[factionlogic, builder]" size="ship_xl"/>
+    <quota galaxy="2" sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="kaori" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="kaori" tags="[builder]" size="ship_xl"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="kaori" overridenpc="true"/>
+    </ship>
+  </job>
+
+    <!--Xenon jobs for Matrix 101-->
+    <job id="xenon_terraformer_patrol_l_matrix" name="{20204,9101}" comment="home sector only" startactive="false">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector"/>
+        </order>
+      </orders>
+      <category faction="xenon" tags="[military, terraformer]" size="ship_l"/>
+      <quota galaxy="2" sector="2"/>
+      <location class="galaxy" macro="cluster_708_macro" faction="xenon" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="xenon" tags="[military, terraformer]" size="ship_l"/>
+        <owner exact="xenon" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="xenon_frigate_escort_m"/>
+        <subordinate job="xenon_frigate_escort_m"/>
+        <subordinate job="xenon_frigate_escort_m"/>
+      </subordinates>
+    </job>
+
+  </add>
+</diff>

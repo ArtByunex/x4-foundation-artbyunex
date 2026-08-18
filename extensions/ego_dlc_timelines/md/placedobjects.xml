@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/mdscript/cues">
+    <!-- Matrix #101 -->
+    <cue name="Place_Matrix101" namespace="this">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <find_cluster name="$Matrix101_Cluster" macro="macro.cluster_708_macro" required="1"/>
+          <find_sector name="$Matrix101_Sector" macro="macro.cluster_708_sector001_macro" required="1"/>
+          <create_station name="$XBTFStation_708" macro="macro.station_xen_defence_base_01_macro" constructionplan="'xen_defense_xbeyond'" sector="$Matrix101_Sector" owner="faction.xenon" state="componentstate.operational">
+            <position x="-52000" y="0" z="-18800"/>
+          </create_station>
+          <set_module_loadout_level object="$XBTFStation_708" exact="1"/>
+          <signal_objects object="player.galaxy" param="'init station'" param2="$XBTFStation_708" param3="true" comment="Add control entities."/>
+          <create_object name="$M0Wreck" macro="macro.landmarks_xen_xl_mothership_01_macro" sector="$Matrix101_Sector" owner="faction.ownerless" spinning="false">
+            <position x="-44200m" y="-4300m" z="-18500m"/>
+            <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+          </create_object>
+
+          <do_all min="10" max="15">
+            <set_value name="$RotationYaw" min="0deg" max="360deg"/>
+            <create_object macro="[macro.env_asteroid_xenon_l_02_macro,
+                                   macro.env_asteroid_xenon_xl_04_macro,
+                                   macro.env_asteroid_xenon_xl_02_macro,
+                                   macro.env_asteroid_xenon_xxl_05_macro,
+                                   macro.env_asteroid_xenon_xxl_06_macro,
+                                   macro.env_asteroid_xenon_xxl_07_macro,].random" sector="$Matrix101_Sector" owner="faction.ownerless" spinning="false">
+              <position object="$XBTFStation_708" min="12km" max="30km"/>
+              <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+            </create_object>
+          </do_all>
+          <do_all min="5" max="7">
+            <set_value name="$RotationYaw" min="0deg" max="360deg"/>
+            <create_station groupname="$AstroStations" macro="macro.asteroid_turret_m_01_macro" sector="$Matrix101_Sector" owner="faction.xenon" state="componentstate.operational">
+              <position object="$XBTFStation_708" min="12km" max="25km"/>
+              <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+            </create_station>
+          </do_all>
+          <do_for_each name="$Station" in="$AstroStations">
+            <signal_objects object="player.galaxy" param="'init station'" param2="$Station" param3="false" comment="Add control entities."/>
+          </do_for_each>
+        </do_if>
+      </actions>
+    </cue>
+  </add>
+  
+	<!-- Scenario_Transport_Refugees: suppresses these types of errors
+	[=ERROR=] 474.07 Error in MD cue md.PlacedObjects.Place_DataVaults_Unlocked1: Property lookup failed: $leak1
+	* Expression: $leak1
+	-->
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked1&quot;]/conditions/check_any" type="@chance">if @$leak1 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked2&quot;]/conditions/check_any" type="@chance">if @$leak2 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked3&quot;]/conditions/check_any" type="@chance">if @$leak3 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked4&quot;]/conditions/check_any" type="@chance">if @$leak4 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked5&quot;]/conditions/check_any" type="@chance">if @$leak5 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked6&quot;]/conditions/check_any" type="@chance">if @$leak6 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked7&quot;]/conditions/check_any" type="@chance">if @$leak7 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked8&quot;]/conditions/check_any" type="@chance">if @$leak8 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked9&quot;]/conditions/check_any" type="@chance">if @$leak9 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked10&quot;]/conditions/check_any" type="@chance">if @$leak10 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked11&quot;]/conditions/check_any" type="@chance">if @$leak11 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked12&quot;]/conditions/check_any" type="@chance">if @$leak12 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked13&quot;]/conditions/check_any" type="@chance">if @$leak13 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked14&quot;]/conditions/check_any" type="@chance">if @$leak14 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked15&quot;]/conditions/check_any" type="@chance">if @$leak15 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked16&quot;]/conditions/check_any" type="@chance">if @$leak16 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked17&quot;]/conditions/check_any" type="@chance">if @$leak17 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked18&quot;]/conditions/check_any" type="@chance">if @$leak18 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked19&quot;]/conditions/check_any" type="@chance">if @$leak19 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked20&quot;]/conditions/check_any" type="@chance">if @$leak20 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked21&quot;]/conditions/check_any" type="@chance">if @$leak21 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked22&quot;]/conditions/check_any" type="@chance">if @$leak22 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked23_a&quot;]/conditions/check_any" type="@chance">if @$leak23 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked23_b&quot;]/conditions/check_any" type="@chance">if @$leak23_b then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked24&quot;]/conditions/check_any" type="@chance">if @$leak24 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked25&quot;]/conditions/check_any" type="@chance">if @$leak25 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked26&quot;]/conditions/check_any" type="@chance">if @$leak26 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked27&quot;]/conditions/check_any" type="@chance">if @$leak27 then 100 else 0</add>
+	<add sel="//cue[@name=&quot;Place_DataVaults_Unlocked28&quot;]/conditions/check_any" type="@chance">if @$leak28 then 100 else 0</add>
+</diff>

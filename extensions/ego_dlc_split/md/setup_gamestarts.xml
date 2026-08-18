@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues">
+
+    <cue name="X4ep1_Gamestart_Split_Shared">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <!-- TODO -->
+        <debug_text text="'Split Shared'"/>
+      </actions>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Split1" module="x4ep1_gamestart_split1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- setup specific to split gamestart 1-->
+        <!-- TODO -->
+        
+        <!-- trigger setup shared by all split gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Split_Shared"/>
+      </actions>
+    </cue>
+
+    <cue name="X4ep1_Gamestart_Split2" module="x4ep1_gamestart_split2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- setup specific to split gamestart 1-->
+        <!-- TODO -->
+
+        <!-- trigger setup shared by all split gamestarts -->
+        <signal_cue cue="X4ep1_Gamestart_Split_Shared"/>
+      </actions>
+    </cue>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ArgonShips'][1]" pos="before">
+    <set_value name="$SplitShips" exact="[]"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_fighter_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_fighter_02_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_heavyfighter_02_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_scout_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_s_trans_container_01_a_macro"/>
+
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_bomber_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_trans_container_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_miner_liquid_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_miner_solid_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_frigate_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_corvette_01_a_macro"/>
+    <append_to_list name="$SplitShips" exact="macro.ship_spl_m_corvette_01_b_macro"/>
+    <append_list_elements name="$ShipMacros" other="$SplitShips"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_elseif[@value='$ParanidShips.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$SplitShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.split" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//set_value[@name='$CapshipMacros']" pos="after">
+    <set_value name="$SplitCapships" exact="[]"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_xl_carrier_01_a_macro"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_xl_resupplier_01_a_macro"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_l_destroyer_01_a_macro"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_l_trans_container_01_a_macro"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_l_miner_solid_01_a_macro"/>
+    <append_to_list name="$SplitCapships" exact="macro.ship_spl_l_miner_liquid_01_a_macro"/>
+    <append_list_elements name="$CapshipMacros" other="$SplitCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$ParanidCapships.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$SplitCapships.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.split" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//remove_value[@name='$CapshipMacros']" pos="before">
+    <remove_value name="$SplitCapships"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform_2']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ShipMacros'][1]" pos="before">
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_fighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_fighter_02_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_heavyfighter_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_heavyfighter_02_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_scout_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_s_trans_container_01_a_macro"/>
+
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_bomber_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_trans_container_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_miner_liquid_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_miner_solid_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_frigate_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_corvette_01_a_macro"/>
+    <append_to_list name="$ShipMacros" exact="macro.ship_spl_m_corvette_01_b_macro"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform_2']//do_if[@value='$DockAreas.count']" pos="after">
+    <set_value name="$CapshipMacros" exact="[]"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_l_destroyer_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_l_trans_container_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_l_miner_solid_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_l_miner_liquid_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_xl_resupplier_01_a_macro"/>
+    <append_to_list name="$CapshipMacros" exact="macro.ship_spl_xl_carrier_01_a_macro"/>
+    <do_all exact="$CapshipMacros.count" counter="$i">
+      <generate_loadout result="$loadout" faction="faction.split" macro="$CapshipMacros.{$i}"/>
+      <create_ship name="$Capship" macro="$CapshipMacros.{$i}" sector="$Station.sector">
+        <owner exact="faction.player" overridenpc="true"/>
+        <loadout loadout="$loadout.{1}"/>
+        <pilot>
+          <select race="race.split"/>
+        </pilot>
+        <drop ref="ship_large_civilian" />
+        <safepos object="$Station" max="5km"/>
+      </create_ship>
+    </do_all>
+    <remove_value name="$CapshipMacros"/>
+  </add>
+
+
+  <replace sel="//cue[@name='Test_Battle']//actions">
+    <actions>
+      <set_faction_known faction="faction.alliance" known="true" />
+      <set_faction_known faction="faction.antigone" known="true" />
+      <set_faction_known faction="faction.argon" known="true" />
+      <set_faction_known faction="faction.hatikvah" known="true" />
+      <set_faction_known faction="faction.holyorder" known="true" />
+      <set_faction_known faction="faction.ministry" known="true"/>
+      <set_faction_known faction="faction.scaleplate" known="true" />
+      <set_faction_known faction="faction.teladi" known="true" />
+      <set_faction_known faction="faction.xenon" known="true" />
+      <set_faction_known faction="faction.split" known="true"/>
+
+      <set_faction_relation faction="faction.player" otherfaction="faction.split" value="-0.32"/>
+      <set_faction_relation faction="faction.split" otherfaction="faction.player" value="-0.32"/>
+      <set_faction_relation faction="faction.split" otherfaction="faction.argon" value="-0.32"/>
+      <set_faction_relation faction="faction.split" otherfaction="faction.antigone" value="-0.32"/>
+      <set_faction_relation faction="faction.split" otherfaction="faction.teladi" value="-0.32"/>
+      <set_faction_relation faction="faction.split" otherfaction="faction.ministry" value="-0.32"/>
+
+      <do_if value="player.debug">
+        <install_software object="player.ship" software="ware.software_dockmk2"/>
+      </do_if>
+
+      <!-- Resupplier -->
+      <set_value name="$faction_shipselection" exact="[faction.argon, faction.teladi, faction.paranid, faction.split]"/>
+      <set_value name="$faction" exact="$faction_shipselection.random"/>
+      <create_ship name="$Player_Resupplier" zone="player.zone">
+        <select faction="$faction" tags="tag.resupplier"/>
+        <owner exact="faction.player" overridenpc="true"/>
+        <loadout>
+          <quantity exact="1.0"     comment="all slots filled">
+            <variation exact="0.0"  comment="all slots filled"/>
+          </quantity>
+          <quality exact="0.5"/>
+        </loadout>
+        <pilot>
+          <select race="[race.argon, race.paranid, race.teladi]" tags="tag.aipilot"/>
+        </pilot>
+        <people>
+          <fillpercent exact="100"/>
+          <person role="service">
+            <select faction="[faction.argon, faction.paranid, faction.teladi, faction.split]" tags="tag.crew"/>
+          </person>
+        </people>
+        <drop ref="ship_large_civilian"/>
+        <safepos object="player.ship" x="5km" y="5km" z="-5km"/>
+        <rotation value="player.ship.rotation"/>
+      </create_ship>
+      <generate_loadout result="$loadout" faction="$faction" macro="$Player_Resupplier.macro" level="$Player_Resupplier.loadoutlevel"/>
+      <apply_loadout object="$Player_Resupplier" loadout="$loadout.{1}"/>
+      <set_object_commander object="$Player_Resupplier" commander="player.ship"/>
+      <add_cargo object="$Player_Resupplier" ware="ware.energycells" exact="9000"/>
+      <add_cargo object="$Player_Resupplier" ware="ware.hullparts" exact="4500"/>
+      <add_cargo object="$Player_Resupplier" ware="ware.missilecomponents" exact="6750"/>
+      <add_cargo object="$Player_Resupplier" ware="ware.smartchips" exact="2250"/>
+      <do_if value="$Player_Resupplier.commander">
+        <create_order id="'SupplyFleet'" object="$Player_Resupplier" default="true">
+          <param name="target" value="$Player_Resupplier.commander"/>
+        </create_order>
+      </do_if>
+
+      <!-- For the two fleets -->
+      <do_all exact="2" counter="$i">
+        <!-- Player Carrier -->
+        <do_if value="$i == 1">
+          <create_ship name="$Carrier" zone="player.zone">
+            <select faction="faction.split" tags="tag.carrier" size="class.ship_xl"/>
+            <owner exact="faction.player" overridenpc="true"/>
+            <loadout>
+              <level exact="1"/>
+            </loadout>
+            <pilot>
+              <select race="[race.argon, race.paranid, race.teladi]" tags="tag.aipilot"/>
+            </pilot>
+            <people>
+              <fillpercent exact="100"/>
+              <person role="service">
+                <select faction="$faction_shipselection" tags="tag.crew"/>
+              </person>
+            </people>
+            <drop ref="ship_large_military"/>
+            <safepos object="player.ship" x="1km" y="-500m" z="4km"/>
+            <rotation value="player.ship.rotation"/>
+          </create_ship>
+          <generate_loadout result="$loadout" faction="faction.split" macro="$Carrier.macro" level="$Carrier.loadoutlevel"/>
+          <apply_loadout object="$Carrier" loadout="$loadout.{1}"/>
+          <set_object_commander object="$Carrier" commander="player.ship"/>
+          <create_order id="'Wait'" object="$Carrier" default="true"/>
+          <!--<set_value name="$PlayerCarrier" exact="$Carrier"/>-->
+          <!--<set_value name="$race_crew" exact="[race.argon, race.teladi, race.paranid, race.split]"/>-->
+        </do_if>
+        <!-- Pirate Carrier -->
+        <do_elseif value="$i == 2">
+          <set_value name="$faction_shipselection" exact="[faction.split]"/>
+          <set_value name="$faction" exact="$faction_shipselection.random"/>
+          <create_ship name="$Carrier" zone="player.zone">
+            <select faction="$faction" tags="tag.carrier" size="class.ship_xl"/>
+            <owner exact="faction.split" overridenpc="true"/>
+            <loadout>
+              <level exact="1"/>
+            </loadout>
+            <pilot actor="null"/>
+            <people>
+              <fillpercent exact="100"/>
+              <person role="service">
+                <select faction="$faction_shipselection" tags="tag.crew"/>
+              </person>
+            </people>
+            <drop ref="ship_large_military"/>
+            <safepos object="player.zone" x="15202" y="1843" z="8365"/>
+            <rotation yaw="-147.130951deg" pitch="0.113185deg" roll="-0.501641deg"/>
+          </create_ship>
+          <generate_loadout result="$loadout" faction="$faction" macro="$Carrier.macro" level="$Carrier.loadoutlevel"/>
+          <apply_loadout object="$Carrier" loadout="$loadout.{1}"/>
+          <create_order id="'Patrol'" object="$Carrier" default="true">
+            <param name="range" value="class.zone"/>
+          </create_order>
+          <!--<set_value name="$PirateCarrier" exact="$Carrier"/>-->
+          <!--<set_value name="$race_crew" exact="race.split"/>-->
+        </do_elseif>
+
+        <find_dockingbay name="$internaldock" object="$Carrier">
+          <match_dock size="tag.dock_s" free="true" storage="true"/>
+        </find_dockingbay>
+
+        <do_if value="$internaldock.exists">
+          <!-- carrier-based scouts -->
+          <do_all min="3" max="12">
+            <set_value name="$faction" exact="$faction_shipselection.random"/>
+            <create_ship name="$Scout" dock="$internaldock">
+              <select faction="$faction" tags="[tag.scout, tag.light]"/>
+              <owner exact="$Carrier.owner" overridenpc="true"/>
+              <loadout>
+                <level exact="1"/>
+                <variation exact="0"/>
+              </loadout>
+              <pilot>
+                <select faction="$faction_shipselection" tags="tag.aipilot"/>
+              </pilot>
+              <people>
+                <fillpercent exact="100"/>
+                <person role="service">
+                  <select faction="$faction_shipselection" tags="tag.crew"/>
+                </person>
+              </people>
+              <drop ref="ship_small_military"/>
+            </create_ship>
+            <generate_loadout result="$loadout" faction="$faction" macro="$Scout.macro" level="$Scout.loadoutlevel"/>
+            <apply_loadout object="$Scout" loadout="$loadout.{1}"/>
+            <set_object_commander object="$Scout" commander="$Carrier"/>
+            <create_order id="'Escort'" object="$Scout" default="true">
+              <param name="target" value="$Carrier"/>
+              <param name="formation" value="formationshape.pointguard"/>
+              <param name="formationparam" value="200m"/>
+            </create_order>
+          </do_all>
+
+          <!--  carrier-based fighters -->
+          <do_all min="9" max="36">
+            <set_value name="$faction" exact="$faction_shipselection.random"/>
+            <create_ship name="$Fighter" dock="$internaldock">
+              <select faction="$faction" tags="[tag.fighter, tag.heavy]"/>
+              <owner exact="$Carrier.owner" overridenpc="true"/>
+              <loadout>
+                <level exact="1"/>
+                <variation exact="0"/>
+              </loadout>
+              <pilot>
+                <select faction="$faction_shipselection" tags="tag.aipilot"/>
+              </pilot>
+              <people>
+                <fillpercent exact="100"/>
+                <person role="service">
+                  <select faction="$faction_shipselection" tags="tag.crew"/>
+                </person>
+              </people>
+              <drop ref="ship_small_military"/>
+            </create_ship>
+            <generate_loadout result="$loadout" faction="$faction" macro="$Fighter.macro" level="$Fighter.loadoutlevel"/>
+            <apply_loadout object="$Fighter" loadout="$loadout.{1}"/>
+            <set_object_commander object="$Fighter" commander="$Carrier"/>
+            <create_order id="'Escort'" object="$Fighter" default="true">
+              <param name="target" value="$Carrier"/>
+              <param name="formation" value="formationshape.pointguard"/>
+              <param name="formationparam" value="200m"/>
+            </create_order>
+          </do_all>
+        </do_if>
+
+        <!-- destroyer escorting the carrier -->
+        <do_all exact="2" counter="$j">
+          <set_value name="$faction" exact="$faction_shipselection.random"/>
+          <create_ship name="$Destroyer" zone="player.zone">
+            <select faction="$faction" tags="tag.destroyer" size="class.ship_l"/>
+            <owner exact="$Carrier.owner" overridenpc="true"/>
+            <loadout>
+              <level exact="-1"/>
+            </loadout>
+            <pilot>
+              <select faction="$faction_shipselection" tags="tag.aipilot"/>
+            </pilot>
+            <people>
+              <fillpercent exact="100"/>
+              <person role="service">
+                <select faction="$faction_shipselection" tags="tag.crew"/>
+              </person>
+            </people>
+            <drop ref="ship_large_military"/>
+            <safepos object="$Carrier" x="-3km + 6km * ($j%2)" y="0m" z="2m"/>
+            <rotation value="$Carrier.rotation"/>
+          </create_ship>
+          <generate_loadout result="$loadout" faction="$faction" macro="$Destroyer.macro" level="$Destroyer.loadoutlevel"/>
+          <apply_loadout object="$Destroyer" loadout="$loadout.{1}"/>
+          <set_object_commander object="$Destroyer" commander="$Carrier"/>
+          <create_order id="'Escort'" object="$Destroyer" default="true">
+            <param name="target" value="$Carrier"/>
+            <param name="formation" value="formationshape.invvshape"/>
+          </create_order>
+
+          <!-- bomber escorting the destroyer -->
+          <do_all exact="1" counter="$k">
+            <set_value name="$faction" exact="$faction_shipselection.random"/>
+            <create_ship name="$Bomber" zone="player.zone">
+              <select faction="$faction" size="class.ship_m" tags="tag.military"/>
+              <owner exact="$Carrier.owner" overridenpc="true"/>
+              <loadout>
+                <level exact="1"/>
+                <variation exact="0"/>
+              </loadout>
+              <pilot>
+                <select faction="$faction_shipselection" tags="tag.aipilot"/>
+              </pilot>
+              <people>
+                <fillpercent exact="100"/>
+                <person role="service">
+                  <select faction="$faction_shipselection" tags="tag.crew"/>
+                </person>
+              </people>
+              <drop ref="ship_small_military"/>
+              <safepos object="$Destroyer" x="0m" y="0m" z="-3km + 6km * ($k%2)"/>
+              <rotation value="$Destroyer.rotation"/>
+            </create_ship>
+            <generate_loadout result="$loadout" faction="$faction" macro="$Bomber.macro" level="$Bomber.loadoutlevel"/>
+            <apply_loadout object="$Bomber" loadout="$loadout.{1}"/>
+            <set_object_commander object="$Bomber" commander="$Destroyer"/>
+            <create_order id="'Escort'" object="$Bomber" default="true">
+              <param name="target" value="$Destroyer"/>
+              <param name="formation" value="formationshape.dartvertical"/>
+              <param name="formationparam" value="2500m"/>
+            </create_order>
+
+            <!--  carrier-based fighters -->
+            <do_all exact="2">
+              <set_value name="$faction" exact="$faction_shipselection.random"/>
+              <create_ship name="$Fighter" zone="player.zone">
+                <select faction="$faction" tags="[tag.fighter]"/>
+                <owner exact="$Bomber.owner" overridenpc="true"/>
+                <loadout>
+                  <level exact="-1"/>
+                </loadout>
+                <pilot>
+                  <select faction="$faction_shipselection" tags="tag.aipilot"/>
+                </pilot>
+                <people>
+                  <fillpercent exact="100"/>
+                  <person role="service">
+                    <select faction="$faction_shipselection" tags="tag.crew"/>
+                  </person>
+                </people>
+                <drop ref="ship_small_military"/>
+                <safepos object="$Bomber" max="500m"/>
+                <rotation value="$Bomber.rotation"/>
+              </create_ship>
+              <generate_loadout result="$loadout" faction="$faction" macro="$Fighter.macro" level="$Fighter.loadoutlevel"/>
+              <apply_loadout object="$Fighter" loadout="$loadout.{1}"/>
+              <set_object_commander object="$Fighter" commander="$Bomber"/>
+              <create_order id="'Escort'" object="$Fighter" default="true">
+                <param name="target" value="$Bomber"/>
+                <param name="formation" value="formationshape.pointguard"/>
+                <param name="formationparam" value="200m"/>
+              </create_order>
+            </do_all>
+          </do_all>
+
+          <!-- Frigate escorting destroyer -->
+          <do_all exact="2">
+            <set_value name="$faction" exact="$faction_shipselection.random"/>
+            <create_ship name="$Frigate" zone="player.zone">
+              <select faction="$faction" tags="tag.frigate"/>
+              <owner exact="$Carrier.owner" overridenpc="true"/>
+              <loadout>
+                <level exact="1"/>
+                <variation exact="0"/>
+              </loadout>
+              <pilot>
+                <select faction="$faction_shipselection" tags="tag.aipilot"/>
+              </pilot>
+              <people>
+                <fillpercent exact="100"/>
+                <person role="service">
+                  <select faction="$faction_shipselection" tags="tag.crew"/>
+                </person>
+              </people>
+              <drop ref="ship_small_military"/>
+              <safepos object="$Destroyer" max="3km"/>
+              <rotation value="$Destroyer.rotation"/>
+            </create_ship>
+            <generate_loadout result="$loadout" faction="$faction" macro="$Frigate.macro" level="$Frigate.loadoutlevel"/>
+            <apply_loadout object="$Frigate" loadout="$loadout.{1}"/>
+            <set_object_commander object="$Frigate" commander="$Destroyer"/>
+            <create_order id="'Escort'" object="$Frigate" default="true">
+              <param name="target" value="$Destroyer"/>
+              <param name="formation" value="formationshape.dartvertical"/>
+              <param name="formationparam" value="2500m"/>
+            </create_order>
+
+            <!--  carrier-based fighters -->
+            <do_all exact="2">
+              <set_value name="$faction" exact="$faction_shipselection.random"/>
+              <create_ship name="$Fighter" zone="player.zone">
+                <select faction="$faction" tags="[tag.fighter, tag.heavy]"/>
+                <owner exact="$Frigate.owner" overridenpc="true"/>
+                <loadout>
+                  <level exact="-1"/>
+                </loadout>
+                <pilot>
+                  <select faction="$faction_shipselection" tags="tag.aipilot"/>
+                </pilot>
+                <people>
+                  <fillpercent exact="100"/>
+                  <person role="service">
+                    <select faction="$faction_shipselection" tags="tag.crew"/>
+                  </person>
+                </people>
+                <drop ref="ship_small_military"/>
+                <safepos object="$Frigate" max="500m"/>
+                <rotation value="$Frigate.rotation"/>
+              </create_ship>
+              <generate_loadout result="$loadout" faction="$faction" macro="$Fighter.macro" level="$Fighter.loadoutlevel"/>
+              <apply_loadout object="$Fighter" loadout="$loadout.{1}"/>
+              <set_object_commander object="$Fighter" commander="$Frigate"/>
+              <create_order id="'Escort'" object="$Fighter" default="true">
+                <param name="target" value="$Bomber"/>
+                <param name="formation" value="formationshape.pointguard"/>
+                <param name="formationparam" value="200m"/>
+              </create_order>
+            </do_all>
+          </do_all>
+        </do_all>
+      </do_all>
+
+      <!--<create_order id="'Attack'" object="$PlayerCarrier">
+        <param name="primarytarget" value="$PirateCarrier"/>
+        <param name="squad_attack" value="false"/>
+        <param name="allowothertargets" value="false"/>
+      </create_order>
+      <create_order id="'Attack'" object="$PirateCarrier">
+        <param name="primarytarget" value="$PlayerCarrier"/>
+        <param name="squad_attack" value="false"/>
+        <param name="allowothertargets" value="false"/>
+      </create_order>-->
+    </actions>
+  </replace>
+
+</diff>

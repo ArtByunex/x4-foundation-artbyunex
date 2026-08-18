@@ -1,0 +1,1039 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/characters">
+
+    <!-- KAORI -->
+    <!-- Kaori Non-Faction Characters (for use in mass traffic) -->
+    <character id="kaori_civilian_arg" group="kaori.crew.arg">
+      <category faction="civilian" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="argon" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="7" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="civilian"/>
+    </character>
+    <character id="kaori_smuggler_arg" group="kaori.crew.arg">
+      <category faction="smuggler" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="argon" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="7" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="smuggler"/>
+    </character>
+    <character id="kaori_criminal_arg" group="kaori.crew.arg">
+      <category faction="criminal" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="argon" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="6" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="criminal"/>
+    </character>
+    <character id="kaori_ownerless_arg" group="kaori.crew.arg">
+      <category faction="ownerless" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="argon" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="7" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="ownerless"/>
+    </character>
+    
+    <character id="trader_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, pilot, aipilot, traderpilot, masstraffic]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" min="5" max="6"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="fighter_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="piloting" min="4" max="15"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="5" max="6"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="manager_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, officer, manager]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="management" min="5" max="9"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" min="2" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <!-- KAORI Faction Representative -->
+    <character id="factionrepresentative_kaori_arg" group="kaori.crew.arg.male">
+      <category tags="[factionrepresentative]" faction="kaori" race="argon"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10134"/>
+      <owner exact="kaori"/>
+    </character>
+    <character id="factiondiplomat_kaori_tel" group="kaori.factiondiplomat">
+      <category tags="[factiondiplomat]" faction="kaori" race="teladi"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10572"/>
+      <owner exact="kaori"/>
+    </character>
+    <character id="agent_kaori_arg" group="kaori.crew.arg.male">
+      <category tags="[agent]" faction="kaori" race="argon"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10601"/>
+      <owner exact="kaori"/>
+    </character>
+
+    <!-- additional character definitions with correct factions set since we can't use xml patching to insert data into an attribute, only replace which is not good enough when multiple extensions may be involved -->
+    <!-- regular -->
+    <character id="service_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, service, regular, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="engineering" min="2" max="4"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="piloting" min="1" max="3"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" max="1"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="marine_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, marine, regular, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" min="2" max="4"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="engineering" max="1"/>
+        <skill type="piloting" min="1" max="3"/>
+        <skill type="management" max="1"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="fighter_kaori_regular_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="piloting" min="5" max="7"/>
+        <skill type="morale" exact="7"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="manager_kaori_regular_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, officer, manager, regular, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="management" min="5" max="6"/>
+        <skill type="morale" max="5"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="boarding" min="2" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <!-- passenger -->
+    <character id="passenger_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, passenger]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" exact="0"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" max="6"/>
+        <skill type="morale" max="12"/>
+        <skill type="piloting" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="prisoner_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[crew, prisoner]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" max="3"/>
+        <skill type="engineering" min="1" max="3"/>
+        <skill type="management" max="2"/>
+        <skill type="morale" min="1" max="2"/>
+        <skill type="piloting" min="2" max="4"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+
+    <!-- Rookies -->
+    <character id="service_kaori_random_rookie_arg" group="kaori.crew.arg">
+      <category tags="[crew, service, rookie, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="engineering" min="1" max="2"/>
+        <skill type="morale" min="1" max="4"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="marine_kaori_random_rookie_arg" group="kaori.crew.arg">
+      <category tags="[crew, marine, rookie, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" min="1" max="2"/>
+        <skill type="morale" min="1" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="fighter_kaori_random_rookie_arg" group="kaori.crew.arg">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, rookie, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="piloting" min="1" max="5"/>
+        <skill type="morale" min="4" max="5"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+
+    <!-- Veteran -->
+    <character id="service_kaori_random_veteran_arg" group="kaori.crew.arg">
+      <category tags="[crew, service, veteran, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="engineering" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="piloting" min="2" max="5"/>
+        <skill type="management" exact="1"/>
+        <skill type="boarding" min="1" max="2"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="marine_kaori_random_veteran_arg" group="kaori.crew.arg">
+      <category tags="[crew, marine, veteran, recruitable]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="engineering" min="1" max="2"/>
+        <skill type="piloting" min="3" max="6"/>
+        <skill type="management" max="1"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+
+    <!-- Elite -->
+    <character id="service_kaori_random_elite_arg" group="kaori.crew.arg">
+      <category tags="[crew, service, elite]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="engineering" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="piloting" min="3" max="6"/>
+        <skill type="management" min="1" max="2"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="marine_kaori_random_elite_arg" group="kaori.crew.arg">
+      <category tags="[crew, marine, elite]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="boarding" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="engineering" min="2" max="3"/>
+        <skill type="piloting" min="4" max="6"/>
+        <skill type="management" min="1" max="3"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+    <character id="platform_trader_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[trader, licencetrader]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <character id="ship_trader_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[trader, shiptrader]" faction="[kaori]" race="argon" />
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <!-- Shady Guy -->
+    <character id="shadyguy_kaori_random_arg" group="kaori.crew.arg">
+      <category tags="[shadyguy]" faction="[kaori]" race="argon" />
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="kaori"/>
+      <stock ref="'default_shadyguy'" />
+    </character>
+    <!-- Casually clothed platform NPCs -->
+    <character id="kaori_casual_arg" group="kaori.crew.arg">
+      <category tags="[casual]" faction="[kaori]" race="argon"/>
+      <skills>
+        <skill type="morale" max="1"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="2"/>
+      </skills>
+      <owner exact="kaori"/>
+    </character>
+
+    <!-- Teladi Non-Faction Characters (for use in multiple clusters) -->
+    <character id="kaori_civilian_tel" group="kaori.crew.tel">
+      <category faction="civilian" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="teladi" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="4" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="4" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="civilian"/>
+    </character>
+    <character id="kaori_smuggler_tel" group="kaori.crew.tel">
+      <category faction="smuggler" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="teladi" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="smuggler"/>
+    </character>
+    <character id="kaori_criminal_tel" group="kaori.crew.tel">
+      <category faction="criminal" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="teladi" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="4" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="2" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="criminal"/>
+    </character>
+    <character id="kaori_ownerless_tel" group="kaori.crew.tel">
+      <category faction="ownerless" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="teladi" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="4" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="2" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="ownerless"/>
+    </character>
+    <!-- TODO: Other race civilians -->
+
+    <!-- TELADI -->
+    <!-- Generic Teladi Characters -->
+    <character id="trader_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, pilot, aipilot, traderpilot, masstraffic]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="piloting" min="6" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="4" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="fighter_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="manager_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, officer, manager]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <!-- regular -->
+    <character id="service_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, service, regular, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="engineering" min="2" max="4"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" min="1" max="2"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="marine_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, marine, regular, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" min="2" max="4"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" min="1" max="2"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="fighter_kaori_regular_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="piloting" min="5" max="6"/>
+        <skill type="morale" max="5"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="2" max="3"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="manager_kaori_regular_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, officer, manager, regular, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="management" min="7" max="8"/>
+        <skill type="morale" min="6" max="8"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <!-- passenger -->
+    <character id="passenger_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, passenger]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" exact="0"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" max="6"/>
+        <skill type="morale" max="12"/>
+        <skill type="piloting" max="3"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="prisoner_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[crew, prisoner]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" max="1"/>
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="6"/>
+        <skill type="morale" min="1" max="2"/>
+        <skill type="piloting" max="3"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+
+    <!-- Rookies -->
+    <character id="service_kaori_random_rookie_tel" group="kaori.crew.tel">
+      <category tags="[crew, service, rookie, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="engineering" min="1" max="2"/>
+        <skill type="morale" min="1" max="4"/>
+        <skill type="piloting" max="1"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="marine_kaori_random_rookie_tel" group="kaori.crew.tel">
+      <category tags="[crew, marine, rookie, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" min="1" max="2"/>
+        <skill type="morale" min="1" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="piloting" max="1"/>
+        <skill type="management" max="1"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="fighter_kaori_random_rookie_tel" group="kaori.crew.tel">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, rookie, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="piloting" exact="3"/>
+        <skill type="morale" min="2" max="3"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="2"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+
+    <!-- Veteran -->
+    <character id="service_kaori_random_veteran_tel" group="kaori.crew.tel">
+      <category tags="[crew, service, veteran, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="engineering" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="piloting" min="1" max="4"/>
+        <skill type="management" min="1" max="3"/>
+        <skill type="boarding" max="2"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="marine_kaori_random_veteran_tel" group="kaori.crew.tel">
+      <category tags="[crew, marine, veteran, recruitable]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="engineering" max="2"/>
+        <skill type="piloting" min="1" max="4"/>
+        <skill type="management" min="1" max="3"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+
+    <!-- Elite -->
+    <character id="service_kaori_random_elite_tel" group="kaori.crew.tel">
+      <category tags="[crew, service, elite]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="engineering" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="piloting" min="3" max="5"/>
+        <skill type="management" min="2" max="4"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+    <character id="marine_kaori_random_elite_tel" group="kaori.crew.tel">
+      <category tags="[crew, marine, elite]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="boarding" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="engineering" min="1" max="3"/>
+        <skill type="piloting" min="2" max="5"/>
+        <skill type="management" min="2" max="4"/>
+      </skills>
+      <owner list="[kaori]"/>
+    </character>
+
+    <character id="platform_trader_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[trader, licencetrader]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori]"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <character id="ship_trader_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[trader, shiptrader]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori, ministry, scaleplate]"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <character id="shadyguy_kaori_random_tel" group="kaori.crew.tel">
+      <category tags="[shadyguy]" faction="[kaori,faction.player]" race="teladi" />
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori, ministry, scaleplate]" />
+      <stock ref="'default_shadyguy'" />
+    </character>
+    <!--character id="factionrepresentative_kaori_tel" group="kaori.crew.tel">
+      <category tags="[factionrepresentative]" faction="kaori" race="teladi"/>
+      <skills>
+        <skill type="management" exact="15"/>
+        <skill type="morale" max="15"/>
+
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="8" max="15"/>
+        <skill type="piloting" min="8" max="15"/>
+      </skills>
+      <page exact="10501"/>
+      <owner exact="kaori"/>
+    </character-->
+    <!-- Casually clothed platform NPCs -->
+    <character id="kaori_casual_tel" group="kaori.crew.tel">
+      <category tags="[casual]" faction="[kaori]" race="teladi"/>
+      <skills>
+        <skill type="morale" max="1"/>
+
+        <skill type="piloting" max="1"/>
+        <skill type="engineering" max="1"/>
+        <skill type="management" min="1" max="3"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[kaori, ministry, scaleplate]"/>
+    </character>
+    
+    <!-- Paranid Non-Faction Characters (for use in multiple clusters) -->
+  <character id="kaori_civilian_par" group="kaori.crew.par">
+    <category faction="civilian" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="paranid" comment="fullyqualified"/>
+    <skills>
+      <skill type="piloting" min="5" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="civilian"/>
+  </character>
+  <character id="kaori_smuggler_par" group="kaori.crew.par">
+    <category faction="smuggler" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="paranid" comment="fullyqualified"/>
+    <skills>
+      <skill type="piloting" min="5" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="smuggler"/>
+  </character>
+  <character id="kaori_criminal_par" group="kaori.crew.par">
+    <category faction="criminal" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="paranid" comment="fullyqualified"/>
+    <skills>
+      <skill type="piloting" min="4" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="criminal"/>
+  </character>
+  <character id="kaori_ownerless_par" group="kaori.crew.par">
+    <category faction="ownerless" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="paranid" comment="fullyqualified"/>
+    <skills>
+      <skill type="piloting" min="5" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="ownerless"/>
+  </character>
+
+  <!-- Paranid -->
+  <!-- Generic Paranid Characters -->
+  <character id="trader_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, pilot, aipilot, traderpilot, masstraffic]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" min="5" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="fighter_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" min="4" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="manager_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, officer, manager]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="management" min="5" max="9"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="piloting" max="3"/>
+      <skill type="engineering" min="2" max="6"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <!-- regular -->
+  <character id="service_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, service, regular, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="engineering" min="2" max="4"/>
+      <skill type="morale" min="2" max="4"/>
+      <skill type="piloting" min="1" max="3"/>
+      <skill type="management" max="1"/>
+      <skill type="boarding" max="1"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="marine_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, marine, regular, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" min="2" max="4"/>
+      <skill type="morale" min="2" max="4"/>
+      <skill type="engineering" max="1"/>
+      <skill type="piloting" min="1" max="3"/>
+      <skill type="management" max="1"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="fighter_kaori_regular_random_par" group="kaori.crew.par">
+    <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" min="5" max="6"/>
+      <skill type="morale" min="1" max="6"/>
+
+      <skill type="engineering" min="2" max="3"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="manager_kaori_regular_random_par" group="kaori.crew.par">
+    <category tags="[crew, officer, manager, regular, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="management" min="5" max="6"/>
+      <skill type="morale" min="1" max="6"/>
+
+      <skill type="piloting" max="3"/>
+      <skill type="engineering" min="2" max="3"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <!-- passenger -->
+  <character id="passenger_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, passenger]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" exact="0"/>
+      <skill type="engineering" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="morale" max="12"/>
+      <skill type="piloting" max="3"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="prisoner_kaori_random_par" group="kaori.crew.par">
+    <category tags="[crew, prisoner]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" exact="0"/>
+      <skill type="engineering" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="morale" min="1" max="2"/>
+      <skill type="piloting" max="3"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+
+  <!-- Rookies -->
+  <character id="service_kaori_random_rookie_par" group="kaori.crew.par">
+    <category tags="[crew, service, rookie, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="engineering" min="1" max="2"/>
+      <skill type="morale" min="1" max="4"/>
+      <skill type="piloting" max="2"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="marine_kaori_random_rookie_par" group="kaori.crew.par">
+    <category tags="[crew, marine, rookie, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" min="1" max="2"/>
+      <skill type="morale" min="1" max="3"/>
+      <skill type="engineering" exact="0"/>
+      <skill type="piloting" max="2"/>
+      <skill type="management" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="fighter_kaori_random_rookie_par" group="kaori.crew.par">
+    <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, rookie, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" min="2" max="4"/>
+      <skill type="morale" min="2" max="4"/>
+
+      <skill type="engineering" min="1" max="3"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+
+  <!-- Veteran -->
+  <character id="service_kaori_random_veteran_par" group="kaori.crew.par">
+    <category tags="[crew, service, veteran, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="engineering" min="6" max="9"/>
+      <skill type="morale" min="6" max="9"/>
+      <skill type="piloting" min="2" max="5"/>
+      <skill type="management" exact="1"/>
+      <skill type="boarding" min="1" max="2"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="marine_kaori_random_veteran_par" group="kaori.crew.par">
+    <category tags="[crew, marine, veteran, recruitable]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" min="6" max="9"/>
+      <skill type="morale" min="6" max="9"/>
+      <skill type="engineering" min="1" max="2"/>
+      <skill type="piloting" min="3" max="6"/>
+      <skill type="management" max="1"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+
+  <!-- Elite -->
+  <character id="service_kaori_random_elite_par" group="kaori.crew.par">
+    <category tags="[crew, service, elite]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="engineering" min="10" max="12"/>
+      <skill type="morale" min="10" max="12"/>
+      <skill type="piloting" min="3" max="6"/>
+      <skill type="management" min="1" max="2"/>
+      <skill type="boarding" min="1" max="3"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="marine_kaori_random_elite_par" group="kaori.crew.par">
+    <category tags="[crew, marine, elite]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="boarding" min="10" max="12"/>
+      <skill type="morale" min="10" max="12"/>
+      <skill type="engineering" min="2" max="3"/>
+      <skill type="piloting" min="4" max="6"/>
+      <skill type="management" min="1" max="3"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+  <character id="fighter_kaori_random_elite_par" group="kaori.crew.par">
+    <category tags="[elitepilot]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="engineering" min="6" max="12"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" min="6" max="9"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+
+  <character id="platform_trader_kaori_random_par" group="kaori.crew.par">
+    <category tags="[trader, licencetrader]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="management" min="5" max="9"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="piloting" max="3"/>
+      <skill type="engineering" min="2" max="6"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+    <stock ref="'default_trader'" />
+  </character>
+  <character id="ship_trader_kaori_random_par" group="kaori.crew.par">
+    <category tags="[trader, shiptrader]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="management" min="5" max="9"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="piloting" max="3"/>
+      <skill type="engineering" min="2" max="6"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+    <stock ref="'default_trader'" />
+  </character>
+  <character id="shadyguy_kaori_random_par" group="kaori.crew.par">
+    <category tags="[shadyguy]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="piloting" min="5" max="12"/>
+      <skill type="morale" max="12"/>
+
+      <skill type="engineering" min="5" max="6"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner list="[kaori]"/>
+    <stock ref="'default_shadyguy'" />
+  </character>
+  <!--character id="factionrepresentative_kaori_par" group="kaori.crew.par">
+    <category tags="[factionrepresentative]" faction="kaori" race="paranid"/>
+    <skills>
+      <skill type="management" min="11" max="15"/>
+      <skill type="morale" max="15"/>
+
+      <skill type="boarding" min="6" max="15"/>
+      <skill type="engineering" min="11" max="15"/>
+      <skill type="piloting" min="7" max="15"/>
+    </skills>
+    <page exact="10301"/>
+    <owner list="[kaori]"/>
+  </character-->
+  <!-- Casually clothed platform NPCs -->
+  <character id="kaori_casual_par" group="kaori.crew.par">
+    <category tags="[casual]" faction="[kaori]" race="paranid"/>
+    <skills>
+      <skill type="morale" min="1" max="2"/>
+
+      <skill type="piloting" exact="0"/>
+      <skill type="engineering" max="1"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" min="1" max="3"/>
+    </skills>
+    <owner list="[kaori]"/>
+  </character>
+
+  <!-- Mining Scenarios -->
+  <character id="fighter_scenario_mining_arg" group="argon.pilot">
+    <category tags="[scenario_mining_pilot]" faction="argon" race="argon"/>
+    <skills>
+      <skill type="piloting" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="engineering" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="argon"/>
+  </character>
+  <character id="fighter_scenario_mining_par" group="paranid.pilot">
+    <category tags="[scenario_mining_pilot]" faction="paranid" race="paranid"/>
+    <skills>
+      <skill type="piloting" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="engineering" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="paranid"/>
+  </character>
+  <character id="fighter_scenario_mining_tel" group="teladi.pilot">
+    <category tags="[scenario_mining_pilot]" faction="teladi" race="teladi"/>
+    <skills>
+      <skill type="piloting" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="engineering" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="teladi"/>
+  </character>
+
+  <character id="service_scenario_mining_arg" group="argon.service">
+    <category tags="[scenario_mining_service]" faction="argon" race="argon"/>
+    <skills>
+      <skill type="engineering" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="piloting" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="argon"/>
+  </character>
+  <character id="service_scenario_mining_par" group="paranid.service">
+    <category tags="[scenario_mining_service]" faction="paranid" race="paranid"/>
+    <skills>
+      <skill type="engineering" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="piloting" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="paranid"/>
+  </character>
+  <character id="service_scenario_mining_tel" group="teladi.service">
+    <category tags="[scenario_mining_service]" faction="teladi" race="teladi"/>
+    <skills>
+      <skill type="engineering" exact="12"/>
+      <skill type="morale" exact="12"/>
+      <skill type="piloting" exact="0"/>
+      <skill type="management" exact="0"/>
+      <skill type="boarding" exact="0"/>
+    </skills>
+    <owner exact="teladi"/>
+  </character>
+  </add>
+
+</diff>

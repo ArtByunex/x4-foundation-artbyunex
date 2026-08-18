@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- DLC Specific Signal Leak Mission Variants -->
+  
+  <!-- ##################################################################################################-->
+  <!-- DLC_Pirate_GM_Assassinate__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_Assassinate__Trigger_patchmarker ']">
+    <do_if value="$Station.owner == faction.teladi">
+      <!-- not do_elseif as that would kick loanshark options and show scaleplate only -->
+      <set_value name="$TextOffset" exact="[100, 200, 300, 400].random"/>
+      <do_any>
+        <set_value name="$ClientOwner" exact="faction.scaleplate" weight="1"/>
+        <set_value name="$ClientOwner" exact="faction.loanshark"  weight="3"/>
+      </do_any>
+      <do_if value="not $ClientOwner.isrelationlocked">
+        <set_value name="$ForeignSignalLeak"/>
+      </do_if>
+    </do_if>
+  </replace>
+  
+  <!-- ##################################################################################################-->
+  <!-- DLC_Pirate_GM_Transport_Passengers__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_Transport_Passengers__Trigger_patchmarker ']">
+    <do_if value="$Station.owner == faction.teladi">
+      <!-- not do_elseif as that would kick loanshark options and show scaleplate only -->
+      <do_any>
+        <set_value name="$ClientOwner" exact="faction.scaleplate" weight="1"/>
+        <set_value name="$ClientOwner" exact="faction.loanshark"  weight="3"/>
+      </do_any>
+    </do_if>
+  </replace>
+  
+  <!-- ##################################################################################################-->
+  <!-- DLC_Pirate_GM_Sabotage__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_Sabotage__Trigger_patchmarker ']">
+    <do_if value="$Station.owner == faction.teladi">
+      <!-- not do_elseif as that would kick loanshark options and show scaleplate only -->
+      <set_value name="$TextOffset"   exact="1200" comment="others don't fit"/>
+      <do_any>
+        <set_value name="$ClientOwner" exact="faction.scaleplate" weight="1"/>
+        <set_value name="$ClientOwner" exact="faction.loanshark"  weight="3"/>
+      </do_any>
+      <set_value name="$EnemyFaction" exact="faction.teladi"/>
+    </do_if>
+  </replace>
+  
+  <!-- ##################################################################################################-->
+  <!-- DLC_Pirate_GM_BoardShip__Trigger_EnemyFactions_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_BoardShip__Trigger_EnemyFactions_patchmarker ']">
+    <append_to_list name="$EnemyFactions" exact="faction.scavenger"/>
+    <append_to_list name="$EnemyFactions" exact="faction.loanshark"/>
+  </replace>  
+  
+  <!-- DLC_Pirate_GM_BoardShip__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_BoardShip__Trigger_patchmarker ']">
+    <do_if value="$Station.owner == faction.teladi">
+      <!-- not do_elseif as that would kick loanshark options and show scaleplate only -->
+      <do_any>
+        <set_value name="$Faction" exact="faction.scaleplate" weight="1"/>
+        <set_value name="$Faction" exact="faction.loanshark"  weight="3"/>
+      </do_any>
+    </do_if>
+  </replace>
+  
+  <!-- ##################################################################################################-->
+  <!-- DLC_Pirate_GM_HackPanel__Trigger_patchmarker -->
+  <replace sel="//comment()[. = ' DLC_Pirate_GM_HackPanel__Trigger_patchmarker ']">
+    <do_if value="$Station.owner == faction.teladi">
+      <!-- not do_elseif as that would kick loanshark options and show scaleplate only -->
+      <set_value name="$TextOffset" exact="[1000, 1200, 1400].random" comment="1300 does not fit as it's about a cargo storage competitor"/>
+      <do_any>
+        <set_value name="$ClientOwner" exact="faction.scaleplate" weight="1"/>
+        <set_value name="$ClientOwner" exact="faction.loanshark"  weight="3"/>
+      </do_any>
+    </do_if>
+  </replace>
+  
+</diff>

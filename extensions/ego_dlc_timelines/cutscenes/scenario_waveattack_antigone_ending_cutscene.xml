@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_waveattack_antigone_ending_cutscene">
+    <params>
+      <param name="startorbitdist" number="true" />
+      <param name="startorbitelevation" number="true" />
+      <param name="station" object="true"/>
+      <param name="station_y" number="true"/>
+      <param name="start_module" object="true" />
+      <param name="start_module_y" number="true"/>
+      <param name="end_module" object="true" />
+      <param name="end_module_y" number="true"/>
+      <param name="endorbitdist" number="true" />
+      <param name="endorbitelevation" number="true" />
+    </params>
+  </director>
+  <!--
+  Shot 1:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:station" />
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="EndingCutsceneSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <!--shot name="OrbitShot" environment="scenezone" duration="onevent:stopscene"-->
+        <shot name="ModuleOrbitShot" environment="scenezone" duration="onevent:StartModuleDestroyed">
+          <!-- Do a little pan/zoom effect to zero in on the object, makes it look a bit cooler. -->
+          <camera_orbit reference="start_module" orient_to="ecliptic" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="0">
+              <distance>
+                <value var="startorbitdist"/>
+              </distance>
+              <elevation>
+                <value var="startorbitelevation"/>
+              </elevation>
+            </begin>
+            <end angle="360" time="48000">
+              <distance>
+                <value var="startorbitdist"/>
+              </distance>
+              <elevation>
+                <value var="startorbitelevation"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+        <shot name="FlyOverShot" environment="scenezone" duration="25000">
+          <camera>
+            <lookdirection>
+              <reference object="start_module" x="0" z="0"/>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="start_module" y="start_module_y"/>
+                </keyframe>
+                <keyframe timestamp="15000" interpolation="smooth">
+                  <reference object="station" y="station_y"/>
+                </keyframe>
+                <keyframe timestamp="20000" interpolation="smooth">
+                  <reference object="end_module" y="end_module_y"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+        <shot name="StationOrbitShot" environment="scenezone" duration="onevent:stopscene">
+          <!-- Do a little pan/zoom effect to zero in on the object, makes it look a bit cooler. -->
+          <camera_orbit reference="station" orient_to="ecliptic" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="0">
+              <distance>
+                <value var="endorbitdist"/>
+              </distance>
+              <elevation>
+                <value var="endorbitelevation"/>
+              </elevation>
+            </begin>
+            <end angle="360" time="48000">
+              <distance>
+                <value var="endorbitdist"/>
+              </distance>
+              <elevation>
+                <value var="endorbitelevation"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+     
+    </actions>
+  </presentation>
+
+</cutscene>

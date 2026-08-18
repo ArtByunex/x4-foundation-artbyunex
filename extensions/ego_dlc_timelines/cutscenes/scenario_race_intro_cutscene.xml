@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_race_intro_cutscene">
+    <params>
+      <!-- Zone to create scenezone from -->
+      <param name="anchor" object="true" />
+
+      <!-- Camera positions -->
+      <param name="camera_0_x" number="true"/>
+      <param name="camera_0_y" number="true"/>
+      <param name="camera_0_z" number="true"/>
+      <param name="camera_0_t" number="true"/>
+
+      <param name="camera_1_x" number="true"/>
+      <param name="camera_1_y" number="true"/>
+      <param name="camera_1_z" number="true"/>
+      <param name="camera_1_t" number="true"/>
+
+      <param name="camera_2_x" number="true"/>
+      <param name="camera_2_y" number="true"/>
+      <param name="camera_2_z" number="true"/>
+      <param name="camera_2_t" number="true"/>
+
+      <param name="camera_3_x" number="true"/>
+      <param name="camera_3_y" number="true"/>
+      <param name="camera_3_z" number="true"/>
+      <param name="camera_3_t" number="true"/>
+
+      <param name="camera_4_x" number="true"/>
+      <param name="camera_4_y" number="true"/>
+      <param name="camera_4_z" number="true"/>
+      <param name="camera_4_t" number="true"/>
+
+      <param name="camera_5_x" number="true"/>
+      <param name="camera_5_y" number="true"/>
+      <param name="camera_5_z" number="true"/>
+      <param name="camera_5_t" number="true"/>
+
+      <param name="lookat_0_x" number="true"/>
+      <param name="lookat_0_y" number="true"/>
+      <param name="lookat_0_z" number="true"/>
+      <param name="lookat_0_t" number="true"/>
+
+      <param name="lookat_1_x" number="true"/>
+      <param name="lookat_1_y" number="true"/>
+      <param name="lookat_1_z" number="true"/>
+      <param name="lookat_1_t" number="true"/>
+
+      <param name="lookat_2_x" number="true"/>
+      <param name="lookat_2_y" number="true"/>
+      <param name="lookat_2_z" number="true"/>
+      <param name="lookat_2_t" number="true"/>
+
+      <param name="lookat_3_x" number="true"/>
+      <param name="lookat_3_y" number="true"/>
+      <param name="lookat_3_z" number="true"/>
+      <param name="lookat_3_t" number="true"/>
+
+      <param name="lookat_4_x" number="true"/>
+      <param name="lookat_4_y" number="true"/>
+      <param name="lookat_4_z" number="true"/>
+      <param name="lookat_4_t" number="true"/>
+
+      <param name="lookat_5_x" number="true"/>
+      <param name="lookat_5_y" number="true"/>
+      <param name="lookat_5_z" number="true"/>
+      <param name="lookat_5_t" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="LookAtShip" start="0">
+        <shot name="LookAtShipShot" environment="scenezone" duration="18000">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="param:camera_0_t" interpolation="linear">
+                  <reference x="camera_0_x" y="camera_0_y" z="camera_0_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:camera_1_t" interpolation="linear">
+                  <reference x="camera_1_x" y="camera_1_y" z="camera_1_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:camera_2_t" interpolation="linear">
+                  <reference x="camera_2_x" y="camera_2_y" z="camera_2_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:camera_3_t" interpolation="linear">
+                  <reference x="camera_3_x" y="camera_3_y" z="camera_3_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:camera_4_t" interpolation="linear">
+                  <reference x="camera_4_x" y="camera_4_y" z="camera_4_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:camera_5_t" interpolation="linear">
+                  <reference x="camera_5_x" y="camera_5_y" z="camera_5_z" object="anchor"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="param:lookat_0_t" interpolation="linear">
+                  <reference x="lookat_0_x" y="lookat_0_y" z="lookat_0_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:lookat_1_t" interpolation="linear">
+                  <reference x="lookat_1_x" y="lookat_1_y" z="lookat_1_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:lookat_2_t" interpolation="linear">
+                  <reference x="lookat_2_x" y="lookat_2_y" z="lookat_2_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:lookat_3_t" interpolation="linear">
+                  <reference x="lookat_3_x" y="lookat_3_y" z="lookat_3_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:lookat_4_t" interpolation="linear">
+                  <reference x="lookat_4_x" y="lookat_4_y" z="lookat_4_z" object="anchor"/>
+                </keyframe>
+                <keyframe timestamp="param:lookat_5_t" interpolation="linear">
+                  <reference x="lookat_5_x" y="lookat_5_y" z="lookat_5_z" object="anchor"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <replace sel="/startmenu/background/scene[@cutscene='startmenu_background']">
+    <scene cutscene="startmenu_background" music="music_menu_main_music" map="blackgalaxy_macro">
+      <cluster name="cluster_black_macro" background="cluster_sm3_background_macro" />
+      <regions>
+        <region name="sm_bs_region_macro">
+          <position x="0" y="-20000" z="0"/>
+        </region>
+      </regions>
+      <paintmod default="paintmod_0191" />
+    </scene>
+  </replace>
+  <add sel="/startmenu/background">
+    <scene cutscene="startmenu_b1_background" music="music_menu_main_bor_music" map="blackgalaxy_macro">
+      <cluster name="cluster_black_macro" background="cluster_sm602_background_macro" />
+      <regions>
+        <region name="sm_bs_region_macro">
+          <position x="0" y="-20000" z="0"/>
+        </region>
+      </regions>
+      <paintmod default="paintmod_0191" />
+    </scene>
+    <scene cutscene="startmenu_b2_background" music="music_menu_main_bor_music" map="blackgalaxy_macro">
+      <unlock>
+        <userdata ref="x4ke_sod_discovered" value="1" />
+      </unlock>
+      <cluster name="cluster_black_macro" background="cluster_sm605_background_macro" />
+      <regions>
+        <region name="sm_sod_region_macro">
+          <position x="0" y="-50000" z="0"/>
+        </region>
+        <region name="sm_sod_region2_macro">
+          <position x="0" y="-20000" z="0"/>
+        </region>
+      </regions>
+      <paintmod default="paintmod_0191" />
+    </scene>
+    <scene cutscene="startmenu_b3_background" music="music_menu_main_bor_music" map="blackgalaxy_macro">
+      <unlock>
+        <userdata ref="x4ke_ke_discovered" value="1" />
+      </unlock>
+      <cluster name="cluster_black_macro" background="cluster_sm606_background_macro" />
+      <regions>
+        <region name="sm_ke_region_macro">
+          <position x="0" y="-20000" z="0"/>
+        </region>
+        <region name="sm_ke_region2_macro">
+          <position x="0" y="-10000" z="0"/>
+        </region>
+        <region name="sm_ke_region3_macro">
+          <position x="0" y="-4000" z="0"/>
+        </region>
+      </regions>
+      <paintmod default="paintmod_0191" />
+    </scene>
+    <random cutscene="random">
+      <unlock>
+        <userdata ref="unlock_x4ke_ch6_complete" value="1" />
+        <userdata ref="unlock_x4ke_ch8_complete" value="1" />
+      </unlock>
+    </random>
+  </add>
+</diff>

@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<components>
+	<component name="turret_ter_m_base_01" referenceable="1" class="positional">
+		<source geometry="extensions\ego_dlc_terran\assets\props\weaponsystems\xref_parts\turret_ter_m_base_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="positional">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="turret_inactive" start="0" end="0"/>
+					<animation name="turret_activating" start="0" end="45"/>
+					<animation name="turret_active" start="50" end="50"/>
+					<animation name="turret_deactivating" start="55" end="100"/>
+					<animation name="gun_firing" start="50" end="55"/>
+				</animations>
+				<parts>
+					<part name="part_socket" wreck="part_socket_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="p1terran.ter_p1_hullpattern_01"/>
+									<material id="3" ref="p1terran.ter_p1_fx_01"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="p1terran.ter_p1_hullpattern_01"/>
+									<material id="3" ref="p1terran.ter_p1_fx_01"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="p1terran.ter_p1_hullpattern_01"/>
+									<material id="3" ref="p1terran.ter_p1_fx_01"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="p1terran.ter_p1_hullpattern_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.502298" y="1.520425" z="7.903461"/>
+							<center x="0" y="1.518725" z="-3.249645E-02"/>
+						</size>
+						<size_raw>
+							<max x="7.502298" y="1.520425" z="7.903461"/>
+							<center x="0" y="1.518725" z="-3.249645E-02"/>
+						</size_raw>
+						<lights>
+							<arealight name="XU AreaLight01" areax="0" areay="0" radius="0.6" r="255" g="0" b="0" lighteffect="1" range="15" spotattenuation="0" specularintensity="1" trigger="1" intensity="0">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0"/>
+										<key frame="40" value="1"/>
+										<key frame="60" value="1"/>
+										<key frame="100" value="0"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.912449E-03" y="1.016293" z="7.156892"/>
+									<quaternion qx="-0" qy="-0" qz="-1" qw="4.371139E-08"/>
+								</offset>
+							</arealight>
+							<arealight name="XU AreaLight002" areax="0" areay="0" radius="0.6" r="255" g="0" b="0" lighteffect="1" range="15" spotattenuation="0" specularintensity="1" trigger="1" intensity="0">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0"/>
+										<key frame="40" value="1"/>
+										<key frame="60" value="1"/>
+										<key frame="100" value="0"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.912449E-03" y="3.087353" z="-5.238299"/>
+									<quaternion qx="-0" qy="-0" qz="-1" qw="4.371139E-08"/>
+								</offset>
+							</arealight>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation nocollision forceoutline detail_xl iklink " parent="part_socket">
+				<animations/>
+				<parts>
+					<part name="anim_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.3572118" y="1.112807" z="6.437106"/>
+							<center x="0" y="1.434072" z="0.9040928"/>
+						</size>
+						<size_raw>
+							<max x="0.3572118" y="0.3212656" z="5.533013"/>
+							<center x="0" y="1.434072" z="0.9040928"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="35" value="0.67"/>
+									<key frame="65" value="0.67"/>
+									<key frame="100" value="0"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision forceoutline detail_m ">
+				<offset/>
+				<parts>
+					<part name="fx_decals">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.156134" y="1.192636" z="6.520348"/>
+							<center x="0" y="1.582623" z="-0.7003713"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

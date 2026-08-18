@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Welfare race cutscene 1 -->
+  <director key="Story_welfare_3">
+    <params>
+      <!--Race ship-->
+      <param name="ship" object="true" />
+      
+      <!--Camera position-->
+      <param name="ship_x" number="true"/>
+      <param name="ship_y" number="true"/>
+      <param name="ship_z" number="true"/>
+
+      <param name="ship_x2" number="true"/>
+      <param name="ship_y2" number="true"/>
+      <param name="ship_z2" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="shipscene" zone="@auto:ship" />
+  </environments>
+
+  <presentation>
+    <actions>
+      
+      <sequence name="LookAtShip1" start="0">
+        <shot name="LookAtShip1Shot" environment="shipscene" duration="onevent:LookAtShip1End">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="ship_x" comment="Ship zone X coordinate" />
+                  <value var="ship_y" comment="Ship zone Y coordinate" />
+                  <value var="ship_z" comment="Ship zone Z coordinate" />
+                </keyframe>
+                <keyframe timestamp="16000" interpolation="linear">
+                  <value var="ship_x2" comment="Ship zone X coordinate" />
+                  <value var="ship_y2" comment="Ship zone Y coordinate" />
+                  <value var="ship_z2" comment="Ship zone Z coordinate" />
+                </keyframe>
+              </keyframes>
+            </position>
+            <panloop pitch="0.01" roll="0.01" time="26"/>
+            <lookdirection>
+              <reference x="5" y="-20" z="15" object="ship"/>
+            </lookdirection>
+            <zoom>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="smooth">
+                  <value exact="1.0"/>
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="linear">
+                  <value exact="1.0"/>
+                </keyframe>
+                <keyframe timestamp="3500" interpolation="linear">
+                  <value exact="20.0"/>
+                </keyframe>
+                <keyframe timestamp="6000" interpolation="linear">
+                  <value exact="50.0"/>
+                </keyframe>
+                <keyframe timestamp="8000" interpolation="linear">
+                  <value exact="40.0"/>
+                </keyframe>
+                <keyframe timestamp="9500" interpolation="linear">
+                  <value exact="45.0"/>
+                </keyframe>
+              </keyframes>
+            </zoom>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="LookAtShip2" start="onevent:LookAtShip2">
+        <shot name="LookAtShip2Shot" environment="shipscene" duration="onevent:LookAtShip2End">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="ship_x" comment="Ship zone X coordinate" />
+                  <value var="ship_y" comment="Ship zone Y coordinate" />
+                  <value var="ship_z" comment="Ship zone Z coordinate" />
+                </keyframe>
+                <keyframe timestamp="16000" interpolation="linear">
+                  <value var="ship_x2" comment="Ship zone X coordinate" />
+                  <value var="ship_y2" comment="Ship zone Y coordinate" />
+                  <value var="ship_z2" comment="Ship zone Z coordinate" />
+                </keyframe>
+              </keyframes>
+            </position>
+            <panloop pitch="0.01" roll="0.01" time="26"/>
+            <lookdirection>
+              <reference x="5" y="-20" z="15" object="ship"/>
+            </lookdirection>
+            <zoom>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="smooth">
+                  <value exact="45.0"/>
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="linear">
+                  <value exact="20.0"/>
+                </keyframe>
+                <keyframe timestamp="3500" interpolation="linear">
+                  <value exact="10.0"/>
+                </keyframe>
+                <keyframe timestamp="8000" interpolation="linear">
+                  <value exact="40.0"/>
+                </keyframe>
+                <keyframe timestamp="9500" interpolation="linear">
+                  <value exact="5.0"/>
+                </keyframe>
+              </keyframes>
+            </zoom>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

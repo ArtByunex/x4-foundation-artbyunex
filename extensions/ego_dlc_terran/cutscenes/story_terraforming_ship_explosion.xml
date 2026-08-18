@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_Terraforming_Ship_Explosion" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="FollowShip" environment="scenezone" duration="onevent:stopscene">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="50" pitch="20" yaw="90"  />
+            <end distance="400" pitch="0" yaw="0" time="30000" />
+          </camera_follow>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

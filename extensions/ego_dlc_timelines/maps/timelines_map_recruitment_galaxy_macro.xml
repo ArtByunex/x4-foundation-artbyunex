@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="objects_120579" ref="objects">
+        <offset>
+          <position x="-27000" z="-49000"/>
+        </offset>
+        <macro connection="space" ref="landmarks_vault_01_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate028to027" ref="gates">
+        <offset>
+          <position x="-2037.231" z="9229.782"/>
+          <rotation yaw="-120"/>
+        </offset>
+        <macro connection="space" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate028to113" ref="gates">
+        <offset>
+          <position x="-13114.908" z="-40702.742"/>
+        </offset>
+        <macro connection="space" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_005_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="player" nameoverride=""/>
+      <plan ref="arg_defence"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_zone_005_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_126730" ref="stations">
+        <offset>
+          <position x="18719.074" z="-9218.881"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_005_station_001_macro" connection="space"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_highway_006_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="162.918" z="38782.801" tz="-1" weight="0.2" inlength="0" outlength="4472.41"/>
+          <splineposition x="162.918" z="25365.5" tz="-1" weight="1" inlength="4472.41" outlength="7963.27"/>
+          <splineposition x="162.918" z="1475.73" tz="-1" weight="1" inlength="7963.27" outlength="6839.511"/>
+          <splineposition x="162.918" z="-19042.801" tz="-1" weight="1" inlength="6839.509" outlength="4891.43"/>
+          <splineposition x="163.094" z="-33717.102" tz="-1" weight="0.2" inlength="4891.43" outlength="0"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="162.918" z="38782.801"/>
+          <rotation yaw="-179.99998"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="163.094" z="-33717.098"/>
+          <rotation yaw="-179.99998"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_highway_007_macro">
+    <component ref="standardzonehighway" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+      <boundaries>
+        <boundary class="splinetube">
+          <splineposition x="7014.78" z="-34709.801" tz="1" weight="0.2" inlength="0" outlength="4563.609"/>
+          <splineposition x="7014.69" z="-21019" tz="1" weight="1" inlength="4563.609" outlength="7006.32"/>
+          <splineposition x="7014.69" tz="1" weight="1" inlength="7006.318" outlength="8099.69"/>
+          <splineposition x="7014.69" z="24299" tz="1" weight="1" inlength="8099.688" outlength="4489.529"/>
+          <splineposition x="7014.69" z="37767.602" tz="1" weight="0.2" inlength="4489.52" outlength="0"/>
+          <size r="200"/>
+        </boundary>
+      </boundaries>
+    </properties>
+    <connections>
+      <connection ref="entrypoint">
+        <offset>
+          <position x="7014.78" z="-34709.801"/>
+        </offset>
+      </connection>
+      <connection ref="exitpoint">
+        <offset>
+          <position x="7014.69" z="37767.605"/>
+        </offset>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,1070011}" description="{20004,1070012}"/>
+    </properties>
+    <connections>
+      <connection name="zone003_cluster_28_sector001_connection" ref="zones">
+        <offset>
+          <position x="-101943.477" z="-122315.109"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zone001_cluster_28_sector001_connection" ref="zones">
+        <offset>
+          <position x="104989.93" z="134567.75"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zone005_cluster_28_sector001_connection" ref="zones">
+        <offset>
+          <position x="102951.203" z="18358.842"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zone004_cluster_28_sector001_connection" ref="zones">
+        <offset>
+          <position x="33633.59" z="-112121.344"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_125061" ref="zones">
+        <offset>
+          <position x="-52000" z="-12000"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_zone_005_macro" connection="sector"/>
+      </connection>
+      <connection name="highway02_cluster_28_sector001_connection" ref="zonehighways">
+        <offset>
+          <position x="94063.078" z="74717.203"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_highway_006_macro" connection="sector">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../zone001_cluster_28_sector001_connection" connection="highway01connection01_gate"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../zone005_cluster_28_sector001_connection" connection="highway01connection02_gate"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+      <connection name="highway01_cluster_28_sector001_connection" ref="zonehighways">
+        <offset>
+          <position x="83250.312" z="75736.578"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_highway_007_macro" connection="sector">
+          <connections>
+            <connection ref="entrypoint">
+              <macro path="../../zone005_cluster_28_sector001_connection" connection="highway01connection01_gate"/>
+            </connection>
+            <connection ref="exitpoint">
+              <macro path="../../zone001_cluster_28_sector001_connection" connection="highway01connection02_gate"/>
+            </connection>
+          </connections>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="regionpart2_cluster_28_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="p1_40km_helium_highyield_field"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_28_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_cluster_28_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_recruitment_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,280001}" description="{20003,280002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_28_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_recruitment_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region002_connection" ref="regions">
+        <macro ref="timelines_map_recruitment_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region004_connection" ref="regions">
+        <offset>
+          <position x="131111" y="5903" z="-161633"/>
+        </offset>
+        <macro ref="timelines_map_recruitment_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region001_connection" ref="regions">
+        <macro ref="timelines_map_recruitment_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region003_connection" ref="regions">
+        <macro ref="timelines_map_recruitment_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_28"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_recruitment_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_120121" ref="clusters">
+        <macro ref="timelines_map_recruitment_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

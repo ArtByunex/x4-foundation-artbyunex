@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Scavenger operation near gate -->
+  <director key="Story_Pirate_Prelude1" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" />
+      <reference object="target_wreck" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+
+        <shot name="FollowShip" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="1050" pitch="0" yaw="20" />
+            <end distance="200" pitch="20" yaw="50" time="20000" />
+          </camera_follow>
+        </shot>
+
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="OrbitOnWreck" environment="scenezone" duration="21000">
+          <camera_orbit reference="target_wreck" orient_to="object">
+            <begin angle="85" distance="1500" elevation="70" />
+            <end angle="190" distance="2500" elevation="-40" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="target_ship" x="523" y="-20" z="-257" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship" x="0" y="50" z="0"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.053829"/>
+            </roll>
+          </camera>
+        </shot>
+
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+
+        <shot name="StaticCameraShot3" environment="scenezone" duration="15000">
+          <camera>
+            <position>
+              <reference object="target_wreck" x="70.740360" y="252.055462" z="-345.119507" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship" x="0" y="0" z="0" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="1.037604"/>
+            </roll>
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

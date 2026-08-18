@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- in-house patches to ai should not contain blocking actions. messes with aicompat. -->
+  <add sel='//create_order[@id="&apos;Attack&apos;"]' pos="before">
+    <do_if value="(this.trueowner == faction.loanshark) and this.sector and (this.sector.owner != this.trueowner)">
+      <signal_objects object="player.galaxy" param="'ship_in_distress'" param2="this.assignedcontrolled" param3="$target"/>
+      <do_if value="this.sector">
+        <signal_objects object="this.sector" param="'ship_in_distress'" param2="this.assignedcontrolled" param3="$target"/>
+      </do_if>
+    </do_if>
+  </add>
+</diff>

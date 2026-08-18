@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_weaken_station_intro_cutscene" />
+  <!--
+  Shot 1:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_targetship_1" zone="@auto:target_station" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_station" />
+      <reference object="target_turret" />
+      <reference object="target_targetship_1" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      
+      <sequence name="Sequence01" start="0">
+        <shot name="FlyFrom_Gate_To_Station" environment="scenezone_targetship_1" duration="15000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_gate" distance="200" flyto_reference="target_station" flyto_distance="220" interpolation="smooth" time_firstobject="9000" time_fly="3000" cycle="none"
+                            orbit1_yaw_start="-99" orbit1_yaw_end="-80" orbit1_elevation="10"
+                            orbit2_yaw_start="15" orbit2_yaw_end="0" orbit2_pitch="-3"/>
+
+        </shot>
+        <shot name="OrbitStation" environment="scenezone_targetship_1" duration="8000">
+          <camera_orbit reference="target_turret" orient_to="object" cycle="none" >
+            <begin distance="200" angle="130" elevation="60"/>
+            <end distance="200" angle="100" time="7500" elevation="68"/>
+          </camera_orbit>
+        </shot>
+        <shot name="FlyFrom_Station_To_Ship" environment="scenezone_targetship_1" duration="8000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_station" distance="200" flyto_reference="target_targetship_1" flyto_distance="220" interpolation="smooth" time_firstobject="2000" time_fly="2000" cycle="none"
+                            orbit1_yaw_start="100" orbit1_yaw_end="80" orbit1_elevation="10"
+                            orbit2_yaw_start="0" orbit2_yaw_end="180" orbit2_pitch="3"/>
+
+        </shot>
+        
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

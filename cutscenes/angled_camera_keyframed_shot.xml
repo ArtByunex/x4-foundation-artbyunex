@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!--A camera set to parameterised angles and positions for two keyframes.
+  Key frames: Two, 10s between them-->
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Angled_Camera_Keyframed_Shot">
+    <params>
+      <param name="duration" number="true" default="10" comment="in seconds"/>
+      <param name="kf_timestamp" number="true" default="10000" comment="in milliseconds"/>
+      <param name="anchor" object="true"/>
+      <param name="camerapos_x_1" number="true"/>
+      <param name="camerapos_x_2" number="true"/>
+      <param name="camerapos_y_1" number="true"/>
+      <param name="camerapos_y_2" number="true"/>
+      <param name="camerapos_z_1" number="true"/>
+      <param name="camerapos_z_2" number="true"/>
+      <param name="yaw_1" number="true"/>
+      <param name="yaw_2" number="true"/>
+      <param name="pitch_1" number="true"/>
+      <param name="pitch_2" number="true"/>
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="LookatSequence" start="0">
+        <shot name="LookatShot" environment="scenezone" duration="param:duration">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <angles>
+                    <distance>
+                      <value exact="1"/>
+                    </distance>
+                    <yaw>
+                      <value var="yaw_1"/>
+                    </yaw>
+                    <pitch>
+                      <value var="pitch_1"/>
+                    </pitch>
+                  </angles>
+                </keyframe>
+                <keyframe timestamp="param:kf_timestamp" interpolation="linear">
+                  <angles>
+                    <distance>
+                      <value exact="1"/>
+                    </distance>
+                    <yaw>
+                      <value var="yaw_2"/>
+                    </yaw>
+                    <pitch>
+                      <value var="pitch_2"/>
+                    </pitch>
+                  </angles>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="anchor" x="camerapos_x_1" y="camerapos_y_1" z="camerapos_z_1"/>
+                </keyframe>
+                <keyframe timestamp="param:kf_timestamp" interpolation="linear">
+                  <reference object="anchor" x="camerapos_x_2" y="camerapos_y_2" z="camerapos_z_2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <!--TODO @Owen panloop parameter support. Support keyframes-->
+            <!--<panloop yaw="panloop_yaw_1" pitch="panloop_pitch_1" roll="panloop_roll_1" time="panloop_time_1"/>-->
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

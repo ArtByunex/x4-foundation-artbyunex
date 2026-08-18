@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Fleet_Battle_Lib" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+
+    <library name="Setup_ParanidFleet" purpose="run_actions">
+      <params>
+        <param name="player"/>
+        <param name="ParanidLocation"/>
+        <param name="PatrolDestination"/>
+        <param name="PatrolPosition1"/>
+      </params>
+      <actions>
+        <create_group groupname="$Paranidfleet"/>
+
+        <!--spawn carrier groups-->
+        <do_all exact="1">
+          <do_if value="$player">
+            <set_value name="$carrier" exact="player.ship"/>
+            <set_owner object="$carrier" faction="faction.player" overridenpc="true"/>
+          </do_if>
+          <do_else>
+            <create_ship groupname="$Paranidfleet" name="$carrier" sector="$ParanidLocation" macro="macro.ship_par_xl_carrier_02_a_macro" capturable="false">
+              <owner exact="faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_par_carrier'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos space="$ParanidLocation" x="-140km" y="0km" z="-150km"/>
+              <rotation yaw="60deg"/>
+            </create_ship>
+          </do_else>
+          <find_object_component groupname="$CarrierTurrets" object="$carrier" multiple="true" class="class.turret"/>
+          <do_for_each in="$CarrierTurrets" name="$CurrentTurret">
+            <set_weapon_mode weapon="$CurrentTurret" weaponmode="weaponmode.attackenemies"/>
+          </do_for_each>
+          <set_object_fleet_name object="$carrier" name="'{30622,2101}'"/>
+          <create_order id="'ProtectPosition'" object="$carrier" default="true">
+            <param name="destination" value="[$PatrolDestination, $PatrolPosition1]"/>
+          </create_order>
+        </do_all>
+
+        <!--spawn destroyer groups-->
+        <do_all exact="3">
+          <create_ship groupname="$Paranidfleet" name="$destroyer" sector="$ParanidLocation" macro="macro.ship_par_l_destroyer_02_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+            <loadout ref="'timelines_scenario_fleet_battle_common_par_destroyer'"/>
+            <pilot>
+              <select faction="faction.paranid" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$carrier" max="10km"/>
+            <rotation value="$carrier.rotation"/>
+          </create_ship>
+          <find_object_component groupname="$DestroyerTurrets" object="$destroyer" multiple="true" class="class.turret"/>
+          <do_for_each in="$DestroyerTurrets" name="$DestroyerTurret">
+            <set_weapon_mode weapon="$DestroyerTurret" weaponmode="weaponmode.attackenemies"/>
+          </do_for_each>
+          <set_object_commander object="$destroyer" commander="$carrier" assignment="assignment.attack"/>
+          <!--destroyer subordinates-->
+          <!--frigates-->
+          <do_all exact="5">
+            <create_ship groupname="$Paranidfleet" name="$frigate" sector="$ParanidLocation" macro="macro.ship_par_m_frigate_01_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_common_par_frigate'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$frigate" commander="$destroyer" assignment="assignment.interception"/>
+          </do_all>
+          <!--corvettes-->
+          <do_all exact="5">
+            <create_ship groupname="$Paranidfleet" name="$corvette" sector="$ParanidLocation" macro="macro.ship_par_m_corvette_01_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_common_par_corvette'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$corvette" commander="$destroyer" assignment="assignment.interception"/>
+          </do_all>
+          <!--fighters-->
+          <do_all exact="4">
+            <create_ship groupname="$Paranidfleet" name="$fighter" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_common_par_fighter'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$fighter" commander="$destroyer" assignment="assignment.interception"/>
+            <!--fighter subordinates-->
+            <do_all exact="2">
+              <create_ship groupname="$Paranidfleet" name="$wingman" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_02_a_macro" capturable="false">
+                <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+                <loadout ref="'timelines_scenario_fleet_battle_common_par_fighter'"/>
+                <pilot>
+                  <select faction="faction.paranid" tags="tag.aipilot"/>
+                </pilot>
+                <safepos object="$fighter" max="3km"/>
+                <rotation value="$carrier.rotation"/>
+              </create_ship>
+              <set_object_commander object="$wingman" commander="$fighter" assignment="assignment.attack"/>
+            </do_all>
+          </do_all>
+        </do_all>
+
+        <!--spawn bomber groups-->
+        <do_all exact="3">
+          <create_ship groupname="$Paranidfleet" name="$bomber" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_01_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+            <loadout ref="'timelines_scenario_fleet_battle_common_par_bomber'"/>
+            <pilot>
+              <select faction="faction.paranid" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$carrier" max="10km"/>
+            <rotation value="$carrier.rotation"/>
+          </create_ship>
+          <do_if value="$player">
+            <create_order id="'Wait'" object="$bomber" default="true"/>
+          </do_if>
+          <do_else>
+            <create_order id="'ProtectPosition'" object="$bomber" default="true">
+              <param name="destination" value="[$PatrolDestination, $PatrolPosition1]"/>
+            </create_order>
+          </do_else>
+          <set_value name="$BomberWingCount" exact="1" operation="add"/>
+          <substitute_text text="$BomberWing" source="{30622,2111}">
+            <replace string="'$BOMBER$'" with="$BomberWingCount"/>
+          </substitute_text>
+          <set_object_fleet_name object="$bomber" name="$BomberWing"/>
+          <!--subordinates-->
+          <do_all exact="2">
+            <create_ship groupname="$Paranidfleet" name="$wingman" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_01_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_common_par_bomber'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$bomber" max="3km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$wingman" commander="$bomber" assignment="assignment.attack"/>
+          </do_all>
+        </do_all>
+
+        <!--spawn interceptor groups-->
+        <do_all exact="3">
+          <create_ship groupname="$Paranidfleet" name="$interceptor" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_01_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+            <loadout ref="'timelines_scenario_fleet_battle_common_par_interceptor'"/>
+            <pilot>
+              <select faction="faction.paranid" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$carrier" max="10km"/>
+            <rotation value="$carrier.rotation"/>
+          </create_ship>
+          <do_if value="$player">
+            <create_order id="'Wait'" object="$interceptor" default="true"/>
+          </do_if>
+          <do_else>
+            <create_order id="'ProtectPosition'" object="$interceptor" default="true">
+              <param name="destination" value="[$PatrolDestination, $PatrolPosition1]"/>
+            </create_order>
+          </do_else>
+          <set_value name="$InterceptorWingCount" exact="1" operation="add"/>
+          <substitute_text text="$InterceptorWing" source="{30622,2121}">
+            <replace string="'$INTERCEPTOR$'" with="$InterceptorWingCount"/>
+          </substitute_text>
+          <set_object_fleet_name object="$interceptor" name="$InterceptorWing"/>
+          <!--subordinates-->
+          <do_all exact="2">
+            <create_ship groupname="$Paranidfleet" name="$wingman" sector="$ParanidLocation" macro="macro.ship_par_s_fighter_01_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.paranid" overridenpc="true"/>
+              <loadout ref="'timelines_scenario_fleet_battle_common_par_interceptor'"/>
+              <pilot>
+                <select faction="faction.paranid" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$interceptor" max="3km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$wingman" commander="$interceptor" assignment="assignment.attack"/>
+          </do_all>
+        </do_all>
+
+        <debug_text text="'Paranid fleet ship count: ' + $Paranidfleet.count"/>
+        <return value="$Paranidfleet"/>
+      </actions>
+    </library>
+
+    <library name="Setup_CPUFleet" purpose="run_actions">
+      <params>
+        <param name="player"/>
+        <param name="XenonLocation"/>
+        <param name="PatrolDestination"/>
+        <param name="PatrolPosition2"/>
+      </params>
+      <actions>
+        <create_group groupname="$CPUfleet"/>
+
+        <!--cpu ship-->
+        <do_all exact="1">
+          <do_if value="$player">
+            <set_value name="$cpu" exact="player.ship"/>
+            <set_owner object="$cpu" faction="faction.player" overridenpc="true"/>
+          </do_if>
+          <do_else>
+            <create_ship groupname="$CPUfleet" name="$cpu" sector="$XenonLocation" macro="macro.ship_tfm_xl_carrier_02_b_macro" capturable="false">
+              <owner exact="faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos space="$XenonLocation" x="67000" y="0" z="93000"/>
+              <rotation yaw="230deg"/>
+            </create_ship>
+          </do_else>
+          <set_object_fleet_name object="$cpu" name="'{30622,3105}'"/>
+          <do_if value="$player">
+            <create_order id="'Wait'" object="$cpu" default="true"/>
+          </do_if>
+          <do_else>
+            <create_order id="'ProtectPosition'" object="$cpu" default="true">
+              <param name="destination" value="[$PatrolDestination, $PatrolPosition2]"/>
+            </create_order>
+          </do_else>
+        </do_all>
+
+        <!--destroyers-->
+        <do_all exact="1">
+          <create_ship groupname="$CPUfleet" name="$destroyer" sector="$XenonLocation" macro="macro.ship_xen_xl_destroyer_01_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+            <loadout ref="'default'"/>
+            <pilot>
+              <select faction="faction.xenon" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$cpu" max="10km"/>
+            <rotation value="$cpu.rotation"/>
+          </create_ship>
+          <set_object_commander object="$destroyer" commander="$cpu" assignment="assignment.attack"/>
+          <!--destroyer subordinates-->
+          <!--corvettes-->
+          <do_all exact="7">
+            <create_ship groupname="$CPUfleet" name="$corvette" sector="$XenonLocation" macro="macro.ship_xen_m_corvette_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$cpu.rotation"/>
+            </create_ship>
+            <set_object_commander object="$corvette" commander="$destroyer" assignment="assignment.interception"/>
+          </do_all>
+          <!--fighters-->
+          <do_all exact="3">
+            <create_ship groupname="$CPUfleet" name="$fighter" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$cpu.rotation"/>
+            </create_ship>
+            <set_object_commander object="$fighter" commander="$destroyer" assignment="assignment.interception"/>
+            <!--fighter subordinates-->
+            <do_all exact="3">
+              <create_ship groupname="$CPUfleet" name="$wingman" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_01_a_macro" capturable="false">
+                <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+                <loadout ref="'default'"/>
+                <pilot>
+                  <select faction="faction.xenon" tags="tag.aipilot"/>
+                </pilot>
+                <safepos object="$fighter" max="3km"/>
+                <rotation value="$cpu.rotation"/>
+              </create_ship>
+              <set_object_commander object="$wingman" commander="$fighter" assignment="assignment.attack"/>
+            </do_all>
+          </do_all>
+        </do_all>
+        <debug_text text="'CPU fleet ship count: ' + $CPUfleet.count"/>
+        <return value="$CPUfleet"/>
+      </actions>
+    </library>
+
+    <library name="Setup_XenonCarrierFleet" purpose="run_actions">
+      <params>
+        <param name="player"/>
+        <param name="XenonLocation"/>
+        <param name="PatrolDestination"/>
+        <param name="PatrolPosition1"/>
+      </params>
+      <actions>
+        <create_group groupname="$XenonCarrierfleet"/>
+        <!--carriers-->
+        <do_all exact="1">
+          <create_ship groupname="$XenonCarrierfleet" name="$carrier" sector="$XenonLocation" macro="macro.ship_xen_xl_carrier_01_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+            <loadout ref="'default'"/>
+            <pilot>
+              <select faction="faction.xenon" tags="tag.aipilot"/>
+            </pilot>
+            <safepos space="$XenonLocation" x="-160000" y="0" z="40000"/>
+            <rotation yaw="160deg"/>
+          </create_ship>
+          <do_if value="$player">
+            <create_order id="'Wait'" object="$carrier" default="true"/>
+          </do_if>
+          <do_else>
+            <create_order id="'ProtectPosition'" object="$carrier" default="true">
+              <param name="destination" value="[$PatrolDestination, $PatrolPosition1]"/>
+            </create_order>
+          </do_else>
+          <!--carrier subordinates-->
+          <!--corvettes-->
+          <do_all exact="10">
+            <create_ship groupname="$XenonCarrierfleet" name="$corvette" sector="$XenonLocation" macro="macro.ship_xen_m_corvette_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$carrier" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$corvette" commander="$carrier" assignment="assignment.interception"/>
+          </do_all>
+          <!--fighters-->
+          <do_all exact="6">
+            <create_ship groupname="$XenonCarrierfleet" name="$fighter" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$carrier" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$fighter" commander="$carrier" assignment="assignment.interception"/>
+            <!--fighter subordinates-->
+            <do_all exact="3">
+              <create_ship groupname="$XenonCarrierfleet" name="$wingman" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_01_a_macro" capturable="false">
+                <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+                <loadout ref="'default'"/>
+                <pilot>
+                  <select faction="faction.xenon" tags="tag.aipilot"/>
+                </pilot>
+                <safepos object="$fighter" max="3km"/>
+                <rotation value="$carrier.rotation"/>
+              </create_ship>
+              <set_object_commander object="$wingman" commander="$fighter" assignment="assignment.attack"/>
+            </do_all>
+          </do_all>
+        </do_all>
+
+        <!--destroyers-->
+        <do_all exact="1">
+          <create_ship groupname="$XenonCarrierfleet" name="$destroyer" sector="$XenonLocation" macro="macro.ship_xen_xl_destroyer_01_a_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+            <loadout ref="'default'"/>
+            <pilot>
+              <select faction="faction.xenon" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$carrier" max="15km"/>
+            <rotation value="$carrier.rotation"/>
+          </create_ship>
+          <set_object_commander object="$destroyer" commander="$carrier" assignment="assignment.attack"/>
+          <!--destroyer subordinates-->
+          <!--corvettes-->
+          <do_all exact="6">
+            <create_ship groupname="$XenonCarrierfleet" name="$corvette" sector="$XenonLocation" macro="macro.ship_xen_m_corvette_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$corvette" commander="$destroyer" assignment="assignment.interception"/>
+          </do_all>
+          <!--fighters-->
+          <do_all exact="3">
+            <create_ship groupname="$XenonCarrierfleet" name="$fighter" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_02_a_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout ref="'default'"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$destroyer" max="10km"/>
+              <rotation value="$carrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$fighter" commander="$destroyer" assignment="assignment.interception"/>
+            <!--fighter subordinates-->
+            <do_all exact="3">
+              <create_ship groupname="$XenonCarrierfleet" name="$wingman" sector="$XenonLocation" macro="macro.ship_xen_s_fighter_01_a_macro" capturable="false">
+                <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+                <loadout ref="'default'"/>
+                <pilot>
+                  <select faction="faction.xenon" tags="tag.aipilot"/>
+                </pilot>
+                <safepos object="$fighter" max="3km"/>
+                <rotation value="$carrier.rotation"/>
+              </create_ship>
+              <set_object_commander object="$wingman" commander="$fighter" assignment="assignment.attack"/>
+            </do_all>
+          </do_all>
+        </do_all>
+        <debug_text text="'Xenon Carrier fleet ship count: ' + $XenonCarrierfleet.count"/>
+        <return value="$XenonCarrierfleet"/>
+      </actions>
+    </library>
+
+    <library name="Setup_XenonTerraformerFleet" purpose="run_actions">
+      <params>
+        <param name="player"/>
+        <param name="XenonLocation"/>
+        <param name="PatrolDestination"/>
+        <param name="PatrolPosition3"/>
+      </params>
+      <actions>
+        <create_group groupname="$Terraformerfleet"/>
+        <!-- Xenon H -->
+        <create_ship groupname="$Terraformerfleet" name="$DroneCarrier" sector="$XenonLocation" macro="macro.ship_xen_l_terraformer_01_b_macro" capturable="false">
+          <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+          <loadout>
+            <quantity exact="1.0"     comment="all slots filled">
+              <variation exact="0.0"  comment="all slots filled"/>
+            </quantity>
+            <quality exact="1.0">
+              <variation exact="0.0"  comment="no variation"/>
+            </quality>
+          </loadout>
+          <pilot>
+            <select faction="faction.xenon" tags="tag.aipilot"/>
+          </pilot>
+          <safepos space="$XenonLocation" x="165000" y="0" z="-95000"/>
+          <rotation yaw="250deg"/>
+        </create_ship>
+        <do_if value="$player">
+          <create_order id="'Wait'" object="$DroneCarrier" default="true"/>
+        </do_if>
+        <do_else>
+          <create_order id="'ProtectPosition'" object="$DroneCarrier" default="true">
+            <param name="destination" value="[$PatrolDestination, $PatrolPosition3]"/>
+          </create_order>
+        </do_else>
+        
+        <!--corvete-->
+        <do_all exact="5">
+          <create_ship groupname="$Terraformerfleet" name="$interceptor" sector="$XenonLocation" macro="macro.ship_xen_m_corvette_01_b_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+            <loadout>
+              <quantity exact="1.0"     comment="all slots filled">
+                <variation exact="0.0"  comment="all slots filled"/>
+              </quantity>
+              <quality exact="1.0">
+                <variation exact="0.0"  comment="no variation"/>
+              </quality>
+            </loadout>
+            <pilot>
+              <select faction="faction.xenon" tags="tag.aipilot"/>
+            </pilot>
+            <safepos object="$DroneCarrier" max="5km"/>
+            <rotation value="$DroneCarrier.rotation"/>
+          </create_ship>
+          <set_object_commander object="$interceptor" commander="$DroneCarrier" assignment="assignment.interception"/>
+          <do_all exact="2">
+            <create_ship groupname="$Terraformerfleet" name="$wingman" sector="$XenonLocation" macro="macro.ship_xen_s_heavyfighter_01_b_macro" capturable="false">
+              <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+              <loadout>
+                <quantity exact="1.0"     comment="all slots filled">
+                  <variation exact="0.0"  comment="all slots filled"/>
+                </quantity>
+                <quality exact="1.0">
+                  <variation exact="0.0"  comment="no variation"/>
+                </quality>
+              </loadout>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <safepos object="$interceptor" max="3km"/>
+              <rotation value="$DroneCarrier.rotation"/>
+            </create_ship>
+            <set_object_commander object="$wingman" commander="$interceptor" assignment="assignment.attack"/>
+          </do_all>
+        </do_all>
+
+        <!--scouts-->
+        <do_all exact="10">
+          <create_ship groupname="$Terraformerfleet" name="$scout" sector="$XenonLocation" macro="macro.ship_xen_s_heavyfighter_01_b_macro" capturable="false">
+            <owner exact="if $player then faction.player else faction.xenon" overridenpc="true"/>
+            <loadout>
+              <quantity exact="1.0"     comment="all slots filled">
+                <variation exact="0.0"  comment="all slots filled"/>
+              </quantity>
+              <quality exact="1.0">
+                <variation exact="0.0"  comment="no variation"/>
+              </quality>
+            </loadout>
+            <pilot>
+              <select faction="faction.xenon" tags="tag.aipilot"/>
+            </pilot>
+            <safepos space="$XenonLocation" x="-25000" y="0" z="-72000" min="1km" max="5km"/>
+            <rotation value="$DroneCarrier.rotation"/>
+          </create_ship>
+          <do_if value="$player">
+            <create_order id="'Wait'" object="$scout" default="true"/>
+          </do_if>
+          <do_else>
+            <create_order id="'Patrol'" object="$scout" default="true">
+              <param name="space" value="$PatrolDestination"/>
+            </create_order>
+          </do_else>
+        </do_all>
+        <debug_text text="'Xenon fleet ship count: ' + $Terraformerfleet.count"/>
+        <return value="$Terraformerfleet"/>
+      </actions>
+    </library>
+  </cues>
+</mdscript>

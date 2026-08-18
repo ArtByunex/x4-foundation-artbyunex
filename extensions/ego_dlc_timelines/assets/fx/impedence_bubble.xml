@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2024-01-12 16:18:33-->
+<components>
+  <component name="impedence_bubble" class="object">
+    <source geometry="extensions\ego_dlc_timelines\assets\fx\impedence_bubble_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="Point" shadow="1" r="173" g="131" b="255" intensity="0.2649619" specularintensity="1" range="40" shadowrange="40" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="0" y="1.570101" z="0" />
+            </offset>
+          </omni>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="object" />
+	  <connection name="limpet" tags="limpet" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="ConnectionForpart_energy" tags="animation nocollision part ">
+        <animations>
+          <animation name="bubble_activating" start="1" end="30" />
+          <animation name="bubble_active" start="30" end="40" />
+          <animation name="bubble_size1anim" start="40" end="60" />
+          <animation name="bubble_size1" start="60" end="70" />
+          <animation name="bubble_size2anim" start="70" end="90" />
+          <animation name="bubble_size2" start="90" end="100" />
+          <animation name="bubble_size3anim" start="100" end="120" />
+          <animation name="bubble_size3" start="120" end="130" />
+          <animation name="bubble_size4anim" start="130" end="150" />
+          <animation name="bubble_size4" start="150" end="160" />
+          <animation name="bubble_collapse" start="160" end="180" />
+        </animations>
+        <parts>
+          <part name="part_energy">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="tleffects.impedence_fx" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.500411" y="3.500412" z="3.500411" />
+              <center x="0" y="0" z="0" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

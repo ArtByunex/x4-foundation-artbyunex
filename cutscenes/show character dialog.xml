@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="ShowCharacterDialog">
+    <params>
+      <param name="npcref" />
+      <param name="npcref2" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    
+    <environment_plot name="scenezone_light">
+      <anchor name="cutscenecore_talkboron_03_macro" />
+      <teleport zone="tzonecluster_black2_sector01_zone02_macro">
+        <offset>
+          <position x="0" y="0" z="0"/>
+          <rotation yaw="0" pitch="0"/>
+        </offset>
+      </teleport>
+    </environment_plot>
+
+    <!--environment_plot name="scenezone_dark">
+      <anchor name="cutscenecore_talkboron_03_macro" comment="Anchor macro contains a pilot slot reference named 'npcref'" />
+      <teleport zone="tzonecluster_black2_sector01_zone02_macro">
+        <offset>
+          <position x="0" y="0" z="0"/>
+          <rotation yaw="0" pitch="0"/>
+        </offset>
+      </teleport>
+    </environment_plot-->
+
+  </environments>
+
+  <!-- The scene consists of a single sequence with multiple shots. -->
+  <presentation>
+    <actions>
+      
+      <sequence name="Sequence1" start="onevent:TriggerSequence1Start">
+        <!-- Note that the actual scene duration is controlled by script-logic and we rely on an event to tell us when to stop playing. -->
+        <shot name="S1Shot1" environment="scenezone_light" duration="onevent:TriggerSequence1Stop">
+          <!-- Animated camera placement: Get camera position from animation in referenced object -->
+          <camera_animated reference="anim_anim">
+          </camera_animated>
+        </shot>
+      </sequence>
+
+      <!-- relative to cameraslot -->
+      <!--sequence name="Npc2Sequence" start="onevent:TriggerSequence2Start">
+        <shot name="Npc2Shot" environment="scenezone_light" duration="onevent:TriggerSequence2Stop">
+          <camera>
+            <position>
+              <value exact="-4.0"    comment="World X coordinate" />
+              <value exact="1.5"   comment="World Y coordinate" />
+              <value exact="-7.0"    comment="World Z coordinate" />
+            </position>
+            <lookdirection>
+              <value exact="0.0" comment="world x look-pos"/>
+              <value exact="2.0"  comment="world y look-pos"/>
+              <value exact="-6.0" comment="world Z look-pos (not angle!)"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence-->
+
+      <!-- relative to anchor -->
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="S2Shot1" environment="scenezone_light" duration="onevent:TriggerSequence2Stop">
+          <camera>
+            <position>
+              <value exact="0.0"    comment="World X coordinate" />
+              <value exact="-1.5"   comment="World Y coordinate" />
+              <value exact="5.0"    comment="World Z coordinate" />
+            </position>
+            <lookdirection>
+              <value exact="0.0" comment="world x look-pos"/>
+              <value exact="-1.5"  comment="world y look-pos"/>
+              <value exact="0.0" comment="world Z look-pos (not angle!)"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="S3Shot1" environment="scenezone_light" duration="onevent:TriggerSequence3Stop">
+          <camera>
+            <position>
+              <value exact="4.0"    comment="World X coordinate" />
+              <value exact="1.5"   comment="World Y coordinate" />
+              <value exact="-4.0"    comment="World Z coordinate" />
+            </position>
+            <lookdirection>
+              <value exact="0.0" comment="world x look-pos"/>
+              <value exact="1.5"  comment="world y look-pos"/>
+              <value exact="-6.0" comment="world Z look-pos (not angle!)"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence>
+    
+    </actions>
+  </presentation>
+
+</cutscene>
+

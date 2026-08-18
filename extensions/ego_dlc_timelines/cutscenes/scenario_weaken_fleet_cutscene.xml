@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Scenario_Weaken_Fleet_Cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_enemyship" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_friendlyship" />
+      <reference object="target_enemyship"/>
+      <reference object="target_destsruction"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="LookAtGate" environment="scenezone" duration="10000">
+          <camera_orbit reference="target_gate" orient_to="object" interpolation="smooth" y="-50">
+            <begin angle="105" distance="8200" elevation="-50" />
+            <end angle="105" distance="8600" elevation="-50" time="12000"/>
+          </camera_orbit>
+        </shot>
+        
+        <shot name="StaticCameraShot01" environment="scenezone" duration="8000">
+          <camera>
+            <position>
+              <reference object="target_friendlyship" x="1500" y="-350" z="-2200"/>
+            </position>
+            <lookdirection>
+              <reference object="target_friendlyship" x="0" y="0" z="400" />
+            </lookdirection>
+          </camera>
+        </shot>
+      
+        <shot name="StaticCameraShot02" environment="scenezone" duration="12000">
+          <camera>
+            <position>
+              <reference object="target_enemyship" x="-210" y="130" z="-50"/>
+            </position>
+            <lookdirection>
+              <reference object="target_friendlyship" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+        
+        <shot name="StaticCameraShot03" environment="scenezone" duration="80000">
+          <camera>
+            <position>
+              <reference object="target_destsruction" x="customdistance_x" y="customdistance_y" z="customdistance_z"/>
+            </position>
+            <lookdirection>
+              <reference object="target_destsruction" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

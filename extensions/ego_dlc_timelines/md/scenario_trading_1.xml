@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Trading_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Adrian Hamm"/>
+  </documentation>
+  <cues>
+    <cue name="Start" namespace="this" module="scenario_trading_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30610"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.argon"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+        <set_value name="md.Signal_Leaks.Manager.$SuppressSignalLeakGeneration" exact="true"/>
+        <create_group groupname="$PlayerAssets" comment="needed for tracking trading efficiency"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <set_value name="$StationCoordinationTable" exact="table[]"/>
+        <set_value name="$RequiredCr" exact="50000Cr"/>
+        <set_value name="$PlayerWareTable" exact="table[]"/>
+        <set_value name="$LargestProfitSale" exact="0Cr"/>
+        <fade_screen fadeout="0s" holdtime="3s" fadein="1.2s" realtime="true"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_MissionDirector" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_UniverseStations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Competition" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerSatelliteNetwork" chance="if $HasError then 0 else 100"/>
+
+                <!--TEMP: TODO @Adrian Remove once Missions have been disabled for timelines-->
+                <cancel_cue cue="md.GenericMissions.Manager"/>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <create_group groupname="$PlayerFleet"/>
+
+                <!--spawn player-owned ships-->
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <set_emergency_eject_active active="false"/>
+                <!-- The player only has one ship in this scenario, so make it Mission Relevant -->
+                <add_to_group groupname="$MissionRelevantObjects" object="player.ship"/>
+                <add_to_group groupname="$PlayerAssets" object="player.ship" />
+                <set_object_name object="player.ship" page="30610" line="201"/>
+              </actions>
+            </library>
+
+            <library name="Setup_MissionDirector">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <include_actions ref="md.Scenario_Hub.Setup_Character_MissionDirectorActor"/>
+
+                <do_if value="not $MissionDirectorActor">
+                  <debug_text text="'MissionDirectorActor does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_UniverseStations">
+              <actions>
+                <!-- Place the relevant stations to be able to trade -->
+
+                <set_value name="$StationCoordinationTable" exact="table[{ware.turretcomponents}          = table[$position = position.[-13996.542969m, 0.000000m, 26426.318359m]],
+                                                                        {ware.shieldcomponents}      = table[$position = position.[-30543.300781m, 0.000000m, 8017.353516m]],
+                                                                        {ware.superfluidcoolant}        = table[$position = position.[-19132.128906m, 0.000000m, -12546.985352m]],
+                                                                        {ware.weaponcomponents}        = table[$position = position.[15319.069336m, 0.000000m, -17234.080078m]],
+                                                                        {ware.refinedmetals}             = table[$position = position.[21223.933594m, 0.000000m, 17934.470703m]],
+                                                                        {ware.antimatterconverters}    = table[$position = position.[-45438.707031m, 0.000000m, 46250.792969m]],
+                                                                        {ware.microchips}          = table[$position = position.[-45816.414063m, 0.000000m, -35565.109375m]],
+                                                                        {ware.claytronics}           = table[$position = position.[7777.690918m, 0.000000m, -40897.378906m]],
+                                                                        {ware.advancedelectronics}       = table[$position = position.[31878.863281m, 0.000000m, -578.741028m]],
+                                                                        {ware.missilecomponents}   = table[$position = position.[12291.226563m, 0.000000m, 70873.421875m]],
+                                                                        {ware.scanningarrays}            = table[$position = position.[-23194.162109m, 0.000000m, 67077.929688m]],
+                                                                        {ware.fieldcoils}         = table[$position = position.[-61747.917969m, 0.000000m, 7582.412109m]],
+                                                                        {ware.plasmaconductors}     = table[$position = position.[-73465.375000m, 0.000000m, -61635.304688m]],
+                                                                        {ware.advancedcomposites}           = table[$position = position.[62430.519531m, 0.000000m, 1123.440918m]],
+                                                                        {ware.hullparts} = table[$position = position.[54305.812500m, 0.000000m, 46871.359375m]],
+                                                                        {ware.graphene}  = table[$position = position.[103321.257813m, 0.000000m, 28010.650391m]],
+                                                                        {ware.engineparts}    = table[$position = position.[44294.761719m, 0.000000m, 88179.828125m]],
+                                                                        {ware.antimattercells}     = table[$position = position.[-8900.639648m, 0.000000m, 117162.226563m]],
+                                                                        {ware.energycells}           = table[$position = position.[-97276.734375m, 0.000000m, 30434.746094m]],
+                                                                        {ware.siliconwafers}      = table[$position = position.[-9035.800781m, 0.000000m, -78865.632813m]],
+                                                                        {ware.smartchips}     = table[$position = position.[-21484.162109m, 0.000000m, -52300.953125m]],
+                                                                        {ware.quantumtubes}          = table[$position = position.[95966.281250m, 0.000000m, -54706.320313m]],
+                                                                        {ware.dronecomponents}     = table[$position = position.[51426.371094m, 0.000000m, -44248.191406m]],
+                                                                        ]"/>
+
+                <set_value name="$wares" exact="$StationCoordinationTable.keys.list"/>
+                <!-- sort list of wares so that the stations closest to the player start location are created first - this helps with navoctree generation -->
+                <sort_list list="$wares" sortbyvalue="player.entity.distanceto.[player.sector, $StationCoordinationTable.{loop.element}.$position]"/>
+
+                <do_for_each name="$ProductionWare" in="$wares">
+                  <set_value name="$StationCoordinates" exact="$StationCoordinationTable.{$ProductionWare}.$position"/>
+                  <get_module_definition reference="$ResultRef" faction="$MissionFaction" ware="$ProductionWare"/>
+                  <do_if value="$ResultRef">
+                    <create_factory name="$SpawnedFactory" modules="$Modules" resultbasesequence="$BaseSequence" sector="player.sector" race="$MissionFaction.primaryrace" owner="$MissionFaction" originalproduct="$ProductionWare" state="componentstate.operational" seed="1234">
+                      <compatibilities>
+                        <limits storage="6" habitation="3" production="4" dock="2"/>
+                      </compatibilities>
+                      <select ware="$ProductionWare" faction="$MissionFaction"/>
+                      <position value="$StationCoordinates"/>
+                    </create_factory>
+                    <add_to_group groupname="$MissionRelevantObjects" object="$SpawnedFactory"/>
+                    <set_value name="$StationCoordinationTable.{$ProductionWare}.$station" exact="$SpawnedFactory"/>
+                    <set_known object="$SpawnedFactory" known="true"/>
+
+                    <signal_cue_instantly cue="md.FinaliseStations.NewStation_GenerateFactory_Signal" param="table[
+                                                  $station = $SpawnedFactory,
+                                                  $plannedmodules = $Modules,
+                                                  $moduleset = $SpawnedFactory.modulesets.{1},
+                                                  $addbuild = false,
+                                                  $reportcue = StationInitialisationReportCue,
+                                                  $debugoutput = if $DebugChance == 100 then true else false
+                                                  ]"/>
+
+                  </do_if>
+                </do_for_each>
+
+                <!-- Add a special Trade Station to be able to dump high-end wares -->
+                <create_station name="$TradeStation" macro="macro.station_arg_tradestation_base_01_macro" owner="$MissionFaction" sector="player.sector" state="componentstate.operational" constructionplan="'arg_tradestation'">
+                  <safepos space="player.sector" value="position.[375.173584m, 0.000000m, -2674.416016m]"/>
+                </create_station>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$TradeStation" param3="false"/>
+
+                <do_for_each name="$ware" in="$wares">
+                  <add_tradeware object="$TradeStation" ware="$ware" allowbuy="true" allowsell="false" lockavgprice="true" />
+                </do_for_each>
+                <add_cargo object="$TradeStation" ware="ware.foodrations" exact="50000"/>
+                <add_tradeware object="$TradeStation" ware="ware.foodrations" allowbuy="true" allowsell="true" lockavgprice="true"/>
+
+                <!-- Add a special Pirate Station that sells small quantities of illegal goods outside of radar range -->
+                <create_station name="$HatikvahStation" macro="macro.station_gen_piratebase_base_01_macro" owner="faction.hatikvah" sector="player.sector" state="componentstate.operational" constructionplan="'gen_piratebase'">
+                  <position space="player.sector" value="position.[6210.137695m, 31664.046875m, 199204.140625m]"/>
+                </create_station>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$HatikvahStation" param3="false"/>
+                <add_cargo object="$HatikvahStation" ware="ware.spaceweed" exact="85"/>
+                <add_tradeware object="$HatikvahStation" ware="ware.spaceweed" allowbuy="true" allowsell="true" lockavgprice="true" />
+                <debug_text text="'Adding illegal ware to: ' + $HatikvahStation.knownname"/>
+
+                <!-- Deactivate Criminal MT to avoid reward exploits -->
+                <set_job_active activate="false" job="'masstraffic_argon_criminal'" />
+              </actions>
+            </library>
+
+            <!-- Since trades are reserved, they will not have a big impact on player experience, but they can serve as a nice bit of background noise -->
+            <library name="Setup_Competition">
+              <actions>
+                <create_group groupname="$CompetitionGroup"/>
+                <set_value name="$WareBasket" exact="[ware.energycells,ware.antimattercells,ware.siliconwafers,ware.refinedmetals,ware.graphene,ware.superfluidcoolant,ware.engineparts,ware.microchips]"/>
+                <do_all exact="$WareBasket.count" counter="$i">
+                  <do_all exact="3">
+                    <set_value name="$StartEntry" exact="$StationCoordinationTable.keys.random"/>
+                    <set_value name="$ProximityStation" exact="$StationCoordinationTable.{$WareBasket.{$i}}.$station"/>
+                    <get_ship_definition reference="$ArgonTradeRef" size="class.ship_s" faction="$MissionFaction" tags="tag.trader"/>
+                    <create_ship name="$ship" ref="$ArgonTradeRef" sector="player.sector" groupname="$CompetitionGroup" capturable="false">
+                      <owner exact="$MissionFaction"/>
+                      <pilot>
+                        <select faction="$MissionFaction" tags="tag.pilot"/>
+                      </pilot>
+                      <loadout>
+                        <quantity exact="1.0" comment="fill completely">
+                          <variation exact="0"/>
+                        </quantity>
+                        <quality exact="0.5"/>
+                      </loadout>
+                      <safepos space="player.sector" object="$ProximityStation" radius="2km"/>
+                    </create_ship>
+                    <create_order object="$ship" id="'TradeRoutine'" default="true">
+                      <param name="warebasket" value="[$WareBasket.{$i}]"/>
+                    </create_order>
+                    <remove_value name="$RandomEntry"/>
+                    <remove_value name="$ProximityStation"/>
+                  </do_all>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerSatelliteNetwork">
+              <actions>
+                <set_value name="$PlayerSatPositionList" exact="[position.[48219.679m, 0m, -12581.406m],
+                                                                position.[-13562.758m, 0m, 63573.550m],
+                                                                position.[-51310.207m, 0m, -23875.107m]]"/>
+
+                <do_all exact="$PlayerSatPositionList.count" counter="$i">
+                  <create_object name="$Satellite" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="player.sector">
+                    <safepos x="$PlayerSatPositionList.{$i}.x" y="$PlayerSatPositionList.{$i}.y" z="$PlayerSatPositionList.{$i}.z"/>
+                  </create_object>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_FillStations" purpose="run_actions">
+              <params>
+                <param name="TargetStation" comment="station which is going to be filled up"/>
+                <param name="DebugChance" default="100" comment="station which is going to be filled up"/>
+              </params>
+              <actions>
+                <debug_text text="'Station Manager ' + $TargetStation.controlentity.{controlpost.manager}.knownname" chance="$DebugChance"/>
+
+                <set_value name="$storagewareslist" exact="$TargetStation.resources.list"/>
+                <set_value name="$productionslist" exact="$TargetStation.products.list"/>
+                <add_workforce object="$TargetStation" race="race.argon"  exact="$TargetStation.workforce.optimal"/>
+
+                <find_buy_offer result="$buyoffers" multiple="true" buyer="$TargetStation" usereservations="true" excludeempty="false"/>
+                <debug_text text="$TargetStation.name + ' Finding these offers on the ProductionStation: ' + $buyoffers" chance="$DebugChance"/>
+                <do_for_each name="$offer" in="$buyoffers">
+                  <do_if value="not $offer.ware.illegal">
+                    <debug_text text="'Adding ware: ' + $offer.ware" chance="$DebugChance"/>
+                    <do_if value="$offer.ware == ware.foodrations or $offer.ware == ware.medicalsupplies">
+                      <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount/1.1)i"/>
+                    </do_if>
+                    <do_else>
+                      <do_if value="$offer.ware.hastag.container">
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount * 0.3)i"/>
+                      </do_if>
+                      <do_elseif value="$offer.ware.hastag.liquid">
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="$offer.desiredamount"/>
+                      </do_elseif>
+                      <do_else>
+                        <add_cargo object="$TargetStation" ware="$offer.ware" exact="($offer.desiredamount * 0.6)i"/>
+                      </do_else>
+                    </do_else>
+                  </do_if>
+                </do_for_each>
+                <do_for_each name="$production" in="$productionslist">
+                  <add_cargo object="$TargetStation" ware="$production" exact="($TargetStation.cargo.{$production}.free * 0.4)i"/>
+                </do_for_each>
+                <add_cargo object="$TargetStation" ware="ware.foodrations" exact="300"/>
+
+                <set_object_scanned object="$TargetStation"/>
+                <set_object_radar_visible object="$TargetStation" visible="true"/>
+                <set_known object="$TargetStation" known="true" updatesnapshot="true"/>
+                <set_tradeoffers_enabled object="$TargetStation" comment="TODO: Temporary hack to force an immediate map UI update" />
+              </actions>
+            </library>
+
+            <!-- We can only initiate stations after they have completed their building-->
+            <cue name="StationInitialisationReportCue" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$TargetStation" exact="event.param.{4}"/>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$TargetStation" param3="false"/>
+
+                <run_actions ref="Setup_FillStations">
+                  <param name="TargetStation" value="$TargetStation"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <!-- All stations have been Initialised, proceed -->
+                <set_value name="parent.$InstantiationNumber" operation="add" exact="1"/>
+                <do_if value="parent.$InstantiationNumber ge $StationCoordinationTable.keys.count ">
+
+                  <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                  <do_if value="$HasError">
+                    <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                    <signal_cue cue="Start_Scenario"/>
+                  </do_else>
+                </do_if>
+              </actions>
+            </cue>
+
+            <!-- add an unlocked shady guy do one station -->
+            <cue name="InitialiseShadyGuys" checkinterval="1s">
+              <conditions>
+                <cue_is_waiting cue="md.NPC_ShadyGuy.EvaluateSectors" />
+              </conditions>
+              <actions>
+                <set_value name="this.$DebugChance" exact="100" />
+
+                <set_value name="this.$PreviousCount" exact="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" />
+                <debug_text text="'Attempting to trigger shady guy spawns in scenario space'" chance="this.$DebugChance" />
+                <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="[player.sector]" />
+
+                <do_all chance="this.$DebugChance">
+                  <do_if value="this.$PreviousCount == md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" chance="this.$DebugChance">
+                    <debug_text text="'no shady guys added'" />
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'added: ' + (md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count - this.$PreviousCount)" />
+                    <do_for_each name="$TestStation" in="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup">
+                      <set_value name="$TestShadyGuy" exact="$TestStation.shadyguy" />
+                      <do_if value="$TestStation.shadyguy">
+                        <debug_text text="'Shady Guy: ' + $TestShadyGuy.name + ' is aboard ' + $TestStation.knownname + ' in ' + $TestStation.sector.knownname + '. Unlocked status is: ' + $TestShadyGuy.tradesvisible" />
+                      </do_if>
+                    </do_for_each>
+                    <remove_value name="$TestShadyGuy" />
+                  </do_else>
+                </do_all>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="[player.sector]" />
+
+                <!-- Add a black market to the eligeble station furthest away from the player -->
+                <find_station_by_true_owner name="$PotentialSmuggleStations" faction="$MissionFaction" space="player.sector" multiple="true" sortbydistanceto="player.entity">
+                  <match_content controlpost="controlpost.shadyguy"/>
+                </find_station_by_true_owner>
+
+                <!-- We want to find two potential black markets that are not too close to the player at start, and as far away from each other as possible -->
+                <set_value name="$SmuggleStation" exact="$PotentialSmuggleStations.{$PotentialSmuggleStations.count}"/>
+
+                <set_value name="$ShadyGuy" exact="$SmuggleStation.shadyguy"/>
+
+                <set_entity_traits entity="$ShadyGuy" tradesvisible="true"/>
+                <do_if value="not $ShadyGuy.$InstantiationRequesters?">
+                  <set_value name="$ShadyGuy.$InstantiationRequesters" exact="[]"/>
+                </do_if>
+                <append_to_list name="$ShadyGuy.$InstantiationRequesters" exact="$MissionCue"/>
+                <signal_objects object="$SmuggleStation" param="'npc_instantiation__mission'" comment="Make sure the shady guy is actually properly instantiated on the station" />
+                <set_known object="$SmuggleStation" known="true" updatesnapshot="true"/>
+                <set_known object="$SmuggleStation.zone" known="true"/>
+                <set_known object="$SmuggleStation.sector" known="true"/>
+                <set_known object="$SmuggleStation.cluster" known="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Debug">
+              <actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$AmountOfTrades" exact="0"/>
+
+            <!-- Turn off trade filters -->
+            <raise_lua_event name="'mapfilter'" param="'layer_trade;false'"/>
+          </actions>
+          <cues>
+
+            <cue name="Trading_Cutscene">
+              <actions>
+                <play_cutscene letterbox="true" movesoundcamera="true" result="this.$Cutscene" key="'scenario_trading_1_intro_cutscene'" abortable="true">
+                  <param name="target_station" object="$TradeStation"/>
+                  <param name="target_targetship_1" object="player.ship"/>
+                </play_cutscene>
+              </actions>
+            </cue>
+
+            <!-- Intro Conversation Cues go here  -->
+            <cue name="Introduction_Dialogue">
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                                                              $abortonsignalledcue = IntroDialogue_NPCUsecase_Abort,
+                                                                              $script = [
+                                                                                      5s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $speak = 306100101, $recipient = 'player', $comment = 'Ah yes, trading. The backbone of economy.' ],
+                                                                                      0.5s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $speak = 306100102, $recipient = 'player', $comment = 'This system is currently separated from the Argon Federation at large, and it is looking to become completely self-reliant.' ],
+                                                                                      0.5s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $speak = 306100103, $recipient = 'player', $comment = 'Fertile grounds for anyone looking to strike a favourable bargain.' ],
+                                                                                      0.5s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $speak = 306100104, $recipient = 'player', $comment = 'Good luck, trader!' ],
+                                                                              ]
+                                                                            ]" />
+              </actions>
+            </cue>
+
+            <cue name="IntroDialogue_NPCUsecase_Abort">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+            </cue>
+
+            <cue name="Start_Gameplay">
+              <conditions>
+                <event_cutscene_stopped key="'scenario_trading_1_intro_cutscene'"/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <signal_cue cue="IntroDialogue_NPCUsecase_Abort"/>
+                <fade_screen fadeout="0s" fadein="0.5s" realtime="true"/>
+              </actions>
+              <delay exact="0.5s"/>
+              <actions>
+                <!-- Mission Objective -->
+                <set_value name="$MissionStep" exact="1"/>
+                <create_mission cue="$MissionCue" comment="Mission: Deliver Ore" abortable="false"
+                                name="{30610,1001}" description="{30610,1007}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction" showelapsedtime="true">
+                  <briefing>
+                    <objective step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}"/>
+                  </briefing>
+                </create_mission>
+                <activate_mission cue="$MissionCue"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}">
+                  <progress text="{30178,1096}" progress="(player.money)/100" max="($RequiredCr)/100"/>
+                </set_objective>
+                <set_value name="$StartTime" exact="player.age"/>
+                <show_help_multi position="1" force="true" allowclose="true">
+                  <text line="30610003"/>
+                  <text line="30610004"/>
+                </show_help_multi>
+              </actions>
+            </cue>
+
+            <cue name="Call_MitsunoHack">
+              <actions>
+                <set_value name="$RandomDelay" min="5min" max="10min" profile="bell"/>
+              </actions>
+              <delay exact="$RandomDelay"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <!-- Rep can slide under -10 in rare occasions, making completing the scenario impossible -->
+            <cue name="Reputation_Recovery" instantiate="true">
+              <conditions>
+                <event_faction_relation_changed faction="faction.player" otherfaction="$MissionFaction"/>
+                <check_value value="$MissionFaction.relationto.{faction.player} le faction.player.relation.dock.min"/>
+              </conditions>
+              <actions>
+                <set_faction_relation faction="$MissionFaction" otherfaction="faction.player" value="faction.player.relation.dock.min + 0.0001" comment="otherwise docking is barely not allowed"/>
+              </actions>
+            </cue>
+
+            <cue name="EfficiencyTracking_ref" ref="md.LIB_Scenario.ScenarioTrading_EfficiencyTracking">
+              <param name="TrackedShipGroup" value="$PlayerAssets"/>
+              <param name="ReportSignalCue" value="EfficiencyReportCue"/>
+            </cue>
+
+            <cue name="EfficiencyReportCue">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$InefficientStationStops" operation="add" exact="1"/>
+              </actions>
+            </cue>
+
+            <!-- check for secondary objectives with each completed trade -->
+            <cue name="Player_FinishedTrade" instantiate="true">
+              <conditions>
+                <event_player_trade_completed/>
+              </conditions>
+              <actions>
+                <set_value name="this.$trade" exact="event.param"/>
+                <set_value name="$ware" exact="this.$trade.ware"/>
+                <do_if value="this.$trade.buyer.isplayerowned">
+                  <do_if value="not $PlayerWareTable.$ware?">
+                    <set_value name="$PlayerWareTable.$ware" exact="0"/>
+                  </do_if>
+                  <do_else>
+                    <set_value name="$buyvalue" exact="$PlayerWareTable.$ware"/>
+                  </do_else>
+                  <set_value name="$buyvalue" operation="add" exact="this.$trade.transferredamount * this.$trade.unitprice"/>
+                  <set_value name="$PlayerWareTable.$ware" exact="$buyvalue"/>
+                </do_if>
+
+                <do_if value="this.$trade.seller.isplayerowned">
+                  <set_value name="this.$BuyPrice" exact="$PlayerWareTable.$ware"/>
+                  <set_value name="this.$SalePrice" exact="this.$trade.transferredamount * this.$trade.unitprice"/>
+                  <set_value name="this.$CurrentSaleProfit" exact="this.$SalePrice - this.$BuyPrice"/>
+                  <do_if value="this.$CurrentSaleProfit gt $LargestProfitSale" >
+                    <set_value name="$LargestProfitSale" exact="this.$CurrentSaleProfit"/>
+                  </do_if>
+                  <set_value name="$PlayerWareTable.$ware" exact="0"/>
+                </do_if>
+
+                <do_if value="$ware.illegalto.{$MissionFaction}.{$MissionFaction} and this.$trade.seller.isplayerowned">
+                  <set_value name="$PlayerSoldIllegalWare"/>
+                </do_if>
+                <set_value name="$AmountOfTrades" operation="add" exact="1"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_MoneyChange" instantiate="true">
+              <conditions>
+                <event_player_money_updated/>
+              </conditions>
+              <actions>
+                <!--<do_if value="event.param2 - event.param ge 15000Cr">
+                  <set_value name="$PlayerTopTradeOver15k"/>
+                </do_if>-->
+                <do_if value="player.money ge $RequiredCr">
+                  <set_value name="$EndTime" exact="player.age"/>
+                  <remove_mission cue="$MissionCue" type="completed"/>
+                  <signal_cue cue="ResultWindow"/>
+                </do_if>
+                <do_else>
+                  <signal_cue cue="UpdateBriefing"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="UpdateBriefing" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30610,1006}" text="($RequiredCr).formatted.{'%.s %Cr'}" updatebriefing="true" silent="@event.param">
+                  <progress text="{30178,1096}" progress="(player.money)/100" max="($RequiredCr)/100"/>
+                </set_objective>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and (event.object == player.entity or $PlayerAssets.indexof.{event.object})"/>
+
+            <do_if value="not $EndTime?">
+              <set_value name="$EndTime" exact="player.age"/>
+            </do_if>
+
+            <set_value name="$Score_TopTrade15k" exact="if $LargestProfitSale ge 15000Cr then 150 else 0"/>
+
+            <do_if value="$ResultData.$PlayerDied">
+              <set_value name="$Score_Trades" exact="0"/>
+              <set_value name="$Score_Time" exact="0"/>
+            </do_if>
+            <do_else>
+              <add_scenario_stat id="'profit'" name="{30610,1201} + ' ' + $LargestProfitSale.formatted.{'%.s %Cr'}" description="{30610,1202}" comment="Most profit in one trade"/>
+              
+              <!-- Stat: Time -->
+              <run_actions ref="md.LIB_Scenario.Add_Scenario_Stat_Time" result="$Score_Time">
+                <param name="StartTime" value="$StartTime"/>
+                <param name="EndTime" value="$EndTime"/>
+                <param name="ScoreTimeReference" value="2400"/>
+                <param name="MandatorySurvival" value="true"/>
+              </run_actions>
+              
+              <set_value name="$Score_Trades" exact="if $AmountOfTrades lt 10 then 200 else 0"/>
+            </do_else>
+
+            <do_if value="not $InefficientStationStops?">
+              <unlock_achievement name="TL_LOGISTICAL" scenario="true"/>
+            </do_if>
+
+            <set_value name="$Score_IllegalWares" exact="if $PlayerSoldIllegalWare? then 200 else 0 " comment="this is a nice fun achievement type score, not something that we should reward or punish the player over"/>
+            <add_scenario_stat id="'trade'" name="{30610,1211}" description="{30610,1212}" comment="Made over 15k Cr profits with one trade?" uivalue="if $Score_TopTrade15k gt 0 then {1001,2617} else {1001,2618} " score="$Score_TopTrade15k" maxscore="150"/>
+            <add_scenario_stat id="'trades'" name="{30610,1221}" description="{30610,1222}"  comment="Completed in 10 trades or less?" uivalue="if $Score_Trades gt 0 then {1001,2617} else {1001,2618}" score="$Score_Trades" maxscore="200"/>
+            <add_scenario_stat id="'illegal'" name="{30610,1231}" description="{30610,1232}" comment="Sold illegal wares?" uivalue="if $PlayerSoldIllegalWare? then {1001,2617} else {1001,2618} " score="$Score_IllegalWares" maxscore="200"/>
+
+            <set_value name="$ResultData.$CustomStats" exact="table[]"/>
+            <set_value name="$ResultData.$CustomStats.$TradeAmount" exact="if $AmountOfTrades? then $AmountOfTrades else 0"/>
+
+            <set_value name="$ResultData.$Score" exact="$Score_Time + $Score_TopTrade15k + $Score_Trades + $Score_IllegalWares"/>
+
+            <!-- If the players finished the mission, award 1 star no matter how long it took -->
+            <do_if value="$ResultData.$Score lt 1 and player.money ge $RequiredCr">
+              <set_value name="$ResultData.$Score" exact="1"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

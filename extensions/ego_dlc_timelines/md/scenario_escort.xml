@@ -1,0 +1,1467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Escort" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Volodymyr"/>
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_escort_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+        <fade_screen fadeout="0s" fadein="3s" holdtime="5s" realtime="true"/>
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30616"/>
+        <set_value name="$Difficulty"         exact="level.hard"/>
+        <set_value name="$MissionType"        exact="missiontype.plot"/>
+        <set_value name="$MissionFaction"     exact="faction.argon"/>
+        <set_value name="$EnemyFactions"       exact="[faction.holyorder, faction.xenon]"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <find_sector name="$MissionSector" macro="macro.timelines_map_escort_cluster_001_sector_001_macro"/>
+        <set_value name="$HOPScoutKilled" exact="0"/>
+        <set_value name="$PlayerShipDestroyed" exact="0"/>
+        <set_value name="$AttackAuxuliaryPriority" exact="false"/>
+        <set_value name="$HOPBombersStartedRun" exact="false"/>
+        <set_value name="$HOPBombersDestroyed" exact="false"/>
+        <set_value name="$CapitalXenonKilled" exact="false"/>
+
+        <!-- Ships -->
+        <set_value name="$WingmatesCount" exact="3"/>
+        <set_value name="$WingmatesMacro" exact="macro.ship_arg_s_heavyfighter_02_a_macro"/>
+
+        <set_value name="$AuxFighterShipCount" exact="2" />
+        <set_value name="$ArgonFighterShipCount" exact="10" />
+        <set_value name="$ArgonBombersShipCount" exact="5" />
+        <set_value name="$ArgonTransportShipSubCount" exact="2" />
+
+        <set_value name="$HOPFighterShipCount" exact="6" />
+        <set_value name="$HOPInterceptorShipCount" exact="6" />
+        <set_value name="$HOPBombersShipCount" exact="8" />
+
+        <set_value name="$HOPCorvetteShipCount" exact="6" />
+        <set_value name="$HOPDestroyersShipCount" exact="3" />
+
+        <!-- Positions -->
+        <create_position name="$ArgonFleetPos" x="-22km" y="-2km" z="42km" space="$MissionSector"/>
+        <create_position name="$ArgonFleetPos2" x="-22km" y="1km" z="43km" space="$MissionSector"/>
+        <create_position name="$ArgonAuxilaryExitPos" x="-15km" y="0km" z="85km" space="$MissionSector"/>
+        <create_position name="$ArgonTransportsBeaconPos" x="-12km" z="85km" space="$MissionSector"/>
+        <create_position name="$HOPFleetInitialPos" x="90km" z="-40km" space="$MissionSector"/>
+        <create_position name="$HOPFleetTargetPos" x="70km" z="60km" space="$MissionSector"/>
+        <create_position name="$HOPBombersStagingPos" x="32km" z="125km" y="2km" space="$MissionSector"/>
+        <create_position name="$AuxilaryPosition" x="-204" z="121671" y="734" space="$MissionSector"/>
+        <create_position name="$SphereRegionEdge" x="0km" z="-35km" space="$MissionSector"/>
+        <create_position name="$ReconSat1Pos" x="24200" z="52450" space="$MissionSector"/>
+        <create_position name="$ReconSat2Pos" x="-40000" z="60000" space="$MissionSector"/>
+        <create_position name="$ReconSat3Pos" x="-204" z="165671" y="734" space="$MissionSector"/>
+
+        <!-- Xenon Spawn Positions -->
+        <create_position name="$XenonSpawnPos1" x="-20km" y="-2km" z="104km" space="$MissionSector"/>
+        <create_position name="$XenonSpawnPos2" x="-18km" y="7km" z="121km" space="$MissionSector"/>
+        <create_position name="$XenonSpawnPos3" x="-10km" y="-2km" z="137km" space="$MissionSector"/>
+        <create_position name="$XenonSpawnPos4" x="10km" y="0km" z="141km" space="$MissionSector"/>
+        <create_position name="$XenonSpawnPos5" x="0km" y="-6km" z="150km" space="$MissionSector"/>
+
+        <create_position name="$XenonAttackPos1" x="-5km" y="0km" z="96km" space="$MissionSector"/>
+        <create_position name="$XenonAttackPos2" x="0km" y="0km" z="118km" space="$MissionSector"/>
+
+        <!-- Mission and Voice lines -->
+        <set_value name="$MissionText_Name" exact="{30616,1}"/>
+        <set_value name="$MissionText_Description" exact="{30616,4}"/>
+        <set_value name="$MissionText_WingHelp" exact="{30616,3}"/>
+
+        <set_value name="$MissionText_Scoring_N1" exact="{30616,201}"/>
+        <set_value name="$MissionText_Scoring_D1" exact="{30616,202}"/>
+        <set_value name="$MissionText_Scoring_N2" exact="{30616,203}"/>
+        <set_value name="$MissionText_Scoring_D2" exact="{30616,204}"/>
+        <set_value name="$MissionText_Scoring_N3" exact="{30616,205}"/>
+        <set_value name="$MissionText_Scoring_D3" exact="{30616,206}"/>
+        <set_value name="$MissionText_Scoring_N4" exact="{30616,207}"/>
+        <set_value name="$MissionText_Scoring_D4" exact="{30616,208}"/>
+        <set_value name="$MissionText_Scoring_N5" exact="{30616,209}"/>
+        <set_value name="$MissionText_Scoring_D5" exact="{30616,210}"/>
+        <set_value name="$MissionText_Scoring_N6" exact="{30604,3002}"/>
+        <set_value name="$MissionText_Scoring_D6" exact="{30604,3002}"/>
+
+        <set_value name="$MissionText_Wait" exact="{30616,100}"/>
+        <set_value name="$MissionText_Phase11" exact="{30616,101}"/>
+        <set_value name="$MissionText_Phase12" exact="{30616,102}"/>
+        <set_value name="$MissionText_Phase21" exact="{30616,103}"/>
+        <set_value name="$MissionText_Phase31" exact="{30616,104}"/>
+
+        <set_value name="$CommanderText_Intro1" exact="306160101"/>
+        <set_value name="$CommanderText_Intro2" exact="306160102"/>
+        <set_value name="$CommanderText_TransportsBeacon" exact="306160103"/>
+        <set_value name="$CommanderText_AuxilaryProtect" exact="306160104"/>
+        <set_value name="$CommanderText_AuxileryMoving" exact="306160105"/>
+        <set_value name="$CommanderText_HOPFleetSighted" exact="306160106"/>
+        <set_value name="$CommanderText_HOPBombersSighted" exact="306160107"/>
+        <set_value name="$CommanderText_HOPBombersAttack" exact="306160108"/>
+        <set_value name="$CommanderText_ARGBombersAttack" exact="306160111"/>
+
+        <set_value name="$CommanderText_MissionFailure" exact="306160109"/>
+        <set_value name="$CommanderText_MissionSuccess" exact="306160110"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+
+                <include_actions ref="Setup_NPC" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_ArgonFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_HOPFleet" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_NPC">
+              <actions>
+                <create_cue_actor name="$ArgonCommander" cue="$MissionCue" macro="macro.character_timelines_scenario_escort_commander_macro">
+                  <owner exact="$MissionFaction"/>
+                  <page exact="10135"/>
+                  <skills>
+                    <skill type="management"  exact="10"/>
+                    <skill type="morale"      exact="9"/>
+                    <skill type="piloting"    exact="7"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="4"/>
+                  </skills>
+                </create_cue_actor>
+
+                <do_if value="not $ArgonCommander">
+                  <debug_text text="'ArgonCommander does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- <add_to_group groupname="$MissionRelevantObjects" object="player.ship"/> -->
+
+                <!-- Place the Player, then check for Player existence -->
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_ArgonFleet">
+              <actions>
+                <create_group groupname="$ArgonFleet"/>
+
+                <create_object name="$ArgonTransportBeacon" macro="macro.env_deco_nav_beacon_t1_mission_macro" owner="faction.argon" sector="$MissionSector">
+                  <position value="$ArgonTransportsBeaconPos" />
+                </create_object>
+
+                <create_object name="$Sat1" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="$MissionSector">
+                  <position value="$ReconSat1Pos" />
+                </create_object>
+
+                <create_object name="$Sat2" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="$MissionSector">
+                  <position value="$ReconSat2Pos" />
+                </create_object>
+
+                <create_object name="$Sat3" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="$MissionSector">
+                  <safepos value="$ReconSat3Pos"/>
+                </create_object>
+
+                <!-- setup argon aux ship, target for initial mission destination -->
+                <create_ship name="$ArgonAuxilary" macro="ship_arg_xl_resupplier_01_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout>
+                    <level exact="1" />
+                  </loadout>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.aipilot" />
+                  </pilot>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select faction="faction.argon" tags="tag.service" />
+                    </person>
+                  </people>
+                  <position value="$AuxilaryPosition" />
+                  <rotation yaw="-16deg" />
+                </create_ship>
+                <add_equipment_mods object="$ArgonAuxilary">
+                  <engine ware="ware.mod_engine_forwardthrust_01_mk3" />
+                </add_equipment_mods>
+                <add_equipment_mods object="$ArgonAuxilary">
+                  <ship ware="ware.mod_ship_mass_01_mk3" />
+                </add_equipment_mods>
+                <create_order object="$ArgonAuxilary" id="'Wait'" default="true"/>
+                <set_value name="$ArgonAuxilary.pilot.$noattackresponse" exact="true"/>
+                <add_to_group groupname="$ArgonFleet" object="$ArgonAuxilary"/>
+                <add_to_group groupname="$MissionRelevantObjects" object="$ArgonAuxilary"/>
+
+                <!-- setup docked S ships-->
+                <set_value name="$ShipToDock" exact="macro.ship_arg_s_fighter_01_a_macro" />
+                <find_object_component name="$ArgonAuxilaryDockS" object="$ArgonAuxilary">
+                  <match_dock storage="true" size="$ShipToDock.docksize" />
+                </find_object_component>
+
+                <do_all exact="$AuxFighterShipCount">
+                  <create_ship name="$Ship" macro="ship_arg_s_fighter_01_a_macro" dock="$ArgonAuxilaryDockS" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <create_order id="'ProtectPosition'" object="$Ship" default="true">
+                    <param name="destination" value="[$MissionSector, $AuxilaryPosition]"/>
+                    <param name="radius" value="15km"/>
+                    <param name="attackonsight" value="true"/>
+                  </create_order>
+                  <add_to_group groupname="$ArgonFleet" object="$Ship"/>
+                </do_all>
+
+                <!-- setup argon carrier -->
+                <create_ship name="$ArgonCarrier" macro="ship_arg_xl_carrier_02_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout>
+                    <level min="0.7" max="1" />
+                  </loadout>
+                  <pilot actor="$ArgonCommander"/>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select faction="faction.argon" tags="tag.service" />
+                    </person>
+                  </people>
+                  <position value="$ArgonFleetPos" />
+                  <rotation yaw="23deg" />
+                </create_ship>
+                <create_order object="$ArgonCarrier" id="'Wait'" default="true"/>
+                <set_value name="$ArgonCarrier.pilot.$noattackresponse" exact="true"/>
+
+                <add_to_group groupname="$ArgonFleet" object="$ArgonCarrier"/>
+
+                <!-- <set_object_name object="$ArgonCarrier" page="xx" line="xx" /> -->
+
+                <!-- setup docked S ships-->
+                <set_value name="$ShipToDock" exact="macro.ship_arg_s_fighter_01_a_macro" />
+                <find_object_component name="$ArgonCarrierDockS" object="$ArgonCarrier">
+                  <match_dock storage="true" size="$ShipToDock.docksize" />
+                </find_object_component>
+
+                <do_all exact="$ArgonFighterShipCount">
+                  <create_ship name="$Ship" macro="ship_arg_s_fighter_02_a_macro" dock="$ArgonCarrierDockS" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$ArgonCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$ArgonFleet" object="$Ship"/>
+                  <add_to_group groupname="$ARGFighters" object="$Ship"/>
+                </do_all>
+
+                <do_all exact="$ArgonBombersShipCount">
+                  <create_ship name="$Ship" macro="ship_arg_s_fighter_01_a_macro" dock="$ArgonCarrierDockS" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout ref="scenario_escort_arg_bomber"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <add_to_group groupname="$ArgonFleet" object="$Ship"/>
+                  <add_to_group groupname="$ARGBombers" object="$Ship"/>
+                </do_all>
+
+                <!-- Setup scouts returning from their missions -->
+                  <create_ship name="$Scout1" macro="ship_arg_s_scout_01_a_macro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                    <position value="$ArgonTransportsBeaconPos" />
+                    <rotation yaw="-180deg" />
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Scout1" immediate="true">
+                    <param name="commander" value="$ArgonCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <create_ship name="$Scout2" macro="ship_arg_s_scout_01_a_macro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                    <position value="$ReconSat1Pos" />
+                    <rotation yaw="-80deg" />
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Scout2" immediate="true">
+                    <param name="commander" value="$ArgonCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <create_ship name="$Scout3" macro="ship_arg_s_scout_01_a_macro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                    <position value="$ReconSat2Pos" />
+                    <rotation yaw="60deg" />
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Scout3" immediate="true">
+                    <param name="commander" value="$ArgonCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$ArgonFleet" object="$Scout1"/>
+                  <add_to_group groupname="$ArgonFleet" object="$Scout2"/>
+                  <add_to_group groupname="$ArgonFleet" object="$Scout3"/>
+
+                <!-- setup docked M ships-->
+                <set_value name="$ShipToDock" exact="macro.ship_arg_m_bomber_01_a_macro" />
+                <find_object_component name="$ArgonCarrierDockM" object="$ArgonCarrier">
+                  <match_dock storage="true" size="$ShipToDock.docksize" />
+                </find_object_component>
+
+                <!-- Transport ships, these are added to the escort group -->
+                <create_group groupname="$TransportFleet"/>
+
+                <create_ship name="$ArgonTransportShipLeader" macro="ship_arg_m_trans_container_02_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout ref="scenario_escort_argon_transport"/>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.aipilot" />
+                  </pilot>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select faction="faction.argon" tags="tag.service" />
+                    </person>
+                  </people>
+                  <safepos value="$ArgonFleetPos2" />
+                  <rotation yaw="10deg" />
+                </create_ship>
+                <set_value name="$ArgonTransportShipLeader.pilot.$noattackresponse" exact="true"/>
+                <add_cargo object="$ArgonTransportShipLeader" ware="[ware.hullparts, ware.scanningarrays, ware.microchips].random" exact="1000"/>
+                <add_to_group groupname="$ArgonFleet" object="$ArgonTransportShipLeader"/>
+                <add_to_group groupname="$TransportFleet" object="$ArgonTransportShipLeader"/>
+
+                <do_all exact="$ArgonTransportShipSubCount">
+                  <create_ship name="$Ship" macro="ship_arg_m_trans_container_02_a_macro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout ref="scenario_escort_argon_transport"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                    <people>
+                      <fillpercent exact="100" />
+                      <person role="service" weight="100">
+                        <select faction="faction.argon" tags="tag.service" />
+                      </person>
+                    </people>
+                    <safepos value="$ArgonFleetPos2" />
+                    <rotation yaw="10deg" />
+                    </create_ship>
+                  <add_cargo object="$Ship" ware="[ware.hullparts, ware.scanningarrays, ware.microchips].random" exact="1000"/>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$ArgonTransportShipLeader" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+                  <create_order object="$Ship" id="'Escort'" default="true">
+                    <param name="formation" value="formationshape.echelon"/>
+                    <param name="overrideformationskill" value="true"/>
+                  </create_order>
+                  <set_value name="$Ship.pilot.$noattackresponse" exact="true"/>
+
+                  <add_to_group groupname="$ArgonFleet" object="$Ship"/>
+                  <add_to_group groupname="$TransportFleet" object="$Ship"/>
+                </do_all>
+
+                <!-- setup escorts -->
+
+                <create_ship name="$ArgonLEscort_1" macro="ship_arg_l_destroyer_02_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout>
+                    <level min="0.7" max="1" />
+                  </loadout>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.aipilot" />
+                  </pilot>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select faction="faction.argon" tags="tag.service" />
+                    </person>
+                  </people>
+                  <position x="-18822" y="-1000" z="38000" />
+                  <rotation yaw="23deg" />
+                </create_ship>
+                 <create_order id="'AssignCommander'" object="$ArgonLEscort_1" immediate="true">
+                  <param name="commander" value="$ArgonCarrier" />
+                  <param name="assignment" value="assignment.defence" />
+                </create_order>
+                <add_to_group groupname="$ArgonFleet" object="$ArgonLEscort_1"/>
+
+                <create_ship name="$ArgonLEscort_2" macro="ship_arg_l_destroyer_02_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout>
+                    <level min="0.7" max="1" />
+                  </loadout>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.aipilot" />
+                  </pilot>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select faction="faction.argon" tags="tag.service" />
+                    </person>
+                  </people>
+                  <position x="-26822" y="-1000" z="42203" />
+                  <rotation yaw="23deg" />
+                </create_ship>
+                <create_order id="'AssignCommander'" object="$ArgonLEscort_2" immediate="true">
+                  <param name="commander" value="$ArgonCarrier" />
+                  <param name="assignment" value="assignment.defence" />
+                </create_order>
+                <add_to_group groupname="$ArgonFleet" object="$ArgonLEscort_2"/>
+
+                <!-- debug check -->
+                <do_for_each in="$ArgonFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'ArgonFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <create_group groupname="$PlayerFleet"/>
+
+                <add_to_group groupname="$PlayerFleet" object="player.ship"/>
+
+                <do_all exact="$WingmatesCount">
+                  <create_ship name="$Ship" macro="$WingmatesMacro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout ref="scenario_escort_player_wingmate"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot" />
+                    </pilot>
+                    <safepos object="player.ship" min="1km" max="2km"/>
+                    <rotation value="player.ship.rotation"/>
+                  </create_ship>
+                  <add_equipment_mods object="$Ship">
+                    <engine ware="ware.mod_engine_boostthrust_escort_scenario" />
+                  </add_equipment_mods>
+
+                  <set_owner object="$Ship" faction="faction.player" overridenpc="true" />
+
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="player.ship" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$PlayerFleet" object="$Ship"/>
+                </do_all>
+
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_HOPFleet">
+              <!-- TODO: ADD S BOMBERS FOR 2nd PHASE -->
+              <actions>
+                <create_group groupname="$HOPFleet"/>
+
+                <!-- setup HOP carrier -->
+                <create_ship name="$HOPCarrier" macro="ship_par_xl_carrier_02_a_macro" sector="$MissionSector" capturable="false">
+                  <owner exact="faction.holyorder" overridenpc="true" />
+                  <loadout>
+                    <level min="0.7" max="1" />
+                  </loadout>
+                  <pilot>
+                    <select race="[race.paranid]" tags="tag.aipilot" />
+                  </pilot>
+                  <people>
+                    <fillpercent exact="100" />
+                    <person role="service" weight="100">
+                      <select race="[race.paranid]" tags="tag.service" />
+                    </person>
+                  </people>
+                  <position value="$HOPFleetInitialPos" />
+                  <rotation yaw="23deg" />
+                </create_ship>
+                <create_order id="'MoveWait'" object="$HOPCarrier" default="true" >
+                  <param name="destination" value="[$MissionSector, $HOPFleetTargetPos]"/>
+                  <param name="precise" value="false"/>
+                </create_order>
+
+                <add_to_group groupname="$HOPFleet" object="$HOPCarrier"/>
+
+                <!-- setup docked S ships-->
+                <set_value name="$ShipToDock" exact="macro.ship_arg_s_fighter_01_a_macro" />
+                <find_object_component name="$HOPCarrierDockS" object="$HOPCarrier">
+                  <match_dock storage="true" size="$ShipToDock.docksize" />
+                </find_object_component>
+
+                <do_all exact="$HOPFighterShipCount">
+                  <create_ship name="$Ship" macro="ship_par_s_fighter_02_b_macro" dock="$HOPCarrierDockS" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$HOPCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$HOPFleet" object="$Ship"/>
+                </do_all>
+
+                <do_all exact="$HOPInterceptorShipCount">
+                  <create_ship name="$Ship" macro="ship_par_s_fighter_01_b_macro" dock="$HOPCarrierDockS" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$HOPCarrier" />
+                    <param name="assignment" value="assignment.interception" />
+                  </create_order>
+
+                  <add_to_group groupname="$HOPFleet" object="$Ship"/>
+                </do_all>
+
+                <do_all exact="$HOPBombersShipCount">
+                  <create_ship name="$Ship" macro="ship_par_s_fighter_01_b_macro" dock="$HOPCarrierDockS" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout ref="scenario_escort_carrier_hop_bomber"/>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                  </create_ship>
+                  <add_equipment_mods object="$Ship">
+                    <engine ware="ware.mod_engine_boostthrust_escort_scenario" />
+                  </add_equipment_mods>
+                  <add_to_group groupname="$HOPFleet" object="$Ship"/>
+                  <add_to_group groupname="$HOPBombers" object="$Ship"/>
+                </do_all>
+
+                <create_ship name="$HOPScout" macro="ship_par_s_scout_01_b_macro" dock="$HOPCarrierDockS" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                </create_ship>
+                  <create_order id="'AssignCommander'" object="$HOPScout" immediate="true">
+                    <param name="commander" value="$HOPCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                <add_to_group groupname="$HOPFleet" object="$HOPScout"/>
+
+                <!-- setup docked M ships-->
+                <set_value name="$ShipToDock" exact="macro.ship_par_m_corvette_01_b_macro" />
+                <find_object_component name="$HOPCarrierDockM" object="$HOPCarrier">
+                  <match_dock storage="true" size="$ShipToDock.docksize" />
+                </find_object_component>
+
+                <do_all exact="$HOPCorvetteShipCount">
+                  <create_ship name="$Ship" macro="ship_par_m_corvette_01_b_macro" dock="$HOPCarrierDockM" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                    <people>
+                      <fillpercent exact="100" />
+                      <person role="service" weight="100">
+                        <select race="[race.paranid]" tags="tag.service" />
+                      </person>
+                    </people>
+                    </create_ship>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$HOPCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$HOPFleet" object="$Ship"/>
+                </do_all>
+
+                <!-- setup escorts -->
+
+                <do_all exact="$HOPDestroyersShipCount">
+                  <create_ship name="$Ship" macro="ship_par_l_destroyer_02_a_macro" sector="$MissionSector" capturable="false">
+                    <owner exact="faction.holyorder" overridenpc="true" />
+                    <loadout>
+                      <level min="0.7" max="1" />
+                    </loadout>
+                    <pilot>
+                      <select race="[race.paranid]" tags="tag.aipilot" />
+                    </pilot>
+                    <people>
+                      <fillpercent exact="100" />
+                      <person role="service" weight="100">
+                        <select race="[race.paranid]" tags="tag.service" />
+                      </person>
+                    </people>
+                    <safepos object="$HOPCarrier" min="2km" max="4km"/>
+                    </create_ship>
+                  <create_order id="'AssignCommander'" object="$Ship" immediate="true">
+                    <param name="commander" value="$HOPCarrier" />
+                    <param name="assignment" value="assignment.defence" />
+                  </create_order>
+
+                  <add_to_group groupname="$HOPFleet" object="$Ship"/>
+                </do_all>
+
+                <!-- error check -->
+                <do_for_each in="$HOPFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'HOPFleet ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$StartTime" exact="player.age"/>
+            <set_value name="$MissionDuration" exact="20min"/>
+            <create_order id="'Undock'" object="$ArgonTransportShipLeader" />
+          </actions>
+          <cues>
+
+             <cue name="Cutscene">
+              <actions>
+                <set_value name="$CutsceneActors" exact="table[]"/>
+                <set_value name="$CutsceneActors.$ArgonCommander" exact="table[
+                                              $entity = $ArgonCarrier.pilot,
+                                              ]"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                                  $script =   [
+                                            10s,
+                                            table[ $actor = '$ArgonCommander', $speak = $CommanderText_Intro1, $recipient = 'player'],
+                                            6s,
+                                            table[ $actor = '$ArgonCommander', $speak = $CommanderText_Intro2, $recipient = 'player'],
+                                            12s],
+                                              $abortcallbackcue = CutsceneStopped,
+                                              $abortonsignalledcue = CutsceneStopped
+                                            ]" />
+              </actions>
+            </cue>
+
+            <cue name="CutsceneStopped">
+              <conditions>
+                <event_cutscene_stopped/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Cutscene"/>
+              </actions>
+              <!-- <delay exact="1s"/>
+              <actions>
+                <fade_screen fadeout="1s" fadein="2s" holdtime="1s"/>
+              </actions> -->
+            </cue>
+
+            <cue name="SetupMission">
+              <actions>
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false"
+                                name="$MissionText_Name" description="$MissionText_Description"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}">
+                  <briefing>
+                    <objective step="1" action="objective.wait" text="$MissionText_Wait" />
+                    <objective step="2" action="objective.follow" text="$MissionText_Phase11" group="$TransportFleet" />
+                    <objective step="3" action="objective.escort" text="$MissionText_Phase12" group="$TransportFleet" />
+                    <objective step="4" action="objective.protect" text="$MissionText_Phase21" object="$ArgonAuxilary" endtime="player.age + 160s"/>
+                    <objective step="5" action="objective.escort" text="$MissionText_Phase31" object="$ArgonAuxilary" />
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+                <lock_getup/>
+                <set_emergency_eject_active active="false"/>
+              </actions>
+              <cues>
+                <cue name="Setup_WaitTransportUndock">
+                  <delay exact="7s"/>
+                  <actions>
+                      <signal_cue cue="Phase1_Start" />
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Phase1_Start" >
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <!-- Order Transports to launch and gather nearby -->
+                  <create_order id="'MoveWait'" object="$ArgonTransportShipLeader" default="true" >
+                    <param name="destination" value="[$MissionSector, $ArgonTransportsBeaconPos]"/>
+                    <param name="precise" value="false"/>
+                  </create_order>
+                  <set_objective_from_briefing cue="$MissionCue" step="2"/>
+              </actions>
+              <cues>
+                <!-- Setup follow mission -->
+                <cue name="Phase11_Follow_Ref" ref="md.RML_Follow_Object.FollowObject">
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="StartStep"       value="2"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="UpdateBriefing"       value="false"/>
+                  <param name="Target"       value="$ArgonTransportShipLeader"/>
+                  <param name="Range_Min"       value="0"/>
+                  <param name="Range_Max"       value="5km"/>
+                  <param name="EndSignalCue"       value="Phase11_Bugoverride"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Phase11_Bugoverride">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+              </actions>
+            </cue>
+
+            <cue name="Phase11_HOPLunchScout" checkinterval="2s">
+              <conditions>
+                <check_value value="$HOPCarrier.distanceto.[$MissionSector, $HOPFleetTargetPos] le 15km" />
+              </conditions>
+              <actions>
+                <create_order id="'MoveWait'" object="$HOPScout" default="true" >
+                  <param name="destination" value="[$MissionSector, $HOPBombersStagingPos]"/>
+                  <param name="precise" value="false"/>
+                </create_order>
+                <show_help duration="15s" custom="$MissionText_WingHelp" position="20" />
+              </actions>
+            <delay exact="10s"/>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_HOPFleetSighted" priority="99"/>
+              </actions>
+            </cue>
+
+            <cue name="Phase11_HOPScoutAttacked" instantiate="false">
+              <conditions>
+                <event_object_attacked object="$HOPScout"/>
+              </conditions>
+              <actions>
+                <do_if value="$HOPScout.exists">
+                  <set_value name="$attacker" exact="event.param"/>
+                  <create_order id="'Flee'" object="$HOPScout" immediate="true">
+                    <param name="method" value="'boost'"/>
+                    <param name="attacker" value="$attacker"/>
+                    <param name="donotdrop" value="true"/>
+                    <param name="deploydistraction" value="true"/>
+                  </create_order>
+                </do_if>
+              </actions>
+            <delay min="10s" max="15s"/>
+              <actions>
+                <do_if value="$HOPScout.exists">
+                  <create_order id="'DockAndWait'" object="$HOPScout" immediate="true">
+                    <param name="destination" value="$HOPCarrier"/>
+                    <param name="noattackresponse" value="true"/>
+                  </create_order>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Phase11_HOPScoutKilled" instantiate="false">
+              <conditions>
+                <event_object_destroyed object="$HOPScout"/>
+              </conditions>
+              <actions>
+                <set_value name="$HOPScoutKilled" exact="1"/>
+                <unlock_achievement name="TL_ITS_A_SPY" scenario="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Phase11_AllShipsReachedBeacon" checkinterval="2s" >
+              <conditions>
+                <check_value value="player.entity.distanceto.{$ArgonTransportBeacon} le 5km" />
+                <check_value value="$ArgonTransportShipLeader.distanceto.{$ArgonTransportBeacon} le 5km" />
+              </conditions>
+              <delay exact="10s"/>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_TransportsBeacon" priority="99"/>
+                <set_objective_from_briefing cue="$MissionCue" step="3"/>
+                <do_for_each  in="$TransportFleet" name="$Ship">
+                  <create_order object="$Ship" id="'DockAndWait'">
+                    <param name="destination" value="$ArgonAuxilary"/>
+                  </create_order>
+                </do_for_each>
+                <signal_cue cue="Xenon_Spawner" />
+              </actions>
+              <cues>
+                <!-- Starting escort mission -->
+                <cue name="Phase12_Escort_Ref" ref="md.RML_Protect_Object.ProtectObject">
+                  <param name="EndSignalCue"      value="Phase12_EscortEnd"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="StartStep"       value="3"/>
+                  <param name="UpdateBriefing"       value="false"/>
+                  <param name="ObjectGroup"       value="$TransportFleet"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="ObjectiveText"     value="$MissionText_Phase12"/>
+                  <param name="EnemyFactions"       value="[faction.xenon, faction.holyorder]"/>
+                  <param name="FlyToRange"       value="15km"/>
+                  <param name="EndTimeIsSuccess"       value="false"/>
+                  <param name="RemoveObjectCue"       value="Phase12_TransportsDocked"/>
+                  <param name="ObjectObjective"       value="objective.escort"/>
+                  <param name="TimeOut"       value="120s"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- Track killed Transports-->
+            <cue name="Phase12_TransportsDead">
+              <conditions>
+                <event_object_destroyed group="$TransportFleet" />
+               </conditions>
+              <actions>
+                <do_if value="$TransportFleet.count le 1">
+                  <speak actor="$ArgonCommander" line="$CommanderText_MissionFailure" priority="99"/>
+                  <signal_cue cue="ResultWindow"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Phase12_TransportsDocked" instantiate="true">
+              <conditions>
+                <event_object_docked group="$TransportFleet"/>
+               </conditions>
+              <actions>
+                <set_value name="$RemovedObject" exact="event.object" />
+              </actions>
+            </cue>
+
+            <cue name="Phase12_EscortEnd">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$AttackAuxuliaryPriority" exact="true"/>
+                <cancel_cue cue="Phase11_Follow_Ref" />
+                <do_if value="Phase12_EscortEnd.$EndFeedbackValue gt 0">
+                  <!--Success-->
+                  <signal_cue cue="Phase2_Start"/>
+                </do_if>
+                <do_elseif value="(Phase12_EscortEnd.$EndFeedbackValue == -1) or (Phase12_EscortEnd.$EndFeedbackValue == -2)">
+                  <!--Failure, player killed owned ship-->
+                  <speak actor="$ArgonCommander" line="$CommanderText_MissionFailure" priority="99"/>
+                  <signal_cue cue="ResultWindow"/>
+                </do_elseif>
+                <do_else>
+                  <speak actor="$ArgonCommander" line="$CommanderText_MissionFailure" priority="99"/>
+                  <signal_cue cue="ResultWindow"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Phase2_Start" >
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_AuxilaryProtect" priority="99"/>
+                <set_objective_from_briefing cue="$MissionCue" step="4" />
+                <signal_cue cue="Phase21_Protect_Ref_Ref" />
+                <signal_cue cue="Phase21_HOPBombersLaunch" />
+              </actions>
+            </cue>
+
+            <!--Set AUX ship freindly fire tolerance.-->
+            <cue name="ArgonAuxilary_Friendly_Fire_Protection" ref="md.LIB_Generic.Friendly_Fire_Protection">
+              <param name="Object" value="$ArgonAuxilary"/>
+              <param name="ProtectionDuration" value="120s"/>
+              <param name="CancelCue" value="ArgonAuxilary_Destroyed"/>
+            </cue>
+
+            <cue name="ArgonAuxilary_Destroyed">
+              <conditions>
+                <event_object_destroyed object="$ArgonAuxilary"/>
+              </conditions>
+            </cue>
+
+            <cue name="Phase21_Protect_Ref_Ref" >
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Phase21_Protect_Ref" ref="md.RML_Protect_Object.ProtectObject">
+                  <param name="EndSignalCue"      value="Phase21_ProtectEnd"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="StartStep"       value="4"/>
+                  <param name="UpdateBriefing"       value="false"/>
+                  <param name="Object"       value="$ArgonAuxilary"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="ObjectiveText"     value="$MissionText_Phase21"/>
+                  <param name="EnemyFactions"       value="[faction.xenon, faction.holyorder]"/>
+                  <param name="FlyToRange"       value="15km"/>
+                  <param name="TimeOut"       value="240s"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Phase21_HOPBombersLaunch">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <do_for_each  in="$HOPBombers" name="$Ship">
+                  <create_order object="$Ship" id="'MoveWait'">
+                    <param name="destination" value="[$MissionSector, $HOPBombersStagingPos]"/>
+                    <param name="precise" value="false"/>
+                  </create_order>
+                </do_for_each>
+              </actions>
+              <delay min="20s" max="30s"/>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_HOPBombersSighted" priority="99"/>
+              </actions>
+            </cue>
+
+            <cue name="Phase21_HOPBombersHit" instantiate="false">
+              <conditions>
+                <check_all>
+                  <event_object_attacked group="$HOPBombers"/>
+                  <check_value value="$HOPBombersStartedRun == false"/> 
+                </check_all>
+              </conditions>
+              <actions>
+                <set_value name="$attacker" exact="event.param"/>
+                  <do_for_each  in="$HOPBombers" name="$Ship">
+                    <create_order object="$Ship" id="'AttackInRange'" immediate="true">
+                      <param name="destination" value="[$attacker.sector, $attacker.position]" />
+                    </create_order>
+                  </do_for_each>
+              </actions>
+            </cue>
+
+
+            <cue name="Phase21_ProtectEnd">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <signal_cue cue="Phase3_Start" />
+              </actions>
+            </cue>
+
+            <cue name="Phase3_Start">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <delay exact="5s"/>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_AuxileryMoving" priority="99"/>
+                <set_objective_from_briefing cue="$MissionCue" step="5"/>
+                <create_order id="'MoveWait'" object="$ArgonAuxilary" default="true" >
+                  <param name="destination" value="[$MissionSector, $ArgonAuxilaryExitPos]"/>
+                  <param name="precise" value="true"/>
+                </create_order>
+                <set_value name="$ArgonAuxilary.pilot.$noattackresponse" exact="true"/>
+                <signal_cue cue="Phase31_Protect_Ref_Ref" />
+                <signal_cue cue="Phase21_HOPBombersAttack" />
+              </actions>
+              <delay min="120s" max="180s"/>
+              <actions>
+                <signal_cue cue="Xenon_CapitalAttack" />
+              </actions>
+            </cue>
+
+            <cue name="Phase21_HOPBombersAttack">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$HOPBombersStartedRun" exact="true"/>
+                <do_for_each  in="$HOPBombers" name="$Ship">
+                  <create_order id="'Attack'" object="$Ship" immediate="true">
+                    <param name="primarytarget" value="$ArgonAuxilary" />
+                    <param name="pursuetargets" value="true" />
+                    <param name="forceprimarytarget" value="true" />
+                    <param name="allowboost" value="false" />
+                  </create_order>
+                </do_for_each>
+              </actions>
+              <delay min="10s" max="15s"/>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_HOPBombersAttack" priority="99"/>
+              </actions>
+            </cue>
+
+
+            <cue name="Phase31_Protect_Ref_Ref">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <cues>
+                <cue name="Phase31_Protect_Ref" ref="md.RML_Protect_Object.ProtectObject">
+                  <param name="EndSignalCue"      value="Phase31_EscortEnd"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="StartStep"       value="5"/>
+                  <param name="UpdateBriefing"       value="false"/>
+                  <param name="Object"       value="$ArgonAuxilary"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="ObjectiveText"     value="$MissionText_Phase31"/>
+                  <param name="EnemyFactions"       value="[faction.xenon, faction.holyorder]"/>
+                  <param name="FlyToRange"       value="15km"/>
+                  <param name="EndTimeIsSuccess"       value="false"/>
+                  <param name="EndPhaseCue"       value="Phase31_AuxilaryReached"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Phase31_AuxilaryReached" checkinterval="5s">
+              <conditions>
+                <check_value value="$ArgonAuxilary.distanceto.[$MissionSector, $ArgonAuxilaryExitPos] le 5km" />
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="Phase31_EscortEnd"/>
+              </actions>
+            </cue>
+
+            <cue name="Phase31_AllEnemiesKilled" checkinterval="10s">
+              <conditions>
+                <check_value value="$HOPBombersDestroyed" exact="true"/>
+                <check_value value="$CapitalXenonKilled" exact="true"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="Phase31_EscortEnd"/>
+              </actions>
+            </cue>
+
+
+            <cue name="Phase31_EscortEnd">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <speak actor="$ArgonCommander" line="$CommanderText_MissionSuccess" priority="99"/>
+              </actions>
+              <delay exact="5s"/>
+              <actions>
+                <signal_cue cue="ResultWindow"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerKilledTransport">
+              <conditions>
+                <check_all>
+                  <event_object_destroyed group="$TransportFleet"/>
+                  <check_value value="event.param.owner == faction.player" />
+                </check_all>
+              </conditions>
+              <actions>
+                <signal_cue cue="ResultWindow"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerShipKilled">
+              <conditions>
+                <event_object_destroyed object="player.ship"/>
+              </conditions>
+              <actions>
+                <set_value name="$PlayerShipDestroyed" exact="1"/>
+                <signal_cue cue="ResultWindow"/>
+              </actions>
+            </cue>
+
+            <cue name="HOPBombersKilled">
+              <conditions>
+                <check_all>
+                  <event_object_destroyed group="$HOPBombers"/>
+                  <check_value value="$HOPBombers.count == 0" />
+                </check_all>
+              </conditions>
+              <actions>
+                <set_value name="$HOPBombersDestroyed" exact="true"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Xenon_CapitalAttack">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+            <actions>
+              <create_ship name="$XenonCapitalShip" macro="ship_xen_l_terraformer_01_b_macro" capturable="false" sector="$MissionSector">
+                <pilot>
+                  <select faction="faction.xenon" tags="tag.aipilot"/>
+                </pilot>
+                <loadout>
+                  <level exact="1" />
+                </loadout>
+                <people>
+                  <fillpercent exact="0"/>
+                </people>
+                <owner exact="faction.xenon"/>
+                <position value="$XenonSpawnPos1"/>
+                <rotation yaw="[0deg, 360deg].randominrange" pitch="[-50deg, 50deg].randominrange"/>
+              </create_ship>
+              <create_order id="'Attack'" object="$XenonCapitalShip" immediate="true">
+                <param name="primarytarget" value="$ArgonAuxilary" />
+                <param name="pursuetargets" value="true" />
+              </create_order>
+            </actions>
+            <delay exact="10s"/>
+          <actions>
+            <speak actor="$ArgonCommander" line="$CommanderText_ARGBombersAttack" priority="99"/>
+              <do_for_each in="$ARGBombers" name="$Ship">
+                <create_order id="'Attack'" object="$Ship" immediate="true">
+                  <param name="primarytarget" value="$XenonCapitalShip" />
+                  <param name="pursuetargets" value="true" />
+                  <param name="forceprimarytarget" value="true" />
+                </create_order>
+              </do_for_each>
+            </actions>
+          <cues>
+            <cue name="XenonCapitalShipKilled">
+              <conditions>
+                <event_object_destroyed object="$XenonCapitalShip"/>
+              </conditions>
+              <actions>
+                <set_value name="$CapitalXenonKilled" exact="true"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Xenon_Spawner">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <set_value name="$SpawnStartTime" exact="player.age"/>
+            <!--Must be listed in order of $spawntime-->
+            <set_value name="$SpawnTables" exact="[
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 2],
+                              $spawntime = 5s,
+                              $position = $XenonSpawnPos1,
+                              $attackposition = $XenonAttackPos1],
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_heavyfighter_01_b_macro} = 2,
+                                              {macro.ship_xen_m_corvette_01_b_macro} = 1],
+                              $spawntime = 90s,
+                              $position = $XenonSpawnPos2,
+                              $attackposition = $XenonAttackPos1],
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_heavyfighter_01_b_macro} = 2],
+                              $spawntime = 170s,
+                              $position = $XenonSpawnPos2,
+                              $attackposition = $XenonAttackPos2],
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 3],
+                              $spawntime = 250s,
+                              $position = $XenonSpawnPos4,
+                              $attackposition = $XenonAttackPos2],
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 3],
+                              $spawntime = 300s,
+                              $position = $XenonSpawnPos3,
+                              $attackposition = $XenonAttackPos2],
+
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 3],
+                              $spawntime = 360s,
+                              $position = $XenonSpawnPos4,
+                              $attackposition = $XenonAttackPos2],
+                       table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_m_corvette_01_b_macro} = 2],
+                              $spawntime = 420s,
+                              $position = $XenonSpawnPos1,
+                              $attackposition = $XenonAttackPos1],
+                      table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 4,
+                                              {macro.ship_xen_m_corvette_01_b_macro} = 1],
+                              $spawntime = 580s,
+                              $position = $XenonSpawnPos2,
+                              $attackposition = $XenonAttackPos1],
+                      table[
+                              $enemytypes = table[
+                                              {macro.ship_xen_s_fighter_02_a_macro} = 3,
+                                              {macro.ship_xen_s_heavyfighter_01_b_macro} = 2],
+                              $spawntime = 660s,
+                              $position = $XenonSpawnPos1,
+                              $attackposition = $XenonAttackPos1],
+
+
+                       ]"/>
+          </actions>
+          <cues>
+            <cue name="Xenon_Spawner_Check" instantiate="true" checkinterval="1s">
+              <conditions>
+                <check_value value="$SpawnTables.count and player.age gt ($SpawnTables.{1}.$spawntime + $SpawnStartTime)"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="Xenon_Spawner_Instance" param="$SpawnTables.{1}"/>
+                <remove_value name="$SpawnTables.{1}"/>
+              </actions>
+            </cue>
+
+            <!--A separate instance to deal with spawning this group ships, potentially over several seconds-->
+            <cue name="Xenon_Spawner_Instance" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="this.$params" exact="event.param"/>
+              </actions>
+              <cues>
+                <cue name="Xenon_Spawner_Instance_Process">
+                  <actions>
+                    <do_for_each name="$shiptypekey" valuename="$shiptypeamount" in="Xenon_Spawner_Instance.$params.$enemytypes">
+                      <do_all exact="$shiptypeamount">
+                        <set_value name="this.$SpawnDelay" min="0s" max="2s"/>
+                        <signal_cue_instantly cue="Xenon_Spawner_Create_Ship" param="table[$delay = this.$SpawnDelay, $shiptype = $shiptypekey]"/>
+                      </do_all>
+                    </do_for_each>
+                  </actions>
+                </cue>
+                <cue name="Xenon_Spawner_Create_Ship" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="event.param.$delay"/>
+                  <actions>
+                    <do_if value="typeof event.param.$shiptype == datatype.macro">
+                      <create_ship name="$XenonShip" macro="event.param.$shiptype" capturable="false" sector="$MissionSector">
+                        <pilot>
+                          <select faction="faction.xenon" tags="tag.aipilot"/>
+                        </pilot>
+                        <loadout>
+                          <level exact="1" />
+                        </loadout>
+                            <owner exact="faction.xenon"/>
+                        <safepos value="Xenon_Spawner_Instance.$params.$position" max="200m"/>
+                        <rotation yaw="[0deg, 360deg].randominrange" pitch="[-50deg, 50deg].randominrange"/>
+                      </create_ship>
+                      <debug_text text="player.age + ' - Spawning ' + $XenonShip + ' ' + $XenonShip.knownname"/>
+                    </do_if>
+                    <do_if value="not $TransportFleet.{1}.dock">
+                      <create_order id="'Attack'" object="$XenonShip" immediate="true">
+                        <param name="primarytarget" value="$TransportFleet.{1}" />
+                        <param name="pursuetargets" value="true" />
+                      </create_order>
+                    </do_if>
+                    <do_elseif value="$AttackAuxuliaryPriority">
+                      <create_order id="'Attack'" object="$XenonShip" immediate="true">
+                        <param name="primarytarget" value="$ArgonAuxilary" />
+                        <param name="pursuetargets" value="true" />
+                      </create_order>
+                    </do_elseif>
+                    <do_else>
+                      <create_order id="'AttackInRange'" object="$XenonShip" immediate="true">
+                        <param name="destination" value="[$MissionSector, Xenon_Spawner_Instance.$params.$attackposition]" />
+                        <param name="pursuetargets" value="true" />
+                      </create_order>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+            </check_any>
+          </conditions>
+          <delay exact="5s"/>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$Score" exact="0"/>
+
+            <set_value name="$TransportFleetScore" exact="0"/>
+            <set_value name="$PlayerFleetScore" exact="0"/>
+            <set_value name="$AuxilaryHealthScore" exact="0"/>
+
+            <do_all exact="$TransportFleet.count">
+              <set_value name="$ResultData.$Score" operation="add" exact="100"/>
+              <set_value name="$TransportFleetScore" operation="add" exact="100"/>
+            </do_all>
+            <add_scenario_stat id="'transports'" name="$MissionText_Scoring_N1" uivalue="$TransportFleet.count" description="$MissionText_Scoring_D1" score="$TransportFleetScore" maxscore="300"/>
+
+            <do_all exact="$PlayerFleet.count">
+              <set_value name="$ResultData.$Score" operation="add" exact="50"/>
+              <set_value name="$PlayerFleetScore" operation="add" exact="50"/>
+            </do_all>
+            <add_scenario_stat id="'playerfleet'" name="$MissionText_Scoring_N2" uivalue="$PlayerFleet.count" description="$MissionText_Scoring_D2" score="$PlayerFleetScore" maxscore="200"/>
+
+            <do_if value="$TransportFleetScore gt 0">
+              <set_value name="$AuxilaryHealth" exact="$ArgonAuxilary.hullpercentage + $ArgonAuxilary.shieldpercentage"/>
+              <set_value name="$AuxilaryHealthScore"  exact="($AuxilaryHealth)i"/>
+              <set_value name="$ResultData.$Score"  operation="add" exact="$AuxilaryHealthScore"/>
+              <add_scenario_stat id="'auxiliary'" name="$MissionText_Scoring_N3" uivalue="($AuxilaryHealth)i" description="$MissionText_Scoring_D3" score="$AuxilaryHealthScore" maxscore="200"/>
+            </do_if>
+
+            <add_scenario_stat id="'ownkills'" name="$MissionText_Scoring_N6" uivalue="stat.ships_destroyed" description="$MissionText_Scoring_D6" score="stat.ships_destroyed * 10" maxscore="300"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="stat.ships_destroyed * 10"/>
+
+            <do_if value="$HOPScoutKilled" exact="1">
+              <add_scenario_stat id="'kills'" name="$MissionText_Scoring_N4" uivalue="$HOPScoutKilled" description="$MissionText_Scoring_D4" score="100" maxscore="100"/>
+              <set_value name="$ResultData.$Score"  operation="add" exact="100"/>
+            </do_if>
+
+            <do_if value="$PlayerShipDestroyed" exact="1">
+              <add_scenario_stat id="'playerdied'" name="$MissionText_Scoring_N5" uivalue="$PlayerShipDestroyed" description="$MissionText_Scoring_D5" score="-300"/>
+              <set_value name="$ResultData.$Score"  operation="add" exact="-300"/>
+            </do_if>
+
+            <signal_cue_instantly cue="Finished_Ref_Ref"/>
+          </actions>
+        </cue>
+
+        <cue name="Finished_Ref_Ref">
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+            </check_any>
+          </conditions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

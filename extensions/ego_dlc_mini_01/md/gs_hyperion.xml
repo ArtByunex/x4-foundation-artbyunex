@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Hyperion" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_hyperion">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Hyperion" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="100"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="'none'"/>
+        <!--Have a black screen for a little while, with the following fade-in kicking in shortly-->
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>
+      <!--<delay exact="5s"/>
+      <actions>
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>-->
+      <cues>
+        <cue name="Setup">
+          <cues>
+
+            <cue name="Ship_Setup">
+              <actions>
+                <set_value name="$HyperionOriginalShip" exact="player.ship"/>
+
+                <add_equipment_mods object="$HyperionOriginalShip">
+                  <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Hyperion_Original"/>
+                </add_equipment_mods>
+
+                <!-- add daughter ship -->
+
+                <!-- daughter ship dock -->
+                <find_dockingbay name="$DockHyperionOriginal" object="$HyperionOriginalShip" checkoperational="true" multiple="false">
+                  <match_dock size="tag.dock_s" storage="false"/>
+                </find_dockingbay>
+
+                <!-- Sentinel Variant -->
+                <set_value name="$ShipMacroDaughter" exact="macro.ship_par_s_fighter_02_b_macro"/>
+                <create_ship name="$ShipDaughterOriginal" macro="$ShipMacroDaughter" dock="$DockHyperionOriginal">
+                  <owner exact="faction.player"/>
+                  <paint ware="md.Setup_DLC_Mini_01.Setup.$PaintCastAsunder"/>
+                  <loadout ref="story_hyperion_daughter_sentinel"/>
+                  <equipmentmods>
+                    <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Daughter_Original"/>
+                  </equipmentmods>
+                  <pilot group="paranid.pilot"/>
+                  <people>
+                    <fillpercent exact="0"/>
+                  </people>
+                </create_ship>
+
+                <!-- add bonus paint mods -->
+                <substitute_text text="$PaintModRewardText" source="{30004,10001}">
+                  <replace string="'$MODNAME$'" with="ware.paintmod_0185.name"/>
+                </substitute_text>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0185" exact="9"/>
+                <show_notification text="{1015,90} + '\n' + $PaintModRewardText" sound="notification_achievement" comment="Reward received"/>
+
+              </actions>
+            </cue>
+
+            <cue name="Setup_Voicelines">
+              <actions>
+                <set_value      name="$PlayerTauntLines" exact="[]"/>
+                <append_to_list name="$PlayerTauntLines" exact="302540239"   comment="Technology and scientific understanding have progressed considerably since we cocooned!"/>
+                <append_to_list name="$PlayerTauntLines" exact="302540240"   comment="A lot has changed, some of which beyond recognition. We will take our time to update our understanding."/>
+                <!--<append_to_list name="$PlayerTauntLines" exact="302540241"   comment="This congregation adopted us readily and recognised Our Holy Mission!"/>-->
+              </actions>
+              <cues>
+                <cue name="Setup_Voicelines_Speak">
+                  <conditions>
+                    <event_object_changed_sector object="player.entity"/>
+                    <!-- dnd things -->
+                    <check_value value="not player.isinfullscreenmenu"/>
+                    <check_value value="not player.isinconversation"/>
+                    <check_value value="not player.isscreenshotmode"/>
+                    <check_value value="not md.$MissionDND.count"/>
+                    <check_value value="player.age ge (md.$LastMentorSpeak + 20s)"/>
+                  </conditions>
+                  <delay exact="20s"/>
+                  <actions>
+                    <set_value name="$line" exact="$PlayerTauntLines.random"/>
+                    <remove_from_list name="$PlayerTauntLines" exact="$line"/>
+                    <speak actor="player.entity" page="10370" line="$line"/>
+                    <do_if value="$PlayerTauntLines.count">
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Setup_Map">
+              <actions>
+                <!-- way to PAR -->
+                <find_sector macro="macro.cluster_730_sector001_macro"  required="true" name="$Sector_Third_Redemption"/>
+                <find_sector macro="macro.cluster_720_sector001_macro"  required="true" name="$Sector_Ore_Belt"/>
+                <find_sector macro="macro.cluster_722_sector001_macro"  required="true" name="$Sector_Sanctum_Verge"/>
+                <find_sector macro="macro.cluster_723_sector001_macro"  required="true" name="$Sector_Tempting_Fumes"/>
+                <find_sector macro="macro.cluster_709_sector001_macro"  required="true" name="$Sector_Cardinals_Domain"/>
+                <!-- way to stories north -->
+                <find_sector macro="macro.cluster_49_sector001_macro"   required="true" name="$Sector_Frontier_Edge"/>
+                <find_sector macro="macro.cluster_27_sector001_macro"   required="true" name="$Sector_The_Void"/>
+                <find_sector macro="macro.cluster_13_sector001_macro"   required="true" name="$Sector_Second_Contact_II_Flashpoint"/>
+                <find_sector macro="macro.cluster_14_sector001_macro"   required="true" name="$Sector_Argon_Prime"/>
+                <find_sector macro="macro.cluster_29_sector001_macro"   required="true" name="$Sector_Hatikvahs_Choice_I"/>
+                <find_sector macro="macro.cluster_30_sector001_macro"   required="true" name="$Sector_Morning_Star_III"/>
+                <!--To uncover a significant amount of space, to simulate travel from Third Redemption to Morning Star III-->
+                <set_value name="$InitialMap" exact="[
+                    macro.cluster_730_sector001_macro,
+                    macro.cluster_720_sector001_macro,
+                    macro.cluster_722_sector001_macro,
+                    macro.cluster_723_sector001_macro,
+                    macro.cluster_709_sector001_macro,
+                    macro.cluster_49_sector001_macro,
+                    macro.cluster_27_sector001_macro,
+                    macro.cluster_13_sector001_macro,
+                    macro.cluster_14_sector001_macro,
+                    macro.cluster_29_sector001_macro,
+                    macro.cluster_30_sector001_macro,
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                  <param name="UncoverShipyardsAndWharfs" value="true" comment="optional"/>
+                  <param name="UncoverTradeStations" value="true" comment="optional"/>
+                  <param name="UncoverHighways" value="true" comment="optional"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

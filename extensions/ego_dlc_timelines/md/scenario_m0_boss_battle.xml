@@ -1,0 +1,2539 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_M0_Bossbattle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Adrian Hamm"/>
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_m0_boss_battle">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$DeepDebugChance"    exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30603"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.fight"/>
+        <set_value name="$MissionFaction"     exact="faction.argon"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <find_sector name="$Cluster706"  macro="macro.timelines_map_m0_bossbattle_cluster_002_sector_001_macro"  required="true" space="player.galaxy"/>
+        <find_sector name="$Cluster705"  macro="macro.timelines_map_m0_bossbattle_cluster_001_sector_001_macro"  required="true" space="player.galaxy"/>
+        <find_gate name="$Cluster706Gate" space="$Cluster706" active="true"/>
+        <find_gate name="$Cluster705Gate" space="$Cluster705" active="true"/>
+        <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+          <param name="InitialMap" value="[$Cluster706,$Cluster705]"/>
+          <param name="UncoverShipyardsAndWharfs" value="true" comment="optional"/>
+          <param name="UncoverTradeStations" value="true" comment="optional"/>
+        </run_actions>
+        <set_value name="$HullDamage" exact="0"/>
+        <set_value name="$XenonKillCounter" exact="0"/>
+
+        <create_group groupname="$AttackingObjectGroup"/>
+        <create_group groupname="$Phase1_ShipGroup"/>
+        <create_group groupname="$CooldownPassiveGroup"/>
+        <create_position name="$Cluster705GatePos" object="$Cluster705Gate" space="$Cluster705"/>
+        <create_position name="$GateStagingGroundPos" object="$Cluster705Gate" space="$Cluster705" z="30km"/>
+
+        <!-- Change the Xenon faction to their historical icon/name -->
+        <!--<run_actions ref="md.LIB_Scenario.Setup_Faction_Terraformers"/>-->
+
+        <!-- Special Faction Relation setup  -->
+        <do_if value="md.$SplitPatriarchyFactions? and md.$SplitPatriarchyFactions.count">
+          <set_value name="$SplitFaction" exact="md.$SplitPatriarchyFactions.{1}"/>
+          <set_faction_relation faction="$SplitFaction" otherfaction="faction.paranid" value="0"/>
+          <set_faction_relation faction="$SplitFaction" otherfaction="faction.argon" value="0"/>
+          <set_faction_relation faction="$SplitFaction" otherfaction="faction.player" value="0.4"/>
+        </do_if>
+        <do_if value="md.$DLCBoronFactions? and md.$DLCBoronFactions.count">
+          <set_value name="$BoronFaction" exact="md.$DLCBoronFactions.{1}"/>
+          <do_if value="$SplitFaction?">
+            <set_faction_relation faction="$SplitFaction" otherfaction="$BoronFaction" value="0"/>
+          </do_if>
+        </do_if>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_M0_Mothership" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_DestroyerWrecks" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_M0_Fleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Phase1BackgroundFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Vanguard_Fleet" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <!--<quit_to_game game="'x4ep1_gamestart_hub'"/>-->
+                  <signal_cue cue="Start_Scenario"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Character_Setup">
+              <cues>
+
+                <cue name="Setup_BanDannaActor">
+                  <actions>
+                    <!-- Ban Danna - Argon Secret Service Leader -->
+                    <create_cue_actor name="$BanDannaActor" cue="namespace" macro="character_timelines_scenario_m0_bossbattle_danna_macro">
+                      <page exact="10133"/>
+                      <owner exact="faction.argon"/>
+                      <skills>
+                        <skill type="management"  exact="3"/>
+                        <skill type="morale"      exact="7"/>
+                        <skill type="piloting"    exact="6"/>
+                        <skill type="engineering" exact="9"/>
+                        <skill type="boarding"    exact="6"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_entity_traits    entity="$BanDannaActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                    <set_entity_overrides entity="$BanDannaActor" title="'{20208,50301}'" icon="'specialist'"/>
+
+                    <!-- NPC Usecase Setup -->
+                    <set_value name="$MissionActors.$BanDannaActor" exact="table[
+                                              $entity = $BanDannaActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                  </actions>
+                </cue>
+
+                <cue name="Setup_ParanidLeaderActor">
+                  <actions>
+                    <!-- Ban Danna - Argon Secret Service Leader -->
+                    <create_cue_actor name="$ParanidLeaderActor" cue="namespace" macro="character_paranid_generic_01_macro">
+                      <page exact="10301"/>
+                      <owner exact="faction.paranid"/>
+                      <skills>
+                        <skill type="management"  exact="3"/>
+                        <skill type="morale"      exact="7"/>
+                        <skill type="piloting"    exact="6"/>
+                        <skill type="engineering" exact="9"/>
+                        <skill type="boarding"    exact="6"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_entity_traits    entity="$ParanidLeaderActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                    <set_entity_overrides entity="$ParanidLeaderActor" title="'{20208,50301}'" icon="'specialist'"/>
+
+                    <!-- NPC Usecase Setup -->
+                    <set_value name="$MissionActors.$ParanidLeaderActor" exact="table[
+                                              $entity = $ParanidLeaderActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <!-- Add Teleportation Research to be able to jump between ships -->
+                <set_value name="$PlayerStartingShip" exact="player.ship"/>
+                <set_value name="$InitialHull" exact="player.ship.hull"/>
+
+                <add_to_group groupname="$Weapons" list="$PlayerStartingShip.weapons.operational.list"/>
+                <do_for_each name="$Weapon" in="$Weapons" counter="$i">
+                  <do_if value="$i == 1">
+                    <set_value name="$weapongroup" exact="0"/>
+                  </do_if>
+                  <do_elseif value="$i == 2">
+                    <set_value name="$weapongroup" exact="1"/>
+                  </do_elseif>
+                  <do_elseif value="$i == 3">
+                    <set_value name="$weapongroup" exact="2"/>
+                  </do_elseif>
+                  <do_elseif value="$i == 4">
+                    <set_value name="$weapongroup" exact="2"/>
+                  </do_elseif>
+                  <do_elseif value="$i == 5">
+                    <set_value name="$weapongroup" exact="1"/>
+                  </do_elseif>
+                  <do_elseif value="$i == 6">
+                    <set_value name="$weapongroup" exact="0"/>
+                  </do_elseif>
+                  <remove_weapon_from_weapongroup weapon="$Weapon" weapongroup="0" primary="true" />
+                  <add_weapon_to_weapongroup weapon="$Weapon" weapongroup="$weapongroup" primary="true" />
+                  <add_weapon_to_weapongroup weapon="$Weapon" weapongroup="3" primary="true" />
+                </do_for_each>
+              </actions>
+            </library>
+
+            <library name="Setup_M0_Mothership">
+              <actions>
+                <!-- Place the target, then check for its existence -->
+
+                <create_ship name="$Target" capturable="false" macro="macro.ship_xen_xl_mothership_01_a_macro" sector="$Cluster705" commandeerable="false">
+                  <owner exact="faction.xenon" overridenpc="true"/>
+                  <pilot>
+                    <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                  </pilot>
+                  <loadout flags="thrusters"/>
+                  <paint ware="ware.paintmod_0145"/>
+                  <!--<orientation orientation="look_at" refobject="$Cluster705Gate"/>-->
+                  <safepos object="$Cluster705Gate" x="-4.6km" z="99km" y="0.9km"/>
+                  <rotation yaw="176.2609deg" roll="-4.4690708deg" pitch="-5.72958deg"/>
+                </create_ship>
+                <set_object_forced_radar_visible object="$Target" visible="true"/>
+                <!-- To disable the ship warping around if the player enters or leaves the system -->
+                <set_ship_safepos_allowed ship="$Target" allow="false"/>
+                <set_known object="$Target" known="true"/>
+
+                <do_if value="not $Target.exists">
+                  <debug_text text="'Target does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+
+                <create_order object="$Target" id="'Wait'"/>
+                <set_value name="$weapons_all" exact="$Target.turrets.operational.list"/>
+                <do_all exact="$weapons_all.count" counter="$i">
+                  <set_weapon_mode weapon="$weapons_all.{$i}" weaponmode="weaponmode.attackenemies"/>
+                </do_all>
+                <!--<signal_objects object="$Target.defencenpc" param="'attack'" param2="$PlayerStartingShip" param3="[true, true, true, false, false, $behaviortargetclasses, true, true, true]" />-->
+
+                <!-- change setup once actual asset is available -->
+                <find_object_component groupname="$TurretComponents" object="$Target" macro="macro.turret_xen_l_plasma_01_mk1_macro" multiple="true"/>
+                <find_object_component groupname="$TargetGenerators" object="$Target" macro="macro.props_xen_generator_01_macro" multiple="true"/>
+
+                <create_group groupname="$DestroyComponents"/>
+                <add_to_group groupname="$DestroyComponents" group="$TurretComponents"/>
+                <add_to_group groupname="$DestroyComponents" group="$TargetGenerators"/>
+
+                <find_object_component groupname="$M0_ArmComponents" object="$Target" macro="macro.ship_xen_xl_mothership_01_part_06_macro" multiple="true"/>
+                <find_object_component name="$M0_HeatFlapComponent" object="$Target" macro="macro.ship_xen_xl_mothership_01_part_05_macro"/>
+                <find_object_component groupname="$M0_ArmTurrets" object="$Target" macro="macro.turret_xen_xl_battleship_01_mk1_macro" multiple="true"/>
+                <find_object_component name="$M0_HeatVentCore" object="$Target" macro="macro.ship_xen_xl_mothership_01_damagebody_01_macro"/>
+
+                <do_for_each name="$arm" in="$M0_ArmComponents">
+                  <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                    <param name="Object" value="$arm"/>
+                    <param name="RequesterCue" value="namespace"/>
+                    <param name="MinHull" value="100"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                  </run_actions>
+                </do_for_each>
+
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$Target"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_min_shield object="$Target" exact="100"/>
+
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$M0_HeatVentCore"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <do_if value="not @$M0_ArmComponents.count">
+                  <debug_text text="'Target has no engines or turrets'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_DestroyerWrecks">
+              <actions>
+                <do_all exact="6" counter="$n">
+                  <do_if value="$n == 1">
+                    <set_value name="$shipmacro" exact="macro.ship_arg_l_destroyer_02_a_macro"/>
+                    <set_value name="$offsetpos" exact="position.[-14km, -0.1km, 15km]"/>
+                  </do_if>
+                  <do_elseif value="$n == 2 or $n == 3" >
+                    <set_value name="$shipmacro" exact="macro.ship_arg_xl_carrier_02_a_macro"/>
+                    <set_value name="$offsetpos" exact="position.[-2km, 0km, 21km]"/>
+                  </do_elseif>
+                  <do_else>
+                    <set_value name="$shipmacro" exact="macro.ship_arg_l_destroyer_02_a_macro"/>
+                    <set_value name="$offsetpos" exact="position.[-6km, 0km, -4km]"/>
+                  </do_else>
+                  
+                  <create_ship name="$wreck" macro="$shipmacro" sector="$Cluster705" state="componentstate.wreck">
+                    <owner exact="faction.ownerless" overridenpc="true"/>
+                    <!--<orientation orientation="look_at" refobject="$Cluster705Gate"/>-->
+                    <orientation refobject="$Target" orientation="look_at"/>
+                    <safepos object="$Target" value="$offsetpos" radius="8km"/>
+                  </create_ship>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_M0_Fleet">
+              <actions>
+                <do_all exact="6">
+                  <create_ship name="$Ship" capturable="false" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="$Cluster705" groupname="$ProtectionGroup" commandeerable="false">
+                    <owner exact="faction.xenon" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <paint ware="ware.paintmod_0145"/>
+                    <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                    <safepos object="$Target" z="4km" min="2km" max="4km"/>
+                  </create_ship>
+                  <!--<create_order id="'AssignCommander'" object="$Ship">
+                    <param name="commander" value="$Target"/>
+                    <param name="assignment" value="assignment.interception"/>
+                    <param name="cancelorders" value="true"/>
+                  </create_order>-->
+                  <set_allow_drop object="$Ship" allow="false"/>
+                  <create_order object="$Ship" id="'MoveWait'" immediate="true">
+                    <param name="destination" value="[$Cluster705, $GateStagingGroundPos]"/>
+                    <param name="lookat" value="$Cluster705GatePos"/>
+                    <param name="timeout" value="0s"/>
+                  </create_order>
+                  <deplete_ammo object="$Ship" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                  <deplete_ammo object="$Ship" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                </do_all>
+
+                <do_all exact="2">
+                  <create_ship name="$EscortFleetCommander" capturable="false" macro="macro.ship_xen_m_corvette_01_b_macro" sector="$Cluster705" groupname="$ProtectionGroup" commandeerable="false">
+                    <owner exact="faction.xenon" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <paint ware="ware.paintmod_0145"/>
+                    <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                    <safepos object="$Target" z="4km" min="2km" max="4km"/>
+                  </create_ship>
+                  <set_allow_drop object="$EscortFleetCommander" allow="false"/>
+                  <!--<create_order id="'AssignCommander'" object="$EscortFleetCommander">
+                  <param name="commander" value="$Target"/>
+                  <param name="assignment" value="assignment.interception"/>
+                  <param name="cancelorders" value="true"/>
+                </create_order>-->
+                  <create_order object="$Ship" id="'MoveWait'" immediate="true">
+                    <param name="destination" value="[$Cluster705, $GateStagingGroundPos]"/>
+                    <param name="lookat" value="$Cluster705GatePos"/>
+                    <param name="timeout" value="0s"/>
+                  </create_order>
+                  <deplete_ammo object="$EscortFleetCommander" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                  <deplete_ammo object="$EscortFleetCommander" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                </do_all>
+
+              </actions>
+            </library>
+
+            <library name="Setup_Phase1BackgroundFleet">
+              <actions>
+                <do_all exact="4">
+                  <create_ship name="$Phase1FleetCommander" capturable="false" macro="macro.ship_xen_m_corvette_01_b_macro" sector="$Cluster705" groupname="$Phase1EnemyGroup" commandeerable="false">
+                    <owner exact="faction.xenon" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <paint ware="ware.paintmod_0145"/>
+                    <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                    <safepos object="$Target" x="[-6km,6km].randominrange" z="5km" y="4.6km"/>
+                  </create_ship>
+                  <set_allow_drop object="$Phase1FleetCommander" allow="false"/>
+                  <create_position name="$protectpos" space="$Cluster705" object="$Phase1FleetCommander"/>
+                  <create_order object="$Phase1FleetCommander" id="'ProtectPosition'" default="true">
+                    <param name="destination" value="[$Cluster705, $protectpos]"/>
+                    <param name="radius" value="30km"/>
+                    <param name="attackonsight" value="true"/>
+                    <param name="flagship" value="$Phase1FleetCommander"/>
+                  </create_order>
+                  <deplete_ammo object="$Phase1FleetCommander" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                  <deplete_ammo object="$Phase1FleetCommander" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                  <do_all exact="3">
+                    <create_ship name="$Ship" capturable="false" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="$Cluster705" groupname="$Phase1EnemyGroup" commandeerable="false">
+                      <owner exact="faction.xenon" overridenpc="true"/>
+                      <pilot>
+                        <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                      </pilot>
+                      <loadout>
+                        <level exact="0.8"/>
+                      </loadout>
+                      <paint ware="ware.paintmod_0145"/>
+                      <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                      <safepos object="$Phase1FleetCommander" min="500m" max="1500m"/>
+                    </create_ship>
+                    <set_allow_drop object="$Ship" allow="false"/>
+                    <create_order id="'AssignCommander'" object="$Ship">
+                      <param name="commander" value="$Phase1FleetCommander"/>
+                      <param name="assignment" value="assignment.defence"/>
+                      <param name="cancelorders" value="true"/>
+                    </create_order>
+                    <deplete_ammo object="$Ship" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                    <deplete_ammo object="$Ship" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                  </do_all>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_Vanguard_Fleet">
+              <actions>
+                <do_all exact="2">
+                  <create_ship name="$VanguardFleetCommander" capturable="false" macro="macro.ship_xen_m_corvette_01_b_macro" sector="$Cluster706" groupname="$VanguardGroup" commandeerable="false">
+                    <owner exact="faction.xenon" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <paint ware="ware.paintmod_0145"/>
+                    <orientation orientation="look_away" refobject="$Cluster706Gate"/>
+                    <safepos object="$Cluster706Gate" x="-5km" z="5km" y="4.6km"/>
+                  </create_ship>
+                  <set_allow_drop object="$VanguardFleetCommander" allow="false"/>
+                  <create_position name="$gatepos" space="$Cluster706" object="$Cluster706Gate"/>
+                  <create_order object="$VanguardFleetCommander" id="'ProtectPosition'" default="true">
+                    <param name="destination" value="[$Cluster706, $gatepos]"/>
+                    <param name="radius" value="6km"/>
+                    <param name="attackonsight" value="true"/>
+                    <param name="flagship" value="$VanguardFleetCommander"/>
+                  </create_order>
+                  <deplete_ammo object="$VanguardFleetCommander" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                  <deplete_ammo object="$VanguardFleetCommander" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                  <do_all exact="2">
+                    <create_ship name="$Ship" capturable="false" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="$Cluster706" groupname="$VanguardGroup" commandeerable="false">
+                      <owner exact="faction.xenon" overridenpc="true"/>
+                      <pilot>
+                        <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                      </pilot>
+                      <loadout>
+                        <level exact="0.8"/>
+                      </loadout>
+                      <paint ware="ware.paintmod_0145"/>
+                      <orientation orientation="look_away" refobject="$Cluster706Gate"/>
+                      <safepos object="$Cluster706Gate" x="-5km" z="5km" y="4.6km"/>
+                    </create_ship>
+                    <set_allow_drop object="$Ship" allow="false"/>
+                    <create_order id="'AssignCommander'" object="$Ship">
+                      <param name="commander" value="$VanguardFleetCommander"/>
+                      <param name="assignment" value="assignment.defence"/>
+                      <param name="cancelorders" value="true"/>
+                    </create_order>
+                    <deplete_ammo object="$Ship" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                    <deplete_ammo object="$Ship" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                  </do_all>
+                </do_all>
+              </actions>
+            </library>
+
+            <!-- Track the cause of death to be able to display it in the debrief menu, if applicable -->
+            <cue name="Add_Stat_Cause_Of_Death" ref="md.LIB_Scenario.Track_Cause_Of_Death">
+              <param name="SpecifyWeapon" value="true"/>
+            </cue>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+            <!-- If no player ships are still operational, end the scenario -->
+            <cue name="FailureCheck_DestroyedShips" checkinterval="2s">
+              <conditions>
+                <count_ships result="$PlayerShipCount" owner="faction.player" exact="0" space="player.galaxy" checkoperational="true">
+                  <match class="class.spacesuit" negate="true"/>
+                </count_ships>
+              </conditions>
+              <actions>
+                <signal_cue cue="ResultWindow"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_KilledXenonCounter" instantiate="true">
+              <conditions>
+                <event_object_killed_object group="global.$PlayerOccupiedShipGroup"/>
+                <check_value value="event.param.owner == faction.xenon"/>
+              </conditions>
+              <actions>
+                <set_value name="$XenonKillCounter" operation="add" exact="1"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Ship_Damaged" instantiate="true">
+              <conditions>
+                <event_object_hull_damaged group="global.$PlayerOccupiedShipGroup"/>
+              </conditions>
+              <actions>
+                <set_value name="$HullDamage" exact="event.param3" operation="add"/>
+                <set_value name="$PlayerTookDamage"/>
+              </actions>
+            </cue>
+
+            <cue name="Scenario_Intro_Cutscene_Handling">
+              <delay exact="0.5s"/>
+              <actions>
+                <!-- Start cutscene -->
+                <find_gate name="$PlayerGate" space="$Cluster706" >
+                  <match_distance object="player.entity" max="40km"/>
+                </find_gate>
+                <play_cutscene result="this.$CutsceneID" letterbox="true" movesoundcamera="true" key="'scenario_m0_boss_battle_intro_cutscene'" targetmonitor="false" abortable="true">
+                  <param name="target_gate_active" object="$Cluster706Gate"/>
+                  <param name="target_gate_player" object="$PlayerGate"/>
+                  <param name="target_player_ship" object="player.ship"/>
+                  <param name="target_xenon_guard" object="$VanguardFleetCommander"/>
+                  <param name="target_m0_mothership" object="$Target"/>
+                </play_cutscene>
+              </actions>
+              <delay exact="10s"/>
+              <actions>
+                <do_if value="this.$CutsceneID?">
+                  <warp object="player.ship" zone="$PlayerGate.zone">
+                    <position z="player.ship.size + 570m" object="$PlayerGate" />
+                    <orientation orientation="look_away" refobject="$PlayerGate" comment="requires create_ship using zone='$Gate.zone' "/>
+                  </warp>
+                  <play_sound sound="'gate_flythrough'" object="player.ship" />
+                  <add_effect effect="'jump_gateeffect'" object="$PlayerGate"/>
+                </do_if>
+              </actions>
+              <delay exact="3s"/>
+              <actions>
+                <do_if value="this.$CutsceneID?">
+                  <force_player_speed speed="player.ship.maxspeed*0.3"/>
+                </do_if>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <do_if value="this.$CutsceneID?">
+                  <force_player_speed speed="player.ship.maxspeed*0.9"/>
+                  <precache_hint target="$Target"/>
+                </do_if>
+              </actions>
+              <delay exact="11s"/>
+              <actions>
+                <do_if value="this.$CutsceneID?">
+                  <precache_hint target="$Cluster706Gate"/>
+                  <precache_hint target="$VanguardFleetCommander"/>
+                </do_if>
+              </actions>
+              <cues>
+
+                <!-- Intro Conversation Cues go here  -->
+                <cue name="Introduction_Dialogue">
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                              $script = [
+                                                                                      10.7s,
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030101, $recipient = 'player', $comment = 'Kyle, this is Ban Danna speaking.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030102, $recipient = 'player', $comment = 'You did a great job destroying the Xenon infrastructure.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030103, $recipient = 'player', $comment = 'But the most important task still lies ahead.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030104, $recipient = 'player', $comment = 'The Xenon have finished the construction of their m0 mothership while we were rallying our allies.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030105, $recipient = 'player', $comment = 'That is bad news. This weapon of mass destruction can wreak havoc on a planetary scale.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030106, $recipient = 'player', $comment = 'But still, you are in control of the most advanced ship known to man, so you are the ideal candidate for the task at hand.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030107, $recipient = 'player', $comment = 'Before our fleet can tackle the problem head on, we need you to investigate the situation and clear the way.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030108, $recipient = 'player', $comment = 'Expect to be met with some serious resistence.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030124, $recipient = 'player', $comment = 'These systems are absolutely infested with the machines.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030131, $recipient = 'player', $comment = 'The fate of all organic life rests in your capable hands.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030109, $recipient = 'player', $comment = 'Godspeed, pilot.' ],
+                                                                                      2s,
+                                                                              ],
+                                                                              $callbackcue = IntroDialogue_DialogueFinished,
+                                                                              $abortonsignalledcue  = IntroDialogue_NPCUsecase_Abort
+                                                                            ]" />
+                  </actions>
+                </cue>
+
+                <cue name="IntroDialogue_NPCUsecase_Abort">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+
+                <cue name="IntroDialogue_DialogueFinished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <stop_cutscene key="'scenario_m0_boss_battle_intro_cutscene'"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="SetupMission">
+              <conditions>
+                <event_cutscene_stopped key="'scenario_m0_boss_battle_intro_cutscene'"/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <remove_value name="Scenario_Intro_Cutscene_Handling.$CutsceneID"/>
+                <signal_cue_instantly cue="IntroDialogue_NPCUsecase_Abort"/>
+                <!--<create_position name="$Cluster706GatePos" object="$Cluster706Gate" space="$Cluster706"/>-->
+                <warp object="player.ship" sector="$Cluster706">
+                  <orientation refobject="$Cluster706Gate" orientation="look_at"/>
+                  <safepos value="position.[123643.960938m, 0.000000m, 31776.371094m]" space="$Cluster706"/>
+                </warp>
+
+                <signal_objects object="player.entity" param="'startactivity'" param2="activity.travel"/>
+                <fade_screen fadeout="0s" fadein="1s" realtime="true"/>
+              </actions>
+              <delay exact="1.5s"/>
+              <actions>
+                <set_value name="$StartTime" exact="player.age"/>
+
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false"
+                                name="{30603,1001}" description="{30603,1012}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                  <briefing>
+                    <objective step="1" action="objective.flyto" object="$Target"/>
+                    <objective step="2" action="objective.destroy" group="$TurretComponents"/>
+                    <objective step="3" action="objective.destroy" group="$M0_ArmComponents"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+              <cues>
+
+                <cue name="Travel_Dialogue">
+                  <actions>
+                    <!-- TODO: Replace with actual dialogue -->
+                    <do_if value="$SplitFaction? and $BoronFaction?">
+                      <set_value name="$Travel_Dialogue_Weight" exact="100"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$Travel_Dialogue_Weight" exact="0"/>
+                    </do_else>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance, $priority = 90,
+                                                                                  $script = [
+                                                                                            3s,
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030125, $recipient = 'player', $comment = 'I must admit, when you first surfaced in our space, I was sceptical about your intentions.' ],
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030126, $recipient = 'player', $comment = 'Stranded in this weird ship prototype that no-ones ever heard of before... Telling tall tales about Earth and riling up the Goner...' ],
+                                                                                            1s,
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030127, $recipient = 'player', $comment = 'I even asked some of our Argon Secret Service officers to run a complete investigation into you, but to my surprise absolutely nothing came up.' ],
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030128, $recipient = 'player', $comment = 'So, we had no choice but to take you by your word - and it is a good thing we did!' ],
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030129, $recipient = 'player', $comment = 'Your actions have proven your character, and only thanks to your warnings did we manage to face the threat of the Xenon head on.' ],
+                                                                                            1s,
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030110, $recipient = 'player', $comment = 'I am still in disbelief that you managed to get everyone on the same page.' ],
+                                                                                            table[ $select = [
+                                                                                            table[$weight = $Travel_Dialogue_Weight, $actor = '$BanDannaActor', $speak = 306030112, $recipient = 'player', $comment = 'Even the Split have agreed to a temporary ceasefire with the Queendom of Boron.' ],
+                                                                                            ] ],
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030111, $recipient = 'player', $comment = 'Our combined forces are gathering closeby.' ],
+                                                                                            1s,
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030123, $recipient = 'player', $comment = 'Once you have cleared the way, we shall move in as one fleet.' ],
+
+                                                                                            ]
+                                                                                  ]" />
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- Player Overwhelming Handing
+            Continually check how many ships are engaged with the player. If a threshold is crossed, draw some of those ships back -->
+            <cue name="EnemyAttack_Handling">
+              <cues>
+
+                <!-- Adds an enemy ship whenever it takes a shot at the player -->
+                <cue name="EnemyAttack_AddToGroup" instantiate="true">
+                  <conditions>
+                    <event_attack_started target="global.$PlayerOccupiedShipGroup"/>
+                    <check_value value="event.param != $Target"/>
+                    <check_value value="not $AttackingObjectGroup.indexof.{event.param}"/>
+                    <check_value value="event.param.owner.ishostileto.{faction.player}" comment="Avoid accidental Friendly Fire being added to the list"/>
+                  </conditions>
+                  <actions>
+                    <add_to_group groupname="$AttackingObjectGroup" object="event.param"/>
+                  </actions>
+                </cue>
+
+                <!-- Removes ships that have ceased firing at the player -->
+                <cue name="EnemyAttack_RemoveFromGroup" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <check_value value="$AttackingObjectGroup.count"/>
+                  </conditions>
+                  <actions>
+                    <do_for_each name="this.$enemy" in="$AttackingObjectGroup" reverse="true">
+                      <do_if value="this.$enemy.isoperational">
+                        <!-- If  this enemy is operational and not executing an attack order, or not attacking the player, remove them from the list -->
+                        <do_if value="this.$enemy.order.id != 'Attack'">
+                          <remove_from_group group="$AttackingObjectGroup" object="this.$enemy"/>
+                        </do_if>
+                        <do_elseif value="this.$enemy.order.$primarytarget != $PlayerStartingShip">
+                          <remove_from_group group="$AttackingObjectGroup" object="this.$enemy"/>
+                        </do_elseif>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <!-- Periodically checks how many ships are shooting at the player, and tells some of them to just follow each other instead of shooting at the player -->
+                <cue name="EnemyAttacks_Overwhelming" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <check_value value="$AttackingObjectGroup.count gt 2"/>
+                    <check_value value="not $customattackhandling_off?"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$AttackingObjectGroup.indexof.{player.target}">
+                      <set_value name="this.$CurrentPlayerTarget" exact="player.target"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="this.$CurrentPlayerTarget" exact="$AttackingObjectGroup.random"/>
+                    </do_else>
+
+                    <shuffle_group group="$AttackingObjectGroup"/>
+                    <do_for_each name="this.$enemy" in="$AttackingObjectGroup" reverse="true">
+                      <do_if value="this.$enemy != this.$CurrentPlayerTarget">
+                        <do_if value="this.$CurrentPlayerTarget">
+                          <set_value name="this.$selectedTarget" exact="this.$CurrentPlayerTarget"/>
+                        </do_if>
+                        <do_else>
+                          <set_value name="this.$selectedTarget" exact="player.ship"/>
+                        </do_else>
+                        <signal_cue_instantly cue="EnemyAttackResponseCooldown" param="this.$enemy"/>
+                        <cancel_all_orders object="this.$enemy"/>
+                        <create_order id="'Follow'" object="this.$enemy" immediate="true">
+                          <param name="target" value="this.$selectedTarget"/>
+                          <param name="debugchance" value="$DebugChance"/>
+                        </create_order>
+                        <remove_from_group group="$AttackingObjectGroup" object="this.$enemy"/>
+                      </do_if>
+                      <do_if value="$AttackingObjectGroup.count le 2">
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="EnemyAttackResponseCooldown" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$attacking_Ship" exact="event.param"/>
+                    <set_value name="this.$attacking_Ship.pilot.$noattackresponse" exact="true"/>
+                    <add_to_group groupname="$CooldownPassiveGroup" object="this.$attacking_Ship"/>
+                  </actions>
+                  <delay exact="30s"/>
+                  <actions>
+                    <do_if value="this.$attacking_Ship.isoperational">
+                      <remove_from_group group="$CooldownPassiveGroup" object="this.$attacking_Ship"/>
+                      <set_value name="this.$attacking_Ship.pilot.$noattackresponse" exact="false"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="PlayerAttackedUnresponsiveShip" instantiate="true">
+                  <conditions>
+                    <event_object_attacked group="$CooldownPassiveGroup"/>
+                    <check_value value="event.param.isclass.ship and event.param.isoperational"/>
+                    <check_value value="@event.param.pilot.$noattackresponse"/>
+                  </conditions>
+                  <actions>
+                    <!-- Player attacked ship without attack response, reset it prematurely-->
+                    <do_if value="$CooldownPassiveGroup.indexof.{event.param}">
+                      <remove_from_group group="$CooldownPassiveGroup" object="event.param"/>
+                    </do_if>
+                    <set_value name="event.param.pilot.$noattackresponse" exact="false"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="PlayerFirstWarning">
+              <conditions>
+                <event_object_hull_damaged object="$PlayerStartingShip"/>
+                <check_value value="event.object.hullpercentage le 70"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          0.5s,
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030339, $recipient = 'player', $monitor = false, $comment = 'You are taking too much fire!' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030340, $recipient = 'player', $monitor = false, $comment = 'A couple more hits and you are done for!' ],
+
+                                                                                          ]
+                                                                                  ]" />
+              </actions>
+              <delay exact="5min"/>
+              <actions>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <cue name="CheckDistanceToGate" checkinterval="0.5s">
+              <conditions>
+                <check_value value="player.ship.distanceto.{$Cluster706Gate} lt 40km and $VanguardGroup.count"/>
+              </conditions>
+              <actions>
+                <find_object_component name="$Engines" object="$PlayerStartingShip" class="[class.engine]" multiple="true"/>
+                <do_if value="$Engines.{1}.travel.active">
+                  <force_player_speed speed="1"/>
+                </do_if>
+                <stop_player_autopilot/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          0.5s,
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030114, $recipient = 'player', $comment = 'These Xenon ships are guarding the entry!' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030115, $recipient = 'player', $comment = 'You need to take them out!' ],
+
+                                                                                          ]
+                                                                                  ]" />
+              </actions>
+              <cues>
+                <cue name="DestroyVanguardFleet_Ref" ref="md.RML_Destroy_Components.DestroyComponents">
+                  <!-- always pass these -->
+                  <param name="EndSignalCue"      value="ContinueTowardsM0_WithReinforements"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="ObjectiveText"     value="{30603,1005}"/>
+                  <!-- mission-related parameters -->
+                  <param name="Targets_Param" value="$VanguardGroup"/>
+                  <param name="AllowAbandoned" value="true"/>
+                  <param name="AllowCapture" value="true"/>
+                  <param name="AllowDestroy" value="true"/>
+                  <param name="ObjectiveIsGroup" value="true" comment="Have the objective point to the group"/>
+                  <param name="StartStep" value="2" comment="Briefing step to start the mission on"/>
+                  <param name="UpdateBriefing" value="true" comment="Update the briefing objective step when the objective is updated"/>
+                </cue>
+
+                <cue name="ContinueTowardsM0_WithReinforements">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$CleanedUp_VanguardFleet"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          2s,
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030116, $recipient = 'player', $comment = 'Well done!' ],
+                                                                                          ]
+                                                                                  ]" />
+                  </actions>
+                  <cues>
+
+                    <cue name="Create_Phase1_WingGroup">
+                      <actions>
+                        <do_all exact="4" counter="$i">
+                          <!-- Create 4 s-sized allied ships-->
+                          <do_if value="$i le 2">
+                            <get_ship_definition reference="$m_shiploadout" size="class.ship_m" faction="faction.argon" tags="tag.gunboat"/>
+                            <set_value name="this.$faction" exact="faction.argon"/>
+                          </do_if>
+                          <do_else>
+                            <get_ship_definition reference="$m_shiploadout" size="class.ship_m" faction="faction.paranid" tags="tag.corvette"/>
+                            <set_value name="this.$faction" exact="faction.paranid"/>
+                          </do_else>
+                          <create_ship name="$m_ship" sector="$Cluster706" commandeerable="false" capturable="false" ref="$m_shiploadout" groupname="$Phase1_ShipGroup">
+                            <loadout>
+                              <level exact="0.8"/>
+                            </loadout>
+                            <owner exact="this.$faction" overridenpc="true"/>
+                            <pilot>
+                              <select faction="this.$faction" tags="tag.fighterpilot"/>
+                            </pilot>
+                            <orientation refobject="player.ship" orientation="look_at"/>
+                            <safepos value="position.[-105687.92m, 50.88m, 32081.67m]" space="$Cluster706"/>
+                          </create_ship>
+                          <set_allow_drop object="$m_ship" allow="false"/>
+
+                          <do_all exact="4">
+                            <!-- Create 16 s-sized allied ships total -->
+                            <do_if value="$i le 2">
+                              <get_ship_definition reference="$s_shiploadout" size="class.ship_s" faction="faction.argon" tags="tag.fighter"/>
+                              <set_value name="this.$faction" exact="faction.argon"/>
+                            </do_if>
+                            <do_else>
+                              <get_ship_definition reference="$s_shiploadout" size="class.ship_s" faction="faction.paranid" tags="tag.fighter"/>
+                              <set_value name="this.$faction" exact="faction.paranid"/>
+                            </do_else>
+                            <create_ship name="$s_ship" sector="$Cluster706" commandeerable="false" capturable="false" ref="$s_shiploadout" groupname="$Phase1_ShipGroup">
+                              <loadout>
+                                <level exact="0.8"/>
+                              </loadout>
+                              <owner exact="this.$faction" overridenpc="true"/>
+                              <pilot>
+                                <select faction="this.$faction" tags="tag.fighterpilot"/>
+                              </pilot>
+                              <orientation refobject="$PlayerStartingShip" orientation="look_at"/>
+                              <safepos object="$m_ship" space="$Cluster706" min="300m" max="600m"/>
+                            </create_ship>
+                            <set_allow_drop object="$s_ship" allow="false"/>
+                            <create_order id="'AssignCommander'" object="$s_ship">
+                              <param name="commander" value="$m_ship"/>
+                              <param name="assignment" value="assignment.interception"/>
+                              <param name="cancelorders" value="true"/>
+                            </create_order>
+                          </do_all>
+                          <create_order object="$m_ship" id="'MoveGeneric'">
+                            <param name="destination" value="$Cluster706Gate"/>
+                            <param name="position" value="position.[0m,200m,4000m]"/>
+                            <param name="lookat" value="position.[0,0,0]"/>
+                          </create_order>
+                          <create_order object="$m_ship" id="'ProtectShip'" default="true">
+                            <param name="target" value="$PlayerStartingShip" />
+                            <param name="debugchance" value="100" />
+                          </create_order>
+                        </do_all>
+                        <set_value name="$Phase1_ReinforcementsSent"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="ContinueTowardsM0_WaitObjective">
+                      <conditions>
+                        <event_cue_completed cue="Create_Phase1_WingGroup"/>
+                      </conditions>
+                      <actions>
+                        <set_objective cue="$MissionCue" step="3"  action="objective.custom" customaction="{30603,1009}" group="$Phase1_ShipGroup" updatebriefing="true"/>
+                      </actions>
+                      <cues>
+
+                        <cue name="ContinueTowardsM0_Regroup" checkinterval="0.5s">
+                          <conditions>
+                            <check_any exact="$Phase1_ShipGroup.count" counter="$j">
+                              <check_value value="$Phase1_ShipGroup.{$j}.distanceto.{$PlayerStartingShip} le 8km"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="ContinueTowardsM0"/>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                    <cue name="ContinuedDelaySignal">
+                      <delay exact="1min"/>
+                      <actions>
+                        <signal_cue cue="ContinueTowardsM0" check="false"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="ContinueTowardsM0">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_for_each name="$ship" in="$Phase1_ShipGroup">
+                      <do_if value="$ship.orders.count">
+                        <do_if value="$ship.orders.{1}.id == 'MoveGeneric'">
+                          <debug_text text="'canceling ' + $ship.knownname + ' orders'"/>
+                          <cancel_order order="$ship.orders.{1}"/>
+                        </do_if>
+                      </do_if>
+                    </do_for_each>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030117, $recipient = 'player', $comment = 'Lets continue onward!' ],
+
+                                                                                          ]
+                                                                                  ]" />
+                    <set_objective cue="$MissionCue" step="3" action="objective.flyto" object="$Target" updatebriefing="true"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="M0_VisualConfirmation">
+              <conditions>
+                <event_player_changed_target target="$Target"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="DestroyVanguardFleet_Ref"/>
+                <set_value name="$PlayerTargeted_M0"/>
+              </actions>
+            </cue>
+
+            <cue name="CheckDistanceToM0Target" checkinterval="1s">
+              <conditions>
+                <check_any>
+                  <check_value value="player.ship.distanceto.{$Target} lt 85km"/>
+                  <check_value value="$PlayerTargeted_M0?"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <do_if value="not $CleanedUp_VanguardFleet?">
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          0.5s,
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030118, $recipient = 'player', $comment = 'You are leaving them?' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030119, $recipient = 'player', $comment = 'Well... it is your choice, I guess.' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030122, $recipient = 'player', $comment = 'They are taking up pursuit, though.' ],
+
+                                                                                          ]
+                                                                                  ]" />
+                  <do_for_each name="$ship" in="$VanguardGroup">
+                    <cancel_all_orders object="$ship"/>
+                    <create_order object="$ship" id="'Attack'">
+                      <param name="primarytarget" value="$PlayerStartingShip"/>
+                      <param name="allowothertargets" value="true"/>
+                      <param name="pursuetargets" value="true"/>
+                      <param name="checkrelation" value="true"/>
+                    </create_order>
+                  </do_for_each>
+                </do_if>
+
+                <do_for_each name="$ship" in="$ProtectionGroup">
+                  <cancel_all_orders object="$ship"/>
+                  <create_order object="$ship" id="'Attack'">
+                    <param name="primarytarget" value="$PlayerStartingShip"/>
+                    <param name="allowothertargets" value="true"/>
+                    <param name="pursuetargets" value="true"/>
+                    <param name="checkrelation" value="true"/>
+                  </create_order>
+                </do_for_each>
+
+                <cancel_cue cue="CheckDistanceToGate"/>
+              </actions>
+              <cues>
+
+                <cue name="Xenon_Battleship_IntroductionSpeech">
+                  <delay exact="0.2s"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          0.5s,
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030201, $recipient = 'player', $comment = 'And there it is! The mother of all Xenon weapons.' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030220, $recipient = 'player', $comment = 'The turrets affixed to the rotating arms are absolutely deadly.' ],
+                                                                                          table[ $actor = '$BanDannaActor', $speak = 306030221, $recipient = 'player', $comment = 'Stay out of their line of fire!' ],
+
+                                                                                          ]
+                                                                                  ]" />
+
+                    <!--table[ $actor = '$BanDannaActor', $speak = 306030202, $recipient = 'player', $comment = 'Be careful how you approach. This could get hairy.' ],-->
+                  </actions>
+                </cue>
+
+                <cue name="Player_InSightsofTurrets" onfail="cancel">
+                  <conditions>
+                    <check_value value="false" comment="just turned out confusing. Nerfed the turrets and disabled comments for now"/>
+                  </conditions>
+                  <cues>
+                    <!-- Check if special Turrets have clear sight of the player ship -->
+                    <cue name="Player_InSightsofTurrets_Check">
+                      <delay exact="0.5s"/>
+                      <actions>
+                        <do_for_each name="$turret" in="$M0_ArmTurrets">
+                          <check_line_of_sight object="$turret" target="$PlayerStartingShip" name="this.$hasview" />
+                          <do_if value="this.$hasview and $turret.distanceto.{$PlayerStartingShip} lt 25km">
+                            <signal_cue_instantly cue="DangerTurret_Warning"/>
+                            <cancel_cue cue="Player_InSightsofTurrets"/>
+                          </do_if>
+                        </do_for_each>
+                        <reset_cue cue="this"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- This cue warns the player of the turrets and tells the player to approach straight from the front -->
+                <cue name="DangerTurret_Warning">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                          $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                          $script = [
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030203, $recipient = 'player', $comment = 'They have you in their sights!' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030204, $recipient = 'player', $comment = 'Divert course now!' ],
+                                                                                      1.2s,
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030205, $recipient = 'player', $comment = 'Try a head on approach.' ],
+                                                                                    ]
+                                                                          ]" />
+                  </actions>
+                  <delay exact="3min"/>
+                  <actions>
+                    <reset_cue cue="Player_InSightsofTurrets"/>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="EscortWarning" checkinterval="1s">
+              <conditions>
+                <check_any>
+                  <check_value value="player.ship.distanceto.{$Target} lt 55km"/>
+                  <check_any exact="$ProtectionGroup.count" counter="$k">
+                    <check_value value="player.ship.distanceto.{$ProtectionGroup.{$k}} lt 15km"/>
+                  </check_any>
+                </check_any>
+                <check_value value="Destroy_GenericTurrets.state == cuestate.waiting"/>
+              </conditions>
+              <actions>
+                <do_for_each name="$ship" in="$ProtectionGroup">
+                  <cancel_all_orders object="$ship"/>
+                  <create_order object="$ship" id="'Attack'">
+                    <param name="primarytarget" value="$PlayerStartingShip"/>
+                    <param name="secondarytargets" value="$Phase1_ShipGroup"/>
+                    <param name="allowothertargets" value="true"/>
+                    <param name="pursuetargets" value="true"/>
+                    <param name="checkrelation" value="true"/>
+                  </create_order>
+                </do_for_each>
+              </actions>
+              <cues>
+
+                <cue name="DestroyEscortFleet_Ref" ref="md.RML_Destroy_Components.DestroyComponents">
+                  <!-- always pass these -->
+                  <param name="EndSignalCue"      value="Destroy_GenericTurrets"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="ObjectiveText"     value="{30603,1006}"/>
+                  <!-- mission-related parameters -->
+                  <param name="Targets_Param" value="$ProtectionGroup"/>
+                  <param name="AllowAbandoned" value="true"/>
+                  <param name="AllowCapture" value="true"/>
+                  <param name="AllowDestroy" value="true"/>
+                  <param name="ObjectiveIsGroup" value="true" comment="Have the objective point to the group"/>
+                  <param name="StartStep" value="3" comment="Briefing step to start the mission on"/>
+                  <param name="UpdateBriefing" value="true" comment="Update the briefing objective step when the objective is updated"/>
+                </cue>
+
+                <cue name="EscortDialogue">
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                          $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                          $script = [
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030209, $recipient = 'player', $comment = 'Xenon escorts!' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030210, $recipient = 'player', $comment = 'They are trying to protect the mothership!' ],
+                                                                                    ]
+                                                                          ]" />
+                    <!--table[ $actor = '$BanDannaActor', $speak = 306030211, $comment = 'Destroy them before you can take out the turrets.' ],-->
+                  </actions>
+                </cue>
+
+                <cue name="CloseProximityCheck" checkinterval="1s">
+
+                  <conditions>
+                    <check_value value="player.ship.distanceto.{$Target} lt 7km"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Destroy_GenericTurrets" check="false"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- Continually spawns singular S ships throughout the entirety of the the  -->
+            <cue name="ContinualShipSpawn">
+              <conditions>
+                <event_cue_signalled cue="Destroy_GenericTurrets"/>
+              </conditions>
+              <actions>
+                <create_group groupname="$ReinforcementGroup"/>
+                <set_value name="this.$WaveCount" exact="0"/>
+              </actions>
+              <cues>
+
+                <cue name="Signal_XenonSpawn" checkinterval="5s" instantiate="true">
+                  <actions>
+                    <signal_cue cue="Spawn_ReinforcementTroops" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Spawn_ReinforcementTroops">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$ReinforcementGroup.count le 8"/>
+                  </conditions>
+                  <actions>
+                    <get_safe_pos result="this.$safepos" object="$Target" sector="$Target.sector" min="45km" max="55km" radius="300m" allowyaxis="false" />
+                    <do_if value="ContinualShipSpawn.$WaveCount == 5">
+                      <!-- After 4 waves, give the players some room to breathe and see to any objectives -->
+                      <set_value name="this.$spawnamount" exact="0"/>
+                      <set_value name="ContinualShipSpawn.$WaveCount" exact="0"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="this.$spawnamount" min="1" max="3" profile="bell"/>
+                      <set_value name="ContinualShipSpawn.$WaveCount" operation="add" exact="1"/>
+                    </do_else>
+                    <do_all exact="this.$spawnamount">
+                      <create_ship name="$Ship" capturable="false" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="$Target.sector" groupname="$ReinforcementGroup" commandeerable="false">
+                        <owner exact="faction.xenon" overridenpc="true"/>
+                        <pilot>
+                          <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                        </pilot>
+                        <loadout>
+                          <level min="0.5" max="0.8"/>
+                        </loadout>
+                        <paint ware="ware.paintmod_0145"/>
+                        <orientation orientation="look_at" refobject="$Target"/>
+                        <position value="this.$safepos" space="$Target.sector"/>
+                      </create_ship>
+                      <set_allow_drop object="$Ship" allow="false"/>
+                      <!-- Either defend the M0 in general, or come after the player ship directly -->
+                      <create_order object="$Ship" id="'Patrol'" default="true">
+                        <param name="space" value="$Target.sector"/>
+                      </create_order>
+                      <do_any>
+                        <create_order id="'AssignCommander'" object="$Ship">
+                          <param name="commander" value="$Target"/>
+                          <param name="assignment" value="assignment.defence"/>
+                          <param name="cancelorders" value="true"/>
+                        </create_order>
+                        <create_order object="$Ship" id="'Attack'">
+                          <param name="primarytarget" value="$PlayerStartingShip"/>
+                          <param name="allowothertargets" value="false"/>
+                          <param name="pursuetargets" value="true"/>
+                          <param name="checkrelation" value="true"/>
+                        </create_order>
+                      </do_any>
+                      <deplete_ammo object="$Ship" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                      <deplete_ammo object="$Ship" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                    </do_all>
+                    <set_value name="this.$RandomisedDelay" min="50s" max="100s" profile="bell" />
+                  </actions>
+                  <delay exact="this.$RandomisedDelay"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="ContinualReinforcements_Chatter">
+                  <conditions>
+                    <event_object_entered_live_view group="$ReinforcementGroup"/>
+                    <check_value value="FleetScripted_BossBattle.state != cuestate.complete"/>
+                  </conditions>
+                  <actions>
+                    <!-- Trigger voice lines that warn the player of incoming enemies -->
+                    <do_any>
+                      <set_value name="this.$line" exact="306030304" comment="More Xenon forces are approaching our position!"/>
+                      <set_value name="this.$line" exact="306030333" comment="Xenon fighters! Heading you off!"/>
+                      <set_value name="this.$line" exact="306030334" comment="More reinforcements!"/>
+                    </do_any>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                    $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                    $script = [
+                                                                                              1s,
+                                                                                              table[ $actor = '$BanDannaActor', $speak = this.$line, $recipient = 'player' ],
+                                                                                              ]
+                                                                                    ]" />
+                    <set_value name="this.$delay" exact="[2min, 3min].randominrange"/>
+                  </actions>
+                  <delay exact="this.$delay"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Destroy_GenericTurrets">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <set_value name="$MaxComponentCount" exact="(($DestroyComponents.count)*0.8)i"/>
+                <set_objective cue="$MissionCue" step="4" action="objective.custom" customaction="{30603,1008}" group="$DestroyComponents" updatebriefing="true">
+                  <progress progress="0" max="$MaxComponentCount"/>
+                </set_objective>
+                <play_music music="'music_soundtrack_timelines_race_intro'" loop="true"/>
+              </actions>
+              <cues>
+
+                <cue name="Focus_AttacksOnPlayer" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $Phase1_ReinforcementsSent?"/>
+                  </conditions>
+                  <actions>
+                    <!-- look in the entire galaxy as it is only two systems large-->
+                    <set_value name="$customattackhandling_off"/>
+                    <find_ship_by_true_owner name="this.$XenonShips" faction="faction.xenon" space="player.galaxy" excluded="$Target" multiple="true"/>
+                    <do_for_each name="this.$ship" in="this.$XenonShips">
+                      <create_order object="this.$ship" id="'Attack'" immediate="true">
+                        <param name="primarytarget" value="player.ship"/>
+                        <param name="allowothertargets" value="false"/>
+                        <param name="pursuetargets" value="true"/>
+                      </create_order>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <!-- If the player waited for reinforcements, have the Phase 1 Fleets fight each other in the background but make sure they don't actually become a danger to the player -->
+                <cue name="Phase1_ShowBattle" onfail="cancel">
+                  <conditions>
+                    <check_value value="$Phase1_ReinforcementsSent?"/>
+                  </conditions>
+                  <actions>
+                    <do_for_each name="this.$ally" in="$Phase1_ShipGroup">
+                      <do_if value="this.$ally.subordinates.count">
+                        <sort_group group="$Phase1EnemyGroup" sortbydistanceto="this.$ally"/>
+                        <create_order id="'Attack'" object="this.$ally" immediate="true">
+                          <param name="primarytarget" value="$Phase1EnemyGroup.{1}"/>
+                          <param name="secondarytargets" value="$Phase1EnemyGroup"/>
+                          <param name="pursuetargets" value="true"/>
+                        </create_order>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                  <delay exact="10s"/>
+                  <actions>
+                    <do_for_each name="this.$enemy" in="$Phase1EnemyGroup">
+                      <do_if value="this.$enemy.subordinates.count">
+                        <cancel_all_orders object="this.$enemy"/>
+                        <sort_group group="$Phase1_ShipGroup" sortbydistanceto="this.$enemy"/>
+                        <create_order id="'Attack'" object="this.$enemy" immediate="true">
+                          <param name="primarytarget" value="$Phase1_ShipGroup.{1}"/>
+                          <param name="secondarytargets" value="$Phase1_ShipGroup"/>
+                          <param name="pursuetargets" value="true"/>
+                        </create_order>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </cue>
+
+                <cue name="Move_m0_CloserToFleetGate" checkinterval="2s">
+                  <conditions>
+                    <check_value value="player.entity.distanceto.{$Target} le 5km"/>
+                  </conditions>
+                  <delay exact="10s"/>
+                  <actions>
+                    <!-- Create order to get M0 closer to the gate for a better playing experience -->
+                    <cancel_all_orders object="$Target"/>
+                    <create_order object="$Target" id="'MoveWait'" default="true">
+                      <param name="destination" value="[$Cluster705, $GateStagingGroundPos]"/>
+                      <param name="lookat" value="$Cluster705GatePos"/>
+                      <param name="noattackresponse" value="true"/>
+                      <param name="recallsubordinates" value="false"/>
+                      <param name="precise" value="true"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="MinorTurretDialogue">
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                          $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                          $script = [
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030213, $recipient = 'player', $comment = 'Great! I have marked several turrets for you that you will need to take out to be able to move more freely.' ],
+                                                                                    ]
+                                                                          ]" />
+                  </actions>
+                </cue>
+
+                <cue name="ComponentDestroyed" instantiate="true">
+                  <conditions>
+                    <event_object_destroyed group="$DestroyComponents"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$DestroyedCount" operation="add" exact="1"/>
+                    <set_objective cue="$MissionCue" step="4" action="objective.custom" customaction="{30603,1008}" group="$DestroyComponents" updatebriefing="true" silent="true">
+                      <progress progress="$DestroyedCount" max="$MaxComponentCount"/>
+                    </set_objective>
+                    <do_if value="$DestroyedCount ge $MaxComponentCount">
+                      <signal_cue cue="Destroy_m0_Arms"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <!-- First take out turrets close to the arms -->
+                <!--<cue name="DestroyTurrets_Ref" ref="md.RML_Destroy_Components.DestroyComponents">
+                  -->
+                <!-- always pass these -->
+                <!--
+                  <param name="EndSignalCue"      value="Destroy_m0_Arms"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="StartStep"         value="4"/>
+                  -->
+                <!-- mission-related parameters -->
+                <!--
+                  <param name="Targets_Param"     value="$DestroyComponents"/>
+                  <param name="ObjectiveIsGroup"  value="true"/>
+                </cue>-->
+
+              </cues>
+            </cue>
+
+            <cue name="Destroy_m0_Arms">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Destroy_GenericTurrets"/>
+                <create_group groupname="$AlreadySpawnedObjectGroup"/>
+                <do_for_each name="$arm" in="$M0_ArmComponents">
+                  <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                    <param name="Object" value="$arm"/>
+                    <param name="RequesterCue" value="namespace"/>
+                    <param name="DebugChance" value="$DebugChance"/>
+                  </run_actions>
+                </do_for_each>
+                <!-- Reset the Wave Count to ensure immediate action again -->
+                <set_value name="ContinualShipSpawn.$WaveCount" exact="0"/>
+              </actions>
+              <cues>
+                <cue name="Destroy_RemainingGenerators">
+                  <actions>
+                    <set_value name="this.$DestroyObject" exact="$TargetGenerators.random"/>
+                  </actions>
+                  <delay min="0.3s" max="1.5s"/>
+                  <actions>
+                    <destroy_object object="this.$DestroyObject"/>
+                    <remove_from_group group="$TargetGenerators" object="this.$DestroyObject"/>
+                    <do_if value="$TargetGenerators.count">
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="TakeOut_M0Arms_Dialogue">
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                          $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                          $script = [
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030214, $recipient = 'player', $comment = 'Okay, now turn your attention towards those four rotating arms.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030215, $recipient = 'player', $comment = 'They are what is keeping our fleet from engaging.' ],
+                                                                                      table[ $actor = '$BanDannaActor', $speak = 306030216, $recipient = 'player', $comment = 'I need you to take them out, quickly!' ],
+                                                                                    ]
+                                                                          ]" />
+                  </actions>
+                </cue>
+
+                <!-- First take out turrets close to the arms -->
+                <cue name="Destroy_m0_Arms_Ref" ref="md.RML_Destroy_Components.DestroyComponents">
+                  <!-- always pass these -->
+                  <param name="EndSignalCue"      value="FleetScripted_BossBattle"/>
+                  <param name="MissionCue"        value="$MissionCue"/>
+                  <param name="DebugChance"       value="$DebugChance"/>
+                  <param name="StartStep"         value="5"/>
+                  <!-- mission-related parameters -->
+                  <param name="Targets_Param"     value="$M0_ArmComponents"/>
+                  <param name="ObjectiveIsGroup"  value="true"/>
+                </cue>
+
+                <!-- Call for minor reinforcements whenever an arm is attacked and pushed below a certain threshold -->
+                <cue name="AmplifierReinforcements_Arrive" instantiate="true">
+                  <conditions>
+                    <event_object_attacked group="$M0_ArmComponents"/>
+                    <check_value value="event.object.hullpercentage le 70"/>
+                    <check_value value="not $AlreadySpawnedObjectGroup.indexof.{event.object}"/>
+                  </conditions>
+                  <actions>
+                    <add_to_group groupname="$AlreadySpawnedObjectGroup" object="event.object"/>
+                  </actions>
+                  <cues>
+
+                    <!-- Cue that lets us know that the reinforcements are coming -->
+
+                    <cue name="Spawn_AmplifierReinforcements">
+                      <actions>
+                        <get_safe_pos result="$SpawnPos" object="$Target" min="35km" max="40km" allowyaxis="false" sector="$Target.sector"/>
+                        <do_all exact="2">
+                          <create_ship name="$Ship" capturable="false" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="$Target.sector" groupname="$ReinforcementGroup" commandeerable="false">
+                            <owner exact="faction.xenon" overridenpc="true"/>
+                            <pilot>
+                              <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                            </pilot>
+                            <loadout>
+                              <level exact="0.8"/>
+                            </loadout>
+                            <paint ware="ware.paintmod_0145"/>
+                            <orientation orientation="look_at" refobject="$Target"/>
+                            <safepos value="$SpawnPos" space="$Target.sector" />
+                          </create_ship>
+                          <set_allow_drop object="$Ship" allow="false"/>
+                          <do_any>
+                            <create_order id="'AssignCommander'" object="$Ship">
+                              <param name="commander" value="$Target"/>
+                              <param name="assignment" value="assignment.defence"/>
+                              <param name="cancelorders" value="true"/>
+                            </create_order>
+                            <create_order object="$Ship" id="'Attack'">
+                              <param name="primarytarget" value="$PlayerStartingShip"/>
+                              <param name="allowothertargets" value="false"/>
+                              <param name="pursuetargets" value="true"/>
+                              <param name="checkrelation" value="true"/>
+                            </create_order>
+                          </do_any>
+                          <deplete_ammo object="$Ship" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                          <deplete_ammo object="$Ship" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                        </do_all>
+
+                        <do_if value="$M0_ArmComponents.count == 2">
+                          <create_ship name="$m_reinforcement" capturable="false" macro="macro.ship_xen_m_corvette_01_b_macro" sector="$Target.sector" commandeerable="false" groupname="$ReinforcementGroup">
+                            <owner exact="faction.xenon" overridenpc="true"/>
+                            <pilot>
+                              <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                            </pilot>
+                            <loadout>
+                              <level exact="0.8"/>
+                            </loadout>
+                            <paint ware="ware.paintmod_0145"/>
+                            <orientation orientation="look_at" refobject="$Target"/>
+                            <safepos value="$SpawnPos" space="$Target.sector" radius="600m"/>
+                          </create_ship>
+                          <set_allow_drop object="$m_reinforcement" allow="false"/>
+                          <cancel_all_orders object="$m_reinforcement"/>
+                          <create_order id="'AssignCommander'" object="$m_reinforcement">
+                            <param name="commander" value="$Target"/>
+                            <param name="assignment" value="assignment.interception"/>
+                            <param name="cancelorders" value="true"/>
+                          </create_order>
+                        </do_if>
+                        <deplete_ammo object="$m_reinforcement" macro="macro.ship_gen_s_lasertower_01_a_macro"/>
+                        <deplete_ammo object="$m_reinforcement" macro="macro.ship_gen_xs_lasertower_01_a_macro"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+
+                <cue name="FinalArmComment">
+                  <conditions>
+                    <event_object_destroyed group="$M0_ArmComponents"/>
+                    <check_value value="$M0_ArmComponents.count == 2 "/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                  $script = [
+                                                                                            2s,
+                                                                                            table[ $actor = '$BanDannaActor', $speak = 306030219, $recipient = 'player', $comment = 'Thats it! Just one more!' ],
+                                                                                            ]
+                                                                                  ]" />
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="FleetScripted_BossBattle">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- Clean up the remaining Phase 1 allies so that they don't accidentally pull aggro away from the main battle -->
+                <do_for_each name="this.$ship" in="$Phase1_ShipGroup">
+                  <destroy_object object="this.$ship" explosion="false"/>
+                </do_for_each>
+
+                <!-- Set target to be attackeable -->
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$Target"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_min_shield object="$Target" exact="0"/>
+
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$Target"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="30"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <!-- get the duration now, since the player does not really have much impact on how long the second half of the battle will take -->
+                <set_value name="$Duration" exact="player.age - $StartTime"/>
+                <set_value name="$FactionList" exact="[faction.argon, faction.teladi, faction.paranid]"/>
+                <do_if value="$BoronFaction?">
+                  <append_list_elements name="$FactionList" other="[$BoronFaction, faction.argon,]"/>
+                </do_if>
+                <do_else>
+                  <append_list_elements name="$FactionList" other="[faction.argon, faction.paranid]"/>
+                </do_else>
+                <do_if value="$SplitFaction?">
+                  <append_list_elements name="$FactionList" other="[$SplitFaction, $SplitFaction]"/>
+                </do_if>
+                <do_else>
+                  <append_list_elements name="$FactionList" other="[faction.paranid, faction.teladi]"/>
+                </do_else>
+                <!-- now after the "special factions" make sure to add another round of our three mostr common races -->
+                <append_list_elements name="$FactionList" other="[faction.argon]"/>
+                <!-- Amount of ships per participating faction-->
+                <set_value name="$DestroyerCount" exact="1"/>
+                <set_value name="$FighterCount" exact="6"/>
+                <set_value name="$HeavyFighterCount" exact="4"/>
+                <create_group groupname="$FinalReinforcementGroup"/>
+
+                <!-- Have a list of positions relative to the exit gate where the destroyers will move to before engaging in an attack (to avoid destroyers clumping up in one spot) -->
+                <set_value name="$InitialAttackPosList" exact="[
+                                                                position.[15km, 0.000000m, 0.5km],
+                                                                position.[12km, 0.000000m, 5km],
+                                                                position.[8km, 0.000000m, 8km],
+                                                                position.[3km, 0.000000m, 13km],
+                                                                position.[-3km, 0.000000m, 13km],
+                                                                position.[-8km, 0.000000m, 8km],
+                                                                position.[-12km, 0.000000m, 5km],
+                                                                position.[-15km, 0.000000m, 0.5km],
+                                                                ]"/>
+
+                <!-- Reset the Wave Count to ensure immediate action again -->
+                <set_value name="ContinualShipSpawn.$WaveCount" exact="0"/>
+              </actions>
+              <cues>
+
+                <!-- If the allied fleet have pushed the m0 around enough  -->
+                <cue name="M0_HullCheck" checkinterval="1s">
+                  <conditions>
+                    <check_value value="$Target.hullpercentage le 32"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="M0_PlayerKillingBlow"/>
+                  </actions>
+                </cue>
+
+                <cue name="Player_InvincibilityHandling">
+                  <actions>
+                    <set_value name="$PlayerShip" exact="player.ship"/>
+                    <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                      <param name="Object" value="$PlayerShip"/>
+                      <param name="RequesterCue" value="namespace"/>
+                      <param name="MinHull" value="33"/>
+                      <param name="DebugChance" value="$DebugChance"/>
+                    </run_actions>
+                    <force_player_speed speed="0"/>
+                    <stop_player_autopilot/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Remove_Invincibility">
+                      <conditions>
+                        <event_cutscene_stopped key="'scenario_m0_boss_battle_allied_fleet_arrival_cutscene'"/>
+                      </conditions>
+                      <actions>
+                        <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                          <param name="Object" value="$PlayerShip"/>
+                          <param name="RequesterCue" value="namespace"/>
+                          <param name="DebugChance" value="$DebugChance"/>
+                        </run_actions>
+                        <signal_cue_instantly cue="AlliedFleetDialogue_NPCUsecase_Abort"/>
+                        <fade_screen fadeout="0s" fadein="0.5s" realtime="true"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="AlliedFleetDialogue_NPCUsecase_Abort">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="FleetArrival_CutsceneHandling">
+                  <delay exact="3s"/>
+                  <actions>
+                    <fade_screen fadein="0.5s" fadeout="0.5s" realtime="true"/>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <play_music music="'x4_timelines_ost_03_duel_of_immortals'" loop="true"/>
+                    <set_value name="this.$CutsceneKey" exact="'scenario_m0_boss_battle_allied_fleet_arrival_cutscene'"/>
+                    <play_cutscene result="this.$CutsceneID" letterbox="true" movesoundcamera="true" key="this.$CutsceneKey" targetmonitor="false" abortable="true">
+                      <param name="target_gate" object="$Cluster705Gate"/>
+                      <param name="target_m0_mothership" object="$Target"/>
+                    </play_cutscene>
+                  </actions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <signal_cue cue="FleetSpawn_Trigger"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="AlliedFleetArrival_Dialogue">
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                      $script = [
+                                                                                                4s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030301, $recipient = 'player', $comment = 'M0 defences are down. I repeat: Defences are down.' ],
+                                                                                                4.7s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030302, $recipient = 'player', $comment = 'Commonwealth fleet, you are free to engage.' ],
+                                                                                                1.5s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030303, $recipient = 'player', $comment = 'Give them all youve got!' ],
+                                                                                                3.7s,
+                                                                                                table[ $actor = '$ParanidLeaderActor', $recipient = 'player', $speak = 306030301, $monitor =false, $comment = 'Prepare to be destroyed!' ],
+                                                                                                1s,
+                                                                                                table[ $actor = '$ParanidLeaderActor', $recipient = 'player', $speak = 306030302, $monitor =false, $comment = 'You are not a worthy opponent.' ],
+                                                                                                ]
+                                                                                      ]" />
+                      </actions>
+                    </cue>
+
+                    <cue name="FleetArrivalCutscene_Finished_ShipWarp">
+                      <conditions>
+                        <event_cutscene_stopped key="'scenario_m0_boss_battle_allied_fleet_arrival_cutscene'"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Final_XenonReinforcements_Cue" check="false"/>
+                        <fade_screen fadeout="0s" holdtime="0.5s" fadein="0.5s" realtime="true"/>
+                        <create_position name="$PlayerWarpPos" space="$Cluster705" value="position.[143973.87m, 546.88m, -29438.38m]"/>
+                        <warp object="player.entity.ship"  sector="$Cluster705">
+                          <orientation orientation="look_at" refobject="$Target"/>
+                          <position value="$PlayerWarpPos"/>
+                        </warp>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <set_objective cue="$MissionCue" step="6" action="objective.custom" customaction="{30603,1011}" object="$Target" updatebriefing="true"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Cutscene_CutToM0_Ship">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="3s"/>
+                      <actions>
+                        <do_if value="FleetArrival_CutsceneHandling.$CutsceneID?">
+                          <cutscene_event key="FleetArrival_CutsceneHandling.$CutsceneKey" event="'TriggerSequence01Done'"/>
+                          <cutscene_event key="FleetArrival_CutsceneHandling.$CutsceneKey" event="'TriggerSequence02Start'"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="FleetSpawn_Trigger">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <cues>
+
+                    <!-- Move the M0 and any remnants of the Phase 1 enemy fleet closer to the gate -->
+                    <cue name="MoveM0_Closer" onfail="cancel">
+                      <conditions>
+                        <check_value value="$Target.distanceto.[$Cluster705,$GateStagingGroundPos] gt 10km"/>
+                      </conditions>
+                      <actions>
+                        <warp object="$Target" sector="$Cluster705">
+                          <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                          <position value="$GateStagingGroundPos"/>
+                        </warp>
+                        <do_for_each name="this.$enemy" in="$Phase1EnemyGroup">
+                          <do_if value="this.$enemy.isoperational">
+                            <warp object="this.$enemy" sector="$Cluster705">
+                              <orientation orientation="look_at" refobject="$Cluster705Gate"/>
+                              <position value="$GateStagingGroundPos" min="2km" max="4km"/>
+                            </warp>
+                            <create_order id="'AssignCommander'" object="this.$enemy">
+                              <param name="commander" value="$Target"/>
+                              <param name="assignment" value="assignment.defence"/>
+                              <param name="cancelorders" value="true"/>
+                            </create_order>
+                          </do_if>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+
+                    <cue name="FleetArrivalCue">
+                      <delay exact="0.2s"/>
+                      <cues>
+
+                        <cue name="FleetDefinitionSetupCue">
+                          <actions>
+                            <set_value name="$SpawnedShipCount" exact="0"/>
+                            <do_if value="not $FleetSpawnCounter?">
+                              <set_value name="$FleetSpawnCounter" exact="1"/>
+                              <set_value name="$FleetFaction" exact="$FactionList.{$FleetSpawnCounter}"/>
+                            </do_if>
+                            <do_else>
+                              <set_value name="$FleetSpawnCounter" operation="add" exact="1"/>
+                              <set_value name="$FleetFaction" exact="$FactionList.{$FleetSpawnCounter}"/>
+                            </do_else>
+                            <get_ship_definition macro="$DestroyerMacro" size="class.ship_l" faction="$FleetFaction" tags="tag.destroyer"/>
+                            <generate_loadout result="$DestroyerLoadout" macro="$DestroyerMacro" faction="$FleetFaction" level="0.8"/>
+                            <get_ship_definition macro="$FighterMacro" size="class.ship_s" faction="$FleetFaction" tags="[tag.military, tag.fighter]"/>
+                            <generate_loadout result="$FighterLoadout" faction="$FleetFaction" macro="$FighterMacro" level="0.8"/>
+                            <get_ship_definition macro="$HeavyFighterMacro" size="class.ship_s" faction="$FleetFaction" tags="[tag.military, tag.heavy]"/>
+                            <generate_loadout result="$HeavyFighterLoadout" macro="$HeavyFighterMacro" faction="$FleetFaction" level="0.8"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="FleetCreationExecution">
+                          <conditions>
+                            <event_cue_completed cue="FleetDefinitionSetupCue"/>
+                          </conditions>
+                          <cues>
+
+                            <cue name="Destroyer_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                              <!-- spawn capital ship first so it doesn't fight with small ships for safepos -->
+                              <param name="Amount"          value="$DestroyerCount"/>
+                              <param name="DelayInit"       value="0s"/>
+                              <param name="ExitGate"        value="$Cluster705Gate"/>
+                              <param name="Macro"           value="$DestroyerMacro"/>
+                              <param name="Owner"           value="$FleetFaction"/>
+                              <param name="Loadout"         value="$DestroyerLoadout.{1}"/>
+                              <param name="People"          value="'argon_elite_military_crew'"/>
+                              <param name="SignalCue"       value="[CapitalSpawnedHandling, ShipCountingCue]"/>
+                            </cue>
+
+                            <cue name="Fighter_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                              <param name="Amount"          value="$FighterCount"/>
+                              <param name="DelayInit"       value="0.1s"/>
+                              <param name="ExitGate"        value="$Cluster705Gate"/>
+                              <param name="Macro"           value="$FighterMacro"/>
+                              <param name="Owner"           value="$FleetFaction"/>
+                              <param name="Loadout"         value="$FighterLoadout.{1}"/>
+                              <param name="People"          value="'argon_elite_military_crew'"/>
+                              <param name="DelayMax"        value="0.4s"/>
+                              <param name="SignalCue"       value="[FighterSpawnedHandling, ShipCountingCue]"/>
+                            </cue>
+
+                            <cue name="HeavyFighter_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                              <param name="Amount"          value="$HeavyFighterCount"/>
+                              <param name="DelayInit"       value="0.2s"/>
+                              <param name="ExitGate"        value="$Cluster705Gate"/>
+                              <param name="Macro"           value="$HeavyFighterMacro"/>
+                              <param name="Owner"           value="$FleetFaction"/>
+                              <param name="Loadout"         value="$HeavyFighterLoadout.{1}"/>
+                              <param name="People"          value="'argon_elite_military_crew'"/>
+                              <param name="DelayMax"        value="0.4s"/>
+                              <param name="SignalCue"       value="[FighterSpawnedHandling, ShipCountingCue]"/>
+                            </cue>
+
+                            <cue name="CapitalSpawnedHandling">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <set_value name="$Destroyer" exact="event.param.$ship"/>
+                                <add_to_group groupname="$AlliedCapitalGroup" object="$Destroyer"/>
+                                <cancel_all_orders object="$Destroyer"/>
+
+                                <create_order object="$Destroyer" id="'Patrol'" default="true">
+                                  <param name="space" value="$Destroyer.sector"/>
+                                </create_order>
+                                <create_order object="$Destroyer" id="'MoveGeneric'">
+                                  <param name="destination" value="$Target"/>
+                                  <param name="position" value="$InitialAttackPosList.{$FleetSpawnCounter}"/>
+                                  <param name="lookat" value="position.[0,0,0]"/>
+                                </create_order>
+                                <create_order object="$Destroyer" id="'Attack'">
+                                  <param name="primarytarget" value="$Target"/>
+                                  <param name="allowothertargets" value="false"/>
+                                  <param name="pursuetargets" value="true"/>
+                                  <param name="checkrelation" value="true"/>
+                                  <param name="forceprimarytarget" value="true"/>
+                                </create_order>
+                                <set_object_docking_enabled object="$Destroyer" enabled="false" comment="disabled docking to avoid escaping"/>
+                              </actions>
+                            </cue>
+
+                            <cue name="FighterSpawnedHandling" instantiate="true">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <set_value name="this.$ship" exact="event.param.$ship"/>
+                                <create_order id="'AssignCommander'" object="this.$ship">
+                                  <param name="commander" value="$Destroyer"/>
+                                  <param name="assignment" value="assignment.defence"/>
+                                  <param name="cancelorders" value="true"/>
+                                </create_order>
+                              </actions>
+                            </cue>
+
+                            <cue name="ShipCountingCue" instantiate="true">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <delay exact="0.3s"/>
+                              <actions>
+                                <set_value name="$SpawnedShipCount" operation="add" exact="1"/>
+                                <do_if value="$SpawnedShipCount ge ($DestroyerCount + $FighterCount + $HeavyFighterCount)">
+                                  <signal_cue cue="FactionFleet_SpawnFinished"/>
+                                </do_if>
+                              </actions>
+                            </cue>
+
+                            <cue name="FactionFleet_SpawnFinished">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <do_if value="$FleetSpawnCounter lt $FactionList.count">
+                                  <do_if value="$FleetSpawnCounter ge 4">
+                                    <signal_cue cue="Cutscene_CutToM0_Ship" check="false"/>
+                                  </do_if>
+                                  <reset_cue cue="FleetArrivalCue"/>
+                                </do_if>
+                                <do_else>
+
+                                  <cancel_all_orders object="$Target"/>
+                                  <create_order object="$Target" id="'Wait'">
+                                    <param name="noattackresponse" value="true"/>
+                                  </create_order>
+                                  <!--<create_order object="$Target" id="'Attack'">
+                                    <param name="primarytarget" value="$Destroyer"/>
+                                    <param name="allowothertargets" value="false"/>
+                                    <param name="pursuetargets" value="true"/>
+                                    <param name="checkrelation" value="true"/>
+                                    <param name="forceprimarytarget" value="true"/>
+                                  </create_order>-->
+
+                                  <signal_cue cue="Final_XenonReinforcements_Cue" check="false"/>
+                                </do_else>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Spawn two TF H and also move them into the conflict -->
+                <cue name="Phase2_TerraformerFleetHandling">
+                  <actions>
+                    <do_all exact="2" counter="this.$i">
+                      <create_ship name="$phase2_tf_reinforcement" capturable="false" macro="macro.ship_xen_l_terraformer_01_b_macro" sector="$Cluster705" groupname="$Phase2EnemyGroup" commandeerable="false">
+                        <owner exact="faction.xenon" overridenpc="true"/>
+                        <pilot>
+                          <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                        </pilot>
+                        <loadout>
+                          <level exact="0.8"/>
+                        </loadout>
+                        <paint ware="ware.paintmod_0145"/>
+                        <orientation orientation="look_at" refobject="$Target"/>
+                        <safepos object="$Cluster705" value="position.[82077.9m, 0.0m, -25652.8m]" min="3km" max="10km" radius="5km"/>
+                      </create_ship>
+                      <set_allow_drop object="$phase2_tf_reinforcement" allow="false"/>
+                      <do_if value="this.$i == 1">
+                        <create_order object="$phase2_tf_reinforcement" id="'ProtectPosition'" default="true">
+                          <param name="destination" value="[$Cluster705, position.[137280m,0,-1764m]]"/>
+                          <param name="radius" value="20km"/>
+                          <param name="attackonsight" value="true"/>
+                          <param name="flagship" value="$phase2_tf_reinforcement"/>
+                        </create_order>
+                        <create_order id="'AttackInRange'" object="$phase2_tf_reinforcement">
+                          <param name="destination" value="[$Cluster705, position.[123713.79m, 0.0m, -25333.54m]]" />
+                          <param name="radius" value="20km"/>
+                          <param name="pursuetargets" value="false" />
+                        </create_order>
+                      </do_if>
+                      <do_else>
+                        <create_order object="$phase2_tf_reinforcement" id="'ProtectPosition'" default="true">
+                          <param name="destination" value="[$Cluster705, position.[138532.29m, 0.0m, -2820.94m]]"/>
+                          <param name="radius" value="20km"/>
+                          <param name="attackonsight" value="true"/>
+                          <param name="flagship" value="$phase2_tf_reinforcement"/>
+                        </create_order>
+                        <create_order id="'AttackInRange'" object="$phase2_tf_reinforcement" immediate="true">
+                          <param name="destination" value="[$Cluster705, position.[138532.29m, 0.0m, -2820.94m]]" />
+                          <param name="radius" value="20km"/>
+                          <param name="pursuetargets" value="false" />
+                        </create_order>
+                      </do_else>
+                    </do_all>
+                  </actions>
+                </cue>
+
+                <cue name="Final_XenonReinforcements_Cue">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="$FinalReinforcementGroup.count le 45">
+                      <!-- Let the reinforcements come either from behind the m0 or the northern gate -->
+                      <do_if value="not $ReinforcementSpawnPos?">
+                        <!-- The first time, spawn the ships closer, and spawn more of them -->
+                        <set_value name="$ReinforcementSpawnPos" exact="position.[132700.218750m, 0.000000m, -8331.790039m]"/>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$ReinforcementSpawnPos" exact="[position.[98560.078125m, 0.000000m, 14995.543945m], position.[98560.078125m, 0.000000m, 14995.543945m]].random"/>
+                      </do_else>
+
+                      <do_all exact="$FactionList.count * 4" counter="$i">
+                        <do_if value="$i le ($FactionList.count/2)">
+                          <set_value name="$reinforcement_macro" exact="macro.ship_xen_m_corvette_01_b_macro"/>
+                          <set_value name="$Commander" exact="true"/>
+                        </do_if>
+                        <do_else>
+                          <set_value name="$reinforcement_macro" exact="macro.ship_xen_s_heavyfighter_01_b_macro"/>
+                          <set_value name="$Commander" exact="false"/>
+                        </do_else>
+
+                        <!-- Create Final Reinforcements coming in to protect the now helpless m0 -->
+                        <set_value name="$loadoutlevel" min="0.2" max="0.7" profile="bell"/>
+                        <create_ship name="$Xenon_Reinforcement" capturable="false" macro="$reinforcement_macro" sector="$Cluster705" groupname="$FinalReinforcementGroup" commandeerable="false">
+                          <owner exact="faction.xenon" overridenpc="true"/>
+                          <pilot>
+                            <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                          </pilot>
+                          <loadout>
+                            <quantity exact="1.0" comment="fill completely">
+                              <variation exact="0.2"/>
+                            </quantity>
+                            <quality exact="$loadoutlevel"/>
+                          </loadout>
+                          <paint ware="ware.paintmod_0145"/>
+                          <orientation orientation="look_at" refobject="$Target"/>
+                          <safepos value="$ReinforcementSpawnPos" space="$Cluster705" radius="200m"/>
+                        </create_ship>
+                        <set_allow_drop object="$Xenon_Reinforcement" allow="false"/>
+                        <do_if value="$Commander">
+                          <add_to_group groupname="$PotentialCommanderGroup" object="$Xenon_Reinforcement"/>
+                          <create_order id="'AssignCommander'" object="$Xenon_Reinforcement">
+                            <param name="commander" value="$Target"/>
+                            <param name="assignment" value="assignment.defence"/>
+                            <param name="cancelorders" value="true"/>
+                          </create_order>
+                        </do_if>
+                        <do_else>
+                          <set_value name="$Commander" exact="$PotentialCommanderGroup.random"/>
+                          <create_order id="'AssignCommander'" object="$Xenon_Reinforcement">
+                            <param name="commander" value="$Commander"/>
+                            <param name="assignment" value="assignment.defence"/>
+                            <param name="cancelorders" value="true"/>
+                          </create_order>
+                          <do_if value="$Commander.subordinates.count ge 3">
+                            <remove_from_group group="$PotentialCommanderGroup" object="$Commander"/>
+                          </do_if>
+                        </do_else>
+                      </do_all>
+
+                      <create_ship name="$m_reinforcement" capturable="false" macro="macro.ship_xen_m_corvette_01_b_macro" sector="$Cluster705" commandeerable="false" groupname="$FinalReinforcementGroup">
+                        <owner exact="faction.xenon" overridenpc="true"/>
+                        <pilot>
+                          <select faction="faction.xenon" tags="tag.fighterpilot"/>
+                        </pilot>
+                        <loadout>
+                          <level exact="0.8"/>
+                        </loadout>
+                        <paint ware="ware.paintmod_0145"/>
+                        <orientation orientation="look_at" refobject="$Target"/>
+                        <safepos value="$ReinforcementSpawnPos" space="$Cluster705" radius="600m"/>
+                      </create_ship>
+                      <set_allow_drop object="$m_reinforcement" allow="false"/>
+                      <create_order id="'AssignCommander'" object="$m_reinforcement">
+                        <param name="commander" value="$Target"/>
+                        <param name="assignment" value="assignment.interception"/>
+                        <param name="cancelorders" value="true"/>
+                      </create_order>
+
+                      <clear_group group="$PotentialCommanderGroup"/>
+                      <set_value name="$RandomisedDelay" exact="[1min,3min].randominrange"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$RandomisedDelay" min="70s" max="110s" profile="bell"/>
+                    </do_else>
+                  </actions>
+                  <delay exact="$RandomisedDelay"/>
+                  <actions>
+                    <signal_cue cue="ResignalReinforcements"/>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="ResignalReinforcements">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <signal_cue cue="Final_XenonReinforcements_Cue"/>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="FinalReinforcements_AnnouncementDialogue">
+                  <conditions>
+                    <event_object_entered_live_view group="$FinalReinforcementGroup"/>
+                  </conditions>
+                  <actions>
+                    <!-- Trigger voice lines that warn the player of incoming enemies -->
+                    <do_if value="not $RepeatWarning_FinalBattle?">
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                      $script = [
+                                                                                                1s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030304, $recipient = 'player', $comment = 'More Xenon forces are approaching our position!' ],
+                                                                                                0.7s,
+                                                                                                table[ $actor = '$ParanidLeaderActor', $speak = 306030303, $recipient = 'player', $comment = 'Do not relent. Destroy them.' ],
+                                                                                                1.2s,
+                                                                                                table[ $closemonitor = true ],
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030305, $comment = 'Destroyers, focus fire on the M0!' ],
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030306, $monitor = false, $comment = 'Fighters! Intercept!' ],
+                                                                                                ]
+                                                                                      ]" />
+                      <set_value name="$RepeatWarning_FinalBattle"/>
+                    </do_if>
+                    <do_else>
+                      <do_any>
+                        <set_value name="this.$line" exact="306030304" comment="More Xenon forces are approaching our position!"/>
+                        <set_value name="this.$line" exact="306030333" comment="Xenon fighters! Heading you off!"/>
+                        <set_value name="this.$line" exact="306030334" comment="More reinforcements!"/>
+                        <set_value name="this.$line" exact="306030341" comment="We are taking heavy losses!"/>
+                      </do_any>
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                        $script = [
+                                                                                                  1s,
+                                                                                                  table[ $actor = '$BanDannaActor', $speak = this.$line, $recipient = 'player' ],
+                                                                                                  ]
+                                                                                        ]" />
+                    </do_else>
+                    <set_value name="this.$delay" exact="[1min, 2min].randominrange"/>
+                  </actions>
+                  <delay exact="this.$delay"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="M0_ShieldsDown">
+                  <conditions>
+                    <event_object_shield_damaged object="$Target"/>
+                    <check_value value="event.param2 == 0"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                        $script = [
+                                                                                                  table[ $actor = '$BanDannaActor', $speak = 306030335, $recipient = 'player', $comment = 'Shields are down! Concentrate fire!' ],
+                                                                                                  ]
+                                                                                        ]" />
+                  </actions>
+                </cue>
+
+                <cue name="FallbackCue_M0_KillingBlow">
+                  <conditions>
+                    <event_cue_completed cue="FleetCreationExecution"/>
+                  </conditions>
+                  <delay exact="20min"/>
+                  <actions>
+                    <signal_cue cue="M0_PlayerKillingBlow"/>
+                  </actions>
+                </cue>
+
+                <cue name="Increased_FightingChatter_Trigger">
+                  <conditions>
+                    <event_cue_completed cue="Final_XenonReinforcements_Cue"/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Increased_FightingChatter_2">
+                      <actions>
+                        <set_value name="$comm_captain" exact="$AlliedCapitalGroup.random.pilot"/>
+                        <do_any>
+                          <set_value name="this.$line" exact="10023" comment="You are done for!"/>
+                          <set_value name="this.$line" exact="10064" comment="Want some more?"/>
+                          <set_value name="this.$line" exact="10074" comment="Useless pile of junk hardware!"/>
+                          <set_value name="this.$line" exact="10074" comment="I'll erase you from space!"/>
+                          <set_value name="this.$line" exact="10083" comment="Gotta get this thing off my six!"/>
+                        </do_any>
+
+                        <set_value name="this.$CutsceneActors" exact="table[]"/>
+                        <set_value name="this.$CutsceneActors.$comm_captain" exact="table[
+                                                                            $entity = $comm_captain,
+                                                                            ]"/>
+
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = this.$CutsceneActors, $debugchance = $DeepDebugChance,
+                                                                                $priority = 50,
+                                                                                $script = [
+                                                                                          2s,
+                                                                                          table[ $actor = '$comm_captain', $speak = this.$line, $broadcast = true, $monitor = false],
+                                                                                          ]
+                                                                                ]" />
+                        <set_value name="this.$delay" exact="[30s, 90s].randominrange"/>
+                      </actions>
+                      <delay exact="this.$delay"/>
+                      <actions>
+                        <reset_cue cue="this"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="M0_PlayerKillingBlow">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="FallbackCue_M0_KillingBlow"/>
+
+                <!-- From this point on we don't want to have to deal with shield regeneration -->
+                <find_object_component name="$Target_ActiveShields" object="$Target" class="class.shieldgenerator" active="true" multiple="true"/>
+                <do_for_each name="$shieldgen" in="$Target_ActiveShields">
+                  <destroy_object object="$shieldgen"/>
+                </do_for_each>
+              </actions>
+              <cues>
+
+                <!-- TODO: Cutscene that shows exposed core opening up (only possible with asset) -->
+                <cue name="M0_FlapOpeningCutscene">
+                  <actions>
+
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                      $script = [
+                                                                                                table[ $actor = '$BanDannaActor', $monitor = false, $speak = 306030307, $recipient = 'player', $speakcallbackcue = HeatVent_OpeningAnimation, $comment = 'We have overwhelmed their system!' ],
+                                                                                                table[ $actor = '$BanDannaActor', $monitor = false, $speak = 306030308,  $recipient = 'player', $comment = 'The shielding is down and the ship is about to overheat!' ],
+                                                                                                0.5s,
+                                                                                                table[ $actor = '$BanDannaActor', $monitor = false, $speak = 306030309, $recipient = 'player', $comment = 'Kyle, an air vent is exposing a critical weakness...' ],
+                                                                                                0.8s,
+                                                                                                table[ $actor = '$BanDannaActor', $monitor = false, $speak = 306030310, $recipient = 'player', $comment = 'This is your opportunity! Give it all youve got!' ],
+                                                                                                ],
+                                                                                      $callbackcue = FinishHeatVentCutscene,
+                                                                                      $abortcallbackcue = FinishHeatVentCutscene
+                                                                                      ]" />
+                  </actions>
+                  <delay exact="3s"/>
+                  <actions>
+                    <play_cutscene result="this.$CutsceneID" key="'scenario_m0_boss_battle_heatvent_cutscene'" targetmonitor="true">
+                      <param name="target_xenon_flap" object="$M0_HeatFlapComponent"/>
+                    </play_cutscene>
+                  </actions>
+                </cue>
+
+                <cue name="FinishHeatVentCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <!-- If the dialogue for some reason didn't play, have the animation play as the cutscene closes -->
+                    <do_if value="HeatVent_OpeningAnimation.state == cuestate.waiting">
+                      <set_object_active object="$M0_HeatFlapComponent" activate="true"/>
+                    </do_if>
+                    <stop_cutscene key="'scenario_m0_boss_battle_heatvent_cutscene'"/>
+                  </actions>
+                </cue>
+
+                <cue name="HeatVent_OpeningAnimation">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <!-- activate heat vent  -->
+                    <set_object_active object="$M0_HeatFlapComponent" activate="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="HeatVentCutscene_Finished">
+                  <conditions>
+                    <event_cutscene_stopped key="'scenario_m0_boss_battle_heatvent_cutscene'"/>
+                  </conditions>
+                  <actions>
+                    <set_objective cue="$MissionCue" step="7" action="objective.custom" customaction="{30603,1007}" object="$Target" offset="position.[0m,16m,-2900m]" updatebriefing="true"/>
+                  </actions>
+                  <delay exact="30min"/>
+                  <actions>
+                    <!-- After a 30 minute fallback, destroy the ship and end the mission if the player hasn't landed a final shot yet -->
+                    <signal_cue cue="Xenon_ModuleDestruction"/>
+                  </actions>
+                  <cues>
+
+                    <!-- We need to continually listen to the Target coming into High Attention, since we cannot save animation states, and have to manually re-open the vent -->
+                    <cue name="HeatVent_HighAttention_Reactivation" instantiate="true">
+                      <conditions>
+                        <event_object_changed_attention object="$Target" attention="attention.nearby"/>
+                      </conditions>
+                      <actions>
+                        <set_object_active object="$M0_HeatFlapComponent" activate="true" immediate="true"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="PlayerShot_m0Core">
+                  <conditions>
+                    <check_any>
+                      <event_object_attacked object="$M0_HeatVentCore"/>
+                    </check_any>
+                    <check_value value="event.param.isplayerowned"/>
+                  </conditions>
+                  <actions>
+                    <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                      <param name="Object" value="$M0_HeatVentCore"/>
+                      <param name="RequesterCue" value="namespace"/>
+                      <param name="DebugChance" value="$DebugChance"/>
+                    </run_actions>
+                    <do_all exact="2">
+                      <add_effect object="$M0_HeatFlapComponent" effect="['missile_explosion_heavy_01','missile_explosion_medium_01'].random">
+                        <position object="$M0_HeatFlapComponent" z="400m" randomoffset="500m"/>
+                      </add_effect>
+                    </do_all>
+                  </actions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <remove_mission cue="$MissionCue" type="completed"/>
+                    <do_all exact="3">
+                      <add_effect object="$M0_HeatFlapComponent" effect="['missile_explosion_heavy_01','missile_explosion_medium_01'].random">
+                        <position object="$M0_HeatFlapComponent" z="300m" randomoffset="500m"/>
+                      </add_effect>
+                    </do_all>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <!--<destroy_object object="$M0_HeatFlapComponent" explosion="true"/>-->
+                    <do_all exact="4">
+                      <add_effect object="$M0_HeatFlapComponent" effect="['missile_explosion_heavy_01','missile_explosion_medium_01'].random">
+                        <position object="$M0_HeatFlapComponent" z="150m" randomoffset="600m"/>
+                      </add_effect>
+                    </do_all>
+
+                    <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                      <param name="Object" value="$Target"/>
+                      <param name="RequesterCue" value="namespace"/>
+                      <param name="DebugChance" value="$DebugChance"/>
+                    </run_actions>
+                    <set_value name="$PlayerShip" exact="player.ship"/>
+                    <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                      <param name="Object" value="$PlayerShip"/>
+                      <param name="RequesterCue" value="namespace"/>
+                      <param name="MinHull" value="33"/>
+                      <param name="DebugChance" value="$DebugChance"/>
+                    </run_actions>
+                    <set_value name="$XenonKillCounter" operation="add" exact="1"/>
+                    <force_player_speed speed="0"/>
+                    <stop_player_autopilot/>
+                    <signal_cue cue="Xenon_ModuleDestruction"/>
+                  </actions>
+                </cue>
+
+                <cue name="Xenon_ModuleDestruction">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <destroy_object object="$Target" explosion="true"/>
+                  </actions>
+                  <cues>
+
+                  </cues>
+                </cue>
+
+                <!-- TODO: Final Cutscene -->
+                <cue name="Xenon_m0_DestructionCutscene">
+                  <conditions>
+                    <event_cue_signalled cue="Xenon_ModuleDestruction"/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="FinalVictoryDialogue_NPCUsecase_Abort">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                    </cue>
+
+                    <cue name="FinalVictoryDialogue">
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                      $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DeepDebugChance,
+                                                                                      $abortonsignalledcue = FinalVictoryDialogue_NPCUsecase_Abort,
+                                                                                      $script = [
+                                                                                                2s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030311, $recipient = 'player', $comment = 'It is working!' ],
+                                                                                                16s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030312, $recipient = 'player', $comment = 'Ohh... this is it!' ],
+                                                                                                0.5s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030313, $recipient = 'player', $comment = 'It is exploding!' ],
+                                                                                                4s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030314, $recipient = 'player', $comment = 'Well done, Kyle! Well done, everyone!' ],
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030315, $recipient = 'player', $comment = 'Now fall back, everybody!' ],
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030316, $recipient = 'player', $comment = 'We will decomission the rest of the machine stragglers after we have properly regrouped.' ],
+                                                                                                1s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030330, $recipient = 'player', $comment = 'And Kyle... when we are done here I expect to see you at Argon Prime space port.' ],
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030331, $recipient = 'player', $comment = 'The first round of Space Fuel is on me!' ],
+                                                                                                1s,
+                                                                                                table[ $actor = '$BanDannaActor', $speak = 306030332, $recipient = 'player', $comment = 'Argon One out.' ],
+                                                                                                ]
+                                                                                      ]" />
+                      </actions>
+                    </cue>
+
+                    <cue name="M0_Destruction_CutsceneHandling">
+                      <delay exact="2s"/>
+                      <actions>
+                        <set_value name="this.$CutsceneKey" exact="'scenario_m0_boss_battle_xenon_destruction_cutscene'"/>
+                        <play_cutscene result="this.$CutsceneID" letterbox="true" movesoundcamera="true" key="this.$CutsceneKey" targetmonitor="false" abortable="true">
+                          <param name="target_playership" object="$PlayerShip"/>
+                          <param name="target_fleetship" object="$AlliedCapitalGroup.{1}"/>
+                          <param name="target_m0_mothership" object="$Target"/>
+                        </play_cutscene>
+
+                        <!-- Clean up some of the small Xenon while the cutscene starts so that it feels more like a "victory" -->
+                        <do_for_each name="this.$ship" in="$FinalReinforcementGroup">
+                          <destroy_object object="this.$ship" chance="80" explosion="true"/>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+
+                    <cue name="M0_Destruction_Cutscene_Ended">
+                      <conditions>
+                        <event_cutscene_stopped key="M0_Destruction_CutsceneHandling.$CutsceneKey"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="event.param3">
+                          <set_value name="this.$delay" exact="0.5s"/>
+                        </do_if>
+                        <do_else>
+                          <set_value name="this.$delay" exact="11s"/>
+                        </do_else>
+                      </actions>
+                      <delay exact="this.$delay"/>
+                      <actions>
+                        <set_value name="$MissionCompleted"/>
+                        <remove_mission cue="$MissionCue" type="completed"/>
+                        <signal_cue_instantly cue="ResultWindow"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+              </cues>
+
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$ResultData.$OptionalObjectives" exact="[false, false]"/>
+
+            <do_if value="$PlayerStartingShip.hullpercentage == 100" comment="player ship did not take any hull damage">
+              <set_value name="$ResultData.$OptionalObjectives.{1}" exact="true"/>
+            </do_if>
+
+            <set_value name="$Score_DestroyedXenon" exact="$XenonKillCounter * 15"/>
+
+            <!-- Stat: Hull Damge avoided -->
+            <set_value name="$PointsForNoHullDamageTaken" exact="400"/>
+            <set_value name="$HullDamageAvoidedMultiplier" exact="[1 - ($HullDamage / $InitialHull), 0].max"/>
+            <set_value name="$HullDamageAvoidedPercentage" exact="(($HullDamageAvoidedMultiplier * 1000)i)/10.0"/>
+            <substitute_text text="$HullDamageAvoided_UI_Value" source="readtext.{30600}.{3003}">
+              <replace string="'$PERCENTAGE$'" with="$HullDamageAvoidedPercentage"/>
+            </substitute_text>
+            <substitute_text text="$HullDamageAvoidedDescription" source="readtext.{30619}.{1107}">
+              <replace string="'$NUMBER$'" with="$PointsForNoHullDamageTaken"/>
+            </substitute_text>
+            <set_value name="$Score_DamagedHull" exact="($PointsForNoHullDamageTaken * $HullDamageAvoidedMultiplier)i"/>
+
+            <add_scenario_stat id="'hull_damage_avoided'" name="{30619,1106}" uivalue="$HullDamageAvoided_UI_Value" description="$HullDamageAvoidedDescription" score="$Score_DamagedHull" maxscore="400"/>
+            <add_scenario_stat id="'destroyed'" name="{30603,1211}" description="{30603,1212}" uivalue="$XenonKillCounter" score="$Score_DestroyedXenon"  maxscore="900"/>
+
+            <do_if value="$MissionCompleted?">
+              <set_value name="$ResultData.$Score" operation="add" exact="$Score_DamagedHull + $Score_DestroyedXenon"/>
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_else>
+
+            <do_if value="player.allmodules.{player.module}.rating.{$ResultData.$Score}">
+              <unlock_achievement name="TL_SCENARIO_3" scenario="true"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

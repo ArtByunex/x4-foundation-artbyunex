@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Show the Ship, put the engines in frame to play engine explosions -->
+  <director key="Story_Timelines_Ch5_Xperimental_Cutscene" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="OrbitDistressShip" environment="scenezone" duration="10000">
+          <camera_orbit reference="target_ship" orient_to="object">
+            <begin angle="-60" distance="40" elevation="10" />
+            <end angle="-30" distance="20" elevation="15" />
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+	Soft Target View From Player Ship.xml
+	Cutscene by Apoch
+	   
+	Simple event monitor cutscene for displaying a soft target object from the player's perspective.
+	   
+	Assumes that a reference object "targetobject" is provided when the scene is started.
+	
+	Playback duration is fully dynamic; the object will be displayed until a specific
+	event ("stopscene") is triggered from control code either in the engine itself or
+	via a controlling MD script.
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="SoftTargetDisplayScene_ViewHighway" />
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="SoftTargetDisplaySequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <shot name="SoftTargetDisplayShot" environment="scenezone" duration="onevent:stopscene">
+
+          <camera>
+            <position>
+              <orbit >
+                <distance>
+                  <value exact="1000" />
+                </distance>
+                <elevation>
+                  <value exact="0" />
+                </elevation>
+              </orbit>
+            </position>
+
+            <lookdirection>
+              <orbit></orbit>
+            </lookdirection>
+
+          </camera>
+
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

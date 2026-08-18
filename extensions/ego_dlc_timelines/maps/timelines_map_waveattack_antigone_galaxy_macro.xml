@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7880011}" description="{20004,7880012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_78056" ref="zones">
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_wave_attack_antigone_region_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_wave_attack_antigone_region_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_wave_attack_antigone_region_fog_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_cluster_28_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7880001}" description="{20003,7880002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_28_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region002_connection" ref="regions">
+        <offset>
+          <position x="859.018" y="-1540.793"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region001_connection" ref="regions">
+        <offset>
+          <position x="280.74" y="-1742.14"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_130689" ref="regions">
+        <offset>
+          <position x="-4342.042" y="-20000" z="-88361.25"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="c28s01_region003_connection" ref="regions">
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_28"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_antigone_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_32332" ref="clusters">
+        <macro ref="timelines_map_waveattack_antigone_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

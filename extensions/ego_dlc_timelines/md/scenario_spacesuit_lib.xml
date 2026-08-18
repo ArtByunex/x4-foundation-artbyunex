@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Spacesuit_LIB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+    <library name="Setup_Player">
+      <actions>
+        <!-- Place the Player, then check for Player existence -->
+
+        <do_if value="not player.exists">
+          <debug_text text="'Player does not exist'" filter="error"/>
+          <set_value name="$HasError" exact="true"/>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="Setup_Chief">
+      <actions>
+        <!-- Henateklis Tismulinis Transadras VIII - Teladi Chief Mechanic -->
+        <create_cue_actor name="$Chief" cue="namespace" macro="character_timelines_scenario_spacesuit_chief_macro">
+          <page exact="10564"/>
+          <owner exact="faction.civilian"/>
+          <skills>
+            <skill type="management"  exact="11"/>
+            <skill type="morale"      exact="7"/>
+            <skill type="piloting"    exact="13"/>
+            <skill type="engineering" exact="15"/>
+            <skill type="boarding"    exact="3"/>
+          </skills>
+        </create_cue_actor>
+        <debug_text text="'Chief: ' + $Chief"/>
+        <do_if value="not $Chief?">
+          <debug_text text="'Teladi Chief Mechanic not created'" filter="error"/>
+          <set_value name="$HasError" exact="true"/>
+        </do_if>
+        <do_else>
+          <set_entity_traits entity="$Chief" missionactor="true" customhandler="true" subtitlename="true"/>
+
+          <!-- NPC Usecase Setup -->
+          <set_value name="$MissionActors.$Chief" exact="table[
+                                      $entity = $Chief,
+                                      $monitor = table[
+                                        $cutscenekey = 'ShowNPCFace',
+                                        $caption = true
+                                      ]
+                                    ]"/>
+        </do_else>
+      </actions>
+    </library>
+
+    <library name="Setup_Terrorist">
+      <actions>
+        <!-- Mnnl t'Tnt - Split Terrorist -->
+        <create_cue_actor name="$Terrorist" cue="namespace" macro="character_timelines_scenario_spacesuit_terrorist_macro">
+          <page exact="10458"/>
+          <owner exact="faction.criminal"/>
+          <skills>
+            <skill type="management"  exact="1"/>
+            <skill type="morale"      exact="4"/>
+            <skill type="piloting"    exact="3"/>
+            <skill type="engineering" exact="5"/>
+            <skill type="boarding"    exact="7"/>
+          </skills>
+        </create_cue_actor>
+        <do_if value="not $Terrorist?">
+          <debug_text text="'Split Terrorist not created'" filter="error"/>
+          <set_value name="$HasError" exact="true"/>
+        </do_if>
+        <do_else>
+          <set_entity_traits entity="$Terrorist" missionactor="true" customhandler="true" subtitlename="true"/>
+
+          <!-- NPC Usecase Setup -->
+          <set_value name="$MissionActors.$Terrorist" exact="table[
+                                      $entity = $Terrorist,
+                                      $monitor = table[
+                                        $cutscenekey = 'ShowNPCFace',
+                                        $caption = true
+                                      ]
+                                    ]"/>
+        </do_else>
+      </actions>
+    </library>
+
+    <library name="PlayerDiedUseCase">
+      <actions>
+        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                                  $script = [
+                                            table [$actor = '$Chief', $speak = 306140201, $recipient = 'player'],
+                                            table [$actor = '$Chief', $speak = 306140202, $recipient = 'player'],
+                                            table [$actor = '$Chief', $speak = 306140203, $recipient = 'player'],
+                                            table [$actor = '$Chief', $speak = 306140204, $recipient = 'player'],
+                                            ],
+                                            $abortcallbackcue = CutsceneStopped,
+                                            $abortonsignalledcue = CutsceneStopped
+                                ]" />
+      </actions>
+    </library>
+
+  </cues>
+</mdscript>

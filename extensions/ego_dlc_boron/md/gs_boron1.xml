@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Boron1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_boron1" version="2">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Boron_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="100"/>
+        <set_value name="$MissionCue"  exact="this"/>
+        <set_value name="$Page"        exact="30290"/>
+        <!--Have a black screen for a little while, with the following fade-in kicking in shortly-->
+        <fade_screen fadeout="0s" fadein="200s" realtime="true"/>
+      </actions>
+      <delay exact="5s"/>
+      <actions>
+        <fade_screen fadeout="0s" fadein="2s" realtime="true"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="$MissionCue.hasmission">
+          <update_mission cue="$MissionCue" group="missiongroup.story_boron"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Setup">
+          <delay exact="2s"/>
+          <actions>
+            <signal_cue cue="Ch1_Intro"/>
+          </actions>
+          <cues>
+
+            <cue name="Setup_Actors">
+              <delay exact="1s" comment="Give enough time to setup the actors."/>
+              <actions>
+                <set_value name="$ExpeditionLeaderActor" exact="md.$PersistentCharacters.$ExpeditionLeaderActor"/>
+
+                <set_value name="$MissionActors" exact="md.Story_Boron.Start.$MissionActors"/>
+
+                <!-- Create a clone of this actor so that the original can remain piloting their ship while the player talks to the clone in a room. -->
+                <create_cue_actor name="$MissionSpecialistActorClone" cue="namespace" macro="character_story_argon_missionspecialist_macro">
+                  <page exact="10191"/>
+                  <owner exact="faction.alliance"/>
+                  <skills>
+                    <skill type="management"  exact="3"/>
+                    <skill type="morale"      exact="7"/>
+                    <skill type="piloting"    exact="6"/>
+                    <skill type="engineering" exact="9"/>
+                    <skill type="boarding"    exact="6"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits    entity="$MissionSpecialistActorClone" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$MissionSpecialistActorClone" title="'{20208,50301}'" icon="'specialist'"/>
+
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$MissionSpecialistActorClone" exact="table[
+                                              $entity = $MissionSpecialistActorClone,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace'
+                                              ]
+                                            ]"/>
+
+              </actions>
+            </cue>
+
+            <cue name="Setup_Locations">
+              <actions>
+                <!--Set up systems relevant to this game start-->
+                <find_sector macro="macro.cluster_30_sector001_macro"  required="true" name="$MorningStarIII"/>
+                <find_sector macro="macro.cluster_31_sector001_macro"  required="true" name="$HereticsEnd"/>
+                <find_sector macro="macro.cluster_29_sector001_macro"  required="true" name="$HatikvahsChoiceI"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_Map">
+              <actions>
+                <!-- To uncover a significant amount of space, to simulate travel from ALI Wharf to Morning Star III -->
+                <set_value name="$InitialMap" exact="[
+                    macro.cluster_30_sector001_macro,
+                    macro.cluster_29_sector001_macro,
+                    macro.cluster_08_sector001_macro,
+                    macro.cluster_34_sector001_macro,
+                    macro.cluster_09_sector001_macro,
+                    macro.cluster_18_sector001_macro,
+                    macro.cluster_47_sector001_macro,
+                  ]"/>
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="$InitialMap"/>
+                  <param name="UncoverShipyardsAndWharfs" value="true" comment="optional"/>
+                  <param name="UncoverTradeStations" value="true" comment="optional"/>
+                  <param name="UncoverHighways" value="true" comment="optional"/>
+                </run_actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Ch1_Intro">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'Starting Boron gamestart 1'" chance="$DebugChance"/>
+          </actions>
+          <cues>
+
+            <!-- First part of the scenario: cutscene of an allied capital ship which is arriving through an accelerator, player arrives on bridge -->
+            <cue name="Ch1_Start">
+              <actions>
+                <!-- find an accelerator to start the scenario in front of -->
+                <find_gate name="$Gate" space="$MorningStarIII" destination="$HatikvahsChoiceI" required="true" />
+                <set_value name="$AlliedFaction" exact="faction.alliance"/>
+                <set_value name="$HereticsEndBoronGate" exact="md.Story_Boron.Start.$HereticsEnd_WatchfulGazeGate"/>
+              </actions>
+              <cues>
+                <cue name="Ch1_Setup_AllianceHubShip">
+                  <actions>
+                    <create_position name="$AllianceHubShipSpawnPos" object="$Gate" space="$Gate.zone" y="-60000"/>
+
+                    <set_value name="$AllianceHubShip" exact="md.Story_Boron.Start.$AllianceHubShip"/>
+
+                    <create_order object="$AllianceHubShip" id="'Wait'" name="$order">
+                      <param name="holdfire" value="true"/>
+                      <param name="noattackresponse" value="true"/>
+                    </create_order>
+                    <!-- teleport the player to the allied destroyer and clean up the ship they spawned in -->
+                    <set_value name="$DummyPlayerShip" exact="player.ship"/>
+                    <set_owner object="$DummyPlayerShip" faction="faction.ownerless" comment="change owner of ship to force player to stand up (otherwise they might be stuck in sitting animation for cutscene"/>
+                    <set_object_capturable object="$DummyPlayerShip" capturable="false"/>
+                    <set_value name="$AllianceHubShipCaptain" exact="$AllianceHubShip.pilot"/>
+
+                    <set_value name="$MissionActors.$AllianceHubShipCaptain" exact="table[
+                                              $entity = $AllianceHubShipCaptain,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                              ]
+                                            ]"/>
+
+                    <create_position name="$MissionSpecialistActorPos" x="0.5" y="-1" z="7.33" space="$AllianceHubShip.controlroom"/>
+                    <create_rotation name="$MissionSpecialistActorRot" yaw="0deg"/>
+
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MissionSpecialistActorClone,
+                                                                                              table[
+                                                                                              $requestercue = namespace,
+                                                                                              $location = $AllianceHubShip.controlroom,
+                                                                                              $priority = 100,
+                                                                                              $rotation = $MissionSpecialistActorRot,
+                                                                                              $position = $MissionSpecialistActorPos,
+                                                                                              $debugchance = 0,
+                                                                                              $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                              ]"/>
+
+                    <debug_text text="'Captain ' + $AllianceHubShipCaptain.knownname + ' with voice page ' + $AllianceHubShipCaptain.page"/>
+                  </actions>
+                </cue>
+
+                <cue name="Scenario1_ExitGateCutscene">
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <!-- Depending on player race height change certain parameters of the shots  -->
+                    <do_if value="player.entity.race == race.teladi">
+                      <set_value name="$customheight" exact="-0.65m"/>
+                    </do_if>
+                    <do_elseif value="player.entity.race == race.paranid">
+                      <set_value name="$customheight" exact="-1.1m"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$customheight" exact="-0.9m"/>
+                    </do_else>
+                      
+                     <!-- Start cutscene --> 
+                    <play_cutscene key="'Story_Boron_Gamestart1'" targetmonitor="false" abortable="true">
+                      <param name="target_gate" object="$Gate"/>
+                      <param name="target_ship" object="$AllianceHubShip"/>
+                      <param name="target_captain" object="$ExpeditionLeaderActor"/>
+                      <param name="target_player" object="player.entity"/>
+                      <param name="customheight" number="$customheight"/>
+                    </play_cutscene>
+                    <!-- For this GS alone, detach the subortinates for the initial approach -->
+                    <do_for_each name="$subordinate" in="$AllianceHubShip.subordinates">
+                      <cancel_all_orders object="$subordinate"/>
+                      <create_order object="$subordinate" id="'Wait'"/>
+                      <add_to_group groupname="$WaitingSubordinates" object="$subordinate"/>
+                    </do_for_each>
+                  </actions>
+                  <cues>
+
+                    <cue name="Gs1_CutsceneStarted">
+                      <conditions>
+                        <event_cutscene_started key="'Story_Boron_Gamestart1'"/>
+                      </conditions>
+                      <delay exact="19s"/>
+                      <actions>
+                        <do_if value="not $CutsceneFinished?">
+                          <fade_screen fadeout="0.5s" holdtime="0.4s" fadein="0.5s" realtime="true"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+
+                    <!-- The ships that have already waited for the ALI Hub now join in as subortinates -->
+                    <cue name="Ch1_ALI_ToGate_DistanceCheck" checkinterval="5s">
+                      <conditions>
+                        <check_value value="Scenario1_ExitGateCutsceneStopped.state == cuestate.complete"/>
+                        <check_value value="$AllianceHubShip.sector == $HereticsEndBoronGate.sector"/>
+                        <check_value value="$AllianceHubShip.distanceto.{$HereticsEndBoronGate} le 15km"/>
+                      </conditions>
+                      <actions>
+                        <do_for_each name="$ship" in="$WaitingSubordinates">
+                          <create_order id="'AssignCommander'" object="$ship">
+                            <param name="commander" value="$AllianceHubShip"/>
+                            <param name="assignment" value="assignment.interception"/>
+                            <param name="cancelorders" value="true"/>
+                          </create_order>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+
+                    <cue name="Scenario1_WarpAllianceHubShip">
+                      <delay exact="7s"/>
+                      <actions>
+                        <create_position name="$PlayerPos" x="-0.083m" y="-1.39m + player.entity.race.height" z="8.6m" space="$AllianceHubShip.controlroom"/>
+                        <!--Warp player to different position-->
+                        <add_actor_to_room actor="player.entity" object="$AllianceHubShip.controlroom">
+                          <position value="$PlayerPos" space="$AllianceHubShip.controlroom"/>
+                          <rotation yaw="40.0deg"/>
+                        </add_actor_to_room>
+
+                        <do_if value="$DummyPlayerShip?">
+                          <destroy_object object="$DummyPlayerShip"/>
+                          <remove_value name="$DummyPlayerShip"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <warp object="$AllianceHubShip" zone="$Gate.zone">
+                          <position z="$AllianceHubShip.size" object="$Gate" />
+                          <orientation orientation="look_away" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                        </warp>
+                        <play_sound sound="'gate_flythrough'" object="$AllianceHubShip" />
+                        <add_effect effect="'jump_gateeffect'" object="$Gate"/>
+
+                        <add_effect object="$AllianceHubShip.zone" effect="'jump_jumpin_capship'">
+                          <position value="$AllianceHubShip.position"/>
+                          <rotation value="$AllianceHubShip.rotation"/>
+                        </add_effect>
+                        <add_effect object="$AllianceHubShip" effect="'warpteleport'"/>
+                        <get_safe_pos result="$sectorpos" sector="$Gate.sector" space="$Gate.sector" object="$Gate" z="3km" radius="$AllianceHubShip.size" direction="quadrant.front" directionobject="$Gate" allowyaxis="false"/>
+                        <debug_text text="'adding movement order to %s in %s, %sm away.'.[$sectorpos, $Gate.sector, $AllianceHubShip.distanceto.[$Gate.sector, $sectorpos]]" chance="0"/>
+                        <cancel_all_orders object="$AllianceHubShip"/>
+                        <create_order object="$AllianceHubShip" id="'MoveGeneric'" name="$order" immediate="true">
+                          <param name="destination" value="$Gate.sector"/>
+                          <param name="position" value="$sectorpos"/>
+                          <param name="precise" value="true"/>
+                          <param name="noboost" value="true"/>
+                        </create_order>
+                        <create_order id="'Wait'" object="$AllianceHubShip"/>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <debug_text text="'Prehinting'"/>
+                        <!-- story characters -->
+                        <set_value name="$storycharacters" exact="[$ExpeditionLeaderActor, $AllianceHubShipCaptain, $MissionSpecialistActorClone, player.entity]"/>
+                        <do_for_each name="$storycharhint" in="$storycharacters">
+                          <debug_text text="'- %s (story actor)'.[$storycharhint.name]"/>
+                          <precache_hint target="$storycharhint"/>
+                        </do_for_each>
+                        <!-- crew standing at the consoles -->
+                        <set_value name="$controlpositions" exact="[controlposition.comms, controlposition.coordination, controlposition.engineering, controlposition.flight, controlposition.gunner, controlposition.manager, controlposition.navigation, controlposition.pilot]"/>
+                        <do_for_each name="$controlpos" in="$controlpositions">
+                          <do_if value="$AllianceHubShip.controlroom.controlposition.{$controlpos}.entity">
+                            <debug_text text="'- controlpos %s entity=%s name=%s'.[$controlpos, $AllianceHubShip.controlroom.controlposition.{$controlpos}.entity, $AllianceHubShip.controlroom.controlposition.{$controlpos}.entity.name]"/>
+                            <precache_hint target="$AllianceHubShip.controlroom.controlposition.{$controlpos}.entity"/>
+                          </do_if>
+                        </do_for_each>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <!-- Simulate the player just moving into the system by triggering the usual Betty notification by hand -->
+                        <speak actor="player.computer" priority="5">
+                          <text line="600" />
+                          <name value="$MorningStarIII.cluster" />
+                        </speak>
+                      </actions>
+                      <delay exact="11s"/>
+                      <actions>
+                        <do_if value="not $CutsceneFinished?">
+                          <set_ambient_sound_state active="false"/>
+                          <!-- The ALI Paranid gives a speech if the cutscene is still going -->
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 100, $priority = 99,
+                                                                              $abortonsignalledcue = Scenario1_NPCUsecaseAbort,
+                                                                              $script = [
+                                                                                      1s,
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30290101, $lookat = '$AllianceHubShipCaptain', $comment = 'Setting course for Heretics End!' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$AllianceHubShipCaptain', $speak = 2103, $speakcallbackcue = Scenario1_AllianceHubShip_MoveToGate, $comment = 'Affirmative.' ],
+                                                                                      5.5s,
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30290102, $recipient = 'player', $lookat = null, $comment = 'Some of you are new additions to our expedition. Others have been with us since we set out from Trinity Sanctum.' ],
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30290103, $recipient = 'player', $comment = 'As we approach our destination, allow me a moment for a brief introduction:' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253008, $recipient = 'player', $speakcallbackcue = GS1_Conversation_Shot02, $comment = 'I, Numanckaret, welcome you in my capacity as Commanding Officer of this expedition.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253009, $recipient = 'player', $comment = 'Our complacency was in treating the gates as an eternal gift from a higher power. We did not make sufficient effort to understand the technology' ],
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253010, $recipient = 'player', $speakcallbackcue = GS1_Conversation_Shot03, $comment = 'This is how the galaxy has found itself in this predicament.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253011, $recipient = 'player', $comment = 'The Alliance of the Word is a collective of scholars and scientists intent on advancing understanding through cooperation.' ],
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253012, $recipient = 'player', $lookat = 'player', $comment = 'Word reached us from the Boron of Kingdom End some months ago via the messenger drone network.' ],
+                                                                                      table[ $actor = '$ExpeditionLeaderActor', $speak = 30253013, $recipient = 'player', $comment = 'It seems they may be making some headway with their gate technology experimentation.' ],
+                                                                                      ],
+                                                                            $callbackcue = Scenario1_GateCutsceneExpositionFinished,
+                                                                            $abortcallbackcue = Scenario1_AllianceHubShip_MoveToGate,
+                                                                            ]" />
+                        </do_if>
+                        <do_else>
+                          <signal_cue cue="Scenario1_AllianceHubShip_MoveToGate"/>
+                        </do_else>
+                      </actions>
+                      <cues>
+
+                        <cue name="GS1_Conversation_TurnAround">
+                          <conditions>
+                            <event_cue_signalled cue="Scenario1_AllianceHubShip_MoveToGate"/>
+                            <check_value value="not $CutsceneFinished?"/>
+                          </conditions>
+                          <delay exact="5s"/>
+                          <actions>
+
+                            <!-- Turn ALI Leader around to face assembled crew -->
+                            <create_position name="$ExpeditionLeaderPos" object="$ExpeditionLeaderActor" space="$AllianceHubShip.controlroom"/>
+                            <create_rotation name="$ExpeditionLeaderRot" yaw="-170.0deg"/>
+
+                            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $ExpeditionLeaderActor,
+                                                                                              table[
+                                                                                              $requestercue = namespace,
+                                                                                              $location = $AllianceHubShip.controlroom,
+                                                                                              $priority = 110,
+                                                                                              $rotation = $ExpeditionLeaderRot,
+                                                                                              $position = $ExpeditionLeaderPos,
+                                                                                              $debugchance = 0,
+                                                                                              $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                              ]"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="GS1_Conversation_Shot02">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <delay exact="0.5s"/>
+                          <actions>
+                            <cutscene_event key="'Story_Boron_Gamestart1'" event="'TriggerSequence01Done'"/>
+                            <cutscene_event key="'Story_Boron_Gamestart1'" event="'TriggerSequence02Start'"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="GS1_Conversation_Shot03">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <delay exact="0.5s"/>
+                          <actions>
+                            <cutscene_event key="'Story_Boron_Gamestart1'" event="'TriggerSequence02Done'"/>
+                            <cutscene_event key="'Story_Boron_Gamestart1'" event="'TriggerSequence03Start'"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Scenario1_AllianceHubShip_MoveToGate">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="5s"/>
+                      <actions>
+                        <!-- Move ship into position -->
+                        <get_safe_pos result="$AllianceHubShipPos" sector="$HereticsEnd" space="$HereticsEnd" object="$HereticsEndBoronGate" z="12km" radius="2km" direction="quadrant.front" directionobject="$HereticsEndBoronGate" allowyaxis="false"/>
+
+                        <cancel_all_orders object="$AllianceHubShip"/>
+                        <create_order object="$AllianceHubShip" id="'MoveWait'">
+                          <param name="destination" value="[$HereticsEnd, $AllianceHubShipPos]"/>
+                        </create_order>
+                      </actions>
+                    </cue>
+
+
+                    <cue name="Scenario1_NPCUsecaseAbort">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                    </cue>
+
+                    <cue name="Scenario1_GateCutsceneExpositionFinished">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <do_if value="not $CutsceneFinished?">
+                          <fade_screen fadein="1.5s" fadeout="1s" realtime="true"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <stop_cutscene key="'Story_Boron_Gamestart1'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Scenario1_ExitGateCutsceneStopped">
+                      <conditions>
+                        <event_cutscene_stopped key="'Story_Boron_Gamestart1'"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="$CutsceneFinished"/>
+                        <do_if value="event.param3 == true">
+                          <signal_cue cue="Scenario1_NPCUsecaseAbort"/>
+                        </do_if>
+                        <set_ambient_sound_state active="true"/>
+                        <!-- Add the player ship to the ALI L ship -->
+                        <set_value name="$PlayerShipMacro" exact="macro.ship_arg_s_scout_01_a_macro"/>
+                        <find_dockingbay name="$AllianceHubShipInternalDock" object="$AllianceHubShip" required="true">
+                          <match_dock size="$PlayerShipMacro.docksize" walkable="true"/>
+                        </find_dockingbay>
+                        <do_if value="$AllianceHubShipInternalDock">
+                          <create_ship name="$PlayerShip" macro="$PlayerShipMacro" dock="$AllianceHubShipInternalDock" capturable="false">
+                            <owner exact="faction.player" overridenpc="true" />
+                            <loadout ref="gs_boron1_playership" />
+                          </create_ship>
+                        </do_if>
+                        <signal_cue cue="Scenario1_EmbarkShipCheck"/>
+                      </actions>
+                      <delay exact="2s"/>
+                      <actions>
+                        <create_position name="$InactiveGatePos" object="$HereticsEndBoronGate" space="$HereticsEnd"/>
+                        <set_value name="$Ch0_Description" exact="{30253,903} + '\n\n' + {30253,905}"/>
+                        <create_mission comment="Mission: 0"
+                          name="{30253,901}" description="$Ch0_Description" rewardtext="{30253,902}"
+                          icon="'briefing_numanckaret_01'" iconcaption="$ExpeditionLeaderActor.name"
+                          faction="faction.alliance" difficulty="level.veryeasy"
+                          cue="$MissionCue" abortable="false" type="missiontype.plot" group="missiongroup.story_boron">
+                          <briefing>
+                            <objective step="1" action="objective.custom" customaction="{30253,906}" comment="Join Alliance forces at inactive gate"  object="$HereticsEnd" offset="$InactiveGatePos" radius="25km" showunknownpath="true"/>
+                          </briefing>
+                        </create_mission>
+                        <set_objective cue="$MissionCue" action="objective.embark" object="$PlayerShip" silent="true"/>
+
+                        <!-- TODO: Expedition Leader gives some more context for the expedition -->
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 99, $missioncue = $MissionCue,
+                                                                                $script = [
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253014, $recipient = 'player', $comment = 'At first, I will admit, we dismissed the notion.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253015, $recipient = 'player', $comment = 'So many scientists have tried and failed to interact with the gate network.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253016, $recipient = 'player', $comment = 'But now the dormant gate at Heretics End is showing infrequent, but undeniable signs of activity.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253017, $recipient = 'player', $comment = 'This may or may not be related to the Boron attempts. But the coincidence of timing is too stark to ignore.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253020, $recipient = 'player', $comment = 'If the Boron have truly succeeded in manipulating the jump gate... The consequences are beyond significant.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253021, $recipient = 'player', $comment = 'But let us not get ahead of ourselves.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253019, $recipient = 'player', $comment = 'This expedition was tasked with resolving the many unknowns of this situation.' ],
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30253022, $recipient = 'player', $comment = 'We could be reuniting with our Boron brethren. Equally, we could find ourselves welcoming a fleet of Xenon destroyers.' ],
+                                                                                        2s,
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30290104, $comment = 'Everybody! Stay alert!' ]
+                                                                              ], 
+                                                                              $callbackcue = Scenario1_MissionSpecialistLeaves,
+                                                                              $abortcallbackcue = Scenario1_MissionSpecialistLeaves      
+                                                                            ]" />
+                        <!-- Now that the cutscene is over, assign the Subordinates from Story_Boron again -->
+                        <do_for_each name="$ship" in="md.Story_Boron.Start.$AllianceEscortGroup">
+                          <cancel_all_orders object="$ship"/>
+                          <create_order id="'AssignCommander'" object="$ship">
+                            <param name="commander" value="$AllianceHubShip"/>
+                            <param name="assignment" value="assignment.interception"/>
+                            <param name="cancelorders" value="true"/>
+                          </create_order>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+                    
+                    <!--These cues handle the briefing presentations e.g. Holomap or cutscene render targets (depending on the mission)
+                    note: play_cutscene action should not be in the actions of the cue with a event_briefing_submission_selected condition. It must be delayed-->
+                    <cue name="Scenario1_BriefingStarted">
+                      <conditions>
+                        <check_any>
+                          <event_briefing_started cue="$MissionCue"/>
+                          <event_briefing_submission_selected cue="$MissionCue"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <set_value name="$RenderTarget" exact="event.param.{1}"/>
+                        <set_value name="$StartBriefingCutscene"/>
+                        <debug_text text="'Briefing started'" chance="$DebugChance"/>
+                      </actions>
+                      <cues>
+                        <cue name="Scenario1_DisplayCutscene" onfail="cancel">
+                          <conditions>
+                            <check_value value="$StartBriefingCutscene?"/>
+                          </conditions>
+                          <actions>
+                            <set_value name="$BriefingCutsceneStarted"/>
+                            <set_value name="$CutsceneKey" exact="'OrbitIndefinitelySlower'"/>
+                            <play_cutscene key="$CutsceneKey" rendertarget="$RenderTarget">
+                              <param name="targetobject" object="$HereticsEndBoronGate"/>
+                            </play_cutscene>
+                          </actions>
+                        </cue>
+
+                        <cue name="Scenario1_BriefingStopped">
+                          <conditions>
+                            <check_any>
+                              <event_briefing_cancelled cue="$MissionCue"/>
+                              <event_briefing_submission_unselected cue="$MissionCue"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <do_if value="$BriefingCutsceneStarted?">
+                              <!--Temp value. This is used to identify if a cutscene for this mission is still playing.-->
+                              <remove_value name="$BriefingCutsceneStarted"/>
+                              <stop_cutscene key="$CutsceneKey"/>
+                            </do_if>
+
+                            <do_if value="$HoloMap?">
+                              <remove_holomap />
+                              <remove_value name="$HoloMap"/>
+                            </do_if>
+
+                            <debug_text text="'Briefing canceled'" chance="$DebugChance"/>
+                            <reset_cue cue="Scenario1_BriefingStarted"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Scenario1_EmbarkShipCheck">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <cues>
+                        
+                        <cue name="Scenario1_PlayerUndocksHint">
+                          <conditions>
+                            <event_object_undocked object="$PlayerShip" dock="$AllianceHubShip"/>
+                          </conditions>
+                          <actions>
+                            <show_help line="4301" position="13" force="false" duration="12s" comment="Press $INPUT_ACTION_TOGGLE_TRAVEL_MODE$ or activate TRAVEL MODE from the SHIP MENU \($INPUT_ACTION_OPEN_COCKPIT_MENU$\)."/>
+                          </actions>
+                        </cue>
+
+                        <cue name="Scenario1_ALILeaderConversation" instantiate="true">
+                          <conditions>
+                            <event_conversation_started actor="$ExpeditionLeaderActor"/>
+                          </conditions>
+                          <actions>
+                            <add_npc_line speaker="$ExpeditionLeaderActor" hidechoices="true">
+                              <text line="30290105" comment="Explorer. Perhaps your attention is best focused on the task in hand. Why do you not scout ahead?"/>
+                            </add_npc_line>
+                          </actions>
+                        </cue>
+                        
+                        <cue name="Scenario1_DelayedObjective">
+                          <delay exact="90s"/>
+                          <actions>
+                            <!-- Point towards the ship more explicitly if the player hasn't entered yet -->
+                            <signal_cue cue="Scenario1_ChangeObjective" check="false"/>
+                            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 99, $missioncue = $MissionCue,
+                                                                                $script = [
+                                                                                        table[ $actor = '$ExpeditionLeaderActor', $speak = 30290105, $lookat = 'player', $comment = 'Explorer. Perhaps your attention is best focused on the task in hand. Why do you not scout ahead?' ]
+                                                                              ],
+                                                                            ]" />
+                          </actions>
+                        </cue>
+                        
+                        <cue name="Scenario1_ChangeObjective">
+                          <conditions>
+                            <check_any>
+                              <event_cue_signalled/>
+                              <event_object_changed_object object="player.entity" newobject="$PlayerShip"/>
+                            </check_any>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <cancel_cue cue="Scenario1_DelayedObjective"/>
+                            <set_objective_from_briefing cue="$MissionCue" step="1"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Scenario1_MissionSpecialistLeaves">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 80, $missioncue = $MissionCue,
+                                                                              $script = [
+                                                                                      2s,
+                                                                                      table[ $actor = '$MissionSpecialistActorClone', $speak = 30290101, $recipient = '$ExpeditionLeaderActor', $monitor = false, $comment = 'Time for one final equipment calibration.' ],
+                                                                                      table[ $actor = '$MissionSpecialistActorClone', $speak = 30290102, $recipient = '$ExpeditionLeaderActor', $monitor = false, $comment = 'We have to make sure everything is in order.' ],
+                                                                              ],
+                                                                            ]" />
+                      </actions>
+                      <delay exact="5s"/>
+                      <actions>
+                        <!-- Remove the placement request to have the ALI Leader character turn around -->
+                        <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $ExpeditionLeaderActor, namespace]"/>
+                        <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MissionSpecialistActorClone,
+                                                                                                      table[
+                                                                                                        $requestercue = $MissionCue,
+                                                                                                        $priority = 100,
+                                                                                                        $location = 'disconnect',
+                                                                                                        $debugchance = $debugchance,
+                                                                                                        $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+             <!-- Boso's Warp In effect might have knocked the ship out of Travel Drive. Reissue order for smoother travel --> 
+            <cue name="Ch1_Reissue_Order">
+              <conditions>
+                <check_all>
+                  <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.Phase_Boron_TalkToBoso_Mission"/>
+                  <check_value value="player.entity.hascontext.{$AllianceHubShip}"/>
+                </check_all>
+              </conditions>
+              <actions>
+                <cancel_all_orders object="$AllianceHubShip"/>
+                <create_order object="$AllianceHubShip" id="'MoveWait'">
+                  <param name="destination" value="[$HereticsEnd, $AllianceHubShipPos]"/>
+                </create_order>
+                <create_order id="'Wait'" object="$AllianceHubShip"/>
+              </actions>
+              <delay exact="4s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 80, $missioncue = $MissionCue,
+                                                                              $script = [
+                                                                                      table[ $actor = '$AllianceHubShipCaptain', $speak = 5040, $monitor = false, $comment = 'Plotting course.' ],
+                                                                              ],
+                                                                            ]" />
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Scenario1_Finished">
+          <conditions>
+            <event_cue_signalled cue="md.Story_Boron.Ch1_Exploration"/>
+          </conditions>
+          <actions>
+            <!--Before removing the MissionSpecialistClone entirely, check if she is still on the Ship -->
+            <do_if value="$MissionSpecialistActorClone.hascontext.{$AllianceHubShip}">
+              <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $MissionSpecialistActorClone,
+                                                                                                      table[
+                                                                                                        $requestercue = $MissionCue,
+                                                                                                        $priority = 100,
+                                                                                                        $location = 'disconnect',
+                                                                                                        $debugchance = $debugchance,
+                                                                                                        $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+            </do_if>
+          </actions>
+          <delay exact="30s"/>
+          <actions>
+            <!-- Make sure to remove the Clone Actor from $MissionActors before we cancel the whole script -->
+            <remove_value name="md.Story_Boron.Start.$MissionActors.$MissionSpecialistActorClone"/>
+            <cancel_cue cue="Start"/>
+          </actions>
+        </cue>
+        
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

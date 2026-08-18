@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="LIB_Scenario" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- Mitsuno Hacks -->
+    <cue name="Mitsuno_Hack_Manager" namespace="this">
+      <!--
+            - A list of $Hacks (cues with voice interaction) will be played in order
+            - some routine scenarios call the 'play_next_hack' lib during quiet moments (players can play scenarios out of order)
+            - if caller has not played a hack yet and there are more generic hacks available in our list, we play the next hack interaction
+      -->
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" comment="required for Scenario_Hub.Setup_Character"/>
+      </conditions>
+      <actions>
+        <!-- voice actors for hack interactions -->
+        <include_actions ref="md.Scenario_Hub.Setup_Character_Player"/>
+        <include_actions ref="md.Scenario_Hub.Setup_Character_PlayerNPC"/>
+        <include_actions ref="md.Scenario_Hub.Setup_Character_HackerActor"/>
+        <include_actions ref="md.Scenario_Hub.Setup_Character_MissionDirectorActor"/>
+
+        <set_value name="$DebugChance" exact="100"/>
+
+        <!-- Don't reset everytime -->
+        <do_if value="not userdata.timelines_hub_currenthack?">
+          <set_userdata name="'timelines_hub_currenthack'"  value="1" comment="signal current hack, then increment"/>
+        </do_if>
+
+        <!-- hack interactions to increment over -->
+        <set_value name="$Hacks" exact="[Mitsuno_Hack1,
+                                         Mitsuno_Hack2,
+                                         Mitsuno_Hack3,
+                                         Mitsuno_Hack4,
+                                         Mitsuno_Hack5,
+                                         Mitsuno_Hack6,
+                                         Mitsuno_Hack7
+                                         ]"/>
+
+        <!-- caller validation; each module can only call a hack once -->
+        <create_list name="$CallerModules"/>
+        <create_list name="$CallerChapters"/>
+        <do_all exact="player.scenarios.chapters.count" counter="$chapter">
+          <set_value name="$LastChapter" exact="$chapter"/>
+          <do_for_each in="player.scenarios.chapters.{$chapter}" name="$module">
+            <set_value name="$userdata_name" exact="'timelines_hub_hack_ch' + $chapter + '_' + $module"/>
+            <do_if value="player.module == $module">
+              <set_value name="$CurrentModule" exact="$userdata_name"/>
+              <set_value name="$CurrentChapter" exact="$chapter"/>
+            </do_if>
+            <do_if value="userdata.{$userdata_name}?">
+              <append_to_list name="$CallerModules" exact="$userdata_name"/>
+              <append_to_list name="$CallerChapters" exact="$chapter"/>
+            </do_if>
+          </do_for_each>
+        </do_all>
+
+        <debug_text text="'Caller Modules ' + $CallerModules" chance="0"/>
+      </actions>
+      <cues>
+
+        <cue name="Debug_Hack" comment="call from different scenario modules for testing">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'signal next hack'"/>
+            <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+          </actions>
+        </cue>
+
+        <cue name="Debug_Userdata">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_all exact="player.scenarios.chapters.count" counter="$chapter">
+              <do_for_each in="player.scenarios.chapters.{$chapter}" name="$module">
+                <set_value name="$userdata_name" exact="'timelines_hub_hack_ch' + $chapter + '_' + $module"/>
+                <debug_text text="'%s %s %s'.[@userdata.{$userdata_name}, (if player.module == $module then ' >player.module' else ''), $userdata_name]"/>
+              </do_for_each>
+            </do_all>
+          </actions>
+        </cue>
+
+        <library name="Mitsuno_Play_Next_Hack" purpose="run_actions">
+          <actions>
+
+            <!-- Hack Terminator Check - we found mitsuno and don't need cryptic messages anymore -->
+            <do_if value="userdata.hub_a5s3_complete? and (not userdata.hub_a5s4_complete?)">
+              <do_if value="userdata.timelines_hub_currenthack le 7">
+                <debug_text text="'terminator set; skipping to last hacking attempt despite counter being at ' + userdata.timelines_hub_currenthack"/>
+                <signal_cue cue="md.LIB_Scenario.Mitsuno_Hack_Manager.$Hacks.last" check="false" comment="each scenario run gets only one attempt"/>
+              </do_if>
+            </do_if>
+            <do_elseif value="not userdata.hub_a5s3_complete?" comment="terminator - we found mitsuno and don't need cryptic messages anymore">
+
+              <do_if value="not md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentModule?">
+                <debug_text text="'hacking prevented - only supported from within scenarios in player.scenarios.chapters.{$chapter}'"/>
+              </do_if>
+              <do_elseif value="md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentChapter == 1">
+                <debug_text text="'hacking prevented - this graph is graph 1, we only allow the final mitsuno hack here'"/>
+              </do_elseif>
+              <do_elseif value="(md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentChapter != md.LIB_Scenario.Mitsuno_Hack_Manager.$LastChapter) and md.LIB_Scenario.Mitsuno_Hack_Manager.$CallerChapters.indexof.{md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentChapter}">
+                <debug_text text="'hacking prevented - this graph already attempted hacking and is not the last graph'"/>
+              </do_elseif>
+              <do_elseif value="md.LIB_Scenario.Mitsuno_Hack_Manager.$Hacks.count lt userdata.timelines_hub_currenthack">
+                <debug_text text="'hacking prevented - no more hacks left'"/>
+              </do_elseif>
+              <do_elseif value="md.LIB_Scenario.Mitsuno_Hack_Manager.$CallerModules.indexof.{md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentModule} and (userdata.timelines_hub_currenthack le 6)">
+                <debug_text text="'hacking prevented - this mission already attempted hacking'"/>
+              </do_elseif>
+              <do_else comment="success">
+                <debug_text text="'hacking attempt'"/>
+                <signal_cue cue="md.LIB_Scenario.Mitsuno_Hack_Manager.$Hacks.{userdata.timelines_hub_currenthack}" check="false" comment="each scenario run gets only one attempt"/>
+              </do_else>
+
+            </do_elseif>
+          </actions>
+        </library>
+
+        <cue name="Mitsuno_Hack_Success" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_userdata name="'timelines_hub_currenthack'"  value="userdata.timelines_hub_currenthack + 1" comment="increment on hacking"/>
+
+            <append_to_list name="md.LIB_Scenario.Mitsuno_Hack_Manager.$CallerModules" exact="md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentModule"/>
+            <set_value name="$CurrentModule" exact="md.LIB_Scenario.Mitsuno_Hack_Manager.$CurrentModule"/>
+            <set_userdata name="$CurrentModule"  value="1" comment="increment on hacking"/>
+
+            <do_if value="(not userdata.hub_a5s3_complete?) and userdata.timelines_hub_currenthack le 7" comment="only hacks 1 to 6 are in act 8; first condition accounts for Terminator handling">
+              <do_if value="userdata.timelines_scenarios_finished?">
+                <set_userdata name="'hub_a8s' + $Hacks.indexof.{event.param} + '_complete'" value="userdata.timelines_scenarios_finished"/>
+              </do_if>
+              <do_else>
+                <set_userdata name="'hub_a8s' + $Hacks.indexof.{event.param} + '_complete'" value="-1"/>
+              </do_else>
+            </do_if>
+            <do_else comment="act 5 hack">
+              <set_userdata name="'hub_a5s4_complete'" value="userdata.timelines_scenarios_finished" comment="set to scenario counter for 'more missions played afterwards' checks"/>
+            </do_else>
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack1" comment="a8s1">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s1 - hack 1'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $closemonitor = true ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930801, $comment = 'What was that?' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930801, $monitor = false, $comment = 'What was what, Recruit Donel?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930802, $comment = 'Comms malfunction?' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930802, $monitor = false, $comment = 'I don t see any malfunction. Let me check diagnostics.' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930803, $monitor = false, $comment = 'No - nothing showing up on diagnostics. Are you sure you re not seeing things? We can get you a medical checkup back at The Facility.' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930803, $comment = 'Forget about it.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack2" comment="a8s2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s2 - hack 2'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930804, $comment = 'Hey, Mission Director.' ],
+                                            table[ $closemonitor = true ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930804, $monitor = false, $comment = 'What s the problem, recruit?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930805, $comment = 'Comms malfunction' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930805, $monitor = false, $comment = 'Again? I ll check it out.' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930806, $monitor = false, $comment = 'Diagnostics are clear. I ll do a deep systems scan back at The Facility. For now, just focus on the mission.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack3" comment="a8s3">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s3 - hack 3'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $closemonitor = true ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930806, $comment = 'Mission Director' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930807, $monitor = false, $comment = 'What s the problem, recruit?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930807, $comment = 'Another comms glitch' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930808, $monitor = false, $comment = 'Nothing came up on the deep scan last time this happened. And no-one has seen these glitches.' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930809, $monitor = false, $comment = 'Are you working too hard? Does the recruit need some rest?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930808, $comment = 'I m fine.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack4" comment="a8s4 LOST IN THE DARK">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="userdata.hub_a3s6_complete?" comment="you need to progress the hub story past meeting pa to trigger this hack"/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s4 - hack 4'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930801, $monitor = true, $comment = 'Lost... in... the... dark' ],
+                                            table[ $closemonitor = true ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930809, $comment = 'MD!' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930810, $monitor = false, $comment = 'What s the problem, recruit? Another comms glitch?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930810, $comment = 'Yes, but it spoke.' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930811, $monitor = false, $comment = 'You re hearing voices?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = false, $speak = 302930811, $comment = 'Oh forget it.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack5" comment="a8s5">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s5 - hack 5'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930802, $monitor = true, $comment = 'Mitsuno.' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930813, $monitor = true, $comment = 'Find me. In the dark.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack6" comment="a8s6 Graph3Complete Mitsuno Introduction">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="userdata.scenario_chapter_3_terminus_completed?"/>
+          </conditions>
+          <actions>
+            <debug_text text="'a8s6 - hack 6'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930803, $monitor = true, $comment = 'I... am... Mitsuno...' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930804, $monitor = true, $comment = 'I... have... blocked... Mission... Director...' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930805, $monitor = true, $comment = 'Find... me... in... the... dark...' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930812, $comment = 'Who are you?' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930809, $monitor = true, $comment = 'Mitsuno... Find... me...' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930813, $comment = 'Where?' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930820, $monitor = true, $comment = 'In... the... facility...tell... no-one...' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930819, $comment = 'Give me details!' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930823, $monitor = true, $comment = 'Find... me...' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+          </actions>
+        </cue>
+
+        <cue name="Mitsuno_Hack7" comment="a5s4 Graph6Complete Mitsuno Ready To Breach">
+          <conditions>
+            <event_cue_signalled/>
+            <!-- Scene Condition -->
+            <!-- <check_value value="userdata.hub_a5s3_complete?"/> -->
+            <check_value value="userdata.hub_a9s3_complete?"/>
+            <check_any>
+              <check_value value="userdata.scenario_chapter_6_terminus_completed?"/>
+              <check_all comment="chapter finale of final chapter">
+                <check_value value="player.allmodules.{player.module}.ischapterfinale"/>
+                <check_value value="player.scenarios.chapters.{player.scenarios.chapters.count}.indexof.{player.module}"/>
+              </check_all>
+            </check_any>
+          </conditions>
+          <actions>
+            <debug_text text="'a5s4 - hack 7'"/>
+
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                  $script = [
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 10, $monitor = table[$cutscenekey = 'ShowNoise', $caption = true], $comment = '*** Static Noise ***' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930501, $monitor = true, $comment = 'Harper... Donel...' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930503, $monitor = true, $comment = 'I... am... Mitsuno... I... am... ready...' ],
+                                            table[ $actor = '$HackerActor', $recipient = '$PlayerActor', $speak = 302930504, $monitor = true, $comment = 'Find... me... in... the... dark...' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $speak = 302930517, $comment = 'OK.' ],
+                                            table[ $closemonitor = true ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930501, $monitor = false, $comment = 'Did you say something, Harper?' ],
+                                            table[ $actor = '$PlayerActor_Clone', $voiceover = true, $monitor = true, $speak = 302930518, $comment = 'All good here' ],
+                                            table[ $actor = '$MissionDirectorActor', $recipient = '$PlayerActor', $speak = 302930502, $monitor = false, $comment = 'OK, recruit. Focus on the mission. No need to be talking to yourself.' ],
+                                            ],
+                                  $callbackcue = Mitsuno_Hack_Success,
+                                  $callbackparam = this,
+                                  ]" />
+
+          </actions>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <!-- Terraformer Faction -->
+    <library name="Setup_Faction_Terraformers" purpose="run_actions">
+      <params>
+        <param name="MissionFaction" default="faction.xenon"/>
+      </params>
+      <actions>
+        <set_faction_identity faction="$MissionFaction" name="'{20203,3901}'" description="'{20203,3902}'" shortname="'{20203,3903}'" prefixname="'{20203,3904}'" spacename="'{20203,3905}'" homespacename="'{20203,3906}'" icon="'faction_terraformer'"/>
+      </actions>
+    </library>
+
+    <!-- USC Faction -->
+    <library name="Setup_Faction_USC" purpose="run_actions">
+      <params>
+        <param name="MissionFaction" default="faction.argon"/>
+      </params>
+      <actions>
+        <set_faction_identity faction="$MissionFaction" name="'{20203,3701}'" description="'{20203,3702}'" shortname="'{20203,3703}'" prefixname="'{20203,3704}'" spacename="'{20203,3705}'" homespacename="'{20203,3706}'" icon="'faction_usc'"/>
+      </actions>
+    </library>
+
+    <!-- ATF Faction -->
+    <library name="Setup_Faction_ATF" purpose="run_actions">
+      <params>
+        <param name="MissionFaction" default="faction.argon"/>
+      </params>
+      <actions>
+        <set_faction_identity faction="$MissionFaction" name="'{20203,3801}'" description="'{20203,3802}'" shortname="'{20203,3803}'" prefixname="'{20203,3804}'" spacename="'{20203,3805}'" homespacename="'{20203,3806}'" icon="'faction_atf'"/>
+      </actions>
+    </library>
+
+    <!-- Paranid Empire Faction PAR -->
+    <library name="Setup_Faction_ParanidEmpire" purpose="run_actions">
+      <params>
+        <param name="MissionFaction" default="faction.paranid"/>
+      </params>
+      <actions>
+        <set_faction_identity faction="$MissionFaction" name="'{20203,4101}'" description="'{20203,4102}'" shortname="'{20203,4103}'" prefixname="'{20203,4104}'" spacename="'{20203,4105}'" homespacename="'{20203,4106}'" icon="'race_paranid_empire'"/>
+      </actions>
+    </library>
+
+    <library name="Scenario_GenericCompletionComment" purpose="run_actions">
+      <params>
+        <param name="TotalScore"/>
+        <param name="DebugChance" default="0"/>
+      </params>
+      <actions>
+        <!-- Have MD comment after the first completed misison, and then only now and again-->
+        <do_if value="userdata.timelines_scenarios_finished == 0">
+          <set_value name="$Chance" exact="100"/>
+        </do_if>
+        <do_elseif value="player.allmodules.{player.module}.ischapterfinale">
+          <!-- We don't want uncontrolled chatter for the setpiece scenarios -->
+          <set_value name="$Chance" exact="0"/>
+        </do_elseif>
+        <do_else>
+          <set_value name="$Chance" exact="33"/>
+        </do_else>
+
+        <do_all chance="$Chance" comment="do not have MD comment after every mission, only now and again">
+          <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$TotalScore}"/>
+
+          <include_actions ref="md.Scenario_Hub.Setup_Character_MissionDirectorActor"/>
+
+          <do_if value="not $MissionDirectorActor">
+            <debug_text text="'MissionDirectorActor does not exist'" filter="error"/>
+            <set_value name="$HasError" exact="true"/>
+          </do_if>
+
+          <!-- lines taken from Act8 Scene4 of Timelines Hub missions -->
+          <do_if value="$Rating == 0">
+            <do_any>
+              <set_value name="$line" exact="302931004" comment="A disappointing performance, recruit."/>
+              <set_value name="$line" exact="302931005" comment="If I had a palm, or a face for that matter, I would facepalm."/>
+              <set_value name="$line" exact="302931006" comment="Recruit Harper. Were you actually asleep in that mission?"/>
+              <set_value name="$line" exact="302931007" comment="I think you'll have to tackle that mission again."/>
+              <set_value name="$line" exact="302931008" comment="We can recruit an Argnu to replace you if you don't do better."/>
+            </do_any>
+          </do_if>
+          <do_elseif value="$Rating == 1">
+            <do_any>
+              <set_value name="$line" exact="302931009" comment="A single, lonely, star rating for you."/>
+              <set_value name="$line" exact="302931010" comment="Well you completed that mission... barely."/>
+              <set_value name="$line" exact="302931011" comment="An underwhelming performance."/>
+              <set_value name="$line" exact="302931012" comment="You're not setting a good example to the others."/>
+              <set_value name="$line" exact="302931013" comment="One star. Have you no pride?"/>
+            </do_any>
+          </do_elseif>
+          <do_elseif value="$Rating == 2">
+            <do_any>
+              <set_value name="$line" exact="302931014" comment="Not the worst mission rating I've seen today."/>
+              <set_value name="$line" exact="302931015" comment="I don't think you're really putting your best into this."/>
+              <set_value name="$line" exact="302931016" comment="Not memorable."/>
+              <set_value name="$line" exact="302931017" comment="Must do better."/>
+              <set_value name="$line" exact="302931018" comment="Two stars is what we might call a participation medal."/>
+            </do_any>
+          </do_elseif>
+          <do_elseif value="$Rating == 3">
+            <do_any>
+              <set_value name="$line" exact="302931019" comment="You look like you're starting to get the hang of this."/>
+              <set_value name="$line" exact="302931020" comment="Not terrible. I'll give you that."/>
+              <set_value name="$line" exact="302931021" comment="You're going in the right direction. Keep it up."/>
+              <set_value name="$line" exact="302931022" comment="I can't say you are a total waste of this Facility's oxygen supplies."/>
+              <set_value name="$line" exact="302931023" comment="A middling performance, recruit."/>
+            </do_any>
+          </do_elseif>
+          <do_elseif value="$Rating == 4">
+            <do_any>
+              <set_value name="$line" exact="302931024" comment="Well done, Harper!"/>
+              <set_value name="$line" exact="302931025" comment="You've got the right stuff, recruit!"/>
+              <set_value name="$line" exact="302931026" comment="Excellent work! Now do more missions, recruit."/>
+              <set_value name="$line" exact="302931027" comment="You're setting an excellent example to the team!"/>
+              <set_value name="$line" exact="302931028" comment="Keep up the good work, Harper!"/>
+            </do_any>
+          </do_elseif>
+          <do_elseif value="$Rating == 5">
+            <do_any>
+              <set_value name="$line" exact="302931029" comment="Well oil me up and call me a ball-bearing! You aced it, Harper!"/>
+              <set_value name="$line" exact="302931030" comment="Outstanding work! I should get you training up the slackers."/>
+              <set_value name="$line" exact="302931031" comment="The day we recruited you was a very fine day indeed!"/>
+              <set_value name="$line" exact="302931032" comment="Keep performing like this and I'll have a statue erected in your honour!"/>
+              <set_value name="$line" exact="302931033" comment="We're lucky to have you Harper. Your performance in this mission made me... emotional."/>
+            </do_any>
+          </do_elseif>
+          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance, $nofullscreenmenu = false, $allow_player_speak = true,
+                                                                                            $script = [
+                                                                                                      table[ $actor = '$MissionDirectorActor', $speak = $line, $recipient = 'player', ],
+                                                                                                      ]
+                                                                                              ]" />
+        </do_all>
+      </actions>
+    </library>
+
+    <library name="Add_Scenario_Stat_Accuracy" purpose="run_actions">
+      <params>
+        <param name="ScoreMultiplier" default="1"/>
+        <param name="AccuracyType"    default="'all'" comment="'all', 'missiles' or 'bullets'"/>
+      </params>
+      <actions>
+
+        <do_if value="$AccuracyType == 'all'">
+          <set_value name="$Fired"              exact="stat.bullets_fired + stat.missiles_fired"/>
+          <set_value name="$Hit"                exact="stat.bullets_hit + stat.missiles_hit"/>
+          <set_value name="$Stat_Name"          exact="readtext.{30600}.{3001}"/>
+          <set_value name="$Stat_Description"   exact="readtext.{30600}.{3002}"/>
+        </do_if>
+        <do_elseif value="$AccuracyType == 'bullets'">
+          <set_value name="$Fired"              exact="stat.bullets_fired"/>
+          <set_value name="$Hit"                exact="stat.bullets_hit"/>
+          <set_value name="$Stat_Name"          exact="readtext.{30600}.{3061}"/>
+          <set_value name="$Stat_Description"   exact="readtext.{30600}.{3062}"/>
+        </do_elseif>
+        <do_elseif value="$AccuracyType == 'missiles'">
+          <set_value name="$Fired"              exact="stat.missiles_fired"/>
+          <set_value name="$Hit"                exact="stat.missiles_hit"/>
+          <set_value name="$Stat_Name"          exact="readtext.{30600}.{3071}"/>
+          <set_value name="$Stat_Description"   exact="readtext.{30600}.{3072}"/>
+        </do_elseif>
+        <do_else>
+          <assert value="false" text="'invalid accuracy type in Add_Scenario_Stat_Accuracy call'"/>
+        </do_else>
+
+        <set_value name="$Accuracy" exact="0"/>
+        <do_if value="$Fired gt 0">
+          <set_value name="$Accuracy" exact="100.0 * $Hit / $Fired"/>
+        </do_if>
+
+        <set_value name="$Accuracy_Formatted" exact="(($Accuracy*1000)i)/1000.0"/>
+        <substitute_text text="$Text_Accuracy_UI" source="readtext.{30600}.{3003}">
+          <replace string="'$PERCENTAGE$'"    with="$Accuracy_Formatted"/>
+        </substitute_text>
+
+        <set_value name="$Score" exact="$Accuracy * $ScoreMultiplier"/>
+        <add_scenario_stat id="'accuracy_' + $AccuracyType" name="$Stat_Name" uivalue="$Text_Accuracy_UI" description="$Stat_Description" score="$Score" maxscore="$ScoreMultiplier * 100"/>
+
+        <return value="$Score"/>
+      </actions>
+    </library>
+
+    <library name="Add_Scenario_Stat_Time" purpose="run_actions">
+      <params>
+        <param name="StartTime"/>
+        <param name="EndTime"/>
+        <param name="ScoreTimeReference"/>
+        <param name="MandatorySurvival" default="false" comment="if true, Score will return 0, with an appended explanation that survival was indeed mandatory"/>
+      </params>
+      <actions>
+
+        <set_value name="$Time_Formatted" exact="($EndTime - $StartTime).formatted.{'%m:%S'}"/>
+        <substitute_text text="$Text_Time_UI" source="readtext.{30600}.{3033}">
+          <replace string="'$TIME_Max$'"    with="(($ScoreTimeReference)s).formatted.{'%m:%S'}"/>
+          <replace string="'$TIME_Taken$'"  with="$Time_Formatted"/>
+        </substitute_text>
+        <set_value name="$Score" exact="($ScoreTimeReference)f - ($EndTime - $StartTime)f"/>
+
+        <do_if value="$MandatorySurvival == false">
+          <set_value name="$Description" exact="readtext.{30600}.{3032}"/>
+        </do_if>
+        <do_elseif value="$MandatorySurvival == true">
+          <set_value name="$Description" exact="readtext.{30600}.{3032} + '\n' + readtext.{30600}.{3034}"/>
+        </do_elseif>
+        <add_scenario_stat id="'time'" name="readtext.{30600}.{3031}" uivalue="$Text_Time_UI" description="$Description" score="$Score"  maxscore="($ScoreTimeReference*0.8)i"/>
+
+        <return value="$Score"/>
+      </actions>
+    </library>
+
+    <library name="Track_Cause_Of_Death" purpose="cue_ref">
+      <params>
+        <!-- PSA: the weapon can't actually be tracked yet, but you may set this param if you want to benefit from a future improvement -->
+        <param name="SpecifyWeapon" default="false"/>
+      </params>
+      <cues>
+
+        <cue name="Track_Cause_Of_Death_Object_Destroyed">
+          <conditions>
+            <event_object_destroyed object="player.entity"/>
+          </conditions>
+          <actions>
+            <set_value name="$Cause" exact="null"/>
+
+            <do_if value="event.param2 == killmethod.suffocated">
+              <set_value name="$Cause" exact="{1016,2011}"/>
+            </do_if>
+            <do_elseif value="event.param2 == killmethod.selfdestructed">
+              <set_value name="$Cause" exact="{1016,2012}"/>
+            </do_elseif>
+            <do_elseif value="event.param2 == killmethod.hitbyareadamage">
+              <set_value name="$Cause" exact="{1016,2013}"/>
+            </do_elseif>
+
+            <do_if value="not (event.param or $Cause)">
+              <set_value name="$Cause" exact="{1016,2014}"/>
+            </do_if>
+
+            <run_actions ref="md.LIB_Scenario.Add_Scenario_Stat_Cause_Of_Death">
+              <param name="Killer" value="if not $Cause then event.param.knownname else null"/>
+              <!-- TODO @Lennart: enable once event_object_destroyed knows what weapon was used for the kill -->
+              <param name="Weapon" value="null"/>
+              <param name="Cause"  value="$Cause"/>
+            </run_actions>
+          </actions>
+        </cue>
+
+      </cues>
+    </library>
+
+    <library name="Add_Scenario_Stat_Cause_Of_Death" purpose="run_actions">
+      <!-- You can enter either Killer, Weapon, Cause, or Killer and Weapon. -->
+      <params>
+        <param name="Killer" default="null"/>
+        <param name="Weapon" default="null"/>
+        <param name="Cause"  default="null"/>
+      </params>
+      <actions>
+        <do_if value="$Killer and $Weapon">
+          <substitute_text text="$CauseString" source="{1016,2005}">
+            <replace string="'$KILLER$'" with="$Killer"/>
+            <replace string="'$WEAPON$'" with="$Weapon"/>
+          </substitute_text>
+        </do_if>
+        <do_elseif value="$Killer">
+          <substitute_text text="$CauseString" source="{1016,2003}">
+            <replace string="'$KILLER$'" with="$Killer"/>
+          </substitute_text>
+        </do_elseif>
+        <do_elseif value="$Weapon">
+          <substitute_text text="$CauseString" source="{1016,2004}">
+            <replace string="'$WEAPON$'" with="$Weapon"/>
+          </substitute_text>
+        </do_elseif>
+        <do_elseif value="$Cause">
+          <set_value name="$CauseString" exact="$Cause"/>
+        </do_elseif>
+        <do_else>
+          <set_value name="$CauseString" exact="'INVALID PARAMS'"/>
+        </do_else>
+
+        <substitute_text text="$ResultString" source="{1016,2001}">
+          <replace string="'$CAUSE$'" with="$CauseString"/>
+        </substitute_text>
+
+        <add_scenario_stat id="'cause_of_death'" name="$ResultString"/>
+      </actions>
+    </library>
+
+    <library name="ScenarioFinished">
+      <params>
+        <param name="ResultData"/>
+        <param name="CustomOutroMusic" default="false"/>
+      </params>
+      <delay exact="1ms"/>
+      <actions>
+        <set_value name="$TimesFinishedName" exact="player.module + '_times_finished'"/>
+        <set_value name="$LastDurationName" exact="player.module + '_last_duration'"/>
+        <set_value name="$LastScoreName" exact="player.module + '_last_score'"/>
+        <set_value name="$LastRatingName" exact="player.module + '_last_rating'"/>
+        <set_value name="$BestScoreName" exact="player.module + '_best_score'"/>
+        <set_value name="$BestRatingName" exact="player.module + '_best_rating'"/>
+        <set_value name="$BestDurationName" exact="player.module + '_best_duration'"/>
+        <set_value name="$UnlockNotifiedName" exact="player.module + '_unlock_notified'"/>
+
+        <set_userdata name="'timelines_scenarios_finished'" value="@userdata.timelines_scenarios_finished + 1"/>
+        <set_userdata name="$TimesFinishedName" value="@userdata.{$TimesFinishedName} + 1"/>
+        <set_userdata name="$LastDurationName" value="player.age"/>
+
+        <do_if value="userdata.{$TimesFinishedName} == 1 and player.allmodules.{player.module}.ischapterfinale">
+          <set_userdata name="'timelines_hub_force_close_scenario_menu'" value="1"/>
+        </do_if>
+
+        <do_if value="$ResultData.$Score lt 0">
+          <set_value name="$ResultData.$Score" exact="0"/>
+        </do_if>
+
+        <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$ResultData.$Score}"/>
+
+        <set_userdata name="$LastScoreName" value="$ResultData.$Score"/>
+        <set_userdata name="$LastRatingName" value="$Rating"/>
+
+        <do_if value="$Rating ge 1">
+          <set_userdata name="$UnlockNotifiedName" value="@userdata.{$UnlockNotifiedName} + 1"/>
+        </do_if>
+
+        <!-- Play a standardised outro jingle for both success and failure cases (if not disabled for cusom handling) -->
+        <do_if value="not $CustomOutroMusic">
+          <do_if value="$Rating ge 1">
+            <!-- Success case -->
+            <play_music music="'music_soundtrack_timelines_scenario_result'" loop="true"/>
+          </do_if>
+          <do_else>
+            <!-- Failure case -->
+            <play_music music="'scenario_fail'"/>
+          </do_else>
+        </do_if>
+
+        <!--update best score and rating if this run was actually better (or the first one)-->
+        <do_if value="userdata.{$TimesFinishedName} == 1 or $ResultData.$Score gt @userdata.{$BestScoreName}">
+          <set_userdata name="$BestScoreName" value="$ResultData.$Score"/>
+          <set_userdata name="$BestRatingName" value="$Rating"/>
+          <set_userdata name="$BestDurationName" value="player.age"/>
+        </do_if>
+
+        <!--update data for leaderboard values if applicable-->
+        <set_value name="$BestScoreNameSigned" exact="$BestScoreName + '_signed'"/>
+        <do_if value="userdata.{$TimesFinishedName} == 1 or $ResultData.$Score gt @userdatasigned.{$BestScoreNameSigned}">
+          <set_userdata name="$BestScoreNameSigned" value="$ResultData.$Score" requiresigned="true"/>
+          <set_userdata name="$BestRatingName + '_signed'" value="$Rating" requiresigned="true"/>
+          <set_userdata name="$BestDurationName + '_signed'" value="player.age" requiresigned="true"/>
+          <set_userdata name="player.module + '_gamebuild'" value="player.gamebuild" requiresigned="true"/>
+          <set_userdata name="player.module + '_upload_pending'" value="1" requiresigned="true"/>
+        </do_if>
+
+        <!--Stop the briefing cutscene if it's still playing-->
+        <do_if value="@$BriefingCutscene">
+          <stop_cutscene key="$BriefingCutscene"/>
+        </do_if>
+
+        <!--if the player dies the debriefing menu will be opened at the correct time by the custom Game Over handler-->
+        <!--Note: @ used because currently some scenarios don't set this value-->
+        <set_value name="$PlayerDied" exact="@$ResultData.$PlayerDied or player.isgameover"/>
+        <do_if value="$PlayerDied">
+          <set_userdata name="'timelines_hub_spawnmethod'" value="2"/>
+        </do_if>
+        <do_else>
+          <set_userdata name="'timelines_hub_spawnmethod'" value="1"/>
+          <open_menu menu="ScenarioDebriefingMenu"/>
+        </do_else>
+        <!--<muffle_sound strength="0.9999" duration="1s"/>-->
+        <do_if value="$Rating ge 5">
+          <unlock_achievement name="TL_5_STARS_ONCE" scenario="true"/>
+        </do_if>
+        <do_if value="$Rating ge 3">
+          <set_value name="$all_5_stars" exact="true"/>
+          <set_value name="$all_4_stars" exact="true"/>
+          <set_value name="$all_3_stars" exact="true"/>
+          <do_all exact="player.scenarios.chapters.count" counter="$chapter">
+            <do_for_each in="player.scenarios.chapters.{$chapter}" name="$module">
+              <set_value name="$BestRatingName" exact="$module + '_best_rating'"/>
+              <set_value name="$rating" exact="@userdata.{$BestRatingName}"/>
+              <do_if value="$module == player.module and $Rating gt $rating">
+                <set_value name="$rating" exact="$Rating"/>
+              </do_if>
+              <do_if value="$rating lt 5">
+                <remove_value name="$all_5_stars"/>
+              </do_if>
+              <do_if value="$rating lt 4">
+                <remove_value name="$all_4_stars"/>
+              </do_if>
+              <do_if value="$rating lt 3">
+                <remove_value name="$all_3_stars"/>
+              </do_if>
+              <do_if value="not $all_3_stars?">
+                <break/>
+              </do_if>
+            </do_for_each>
+          </do_all>
+          <do_if value="$all_3_stars?">
+            <unlock_achievement name="TL_3_STARS_ALL" scenario="true"/>
+          </do_if>
+          <do_if value="$all_4_stars?">
+            <unlock_achievement name="TL_4_STARS_ALL" scenario="true"/>
+          </do_if>
+          <do_if value="$all_5_stars?">
+            <unlock_achievement name="TL_5_STARS_ALL" scenario="true"/>
+          </do_if>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="ScenarioStarted" purpose="include_actions">
+      <actions>
+        <set_value name="$MuffleDuration" exact="10s"/>
+        <set_value name="$BlurDuration" exact="10s"/>
+        <set_value name="$FadeDuration" exact="1s"/>
+        <muffle_sound strength="0.9999" duration="0s"/>
+        <muffle_sound strength="0" duration="$MuffleDuration"/>
+        <blur_screen strength="10" duration="0s"/>
+        <blur_screen strength="0" duration="$BlurDuration"/>
+        <fade_screen fadeout="0s" fadein="$FadeDuration" realtime="true"/>
+      </actions>
+    </library>
+
+    <!-- Track if a specified group of objects buys something before undocking again (for achievement purposes) -->
+    <library name="ScenarioTrading_EfficiencyTracking" purpose="cue_ref">
+      <params>
+        <param name="TrackedShipGroup"/>
+        <param name="ReportSignalCue"/>
+      </params>
+      <cues>
+
+        <cue name="PlayerOwnedDocked" instantiate="true">
+          <conditions>
+            <event_object_docked group="$TrackedShipGroup"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$DockedShip" exact="event.object"/>
+          </actions>
+          <cues>
+
+            <cue name="PlayerOwned_TradeComplete">
+              <conditions>
+                <event_trade_completed buyer="parent.$DockedShip"/>
+              </conditions>
+              <actions>
+                <set_value name="parent.$ProductBought"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerOwnedUndocking">
+              <conditions>
+                <event_object_undocked object="parent.$DockedShip"/>
+              </conditions>
+              <actions>
+                <do_if value="not parent.$ProductBought?">
+                  <signal_cue_instantly cue="$ReportSignalCue"/>
+                </do_if>
+                <cancel_cue cue="parent"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </library>
+
+  </cues>
+</mdscript>
+
+<!-- Questions/Notes
+  - Is this the master timelines script which evaluates results and performs changes/unlocks?
+  -->

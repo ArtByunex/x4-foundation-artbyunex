@@ -1,0 +1,874 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Wave_Attack_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Daniel Turner"/>
+  </documentation>
+  <cues>
+
+    <!--This template includes an example scenario. Actions and sections with the tag #TemplateExample can be changed or removed.
+    TODO @Owen probably better just making an actual example-->
+    <cue name="Start" namespace="this" module="scenario_waveattack_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.holyorder"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+
+        <!-- Custom Scenario-Related variables -->
+        <set_value name="$EnemyOwner" exact="faction.xenon" comment="#TemplateExample"/>
+
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Station" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_EnemySpawn" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Cutscene" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Station">
+              <actions>
+                <find_station name="$Station" space="player.sector" required="true" chance="if player.sector then 100 else 0"/>
+                <do_if value="not $Station.exists">
+                  <debug_text text="'Station does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+                  <add_to_group groupname="$MissionRelevantObjects" object="$Station"/>
+                  <set_object_relation_behaviour object="$Station" disable="true"/>
+                  <find_object_component name="$StationModules" object="$Station" multiple="true" class="class.module"/>
+                  <do_for_each in="$StationModules" name="$CurrentModule">
+                    <set_object_hull_unrepairable object="$CurrentModule" unrepairable="true"/>
+                  </do_for_each>
+                  <!--remove all cargo from Station-->
+                  <do_for_each name="$Ware" valuename="$Amount" in="$Station.cargo.table">
+                    <remove_cargo object="$Station" ware="$Ware" exact="$Amount"/>
+                  </do_for_each>
+                  <find_module name="$Dockarea" object="$Station" class="class.dockarea"/>
+                  <find_dockingbay name="$Dock" object="$Dockarea">
+                    <match_dock size="tag.dock_s" free="true"/>
+                  </find_dockingbay>
+
+                  <create_ship name="$Ares" macro="ship_par_s_heavyfighter_01_a_macro" dock="$Dock">
+                    <loadout ref="'scenario_wave_attack_burst_heavy'"/>
+                    <owner exact="$MissionFaction"/>
+                  </create_ship>
+
+                  <!-- Set Weapon groups -->
+                  <do_for_each in="$Ares.weapons.all.list" name="$weapon">
+                    <do_if value="$weapon.macro == macro.weapon_gen_s_burst_01_mk1_macro">
+                      <remove_weapon_from_all_weapongroups weapon="$weapon"/>
+                      <add_weapon_to_weapongroup      weapon="$weapon" weapongroup="1" primary="true" />
+                    </do_if>
+                    <do_if value="$weapon.macro == macro.weapon_gen_s_laser_01_mk2_macro">
+                      <remove_weapon_from_all_weapongroups weapon="$weapon"/>
+                      <add_weapon_to_weapongroup      weapon="$weapon" weapongroup="0" primary="true" />
+                      <add_weapon_to_weapongroup      weapon="$weapon" weapongroup="1" primary="true" />
+                    </do_if>
+                  </do_for_each>
+
+                  <create_group groupname="$WreckShips"/>
+
+                  <set_value name="$PositionAngle" exact="0deg"/>
+                  <set_value name="$RotationYaw" exact="0deg"/>
+
+                  <do_all exact="3">
+                    <set_value name="$PositionDistance" exact="2.5km"/>
+                    <set_value name="$PositionHeight" exact="0km"/>
+                    <create_ship name="$MissileWreck" macro="ship_par_s_fighter_02_a_macro" sector="$Station.sector" capturable="false" group="$WreckShips" state="componentstate.wreck">
+                      <owner exact="$MissionFaction"/>
+                      <position object="$Station" x="$PositionDistance * sin($PositionAngle)" y="0km" z="$PositionDistance * cos($PositionAngle)"/>
+                      <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+                    </create_ship>
+                    <create_object name="$Navbeacon" macro="macro.env_deco_nav_beacon_t1_macro" sector="$Station.sector" owner="$MissionFaction">
+                      <position object="$Station" x="$PositionDistance * sin($PositionAngle)" y="0km" z="$PositionDistance * cos($PositionAngle)"/>
+                      <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+                    </create_object>
+                    <set_value name="$PositionAngle" exact="120deg" operation="add"/>
+                    <set_value name="$RotationYaw" exact="120deg" operation="add"/>
+
+                    <set_object_name object="$Navbeacon" page="20109" line="1001"/>
+                    <set_wreck_persistence object="$MissileWreck" persistent="true"/>
+                    <spawn_drop drop="'drops_scenario_waveattack_01_missile_resupply'" object="$MissileWreck"/>
+                    <set_allow_drop object="$MissileWreck" allow="false"/>
+                    <set_object_radar_visible object="$MissileWreck" visible="false"/>
+                  </do_all>
+                  <find_object name="$MissileDrops" class="class.drop" multiple="true" space="$Station.zone"/>
+                  <do_for_each name="$MissileDrop" in="$MissileDrops">
+                    <set_drop_persistence object="$MissileDrop" persistent="true"/>
+                  </do_for_each>
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_Player">
+              <actions>
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+                  <set_emergency_eject_active active="false"/>
+                  <set_faction_relation_locked faction="faction.player" locked="false" />
+                  <set_faction_relation_locked faction="$MissionFaction" locked="false" />
+                  <set_faction_relation faction="$MissionFaction" otherfaction="faction.player" value="$MissionFaction.relation.ally.min" />
+                  <set_faction_relation_locked faction="faction.player" locked="true" />
+                  <set_faction_relation_locked faction="$MissionFaction" locked="true" />
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_EnemySpawn">
+              <actions>
+                <do_if value="not $Station.exists">
+                  <debug_text text="'Station does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+                <do_else>
+                  <!--Positions sourced from the position of $Station, ignoring rotation, in sector coordinate space-->
+                  <create_position name="$EnemyLocation_1" object="$Station.zone" space="$Station.sector" x="$Station.position.x" y="$Station.position.y" z="$Station.position.z + 15km"/>
+                  <create_position name="$EnemyLocation_2" object="$Station.zone" space="$Station.sector" x="$Station.position.x + 15km" y="$Station.position.y" z="$Station.position.z"/>
+                  <create_position name="$EnemyLocation_3" object="$Station.zone" space="$Station.sector" x="$Station.position.x - 15km" y="$Station.position.y" z="$Station.position.z"/>
+                  <create_position name="$EnemyLocation_4" object="$Station.zone" space="$Station.sector" x="$Station.position.x" y="$Station.position.y" z="$Station.position.z - 15km"/>
+                  <set_value name="$EnemyLocations" exact="[$EnemyLocation_1, $EnemyLocation_2, $EnemyLocation_3, $EnemyLocation_4]"/>
+                  <create_list name="$EnemySpawns"/>
+                  <do_for_each name="$EnemyLocation" in="$EnemyLocations">
+                    <create_orientation name="$Orientation" orientation="look_at" refposition="$Station.position">
+                      <position value="$EnemyLocation"/>
+                    </create_orientation>
+                    <create_object name="$EnemySpawn" macro="macro.wormhole_v1_macro" sector="$Station.sector">
+                      <position value="$EnemyLocation"/>
+                      <rotation value="$Orientation"/>
+                    </create_object>
+                    <append_to_list name="$EnemySpawns" exact="$EnemySpawn"/>
+                    <create_object name="$Navbeacon" macro="macro.env_deco_nav_beacon_t1_macro" sector="$Station.sector" owner="$MissionFaction">
+                      <position value="$EnemyLocation"/>
+                      <rotation value="$Orientation"/>
+                    </create_object>
+                    <set_object_name object="$Navbeacon" page="20109" line="4901"/>
+                  </do_for_each>
+                  <do_for_each name="$EnemySpawn" in="$EnemySpawns">
+                    <do_for_each name="$Spawn" in="$EnemySpawns">
+                      <do_if value="$Spawn != $EnemySpawn">
+                        <add_anomaly_destination anomaly="$EnemySpawn" destination="$Spawn"/>
+                      </do_if>
+                    </do_for_each>
+                  </do_for_each>
+                </do_else>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                  <page exact="10302"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Cutscene">
+              <actions>
+                <!--Owen: should these ships have fixed macros/loadouts?-->
+                <create_cue_actor name="$CommPilot" cue="namespace" macro="macro.character_argon_male_afr_pilot_01_macro">
+                  <owner exact="$MissionFaction"/>
+                  <page exact="10102"/>
+                  <skills>
+                    <skill type="management"  exact="10"/>
+                    <skill type="morale"      exact="9"/>
+                    <skill type="piloting"    exact="7"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="4"/>
+                  </skills>
+                </create_cue_actor>
+
+                <create_ship name="$CommShip" zone="player.zone">
+                  <select faction="$MissionFaction" size="class.ship_s" tags="tag.scout"/>
+                  <owner exact="$MissionFaction" overridenpc="true"/>
+                  <pilot actor="$CommPilot"/>
+                  <safepos object="$Station" min="10km" max="15km"/>
+                </create_ship>
+                <set_allow_drop object="$CommShip" allow="false"/>
+                <set_object_shield object="$CommShip" exact="0"/>
+                <set_object_shield_unrepairable object="$CommShip" unrepairable="true"/>
+                <set_object_min_hull object="$CommShip" exact="5"/>
+                <create_group groupname="$CutsceneXenons"/>
+                <do_all exact="5">
+                  <create_ship name="$Xenon" groupname="$CutsceneXenons" zone="player.zone" macro="macro.ship_xen_s_fighter_02_a_macro">
+                    <owner exact="$EnemyOwner" overridenpc="true"/>
+                    <pilot>
+                      <select faction="$EnemyOwner" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$CommShip" min="200m" max="500m"/>
+                  </create_ship>
+                  <set_allow_drop object="$Xenon" allow="false"/>
+                  <create_order object="$Xenon" id="'Attack'">
+                    <param name="primarytarget" value="$CommShip"/>
+                  </create_order>
+                </do_all>
+
+                <set_value name="$Xenon" exact="$CutsceneXenons.random"/>
+                <create_order object="$CommShip" id="'Attack'">
+                  <param name="primarytarget" value="$Xenon"/>
+                </create_order>
+
+                <do_if value="not $CommShip.exists">
+                  <debug_text text="'CommShip does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+
+            <cue name="Cutscene">
+              <actions>
+                <fade_screen color="black" fadein="3s" fadeout="0s" realtime="true"/>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <set_value name="$CutsceneActors" exact="table[]"/>
+                <set_value name="$CutsceneActors.$PlayerComputer" exact="table[
+                                              $entity = player.computer,
+                                              ]"/>
+                <set_value name="$CutsceneActors.$CommPilot" exact="table[
+                                              $entity = $CommShip.pilot,
+                                              ]"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                                  $script = [
+                                            table [$actor = '$PlayerComputer', $speak = 30224515, $speakcallbackcue = StartCutscene, $recipient = 'player'],
+                                            table [$actor = '$CommPilot', $speak = 10052, $speakcallbackcue = PlaySoundEffects, $recipient = 'player'],
+                                            2.5s,
+                                            table [$actor = '$CommPilot', $speak = 10018, $speakcallbackcue = StopCutscene, $recipient = 'player'],
+                                            ],
+                                            $abortcallbackcue = CutsceneStopped,
+                                            $abortonsignalledcue = CutsceneStopped
+                                ]" />
+              </actions>
+              <cues>
+                <cue name="StartCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$LookatTarget" exact="$Station"/>
+                    <set_value name="$Anchor" exact="$CommShip"/>
+                    <set_value name="$Duration" exact="20s"/>
+                    <set_value name="$Duration" exact="$Duration + player.timewarp.factor + 1s"/>
+                    <set_value name="$Distance" exact="$Anchor.size * 3.5f"/>
+
+                    <play_cutscene letterbox="true" movesoundcamera="true" result="$OpeningCutscene" key="'Follow_A_Lookat_B'">
+                      <param name="duration" number="$Duration"/>
+                      <param name="anchordist" number="-$Distance"/>
+                      <param name="anchor" object="$Anchor"/>
+                      <param name="anchor_x" number="0"/>
+                      <param name="anchor_y" number="$Anchor.height * 0.6"/>
+                      <param name="anchor_z" number="0"/>
+                      <param name="target" object="$LookatTarget"/>
+                      <param name="target_x" number="0"/>
+                      <param name="target_y" number="0"/>
+                      <param name="target_z" number="0"/>
+                    </play_cutscene>
+                  </actions>
+                </cue>
+                <cue name="PlaySoundEffects">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="2.5s"/>
+                  <actions>
+                    <add_effect effect="'surfaceexplosions_s'" object="$CommShip"/>
+                    <add_effect effect="'sparkles_s'" object="$CommShip"/>
+                    <add_effect effect="'smoketrail_s'" object="$CommShip"/>
+                    <add_effect effect="'firetrail_s'" object="$CommShip"/>
+                    <set_object_velocity object="$CommShip">
+                      <linear value="vector.[0m, 0m, 0m]"/>
+                      <angular value="vector.[0m, 0m, 0m]"/>
+                    </set_object_velocity>
+                    <fade_screen color="black" starttime="player.age + 2s" fadeout="1s * player.timewarp.factor" fadein="2s * player.timewarp.factor"/>
+                  </actions>
+                </cue>
+                <cue name="StopCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <stop_cutscene cutscene="$OpeningCutscene"/>
+                    <play_sound sound="'explosion_close_m_l_short'" object="$CommShip" type="ui"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="CutsceneStopped">
+              <conditions>
+                <event_cutscene_stopped/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <cancel_cue cue="Cutscene"/>
+                <remove_value name="$CutsceneActors.$CommPilot"/>
+                <remove_cue_actor actor="$CommPilot" cue="namespace"/>
+                <destroy_group group="$CutsceneXenons" explosion="false"/>
+                <destroy_object object="$CommShip" explosion="false"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <speak actor="player.computer" priority="90">
+                  <text line="30224523" comment="End of transmission."/>
+                </speak>
+                <set_value name="$StartTime" exact="player.age"/>
+                <signal_cue_instantly cue="Ch1_WaveDefence"/>
+              </actions>
+            </cue>
+
+            <cue name="MitsunoHack">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay min="8s" max="12s"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_WaveDefence">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!--Owen: Are the resulting ships potentially too random?-->
+                <set_value name="$WaveConfig" exact="[
+                            table[
+                              $PreparationTime = 45s,
+                              $CompletionTime = 60s,
+                              $EnemyConfig = [
+                                table[$Count = 5, $Macro = macro.ship_xen_s_fighter_01_a_macro, $Loadout = 'scenario_wave_attack_xen_n'],
+                                ]
+                            ],
+                            table[
+                               $PreparationTime = 30s,
+                               $CompletionTime = 60s,
+                               $AllyConfig = [
+                                table[$Count = 2, $Size = class.ship_s, $Tags = [tag.military,tag.fighter]],
+                                ],
+                               $EnemyConfig = [
+                                table[$Count = 2, $Macro = macro.ship_xen_s_fighter_01_a_macro, $Loadout = 'scenario_wave_attack_xen_n'],
+                                table[$Count = 3, $Macro = macro.ship_xen_s_fighter_02_a_macro, $Loadout = 'scenario_wave_attack_xen_m'],
+                                table[$Count = 2, $Macro = macro.ship_xen_m_corvette_02_a_macro, $Loadout = 'scenario_wave_attack_xen_pe'],
+                                ]
+                            ],
+                            table[
+                              $PreparationTime = 30s,
+                              $CompletionTime = 90s,
+                              $AllyConfig = [
+                                table[$Count = 3, $Size = class.ship_s, $Tags = [tag.military,tag.fighter]],
+                                table[$Count = 2, $Size = class.ship_m, $Tags = [tag.military]],
+                                ],
+                              $EnemyConfig = [
+                                table[$Count = 3, $Macro = macro.ship_xen_s_fighter_01_a_macro, $Loadout = 'scenario_wave_attack_xen_n'],
+                                table[$Count = 5, $Macro = macro.ship_xen_s_fighter_02_a_macro, $Loadout = 'scenario_wave_attack_xen_m'],
+                                table[$Count = 2, $Macro = macro.ship_xen_m_corvette_02_a_macro, $Loadout = 'scenario_wave_attack_xen_pe'],
+                                ]
+                            ],
+                            table[
+                              $PreparationTime = 75s,
+                              $CompletionTime = 120s,
+                              $EnemyConfig = [
+                                table[$Count = 3, $Macro = macro.ship_xen_s_fighter_01_a_macro, $Loadout = 'scenario_wave_attack_xen_n'],
+                                table[$Count = 5, $Macro = macro.ship_xen_s_fighter_02_a_macro, $Loadout = 'scenario_wave_attack_xen_m'],
+                                table[$Count = 3, $Macro = macro.ship_xen_m_corvette_02_a_macro, $Loadout = 'scenario_wave_attack_xen_pe'],
+                                ],
+                            ],
+                            table[
+                              $PreparationTime = 60s,
+                              $AllyConfig = [
+                                table[$Count = 5, $Size = class.ship_s, $Tags = [tag.military,tag.fighter]],
+                                table[$Count = 3, $Size = class.ship_m, $Tags = [tag.military]],
+                                table[$Count = 2, $Size = class.ship_l, $Tags = [tag.military,tag.destroyer]],
+                                ],
+                              $EnemyConfig = [
+                                table[$Count = 5, $Macro = macro.ship_xen_s_fighter_01_a_macro, $Loadout = 'scenario_wave_attack_xen_n'],
+                                table[$Count = 8, $Macro = macro.ship_xen_s_fighter_02_a_macro, $Loadout = 'scenario_wave_attack_xen_m'],
+                                table[$Count = 5, $Macro = macro.ship_xen_m_corvette_02_a_macro, $Loadout = 'scenario_wave_attack_xen_pe'],
+                                table[$Count = 1, $Macro = macro.ship_xen_xl_destroyer_01_a_macro, $Loadout = 'scenario_wave_attack_xen_k'],
+                                ],
+                            ],
+                          ]"/>
+
+                <set_value name="$CurrentWaveNumber" exact="1"/>
+                <set_value name="$CurrentSpawnNumber" min="1" max="$EnemySpawns.count"/>
+                <set_value name="$ClearedWaves" exact="0"/>
+
+                <!-- Scenario Stats -->
+                <set_value name="$DestroyedAllies" exact="0"/>
+                <set_value name="$UpgradeInstalled" exact="false"/>
+
+                <set_value name="$CollectedDrops" exact="[]"/>
+                <set_value name="$Resupplier" exact="null"/>
+                <create_group groupname="$Allies"/>
+
+                <debug_text text="'Starting Chapter 1'" chance="$DebugChance"/>
+
+                <!-- Mission Objective -->
+                <!--Owen: reward text not necessary for scenarios-->
+                <set_value name="$MissionStep" exact="1"/>
+                <create_mission cue="$MissionCue" comment="Mission: Defend station" abortable="false"
+                                name="{30604,1}" description="{30604,3}" difficulty="level.medium" type="missiontype.other"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                faction="$MissionFaction">
+                  <briefing>
+                    <objective step="1" action="objective.protect" object="$Station"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="$MissionStep"/>
+                <set_objective cue="$MissionCue" object="$Station" action="objective.flyto" updatebriefing="false" silent="true"/>
+              </actions>
+              <cues>
+                <cue name="PlayerInRangeCheck" checkinterval="1s">
+                  <conditions>
+                    <check_value value="(player.sector == $Station.sector) and (player.entity.bboxdistanceto.{$Station} le 10000m)"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Actors" exact="table[]"/>
+                    <set_value name="$Actors.$PlayerComputer" exact="table[
+                                              $entity = player.computer,
+                                              ]"/>
+                    <set_value name="$Actors.$Client" exact="table[
+                                              $entity = $Client,
+                                              ]"/>
+                    <do_if value="$CurrentWaveNumber == 1">
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                  $caller = this, $preset = '$plotlike', $actors = $Actors, $debugchance = 0,
+                                  $script = [
+                                            table [$actor = '$Client', $speak = 10074, $recipient = 'player'],
+                                            table [$actor = '$PlayerComputer', $speak = 505, $recipient = 'player'],
+                                            ]
+                                ]" />
+                      <signal_cue_instantly cue="WaveLogic"/>
+                    </do_if>
+                  </actions>
+                </cue>
+                <cue name="AllyKilled" instantiate="true">
+                  <conditions>
+                    <event_object_destroyed group="$Allies"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$DestroyedAllies" operation="add"/>
+                  </actions>
+                </cue>
+
+                <cue name="EndingCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$Station.isoperational">
+                      <play_cutscene letterbox="true" movesoundcamera="true" result="$EndingCutscene" key="'OrbitParameterized'">
+                        <param name="targetobject" object="$Station"/>
+                        <param name="orbitdist" number="$Station.width"/>
+                        <param name="orbitelevation" number="$Station.height * 1.5" />
+                      </play_cutscene>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="md.Scenario_Wave_Attack_1.ResultWindow"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Stop_EndingCutscene">
+                      <delay exact="15s"/>
+                      <actions>
+                        <stop_cutscene cutscene="$EndingCutscene"/>
+                      </actions>
+                    </cue>
+                    <cue name="EndingCutscene_Stopped">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="$EndingCutscene"/>
+                      </conditions>
+                      <actions>
+                        <fade_screen color="black" fadein="2s" fadeout="0s" realtime="true"/>
+                        <cancel_cue cue="Stop_EndingCutscene"/>
+                        <signal_cue cue="md.Scenario_Wave_Attack_1.ResultWindow"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="GuidePlayerToAres">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="10s"/>
+                  <actions>
+                    <signal_cue cue="MitsunoHack"/>
+                  </actions>
+                  <cues>
+                    <cue name="GuidePlayerToAres_Guidance">
+                      <delay exact="5s"/>
+                      <actions>
+                        <set_owner object="$Ares" faction="faction.player"/>
+                        <set_objective cue="$MissionCue" action="objective.embark" object="$Ares" keeptimer="true"/>
+                      </actions>
+                    </cue>
+                    <cue name="GuidePlayerToAres_Reminder">
+                      <delay exact="20s"/>
+                      <actions>
+                        <do_if value="player.controlled and player.controlled != $Ares">
+                          <reset_cue cue="GuidePlayerToAres_Guidance"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="10s"/>
+                      <actions>
+                        <do_if value="player.controlled and player.controlled != $Ares">
+                          <reset_cue cue="GuidePlayerToAres_Guidance"/>
+                        </do_if>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="AresBoarded">
+                  <conditions>
+                    <event_player_started_control/>
+                  </conditions>
+                  <actions>
+                    <do_if value="event.param == $Ares">
+                      <set_objective cue="$MissionCue" action="objective.wait" object="$EnemySpawns.{$CurrentSpawnNumber}" radius="500m" keeptimer="true" text="{30604,1201}"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="WaveLogic" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_group groupname="$Enemies"/>
+                    <set_value name="$NumberOfEnemies" exact="0"/>
+                  </actions>
+                  <cues>
+                    <cue name="PreparationPhase">
+                      <actions>
+                        <do_if value="$WaveConfig.{$CurrentWaveNumber}.$AllyConfig?">
+                          <set_value name="$AllyConfig" exact="$WaveConfig.{$CurrentWaveNumber}.$AllyConfig"/>
+                          <do_for_each name="$Set" in="$AllyConfig">
+                            <do_all exact="$Set.$Count">
+                              <create_ship name="$Ally" groupname="$Allies" sector="$Station.sector" capturable="false">
+                                <select faction="$MissionFaction" size="$Set.$Size" tags="$Set.$Tags"/>
+                                <owner exact="if $CurrentWaveNumber == 2 then faction.player else $MissionFaction" overridenpc="true"/>
+                                <pilot>
+                                  <select faction="$MissionFaction" tags="tag.aipilot"/>
+                                </pilot>
+                                <safepos object="$Station" min="2km" max="5km"/>
+                                <rotation pitch="0deg" roll="0deg"/>
+                              </create_ship >
+                              <set_value name="$Ally.pilot.$donotbail"/>
+                              <set_allow_drop object="$Ally" allow="false"/>
+                              <add_effect object="$Ally" effect="'jump_gateeffect'"/>
+                              <do_if value="$Set.$Loadout?">
+                                <get_loadout result="$Loadout" macro="$Ally.macro" loadout="$Set.$Loadout"/>
+                                <apply_loadout object="$Ally" loadout="$Loadout"/>
+                              </do_if>
+                              <create_order object="$Ally" id="'ProtectStation'">
+                                <param name="station" value="$Station"/>
+                                <param name="radius" value="15km"/>
+                              </create_order>
+                            </do_all>
+                          </do_for_each>
+                        </do_if>
+                        <set_objective cue="$MissionCue" action="objective.wait" object="$EnemySpawns.{$CurrentSpawnNumber}" radius="500m" endtime="player.age + $WaveConfig.{$CurrentWaveNumber}.$PreparationTime" text="{30604,1201}"/>
+                      </actions>
+                      <delay exact="2s"/>
+                      <!--Tips block-->
+                      <actions>
+                        <do_if value="$CurrentWaveNumber == 1">
+                          <show_help custom="{30604,5001}" duration="5s" allowclose="true" position="1"/>
+                          <write_to_logbook title="{1001, 5713}" category="tips" text="{30604,5001}"/>
+                        </do_if>
+                        <do_elseif value="$CurrentWaveNumber == 5">
+                          <show_help custom="{30604,5021} + ' ' + {30604,5022}" duration="5s" allowclose="true" position="1"/>
+                          <write_to_logbook category="missions" title="{30604,5021}" text="{30604,5022}" highlighted="true"/>
+                          <signal_cue cue="GuidePlayerToAres"/>
+                        </do_elseif>
+                      </actions>
+                      <delay exact="5s"/>
+                      <actions>
+                      </actions>
+                    </cue>
+                    <cue name="AttackPhase">
+                      <!--Have a minimum of 1ms delay so the subcue can listen to event_cue_completed-->
+                      <delay exact="[$WaveConfig.{$CurrentWaveNumber}.$PreparationTime, 1ms].max"/>
+                      <actions>
+                        <set_value name="$EnemyConfig" exact="$WaveConfig.{$CurrentWaveNumber}.$EnemyConfig"/>
+                        <do_for_each name="$Set" in="$EnemyConfig">
+                          <set_value name="$NumberOfEnemies" operation="add" exact="$Set.$Count"/>
+                          <do_all exact="$Set.$Count">
+                            <create_ship name="$EnemyShip" groupname="$Enemies" sector="$Station.sector" macro="$Set.$Macro">
+                              <owner exact="$EnemyOwner" overridenpc="true"/>
+                              <loadout ref="$Set.$Loadout"/>
+                              <pilot>
+                                <select faction="$EnemyOwner" tags="tag.aipilot"/>
+                                <skills>
+                                  <skill type="piloting" exact="15"/>
+                                  <skill type="morale" exact="15"/>
+                                </skills>
+                              </pilot>
+                              <drop ref="drops_scenario_waveattack_01_xenon"/>
+                              <orientation orientation="look_at" refobject="$Station"/>
+                              <safepos value="$EnemySpawns.{$CurrentSpawnNumber}.position" space="$Station.zone" min="500m" max="800m"/>
+                            </create_ship>
+                            <do_if value="$EnemyShip.exists">
+                              <do_if value="$EnemyShip.isclass.ship_xl">
+                                <set_value name="$XenonDestroyer" exact="$EnemyShip"/>
+                                <set_value name="$XenonDestroyerMaxHitpoints" exact="$XenonDestroyer.hull"/>
+                                <do_for_each name="$Shield" in="$XenonDestroyer.shields.all.list">
+                                  <set_value name="$XenonDestroyerMaxHitpoints" operation="add" exact="$Shield.hull"/>
+                                </do_for_each>
+                                <do_for_each name="$Weapon" in="$XenonDestroyer.weapons.all.list">
+                                  <set_value name="$XenonDestroyerMaxHitpoints" operation="add" exact="$Weapon.hull"/>
+                                </do_for_each>
+                                <do_for_each name="$Engine" in="$XenonDestroyer.engines.all.list">
+                                  <set_value name="$XenonDestroyerMaxHitpoints" operation="add" exact="$Engine.hull"/>
+                                </do_for_each>
+                              </do_if>
+                              <add_effect object="$EnemyShip" effect="'jump_gateeffect'"/>
+                              <create_order object="$EnemyShip" id="'Attack'">
+                                <param name="primarytarget" value="if $Allies.count > 0 and not $EnemyShip.isclass.ship_xl then [$Station, $Allies.random].random else $Station"/>
+                                <param name="secondarytargets" value="[$Station]"/>
+                                <param name="pursuetargets" value="true"/>
+                                <param name="allowothertargets" value="false"/>
+                              </create_order>
+                            </do_if>
+                            <do_else>
+                              <debug_text text="'Unable to create ship with size ' + $Set.$Size + ' and tags ' + $Set.$Tags" filter="error"/>
+                            </do_else>
+                          </do_all>
+                        </do_for_each>
+                      </actions>
+                      <cues>
+                        <cue name="ManageRML">
+                          <conditions>
+                            <event_cue_completed cue="AttackPhase"/>
+                            <check_value value="$MissionCue.hasmission"/>
+                          </conditions>
+                          <cues>
+                            <cue name="ProtectObjectRML" ref="md.RML_Protect_Object.ProtectObject">
+                              <param name="EndSignalCue"    value="WaveCleared"/>
+                              <param name="MissionCue"      value="$MissionCue"/>
+                              <param name="StartStep"       value="$MissionStep" comment="Briefing step to start the mission on"/>
+                              <param name="UpdateBriefing"  value="false" comment="Update the briefing objective step when the objective is updated"/>
+                              <param name="GuidanceOnObject" value="true"/>
+                              <param name="EnemyFactions" value="[$EnemyOwner]"/>
+                              <param name="Object"   value="$Station" />
+                              <param name="DebugChance"     value="$DebugChance"/>
+                              <param name="FlyToRange"     value="15km"/>
+                              <param name="EndTime"     value="if $WaveConfig.{$CurrentWaveNumber}.$CompletionTime? then player.age + $WaveConfig.{$CurrentWaveNumber}.$CompletionTime else 0s"/>
+                              <param name="ForceEndCue" value="ResultWindow" comment="Force the end of the protect RML"/>
+                            </cue>
+                            <cue name="WaveCleared">
+                              <conditions>
+                                <event_cue_signalled/>
+                              </conditions>
+                              <actions>
+                                <!--Failure case ($EndFeedbackValue is less than or equal to 0)-->
+                                <do_if value="WaveCleared.$EndFeedbackValue" max="0">
+                                  <debug_text text="'This mission has failed. RML Feedback: ' + WaveCleared.$EndFeedbackValue" chance="$DebugChance"/>
+                                  <set_value name="$Feedback" exact="'$RML_FAILED'"/>
+                                  <speak actor="$Client" line="1000403" comment="(failed mission)"/>
+
+                                  <remove_mission cue="$MissionCue" type="failed"/>
+                                  <signal_cue cue="md.Scenario_Wave_Attack_1.ResultWindow"/>
+                                </do_if>
+                                <!--Success case ($EndFeedbackValue is greater than 0)-->
+                                <do_else>
+                                  <set_value name="$ClearedWaves" operation="add"/>
+                                  <do_if value="$MissionCue.hasmission">
+                                    <do_if value="$CurrentWaveNumber lt $WaveConfig.count">
+                                      <signal_cue cue="md.Scenario_Wave_Attack_1.WaveLogic"/>
+                                      <set_value name="$CurrentWaveNumber" operation="add"/>
+                                      <do_if value="$CurrentSpawnNumber lt $EnemySpawns.count">
+                                        <set_value name="$CurrentSpawnNumber" operation="add"/>
+                                      </do_if>
+                                      <do_else>
+                                        <set_value name="$CurrentSpawnNumber" exact="1"/>
+                                      </do_else>
+
+                                    </do_if>
+                                    <do_else>
+                                      <debug_text text="'This mission has ended. RML Feedback: ' + WaveCleared.$EndFeedbackValue" chance="100"/>
+
+                                      <set_value name="$Feedback" exact="'$MISSION_SUCCEEDED'"/>
+                                      <speak actor="$Client" line="1000401" comment="(successful mission)"/>
+
+                                      <remove_mission cue="$MissionCue" type="completed" activate="next"/>
+                                      <signal_cue cue="md.Scenario_Wave_Attack_1.EndingCutscene"/>
+                                    </do_else>
+                                  </do_if>
+                                </do_else>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                    <cue name="EnemyHit" instantiate="true">
+                      <conditions>
+                        <event_player_attacked_object/>
+                      </conditions>
+                      <actions>
+                        <do_if value="not event.param.isclass.ship_xl and event.param.isoperational and event.param.owner == $EnemyOwner">
+                          <do_if value="event.param.order.id == 'Attack' and event.param.order.$primarytarget != player.ship">
+                            <create_order object="event.param" id="'Attack'" immediate="true">
+                              <param name="primarytarget" value="player.ship"/>
+                            </create_order>
+                          </do_if>
+                        </do_if>
+                      </actions>
+                    </cue>
+                    <cue name="PlayerKilled">
+                      <conditions>
+                        <event_object_destroyed object="player.entity"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'This mission has failed. ' + {1037,6003}" chance="$DebugChance"/>
+                        <set_value name="$Feedback" exact="'This mission has failed. {1037,6003}'"/>
+                        <speak actor="$Client" line="1000403" comment="(failed mission)"/>
+                        <remove_mission cue="$MissionCue" type="failed"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$ResultData.$Score" exact="$ClearedWaves * 100"/>
+            <add_scenario_stat id="'waves'" name="{30604,3001}" uivalue="$ClearedWaves" score="$ClearedWaves * 100" maxscore="$WaveConfig.count * 100"/>
+
+            <add_scenario_stat id="'kills'" name="{30604,3002}" uivalue="stat.ships_destroyed" score="stat.ships_destroyed * 5"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="stat.ships_destroyed * 5"/>
+
+            <do_if value="$XenonDestroyer?">
+              <set_value name="$XenonDestroyerEndHitpoints" exact="$XenonDestroyer.hull"/>
+              <do_for_each name="$Shield" in="$XenonDestroyer.shields.all.list">
+                <set_value name="$XenonDestroyerEndHitpoints" operation="add" exact="$Shield.hull"/>
+              </do_for_each>
+              <do_for_each name="$Weapon" in="$XenonDestroyer.weapons.all.list">
+                <set_value name="$XenonDestroyerEndHitpoints" operation="add" exact="$Weapon.hull"/>
+              </do_for_each>
+              <do_for_each name="$Engine" in="$XenonDestroyer.engines.all.list">
+                <set_value name="$XenonDestroyerEndHitpoints" operation="add" exact="$Engine.hull"/>
+              </do_for_each>
+            </do_if>
+
+            <set_value name="$CapitalShipDamage" exact="if $XenonDestroyer? then (100 - ($XenonDestroyerEndHitpoints / $XenonDestroyerMaxHitpoints * 100))i else 0"/>
+
+            <add_scenario_stat id="'capitalshipdamage'" name="{30604,3008}" uivalue="$CapitalShipDamage" score="$CapitalShipDamage" maxscore="100"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="$CapitalShipDamage"/>
+
+            <add_scenario_stat id="'losses'" name="{30604,3003}" uivalue="$DestroyedAllies" score="$DestroyedAllies * -1"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="$DestroyedAllies * -1"/>
+
+            <set_value name="$LaserTowersScore" exact="[stat.lasertowers_launched * 2, 50].min"/>
+            <add_scenario_stat id="'lasertowers'" name="{30604,3004}" uivalue="stat.lasertowers_launched" score="$LaserTowersScore" maxscore="50"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="$LaserTowersScore"/>
+
+            <set_value name="$MinesScore" exact="[stat.mines_launched * 1, 25].min"/>
+            <add_scenario_stat id="'mines'" name="{30604,3005}" uivalue="stat.mines_launched" score="$MinesScore" maxscore="25"/>
+            <set_value name="$ResultData.$Score" operation="add" exact="$MinesScore"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

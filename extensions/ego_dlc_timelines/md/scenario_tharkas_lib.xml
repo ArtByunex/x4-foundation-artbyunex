@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Tharkas_LIB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <library name="Setup_Faction_Tharka" purpose="run_actions">
+      <params>
+        <param name="MissionFaction"/>
+      </params>
+      <actions>
+        <set_faction_identity faction="$MissionFaction" name="'{20203,3501}'" description="'{20203,3502}'" shortname="'{20203,3503}'" prefixname="'{20203,3504}'" spacename="'{20203,3505}'" homespacename="'{20203,3506}'" icon="'race_split'" image="'race_split'" />
+        <set_faction_identity faction="faction.player" image="'race_split'" />
+
+        <!--<do_if value="not $MissionFaction.ispolice">
+          <debug_text text="'Faction should likely already be a police faction to prevent potential errors with finding police jobs'"/>
+        </do_if>
+        <set_faction_police faction="$MissionFaction" policefaction="$MissionFaction"/>-->
+
+        <set_faction_relation_locked faction="$MissionFaction"    locked="true"/>
+
+        <set_faction_known faction="$MissionFaction" known="true"/>
+      </actions>
+    </library>
+
+    <library name="Setup_Character_Tharka" purpose="run_actions">
+      <params>
+        <param name="MissionFaction"/>
+        <param name="NameSpace"/>
+      </params>
+      <actions>
+        <create_cue_actor name="$TharkaActor" cue="$NameSpace" macro="character_timelines_tharkas_patriarch_tharka_macro">
+          <page exact="10457"/>
+          <owner exact="$MissionFaction"/>
+          <skills>
+            <skill type="management"  exact="14"/>
+            <skill type="morale"      exact="15"/>
+            <skill type="piloting"    exact="7"/>
+            <skill type="engineering" exact="5"/>
+            <skill type="boarding"    exact="11"/>
+          </skills>
+        </create_cue_actor>
+        <set_entity_traits    entity="$TharkaActor" missionactor="true" customhandler="true" subtitlename="true"/>
+        <set_entity_overrides entity="$TharkaActor" title="'{30612,131}'" icon="'factionrepresentative'"/>
+        <set_value name="md.$PersistentCharacters.$TharkaActor" exact="$TharkaActor"/>
+
+        <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=$NameSpace, $actor=$TharkaActor]"/>
+
+        <return value="$TharkaActor"/>
+      </actions>
+    </library>
+
+    <library name="Setup_Character_ComputerActor" purpose="run_actions">
+      <params>
+        <param name="NameSpace"/>
+      </params>
+      <actions>
+        <create_cue_actor name="$ComputerActor" cue="$NameSpace">
+          <select race="race.drone"/>
+          <owner exact="faction.civilian"/>
+          <page exact="10002"/>
+          <name name="'{30224,154}'"/>
+        </create_cue_actor>
+        <set_entity_traits entity="$ComputerActor" missionactor="true" customhandler="true" subtitlename="true"/>
+        <set_entity_overrides entity="$ComputerActor" icon="'factionrepresentative'" title="'{30224,154}'"/>
+        <set_value name="md.$PersistentCharacters.$ComputerActor" exact="$ComputerActor"/>
+
+        <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=$NameSpace, $actor=$ComputerActor]"/>
+
+        <return value="$ComputerActor"/>
+      </actions>
+    </library>
+
+  </cues>
+</mdscript>

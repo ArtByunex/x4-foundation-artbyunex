@@ -1,0 +1,979 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Timelines" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false" version="2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <!--Prevent Quettanauts NPCs showing up on other faction's stations-->
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$ExcludedVisitorFactions" exact="faction.kaori"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.kaori}"    exact="table[$DiplomatAvailable = ['yes', tag.group_19],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_spacedyepizza}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_finemeal}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_rareartefact}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.kaori]" create="true"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.kaori}"    exact="table[$DiplomatAvailable = ['yes', tag.group_19],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_spacedyepizza}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_finemeal}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_rareartefact}" other="[faction.kaori]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.kaori]" create="true"/>
+      </patch>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+        <do_if value="not md.$DLCKaoriFactions?">
+          <set_value name="md.$DLCKaoriFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCKaoriFactions" other="[faction.kaori]" />
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!--<cue name="Patch_Userdata" instantiate="true">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="@Start.$Player_Erlking_Group.count">
+          <set_userdata storystate="'story_erlking_possession'" value="1"/>
+        </do_if>
+        <do_if value="@Start.$ErlkingUpgraded">
+          <set_userdata storystate="'story_erlking_upgrade'" value="1"/>
+        </do_if>
+      </actions>
+    </cue>-->
+
+    <cue name="Timelines_Unlock_Message" mapeditor="false" instantiate="true" namespace="static" comment="Every time the player loads a sandbox save, or starts a new one, create/update a message that lists all unlocked Timelines rewards">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <do_if value="not $OldUnlocks?">
+          <create_list name="$OldUnlocks"/>
+        </do_if>
+        <create_list name="$NewUnlocks"/>
+        <set_value name="$UnlockString" exact="{30600,1112} + '\n'" comment="Leave one line between the header and the list of unlocks"/>
+
+        <!-- SHIP UNLOCKS -->
+
+        <!-- Asteroid Dash -->
+        <set_value name="$ScenarioName" exact="'scenario_race_1'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,7130011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Impeded Extraction -->
+        <set_value name="$ScenarioName" exact="'scenario_escort_1'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,40011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- The Fade -->
+        <set_value name="$ScenarioName" exact="'scenario_tharkas_cascade'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,320011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Spaceport Stride -->
+        <set_value name="$ScenarioName" exact="'scenario_race_2'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,7100011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Attack on Antigone -->
+        <set_value name="$ScenarioName" exact="'scenario_waveattack_antigone'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,280011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Station Circuit -->
+        <set_value name="$ScenarioName" exact="'scenario_race_3'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,7140011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Signal Strength -->
+        <set_value name="$ScenarioName" exact="'scenario_protect_object'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,310011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Flight of the Dragonfyre  -->
+        <set_value name="$ScenarioName" exact="'scenario_dragonfyre'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,480011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+          <!-- SHIP UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1113} + ' ' + {20004,7150011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- SECTOR UNLOCKS -->
+        <set_value name="$UnlockString" exact="$UnlockString + '\n'"/>
+
+        <!-- Brennan's Trial -->
+        <set_value name="$ScenarioName" exact="'scenario_M0_boss_battle'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SECTOR UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1114} + ' ' + {20004,140011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+          <!-- SECTOR UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1114} + ' ' + {20004,320011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+          <!-- we unlock 3 sectors but only need 2 strings -->
+        </do_if>
+
+        <!-- President's End -->
+        <set_value name="$ScenarioName" exact="'scenario_presidents_end_1'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- SECTOR UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1114} + ' ' + {20004,80011}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- CACHE UNLOCKS -->
+        <set_value name="$UnlockString" exact="$UnlockString + '\n'"/>
+
+        <!-- Battle of Omycron Lyrae -->
+        <set_value name="$ScenarioName" exact="'scenario_khaak_boss_battle'"/>
+        <set_value name="$RatingName" exact="$ScenarioName + '_best_rating'"/>
+        <do_if value="@userdata.{$RatingName} ge 1">
+          <append_to_list name="$NewUnlocks" exact="$ScenarioName"/>
+          <!-- build notification string -->
+          <!-- CACHE UNLOCK -->
+          <set_value name="$UnlockText" exact="{30600,1115} + ' ' + {20004,60021}"/>
+          <set_value name="$UnlockString" exact="$UnlockString + '\n' + $UnlockText"/>
+        </do_if>
+
+        <!-- Send message -->
+        <set_value name="$SendUnlockMessage" exact="false"/>
+        <do_for_each in="$NewUnlocks" name="$CurrentUnlock">
+          <do_if value="not $OldUnlocks.indexof.{$CurrentUnlock}">
+            <set_value name="$SendUnlockMessage" exact="true"/>
+            <break/>
+          </do_if>
+        </do_for_each>
+
+        <!-- Remember unlocks for the next time the player loads this save -->
+        <set_value name="$OldUnlocks" exact="$NewUnlocks"/>
+      </actions>
+      <delay exact="7s"/>
+      <actions>
+        <do_if value="$SendUnlockMessage">
+          <!-- Remove the old message to not clog the message log -->
+          <do_if value="@$TimelinesUnlockMail">
+            <remove_message id="$TimelinesUnlockMail"/>
+          </do_if>
+          <write_incoming_message result="$TimelinesUnlockMail" title="{30600,1301}" source="{30600,1302}" text="$UnlockString" highpriority="true"/>
+        </do_if>
+      </actions>
+    </cue>
+
+    <!-- NOTE: Variables can be read from outside this script -->
+    <cue name="Timelines_States" namespace="this" mapeditor="false" version="2">
+      <conditions>
+        <event_universe_generated />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <!-- Locations -->
+        <find_cluster groupname="$Clusters" name="$Cluster_MitsunosRevelation" macro="macro.cluster_701_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_MitsunosDefiance" macro="macro.cluster_702_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_MitsunosSacrifice" macro="macro.cluster_703_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_PresidentsEnd" macro="macro.cluster_704_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_NopileosMemorial" macro="macro.cluster_705_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_HatikvahsFaith" macro="macro.cluster_706_macro" required="true"/>
+        <find_cluster groupname="$Clusters" name="$Cluster_Matrix101" macro="macro.cluster_708_macro" required="true"/>
+
+        <find_sector groupname="$Sectors" name="$MitsunosRevelation" macro="macro.cluster_701_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$MitsunosDefiance" macro="macro.cluster_702_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$MitsunosSacrifice" macro="macro.cluster_703_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$PresidentsEnd" macro="macro.cluster_704_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$NopileosMemorial" macro="macro.cluster_705_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$HatikvahsFaith" macro="macro.cluster_706_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector groupname="$Sectors" name="$Matrix101" macro="macro.cluster_708_sector001_macro" space="player.galaxy" extension="'ego_dlc_timelines'" required="true"/>
+        <find_sector name="$ArgonPrime" macro="macro.cluster_14_sector001_macro" space="player.galaxy" required="true"/>
+        <!-- Prevent Faction Logic -->
+        <do_for_each name="$Sector" in="$Sectors">
+          <set_space_faction_logic_allowed space="$Sector" allow="false" />
+        </do_for_each>
+        <!-- Disabled Gates -->
+        <find_gate name="$Gate_MR" active="1" space="$MitsunosRevelation" accelerator="false" comment="Mitsuno's Remembrance" required="1"/>
+        <set_object_active object="$Gate_MR" activate="0"/>
+        <find_gate name="$Gate_PE" active="1" space="$PresidentsEnd" accelerator="false" comment="President's End" required="1"/>
+        <set_object_active object="$Gate_PE" activate="0"/>
+        <find_gate name="$Gate_HF" active="1" space="$HatikvahsFaith" accelerator="false" comment="Hatikvah's Faith" required="1" destination="$ArgonPrime"/>
+        <set_object_active object="$Gate_HF" activate="0"/>
+        <find_gate name="$Gate_MX" active="1" space="$Matrix101" accelerator="false" comment="Matrix #101" required="1"/>
+        <set_object_active object="$Gate_MX" activate="0"/>
+        <signal_cue cue="md.Story_Research_Abandoned_Ships.Start"/>
+      </actions>
+      <patch sinceversion="2">
+        <set_space_faction_logic_allowed space="$ArgonPrime" allow="true" />
+      </patch>
+      <cues>
+        <cue name="Timelines_Activate_Everything">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!-- Activate Gates -->
+            <set_object_active object="$Gate_MR" activate="1"/>
+            <set_object_active object="$Gate_PE" activate="1"/>
+            <set_object_active object="$Gate_HF" activate="1"/>
+            <set_object_active object="$Gate_MX" activate="1"/>
+            <!-- Enable Faction Logic -->
+            <set_space_faction_logic_allowed space="$PresidentsEnd" allow="true"/>
+            <set_space_faction_logic_allowed space="$Matrix101" allow="true"/>
+            <set_space_faction_logic_allowed space="$HatikvahsFaith" allow="true"/>
+            <set_space_faction_logic_allowed space="$MitsunosRevelation" allow="true"/>
+            <set_space_faction_logic_allowed space="$MitsunosDefiance" allow="true"/>
+            <set_space_faction_logic_allowed space="$MitsunosSacrifice" allow="true"/>
+            <!-- Create Stations -->
+            <create_god_station groupname="$TradeStations" id="'kao_tradestation_cluster_701'"/>
+            <create_god_station groupname="$TradeStations" id="'kao_tradestation_cluster_703'"/>
+            <create_god_station id="'kao_energy_array'"/>
+            <create_god_station id="'kao_wharf_cluster_702'"/>
+            <create_god_station id="'kao_hydro_processing_plant'"/>
+            <create_god_station id="'kao_compound_refinery'"/>
+            <create_god_station id="'kao_shipyard_cluster_703'"/>
+            <create_god_station id="'kao_advanced_tech_complex'"/>
+            <create_god_station id="'kao_produce_facility'"/>
+            <create_god_station id="'xen_defence_cluster_708_sector001_01'"/>
+            <create_god_station id="'arg_tradestation_cluster_704'"/>
+            <create_god_station id="'arg_defence_cluster_704_sector001_01'"/>
+            <create_god_factory groupname="$Factories" id="'arg_advancedelectronics_new'"/>
+            <create_god_factory groupname="$Factories" id="'arg_refinedmetals_new'"/>
+            <create_god_factory groupname="$Factories" id="'arg_turretcomponents_new'"/>
+            <create_god_factory groupname="$Factories" id="'arg_water_new'"/>
+            <do_for_each name="$Station" in="$TradeStations">
+              <set_trade_restrictions object="$Station" buy="noplayer" sell="noplayer" supply="noplayer" />
+            </do_for_each>
+            <do_for_each name="$Factory" in="$Factories">
+              <signal_objects object="player.galaxy" param="'init station'" param2="$Factory" param3="false"/>
+            </do_for_each>
+            <signal_cue_instantly cue="md.FactionLogic.KaoriFactionLogic"/>
+            <!-- Lock Economy -->
+            <set_trade_restrictions faction="faction.kaori" buy="owneronly" sell="owneronly" build="owneronly" supply="owneronly" />
+            <!-- Activate Job Space -->
+            <set_space_jobs_allowed space="$PresidentsEnd" allow="true"/>
+            <set_space_jobs_allowed space="$Matrix101" allow="true"/>
+            <set_space_jobs_allowed space="$HatikvahsFaith" allow="true"/>
+            <set_space_jobs_allowed space="$NopileosMemorial" allow="true"/>
+            <set_space_jobs_allowed space="$MitsunosRevelation" allow="true"/>
+            <set_space_jobs_allowed space="$MitsunosDefiance" allow="true"/>
+            <set_space_jobs_allowed space="$MitsunosSacrifice" allow="true"/>
+            <!-- Activate Jobs -->
+            <set_job_active activate="true" job="'argon_generic_trader_m_timelines'"/>
+            <set_job_active activate="true" job="'xenon_terraformer_patrol_l_matrix'"/>
+            <set_job_active activate="true" job="'kaori_bio_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_food_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_medical_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_energycell_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_equipment_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_construction_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_ship_construction_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_refinedgas_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_refinedmineral_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_tech_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_tech_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_water_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_mineral'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_ice'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_liquid'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_s_mineral_trader'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_liquid_trader'"/>
+            <set_job_active activate="true" job="'kaori_mixed_patrol_m_sector'"/>
+            <set_job_active activate="true" job="'kaori_fighter_patrol_s_zone'"/>
+            <set_job_active activate="true" job="'kaori_universal_trader_l'"/>
+            <set_job_active activate="true" job="'kaori_universal_trader_l_refined'"/>
+            <set_job_active activate="true" job="'kaori_scout_patrol_s'"/>
+            <!-- Clear Location Tag noaggressivespawn -->
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$PresidentsEnd"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$Matrix101"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$HatikvahsFaith"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$NopileosMemorial"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosRevelation"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosDefiance"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosSacrifice"/>
+          </actions>
+        </cue>
+        <!-- Activate Gates -->
+        <cue name="Gamestarted">
+          <!-- Used to trigger cues below for new games -->
+        </cue>
+        <!-- Presidents End -->
+        <cue name="PresidentsEnd_Unlock" comment="President's End">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_presidents_end_1_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_object_active object="$Gate_PE" activate="1"/>
+            <set_space_faction_logic_allowed space="$PresidentsEnd" allow="true"/>
+            <create_god_station id="'arg_tradestation_cluster_704'"/>
+            <create_god_station id="'arg_defence_cluster_704_sector001_01'"/>
+            <create_god_factory groupname="$PEStations" id="'arg_advancedelectronics_new'"/>
+            <create_god_factory groupname="$PEStations" id="'arg_refinedmetals_new'"/>
+            <create_god_factory groupname="$PEStations" id="'arg_turretcomponents_new'"/>
+            <create_god_factory groupname="$PEStations" id="'arg_water_new'"/>
+            <do_for_each name="$Factory" in="$PEStations">
+              <signal_objects object="player.galaxy" param="'init station'" param2="$Factory" param3="false"/>
+            </do_for_each>
+            <set_space_jobs_allowed space="$PresidentsEnd" allow="true"/>
+            <set_job_active activate="true" job="'argon_generic_trader_m_timelines'"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$PresidentsEnd"/>
+          </actions>
+        </cue>
+        <!-- M0 Bossbattle-->
+        <cue name="M0Battle_Unlock" comment="Hatikvah's Faith, Nopileos' Memorial and Matrix #101">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_m0_boss_battle_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_object_active object="$Gate_HF" activate="1"/>
+            <set_object_active object="$Gate_MX" activate="1"/>
+            <set_space_faction_logic_allowed space="$Matrix101" allow="true"/>
+            <set_space_jobs_allowed space="$Matrix101" allow="true"/>
+            <set_space_jobs_allowed space="$HatikvahsFaith" allow="true"/>
+            <set_space_jobs_allowed space="$NopileosMemorial" allow="true"/>
+            <set_job_active activate="true" job="'xenon_terraformer_patrol_l_matrix'"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$Matrix101"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$HatikvahsFaith"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$NopileosMemorial"/>
+            <create_god_station id="'xen_defence_cluster_708_sector001_01'"/>
+            <signal_cue cue="md.PlacedObjects.Place_Matrix101"/>
+            <signal_cue cue="Nopileos_Memorial_FreePort"/>
+          </actions>
+          <cues>
+            <cue name="M0Battle_Unlock_FactionLogic">
+              <conditions>
+                <event_object_known_to_player object="$HatikvahsFaith"/>
+              </conditions>
+              <delay min="220min" max="260min"/>
+              <actions>
+                <set_space_faction_logic_allowed space="$HatikvahsFaith" allow="true"/>
+              </actions>
+            </cue>
+            <cue name="M0Battle_Unlock_FactionLogic_NopileosMemorial">
+              <conditions>
+                <event_object_changed_owner object="$NopileosMemorial"/>
+              </conditions>
+              <actions>
+                <set_space_faction_logic_allowed space="$NopileosMemorial" allow="true"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+        <!-- Khaak Boss Battle Reward -->
+        <cue name="Khaak_Boss_Battle_Reward">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_khaak_boss_battle_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <find_sector name="$BlackHoleSunIV" macro="macro.cluster_06_sector002_macro" space="player.galaxy" required="true"/>
+            <create_position name="$Placement" space="$BlackHoleSunIV" x="-66000m" y="0m" z="-110000m"/>
+            <create_object name="$Wreck" macro="macro.env_debris_debris_l_02_container_macro" sector="$BlackHoleSunIV" owner="faction.ownerless" spinning="false">
+              <position value="$Placement"/>
+              <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+            </create_object>
+            <create_lockbox name="$Lockbox" macro="macro.sm_gen_lockbox_special_01_macro" sector="$BlackHoleSunIV" owner="faction.ownerless">
+              <safepos value="$Placement" max="300m"/>
+            </create_lockbox>
+            <set_object_min_hull object="$Lockbox" exact="100" />
+            <add_cargo object="$Lockbox" ware="ware.inv_seminar_piloting_4" exact="2"/>
+            <add_cargo object="$Lockbox" ware="ware.inv_seminar_management_4" exact="2"/>
+            <add_cargo object="$Lockbox" ware="ware.inv_kyondevice_03" exact="1"/>
+          </actions>
+          <cues>
+            <cue name="Khaak_Boss_Battle_Reward_Collected">
+              <conditions>
+                <event_object_dropped_objects object="$Lockbox"/>
+              </conditions>
+              <actions>
+                <write_incoming_message source="{30301,101}" highpriority="true" title="{30005,14400}" text="{30005,14410}"/>
+                <set_object_min_hull object="$Lockbox" exact="0" />
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Free Port handling -->
+        <cue name="Nopileos_Memorial_FreePort" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <create_god_station name="$FreePort" id="'sca_piratestation_cluster_705'"/>
+            <find_station name="$FreePort" godstationentry="'sca_piratestation_cluster_705'" space="$NopileosMemorial" required="true"/>
+            <set_value name="$PositionAngle" exact="0deg"/>
+            <set_value name="$RotationYaw" exact="15deg"/>
+            <set_value name="$PositionDistance" exact="15km"/>
+            <set_value name="$Attacks" exact="0"/>
+            <create_position name="$PatrolPosition" object="$FreePort" space="$NopileosMemorial"/>
+            <do_all exact="6" counter="$K">
+              <do_if value="$K" list="[1, 3, 5]">
+                <set_value name="$PositionHeight" min="3km" max="6km"/>
+                <create_ship groupname="$XenonShips" macro="macro.ship_xen_xl_destroyer_01_a_macro" sector="$NopileosMemorial" >
+                  <owner exact="faction.xenon"/>
+                  <loadout>
+                    <quantity exact="1.0"     comment="all slots filled">
+                      <variation exact="0.0"  comment="all slots filled"/>
+                    </quantity>
+                    <quality exact="0.8"/>
+                  </loadout>
+                  <drop ref="ship_large_xenon"/>
+                  <pilot>
+                    <select faction="faction.xenon" tags="tag.aipilot"/>
+                  </pilot>
+                  <position space="$NopileosMemorial" object="$FreePort" x="$PositionDistance * sin($PositionAngle)" y="$PositionHeight" z="$PositionDistance * cos($PositionAngle)"/>
+                  <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+                </create_ship>
+                <set_value name="$PositionAngle" exact="60deg" operation="add"/>
+                <set_value name="$RotationYaw" exact="60deg" operation="add"/>
+              </do_if>
+              <do_else>
+                <set_value name="$PositionHeight" min="3km" max="6km"/>
+                <create_ship groupname="$XenonShips" macro="macro.ship_xen_l_terraformer_01_a_macro" sector="$NopileosMemorial" >
+                  <owner exact="faction.xenon"/>
+                  <loadout>
+                    <quantity exact="1.0"     comment="all slots filled">
+                      <variation exact="0.0"  comment="all slots filled"/>
+                    </quantity>
+                    <quality exact="0.5"/>
+                  </loadout>
+                  <drop ref="ship_large_xenon_tf"/>
+                  <pilot>
+                    <select faction="faction.xenon" tags="tag.aipilot"/>
+                  </pilot>
+                  <position space="$NopileosMemorial" object="$FreePort" x="$PositionDistance * sin($PositionAngle)" y="$PositionHeight" z="$PositionDistance * cos($PositionAngle)"/>
+                  <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+                </create_ship>
+                <set_value name="$PositionAngle" exact="60deg" operation="add"/>
+                <set_value name="$RotationYaw" exact="60deg" operation="add"/>
+              </do_else>
+            </do_all>
+            <create_ship groupname="$XenonShips" macro="macro.ship_xen_xl_destroyer_01_a_macro" sector="$NopileosMemorial" >
+              <owner exact="faction.xenon"/>
+              <loadout>
+                <quantity exact="1.0"     comment="all slots filled">
+                  <variation exact="0.0"  comment="all slots filled"/>
+                </quantity>
+                <quality exact="0.8"/>
+              </loadout>
+              <drop ref="ship_large_xenon"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <position space="$NopileosMemorial" object="$FreePort" x="0km" y="18km" z="0km"/>
+              <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+            </create_ship>
+
+            <create_ship groupname="$XenonShips" macro="macro.ship_xen_l_terraformer_01_a_macro" sector="$NopileosMemorial" >
+              <owner exact="faction.xenon"/>
+              <loadout>
+                <quantity exact="1.0"     comment="all slots filled">
+                  <variation exact="0.0"  comment="all slots filled"/>
+                </quantity>
+                <quality exact="0.5"/>
+              </loadout>
+              <drop ref="ship_large_xenon_tf"/>
+              <pilot>
+                <select faction="faction.xenon" tags="tag.aipilot"/>
+              </pilot>
+              <position space="$NopileosMemorial" object="$FreePort" x="0km" y="-18km" z="0km"/>
+              <rotation yaw="$RotationYaw" pitch="0deg" roll="0deg"/>
+            </create_ship>
+            <do_for_each name="$Ship" in="$XenonShips">
+              <set_relation_boost object="$FreePort" otherobject="$Ship" value="$Ship.owner.relation.neutral.mid" silent="true"/>
+              <set_relation_boost object="$Ship" otherobject="$FreePort" value="$FreePort.owner.relation.neutral.mid" silent="true"/>
+              <abort_scripts entity="$Ship.pilot"/>
+            </do_for_each>
+            <set_object_relation_behaviour object="$FreePort" disable="true"/>
+            <create_group groupname="$ReinforceFleet"/>
+          </actions>
+          <patch sinceversion="2">
+            <do_for_each name="$Ship" in="$XenonShips">
+              <do_if value="$Ship.isclass.ship_xl">
+                <set_drop_object object="$Ship" drop="'ship_large_xenon'"/>
+              </do_if>
+              <do_else>
+                <set_drop_object object="$Ship" drop="'ship_large_xenon_tf'"/>
+              </do_else>
+            </do_for_each>
+          </patch>
+          <cues>
+            <cue name="Nopileos_Memorial_FreePort_Activate">
+              <conditions>
+                <event_object_entered_live_view object="$FreePort"/>
+              </conditions>
+              <actions>
+                <do_for_each name="$Ship" in="$XenonShips">
+                  <start_script name="'orders.base'" object="$Ship.pilot" />
+                  <create_order id="'ProtectPosition'" object="$Ship" default="true">
+                    <param name="destination" value="[$NopileosMemorial, $PatrolPosition]"/>
+                  </create_order>
+                </do_for_each>
+              </actions>
+              <delay exact="if player.debug then 10s else 180s"/>
+              <actions>
+                <signal_cue cue="Nopileos_Memorial_FreePort_Reinforments"/>
+              </actions>
+            </cue>
+
+            <cue name="Nopileos_Memorial_FreePort_Reinforments">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="not ($ArgonPrime.owner == faction.argon)">
+                  <cancel_cue cue="Nopileos_Memorial_FreePort_Reinforments"/>
+                </do_if>
+                <do_else>
+                  <find_ship groupname="$PlayerCombatShips" primarypurpose="purpose.fight" multiple="true" owner="faction.player" space="player.galaxy"/>
+                  <do_for_each name="$Ship" in="$PlayerCombatShips">
+                    <do_if value="$Ship.isclass.ship_xl">
+                      <set_value name="$PlayerFleet" exact="200" operation="add"/>
+                    </do_if>
+                    <do_if value="$Ship.isclass.ship_l">
+                      <set_value name="$PlayerFleet" exact="100" operation="add"/>
+                    </do_if>
+                    <do_if value="$Ship.isclass.ship_m">
+                      <set_value name="$PlayerFleet" exact="10" operation="add"/>
+                    </do_if>
+                    <do_if value="$Ship.isclass.ship_s">
+                      <set_value name="$PlayerFleet" exact="1" operation="add"/>
+                    </do_if>
+                  </do_for_each>
+                  <do_if value="$PlayerFleet" max="50">
+                    <set_value name="$LShips" exact="3"/>
+                    <set_value name="$MShips" exact="9"/>
+                    <set_value name="$SShips" exact="18"/>
+                  </do_if>
+                  <do_elseif value="$PlayerFleet" min="51" max="500">
+                    <set_value name="$LShips" exact="1"/>
+                    <set_value name="$MShips" exact="6"/>
+                    <set_value name="$SShips" exact="12"/>
+                  </do_elseif>
+                  <do_else>
+                    <set_value name="$LShips" exact="0"/>
+                    <set_value name="$MShips" exact="3"/>
+                    <set_value name="$SShips" exact="6"/>
+                  </do_else>
+                  <!-- Position -->
+                  <do_if value="player.sector == $ArgonPrime">
+                    <set_value name="$SpawnSector" exact="$HatikvahsFaith"/>
+                    <create_position name="$SpawnPosition" space="$HatikvahsFaith" x="150000m" y="0m" z="20000m"/>
+                  </do_if>
+                  <do_else>
+                    <set_value name="$SpawnSector" exact="$ArgonPrime"/>
+                    <create_position name="$SpawnPosition" space="$ArgonPrime" x="-90000m" y="0m" z="27500m"/>
+                  </do_else>
+                  <!-- Factions -->
+                  <set_value name="$Factions" exact="faction.argon"/>
+                  <!-- Create Fleet -->
+                  <create_ship groupname="$ReinforceFleet" name="$ReinforceFleetLeader" sector="$SpawnSector" macro="macro.ship_arg_l_destroyer_02_a_macro">
+                    <owner exact="faction.argon" overridenpc="true"/>
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos value="$SpawnPosition"/>
+                  </create_ship>
+
+                  <!-- L Ships -->
+                  <do_if value="$LShips" min="1">
+                    <do_all exact="$LShips">
+                      <create_ship groupname="$ReinforceFleet" name="$ClassL" sector="$SpawnSector">
+                        <select faction="$Factions" size="class.ship_l" tags="tag.military"/>
+                        <owner exact="$Factions" overridenpc="true"/>
+                        <loadout>
+                          <level exact="1.0"/>
+                        </loadout>
+                        <safepos object="$ReinforceFleetLeader" max="10km"/>
+                        <rotation value="$ReinforceFleetLeader.rotation"/>
+                      </create_ship>
+                      <set_object_commander object="$ClassL" commander="$ReinforceFleetLeader" assignment="assignment.attack"/>
+                    </do_all>
+                  </do_if>
+
+                  <!-- M Ships -->
+                  <do_if value="$MShips" min="1">
+                    <do_all exact="$MShips">
+                      <create_ship groupname="$ReinforceFleet" name="$ClassM" sector="$SpawnSector">
+                        <select faction="$Factions" size="class.ship_m" tags="tag.military"/>
+                        <owner exact="$Factions" overridenpc="true"/>
+                        <loadout>
+                          <level exact="1.0"/>
+                        </loadout>
+                        <safepos object="$ReinforceFleetLeader" max="10km"/>
+                        <rotation value="$ReinforceFleetLeader.rotation"/>
+                      </create_ship>
+                      <set_object_commander object="$ClassM" commander="$ReinforceFleetLeader" assignment="assignment.attack"/>
+                    </do_all>
+                  </do_if>
+
+                  <!-- S Ships -->
+                  <do_if value="$SShips" min="1">
+                    <do_all exact="$SShips">
+                      <create_ship groupname="$ReinforceFleet" name="$ClassS" sector="$SpawnSector">
+                        <select faction="$Factions" size="class.ship_m" tags="tag.military"/>
+                        <owner exact="$Factions" overridenpc="true"/>
+                        <loadout>
+                          <level exact="1.0"/>
+                        </loadout>
+                        <safepos object="$ReinforceFleetLeader" max="10km"/>
+                        <rotation value="$ReinforceFleetLeader.rotation"/>
+                      </create_ship>
+                      <set_object_commander object="$ClassS" commander="$ReinforceFleetLeader" assignment="assignment.attack"/>
+                    </do_all>
+                  </do_if>
+                  <create_order id="'ProtectPosition'" object="$ReinforceFleetLeader" default="true">
+                    <param name="destination" value="[$NopileosMemorial, $PatrolPosition]"/>
+                  </create_order>
+                  <substitute_text text="$MessageTicker" source="{30004,8203}">
+                    <replace string="'$FACTION$'" with="$Factions"/>
+                    <replace string="'$DESTINATION$'" with="$NopileosMemorial.knownname" />
+                  </substitute_text>
+                  <show_notification text="$MessageTicker" sound="notification_generic" priority="7"/>
+                  <write_incoming_message source="{30253,10051}" highpriority="true" title="{30005,14300}" text="{30005,14310}"/>
+                </do_else>
+                <do_for_each name="$Ship" in="$ReinforceFleet">
+                  <set_relation_boost object="$FreePort" otherobject="$Ship" value="$Ship.owner.relation.neutral.mid" silent="true"/>
+                  <set_relation_boost object="$Ship" otherobject="$FreePort" value="$FreePort.owner.relation.neutral.mid" silent="true"/>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Nopileos_Memorial_FreePort_Relation">
+              <conditions>
+                <event_object_attacked object="$FreePort"/>
+                <check_value value="event.param.isplayerowned"/>
+              </conditions>
+              <actions>
+                <do_if value="$Attacks ge 4">
+                  <set_object_relation_behaviour object="$FreePort" disable="false"/>
+                  <cancel_cue cue="Nopileos_Memorial_FreePort_Relation"/>
+                </do_if>
+                <do_else>
+                  <set_value name="$Attacks" exact="1" operation="add"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Nopileos_Memorial_FreePort_ArgonCleanUp" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed group="$ReinforceFleet"/>
+                  <event_object_changed_true_owner group="$ReinforceFleet"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <remove_from_group group="$ReinforceFleet" object="event.object"/>
+              </actions>
+            </cue>
+
+            <cue name="Nopileos_Memorial_FreePort_XenonCleanUp" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed group="$XenonShips"/>
+                  <event_object_changed_true_owner group="$XenonShips"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <remove_from_group group="$XenonShips" object="event.object"/>
+                <do_if value="$XenonShips.count == 0">
+                  <do_for_each name="$Ship" in="$ReinforceFleet">
+                    <create_order object="$Ship" id="'MoveDie'" immediate="true" override="true">
+                      <param name="byhighway" value="not $Ship.isclass.[class.ship_l, class.ship_xl]" />
+                      <param name="byhostile" value="true" />
+                    </create_order>
+                  </do_for_each>
+                  <set_object_relation_behaviour object="$FreePort" disable="false"/>
+                  <cancel_cue cue="Nopileos_Memorial_FreePort_Relation"/>
+                  <cancel_cue cue="Nopileos_Memorial_FreePort_ArgonCleanUp"/>
+                  <cancel_cue cue="Nopileos_Memorial_FreePort_XenonCleanUp"/>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+        <cue name="Epilogue_Unlock" comment="Mitsuno's Remembrance" version="2">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.hub_a6s4_complete" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_object_active object="$Gate_MR" activate="1"/>
+            <!-- Stations -->
+            <create_god_station groupname="$TradeStations" id="'kao_tradestation_cluster_701'"/>
+            <create_god_station groupname="$TradeStations" id="'kao_tradestation_cluster_703'"/>
+            <create_god_station id="'kao_energy_array'"/>
+            <create_god_station id="'kao_wharf_cluster_702'"/>
+            <create_god_station id="'kao_hydro_processing_plant'"/>
+            <create_god_station id="'kao_compound_refinery'"/>
+            <create_god_station id="'kao_shipyard_cluster_703'"/>
+            <create_god_station id="'kao_advanced_tech_complex'"/>
+            <create_god_station id="'kao_produce_facility'"/>
+            <signal_cue_instantly cue="md.FactionLogic.KaoriFactionLogic" check="false"/>
+            <!-- Lock Economy -->
+            <set_trade_restrictions faction="faction.kaori" buy="owneronly" sell="owneronly" build="owneronly" supply="owneronly" />
+            <do_for_each name="$Station" in="$TradeStations">
+              <set_trade_restrictions object="$Station" buy="noplayer" sell="noplayer" supply="noplayer" />
+            </do_for_each>
+            <!-- Jobs -->
+            <set_space_jobs_allowed space="$MitsunosRevelation" allow="true"/>
+            <set_space_jobs_allowed space="$MitsunosDefiance" allow="true"/>
+            <set_space_jobs_allowed space="$MitsunosSacrifice" allow="true"/>
+
+            <set_job_active activate="true" job="'kaori_bio_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_food_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_medical_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_energycell_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_equipment_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_construction_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_ship_construction_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_refinedgas_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_refinedmineral_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_tech_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_tech_trader_s'"/>
+            <set_job_active activate="true" job="'kaori_water_trader_m'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_mineral'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_ice'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_liquid'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_s_mineral_trader'"/>
+            <set_job_active activate="true" job="'kaori_free_miner_m_liquid_trader'"/>
+            <set_job_active activate="true" job="'kaori_mixed_patrol_m_sector'"/>
+            <set_job_active activate="true" job="'kaori_fighter_patrol_s_zone'"/>
+            <set_job_active activate="true" job="'kaori_universal_trader_l'"/>
+            <set_job_active activate="true" job="'kaori_universal_trader_l_refined'"/>
+            <set_job_active activate="true" job="'kaori_scout_patrol_s'"/>
+            <!-- Misc -->
+            <set_space_faction_logic_allowed space="$MitsunosRevelation" allow="true"/>
+            <set_space_faction_logic_allowed space="$MitsunosDefiance" allow="true"/>
+            <set_space_faction_logic_allowed space="$MitsunosSacrifice" allow="true"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosRevelation"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosDefiance"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$MitsunosSacrifice"/>
+          </actions>
+          <patch sinceversion="2" comment="Patching XL Spire Module Blueprint for those that already had 20+ relation with faction.kaori before the blueprint was made available">
+            <do_if value="faction.player.haslicence.ceremonyally.{faction.kaori}">
+              <add_blueprints wares="ware.module_hab_arg_antigonespire_01"/>
+            </do_if>
+          </patch>
+        </cue>
+
+        <cue name="CustomGameStart_Blueprints">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_value value="player.module == 'custom_budgeted' or player.module == 'custom_creative'"/>
+          </conditions>
+          <actions>
+            <do_if value="$MitsunosRevelation.owner == faction.kaori">
+              <signal_cue cue="CustomGameStart_Blueprints_Reward"/>
+              <cancel_cue cue="CustomGameStart_Blueprints_OwnerChange"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="CustomGameStart_Blueprints_OwnerChange">
+              <conditions>
+                <event_object_changed_owner object="$MitsunosRevelation" owner="faction.kaori"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="CustomGameStart_Blueprints_Reward"/>
+              </actions>
+            </cue>
+            <cue name="CustomGameStart_Blueprints_Reward">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="faction.player.haslicence.ceremonyfriend.{faction.kaori}">
+                  <get_ware_definition result="$FriendWares" flags="blueprint allowplayerblueprint" faction="faction.kaori" tags="tag.rewarded">
+                    <owner licencefaction="faction.kaori" type="station_gen_intermediate"/>
+                  </get_ware_definition>
+                  <do_if value="$FriendWares.count ge 1">
+                    <do_for_each name="$Blueprint" in="$FriendWares">
+                      <add_blueprints wares="$Blueprint"/>
+                    </do_for_each>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'No Blueprint Rewarded'"/>
+                  </do_else>
+                </do_if>
+                <do_if value="faction.player.haslicence.ceremonyally.{faction.kaori}">
+                  <get_ware_definition result="$AllyWares" flags="blueprint allowplayerblueprint" faction="faction.kaori" tags="tag.rewarded">
+                    <owner licencefaction="faction.kaori" type="station_gen_advanced"/>
+                  </get_ware_definition>
+                  <do_if value="$AllyWares.count ge 1">
+                    <do_for_each name="$Blueprint" in="$AllyWares">
+                      <add_blueprints wares="$Blueprint"/>
+                    </do_for_each>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'No Blueprint Rewarded'"/>
+                  </do_else>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="Setup_Racing_Trophy" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="(@userdata.scenario_race_1_best_rating ge 5) or (@userdata.scenario_race_2_best_rating ge 5) or (@userdata.scenario_race_3_best_rating ge 5)"/>
+      </conditions>
+      <actions>
+        <signal_cue_instantly cue="md.X4Ep1_Mentor_Subscriptions.Add_Player_Office_Trophy" param="tag.trophy_timelines_racer"/>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

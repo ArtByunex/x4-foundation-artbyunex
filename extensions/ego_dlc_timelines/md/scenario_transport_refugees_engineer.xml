@@ -1,0 +1,2268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Transport_Refugees_Engineer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Jo'Paul Mamuyac"/>
+    <!--
+      userdata saved by this scenario:
+        userdata.scenario_transport_refugees_engineer_start
+        userdata.scenario_transport_refugees_engineer_died
+        userdata.scenario_transport_refugees_engineer_first_repair
+        userdata.scenario_transport_refugees_engineer_last_repair
+        userdata.scenario_transport_refugees_engineer_repairs
+        userdata.scenario_transport_refugees_engineer_score
+      because the scores from The Mechanic and The Safeguard scenarios are used in The Ferryman scenario, all userdata listed above are obfuscated.
+      note that these userdata are NOT the userdata used by the general Timelines scoring system. e.g. *_best_(duration|rating|score) and *_last_(duration|rating|score)
+      userdata saves are in UpdateUserData, which calls SaveToUserData to both (1) obfuscate the values and (2) actually save them.
+    -->
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_transport_refugees_engineer">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$DebugChance2"       exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--Disable certain notification types-->
+        <set_notification_type_enabled type="notification.npc_under_attack" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_out_of_ammo" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_await_orders" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_order_not_complete" enabled="false"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <include_actions ref="md.Scenario_Transport_Refugees.Start_SetModes" />
+        <set_value name="$Mode" exact="$Mode_Engineer" />
+        <include_actions ref="md.Scenario_Transport_Refugees.Start_IncludeLibrary" />
+        <!-- init specific to $Mode_Engineer -->
+        <set_value name="$MissionDescription" exact="{30615,202}" />
+        <set_value name="$Ship_Rescue" exact="player.ship" />
+        <set_value name="$Ship_Escort" exact="null" />
+        <set_value name="$Ship_Other" exact="$Ship_Rescue" />
+        <!-- can't attach macro.interactive_repairpanel_01_macro to modules -->
+        <!-- <set_value name="$MissionCue.$SignalLeakMacro" exact="macro.interactive_repairpanel_01_macro" /> -->
+        <set_value name="$MissionCue.$SignalLeakMacro" exact="macro.dataleak_s_scenario_01_macro" />
+        <set_value name="$Count_SignalLeaks_Max" exact="40" />
+        <create_group groupname="$MissionCue.$SignalLeaks_ToRepair" />
+        <set_value name="$IsShowNearestSignalLeaksAlways" exact="false" />
+        <!-- <set_value name="$IsShowNearestSignalLeaksAlways" exact="true" comment="testing: show nearest signal leaks always to get the absolute BEST repair rate" /> -->
+        <do_if value="$IsShowNearestSignalLeaksAlways">
+          <set_value name="$Count_SignalLeaksPerMissionUpdate" exact="1" />
+        </do_if>
+        <do_else>
+          <set_value name="$Count_SignalLeaksPerMissionUpdate" exact="3" comment="number of signal leaks shown at a time" />
+        </do_else>
+        <set_value name="$SignalLeaks_Current" exact="[]" />
+        <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+          <param name="MissionCue" value="$MissionCue" />
+          <param name="Event" value="'init'" />
+        </run_actions>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Transport_Refugees.InitDisabledStation_IncludeLibrary" />
+                <include_actions ref="md.Scenario_Transport_Refugees.InitHospital_IncludeLibrary" />
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <create_group groupname="$PlayerFleet"/>
+                <set_value name="$Ship_Rescue" exact="player.ship" />
+                <set_owner object="$Ship_Rescue" faction="faction.player" overridenpc="true" />
+                <do_if value="$Ship_Rescue">
+                  <debug_text text="'$Ship_Rescue: ' + $Ship_Rescue" chance="$MissionCue.$DebugChance" />
+                  <do_if value="$IsAddTravelThrustMod">
+                    <add_equipment_mods object="$Ship_Rescue">
+                      <engine ware="ware.mod_engine_travelthrust_transport_refugees"/>
+                    </add_equipment_mods>
+                  </do_if>
+                  <add_to_group groupname="$PlayerFleet" object="$Ship_Rescue" />
+                  <set_value name="$MissionCue.$Actor_Rescuer" exact="$Ship_Rescue.assignedaipilot" />
+                </do_if>
+                <set_value name="player.entity.$PlayerTaxi" exact="null"/>
+
+                <!--spawn player-owned ships-->
+                <!-- Nemesis sentinel: ship_par_m_corvette_01_a_macro -->
+                <set_value name="$Owner" exact="faction.player" />
+                <set_value name="$PilotFaction" exact="$Factions_Friendly.random" />
+                <set_value name="$ShipDefinition" exact="macro.ship_par_m_corvette_01_a_macro" />
+                <debug_text text="'$ShipDefinition: ' + $ShipDefinition" chance="$MissionCue.$DebugChance" />
+                <set_value name="$Sector" exact="player.sector" />
+                <get_safe_pos result="$Pos" sector="player.sector" object="player.ship" min="player.ship.size * 5" max="player.ship.size * 10" />
+                <create_cue_actor name="$Actor_Escort" cue="$MissionCue" macro="macro.character_timelines_transport_refugees_escort_npc_macro">
+                  <owner exact="faction.player"/>
+                  <page exact="10134" />
+                  <name name="'{30615,3}'" />
+                </create_cue_actor>
+                <set_value name="$MissionCue.$Actor_Escort.$skipwait" exact="true" />
+                <set_entity_traits entity="$Actor_Escort" missionactor="true"/>
+                <debug_text text="'$Actor_Escort: ' + $Actor_Escort + ' ' + $Actor_Escort.knownname + ' ismissionactor ' + $Actor_Escort.ismissionactor + ' istemporary ' + $Actor_Escort.istemporary" chance="$MissionCue.$DebugChance" />
+                <run_actions ref="md.Scenario_Transport_Refugees.CreateShip" result="$Ship_Escort">
+                  <param name="Group"          value="$PlayerFleet" />
+                  <param name="Owner"          value="$Owner" />
+                  <param name="PilotFaction"   value="$PilotFaction" />
+                  <param name="ShipDefinition" value="$ShipDefinition" />
+                  <param name="Sector"         value="$Sector" />
+                  <param name="Pos"            value="$Pos" />
+                  <param name="Commander"      value="$Ship_Rescue" />
+                  <param name="Assignment"     value="assignment.defence" />
+                  <param name="PilotActor"     value="$Actor_Escort" />
+                </run_actions>
+                <!-- remove all generatred ammo -->
+                <do_for_each name="$Macro_Ammo" valuename="$Count" in="$Ship_Escort.ammostorage.deployable.table">
+                  <remove_ammo object="$Ship_Escort" macro="$Macro_Ammo" amount="$Count" />
+                </do_for_each>
+                <!-- add specific ammo -->
+                <add_ammo object="$Ship_Escort" macro="$Macro_EscortLaserTower" amount="25" />
+                <add_ammo object="$Ship_Escort" macro="$Macro_EscortMine" amount="20" />
+                <add_ammo object="$Ship_Escort" macro="$Macro_EscortSatellite" amount="5" />
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <debug_text text="$ship + ' ' + $ship.knownname" chance="$DebugChance" />
+                  <debug_text text="'    $ship.macro: ' + $ship.macro" chance="$DebugChance" />
+                  <do_for_each name="$Item" in="$ship.loadout.wares.list">
+                    <debug_text text="'    $Item: ' + $Item + ' ' + @$Item.id" chance="$DebugChance" />
+                  </do_for_each>
+                </do_for_each>
+
+                <do_if value="not $PlayerFleet.count">
+                  <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+
+                <debug_text text="'$Actor_Rescuer: ' + $Actor_Rescuer + ' ' + @$Actor_Rescuer.knownname" chance="$DebugChance" />
+                <debug_text text="'$Actor_Engineer: ' + $Actor_Engineer + ' ' + @$Actor_Engineer.knownname" chance="$DebugChance" />
+                <debug_text text="'$Actor_Escort: ' + $Actor_Escort + ' ' + @$Actor_Escort.knownname" chance="$DebugChance" />
+              </actions>
+            </library>
+
+            <cue name="Debug">
+              <cues>
+                <cue name="Debug_GetPlayerRoomAndPosition" namespace="this">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <set_value name="$MissionCue" exact="parent.namespace.$MissionCue" />
+                    <debug_text text="'player.entity.room.macro: ' + player.entity.room.macro" />
+                    <get_floor_position object="player.entity">
+                      <position object="player.entity" y="player.entity.race.height * -1" />
+                      <result position="$Position" context="$Object" room="$Room" />
+                    </get_floor_position>
+                    <debug_text text="'$Position: ' + $Position" />
+                    <debug_text text="'$Object: ' + $Object + ' ' + $Object.knownname" />
+                    <debug_text text="'$Room: ' + $Room + ' ' + $Room.knownname" />
+                    <debug_text text="'player.entity.rotation: ' + player.entity.rotation" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_GetTakeSeatCutscenePositions">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <find_npc_slot name="$PilotSeat" object="player.ship" tags="[tag.control]" excludefilled="false" />
+                    <debug_text text="'$PilotSeat.tags: ' + $PilotSeat.tags + ' offset: ' + $PilotSeat.offset" />
+
+                    <find_npc_slot name="$Slots" object="player.ship" multiple="true" excludefilled="false" />
+                    <do_for_each name="$Slot" in="$Slots">
+                      <debug_text text="'$Slot.tags: ' + $Slot.tags + ' offset: ' + $Slot.offset" />
+                    </do_for_each>
+
+                    <set_value name="$MainActor" exact="$MissionCue.$Ship_Rescue" />
+                    <debug_text text="'$MainActor: ' + $MainActor" />
+                    <debug_text text="'$MissionCue.$EngineerSeat.component: ' + $MissionCue.$EngineerSeat.component" />
+                    <debug_text text="'$MissionCue.$EngineerSeat.offset: ' + $MissionCue.$EngineerSeat.offset" />
+                    <set_value name="$OtherActor" exact="$MissionCue.$Actor_Rescuer" />
+                    <create_position name="$CameraPos" space="$MainActor" object="$MissionCue.$EngineerSeat.component" value="$MissionCue.$EngineerSeat.offset" y="player.entity.race.height * 7/8" comment="player's eye level at engineer's seat" />
+                    <create_position name="$LookAtPos" space="$MainActor" object="$OtherActor" y="$OtherActor.race.height * 7/8" comment="npc's eye level at captain's seat" />
+                    <debug_text text="'$CameraPos: ' + $CameraPos" />
+                    <debug_text text="'$LookAtPos: ' + $LookAtPos" />
+                    <debug_text text="'$CameraPos.distanceto.{$LookAtPos}: ' + $CameraPos.distanceto.{$LookAtPos}" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_PlayCutscene">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Cutscenes.$PlayCutsceneCue" param="table[
+                              $ObjectiveCue        = EngineerMode_StationApproach,
+                              $DialogueScene       = 'station analyse',
+                              $DialogueCompleteCue = EngineerMode_StationApproach_Analyse2,
+                              $From = this.name]" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_PlayStationDestructionCutscene">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Cutscenes.$PlayCutsceneCue" param="table[
+                              $ObjectiveCue = StationDestruction,
+                              $Priority = 100,
+                              $From = this.name]" />
+                  </actions>
+                  <cues>
+                    <cue name="Debug_PlayStationDestructionCutscene_Timeout" checktime="player.age + 5s">
+                      <actions>
+                        <signal_cue_instantly cue="Cutscenes.$StopCutsceneCue" />
+                        <reset_cue cue="Debug_PlayStationDestructionCutscene" />
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+                <cue name="Debug_RecreateSignalLeaks">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="event.name" />
+                    <do_for_each name="$SignalLeak" in="$MissionCue.$SignalLeaks_ToRepair" reverse="true">
+                      <destroy_object object="$SignalLeak" />
+                    </do_for_each>
+                  </actions>
+                  <delay exact="1s" />
+                  <actions>
+                    <do_for_each name="$SignalLeakData" in="$MissionCue.$SignalLeaks_Current">
+                      <create_position name="$Pos_SignalLeak" value="$SignalLeakData.$Pos" />
+                      <create_rotation name="$Rot_SignalLeak" value="$SignalLeakData.$Rot" />
+                      <create_signal_leak name="$SignalLeak" type="signalleaktype.data" object="$MissionCue.$Station_Disabled" macro="$MissionCue.$SignalLeakMacro">
+                        <position value="$Pos_SignalLeak" />
+                        <rotation value="$Rot_SignalLeak" />
+                      </create_signal_leak>
+                      <add_effect effect="'smoketrail_s_long_duration'" object="$SignalLeak" strength="0.25">
+                        <position x="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" y="$SignalLeak.height * 1" z="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" />
+                      </add_effect>
+                      <add_effect effect="'firetrail_s_long_duration'" object="$SignalLeak" strength="0.06125">
+                        <position x="0" y="$SignalLeak.height * -0.75" z="0" />
+                      </add_effect>
+                      <add_to_group groupname="$MissionCue.$SignalLeaks_ToRepair" object="$SignalLeak" />
+                    </do_for_each>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario" version="4">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <include_actions ref="md.Scenario_Transport_Refugees.StartMission_IncludeLibrary" />
+            <find_npc_slot name="$EngineerSeats" object="$Ship_Rescue" tags="[tag.control]" multiple="true" />
+            <set_value name="$EngineerSeat" exact="$EngineerSeats.{1}" />
+            <debug_text text="'$EngineerSeat: ' + $EngineerSeat" chance="$DebugChance" />
+            <precache_hint target="$MissionCue.$Ship_Rescue" />
+          </actions>
+          <patch sinceversion="2">
+            <debug_text text="'patch sinceversion 2'" chance="$MissionCue.$DebugChance" />
+            <set_value name="PickUpRefugees.$StationDestructionCue" exact="StationDestruction" />
+          </patch>
+          <patch sinceversion="3">
+            <debug_text text="'patch sinceversion 3'" chance="$MissionCue.$DebugChance" />
+            <debug_text text="'not @$MissionCue.$Ship_Rescue.isoperational: ' + (not @$MissionCue.$Ship_Rescue.isoperational)" chance="$MissionCue.$DebugChance" />
+            <debug_text text="'player.ship.isclass.spacesuit: ' + player.ship.isclass.spacesuit" chance="$MissionCue.$DebugChance" />
+            <do_if value="not @$MissionCue.$Ship_Rescue.isoperational">
+              <do_if value="@player.ship.isclass.spacesuit">
+                <debug_text text="'patch sinceversion 3'" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'set_object_min_shield player.ship 0'" chance="$DebugChance" />
+                <debug_text text="'set_object_min_hull player.ship 0'" chance="$DebugChance" />
+                <set_object_min_shield object="player.ship" exact="0" />
+                <set_object_min_hull object="player.ship" exact="0" />
+              </do_if>
+            </do_if>
+          </patch>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+            <!-- cues specific to $Mode_Engineer -->
+            <library name="CreateMission_RunActions" purpose="run_actions">
+              <params>
+                <param name="MissionCue" />
+                <param name="IsUseSpacesuitObjective" default="false" />
+              </params>
+              <actions>
+                <set_value name="$MissionCue.$ObjectiveStep_TakeEngineerSeat" exact="1" />
+                <set_value name="$MissionCue.$ObjectiveStep_DockAtDisabledStation" exact="2" />
+                <set_value name="$MissionCue.$ObjectiveStep_UseSpacesuit" exact="3" />
+                <set_value name="$MissionCue.$ObjectiveStep_Repair" exact="4" />
+                <set_value name="$MissionCue.$ObjectiveStep_ReturnToDisabledStation" exact="5" />
+                <set_value name="$MissionCue.$ObjectiveStep_ReturnToShip" exact="6" />
+                <set_value name="$MissionCue.$ObjectiveStep_WaitForEmbarkation" exact="7" />
+                <set_value name="$MissionCue.$ObjectiveStep_DockAtHospital" exact="8" />
+                <set_value name="$MissionCue.$ObjectiveStep_WaitForDisembarkation" exact="9" />
+                <create_mission cue="$MissionCue" type="missiontype.repair" name="{30615,201}" description="$MissionCue.$MissionDescription" faction="$MissionCue.$Station_Disabled.owner" difficulty="$MissionCue.$Difficulty">
+                  <briefing>
+                    <objective step="$MissionCue.$ObjectiveStep_TakeEngineerSeat" action="objective.custom" slot="$MissionCue.$EngineerSeat" customaction="{30615,204}" />
+                    <objective step="$MissionCue.$ObjectiveStep_DockAtDisabledStation" action="objective.dockat" object="$MissionCue.$Station_Disabled" />
+                    <objective step="$MissionCue.$ObjectiveStep_UseSpacesuit" action="objective.usespacesuit" />
+                    <objective step="$MissionCue.$ObjectiveStep_Repair" action="objective.repair" />
+                    <objective step="$MissionCue.$ObjectiveStep_ReturnToDisabledStation" action="objective.board" object="$MissionCue.$Station_Disabled" />
+                    <objective step="$MissionCue.$ObjectiveStep_ReturnToShip" action="objective.board" object="$MissionCue.$Ship_Rescue" />
+                    <objective step="$MissionCue.$ObjectiveStep_WaitForEmbarkation" action="objective.wait" />
+                    <objective step="$MissionCue.$ObjectiveStep_DockAtHospital" action="objective.dockat" object="$MissionCue.$Station_Hospital" />
+                    <objective step="$MissionCue.$ObjectiveStep_WaitForDisembarkation" action="objective.wait" />
+                  </briefing>
+                </create_mission>
+                <do_if value="$IsUseSpacesuitObjective">
+                  <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_UseSpacesuit" />
+                </do_if>
+                <do_else>
+                  <do_if value="player.entity.roomslot == $MissionCue.$EngineerSeat">
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_DockAtDisabledStation" />
+                  </do_if>
+                  <do_else>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_TakeEngineerSeat" />
+                  </do_else>
+                </do_else>
+              </actions>
+            </library>
+            <library name="UpdateMission" purpose="run_actions">
+              <params>
+                <param name="MissionCue" />
+                <param name="ObjectiveCue" default="null" />
+                <param name="DebugChance" default="100" />
+              </params>
+              <actions>
+                <do_if value="
+                  $MissionCue.hasmission and
+                  (
+                    (not $MissionCue.$IsRealMissionTimerStarted) or
+                    (
+                      $MissionCue.$Station_Disabled.isoperational and
+                      (not $MissionCue.$IsStationDestroyed_Actual)
+                    )
+                  )">
+                  <debug_text text="'$ObjectiveCue: ' + $ObjectiveCue" chance="$MissionCue.$DebugChance2" />
+                  <do_if value="@$ObjectiveCue.exists">
+                    <set_value name="$ObjectiveCueName" exact="$ObjectiveCue.name" />
+                  </do_if>
+                  <do_else>
+                    <set_value name="$ObjectiveCueName" exact="$MissionCue.$ObjectiveCue_LastName" />
+                  </do_else>
+                  <do_if value="not $MissionCue.hasmission" comment="purposely empty">
+                  </do_if>
+                  <do_elseif value="
+                    $ObjectiveCueName == 'EngineerMode_TakeEngineerSeat' or
+                    (
+                      $ObjectiveCueName == 'ReturnToShip' and
+                      player.entity.hascontext.{$MissionCue.$Ship_Rescue} and
+                      (not @player.entity.roomslot.hastag.control) and
+                      (not @player.entity.roomslot.hastag.npc)
+                    )
+                  ">
+                    <debug_text text="'player.entity.hascontext.{$MissionCue.$Ship_Rescue}: ' + player.entity.hascontext.{$MissionCue.$Ship_Rescue}" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'player.entity.roomslot: ' + player.entity.roomslot" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$MissionCue.$EngineerSeat: ' + $MissionCue.$EngineerSeat" chance="$MissionCue.$DebugChance" />
+                    <do_if value="not player.entity.hascontext.{$MissionCue.$Ship_Rescue}">
+                      <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_ReturnToShip" />
+                    </do_if>
+                    <do_elseif value="player.entity.roomslot != $MissionCue.$EngineerSeat">
+                      <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_TakeEngineerSeat" />
+                    </do_elseif>
+                    <do_else>
+                      <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_DockAtDisabledStation" />
+                    </do_else>
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'Spacewalk'">
+                    <do_if value="player.ship">
+                      <update_mission cue="$MissionCue">
+                        <briefing>
+                          <objective step="$MissionCue.$ObjectiveStep_UseSpacesuit" action="objective.disembark" object="$MissionCue.$Station_Disabled" />
+                        </briefing>
+                      </update_mission>
+                    </do_if>
+                    <do_elseif value="DockAtDisabledStation_DockingBayValidated.state == cuestate.complete or @player.entity.room.station == $MissionCue.$Station_Disabled">
+                      <do_if value="$MissionCue.$Ship_Rescue.dock">
+                        <find_npc_waypoint name="$TransporterSlot" object="$MissionCue.$Ship_Rescue.dock" tags="tag.npctransport" excludeblocked="false" />
+                      </do_if>
+                      <do_else>
+                        <find_npc_waypoint name="$TransporterSlots" object="$MissionCue.$Station_Disabled" tags="tag.npctransport" multiple="true" excludeblocked="false" />
+                        <sort_list list="$TransporterSlots" sortbydistanceto="player.entity" sortdescending="false" />
+                        <set_value name="$TransporterSlot" exact="$TransporterSlots.{1}" />
+                      </do_else>
+                      <set_value name="$Dist_ToTransporterSlot" exact="player.entity.distanceto.[$TransporterSlot.component, $TransporterSlot.offset]" />
+                      <debug_text text="'$Dist_ToTransporterSlot: ' + $Dist_ToTransporterSlot" chance="$MissionCue.$DebugChance" />
+                      <update_mission cue="$MissionCue">
+                        <briefing>
+                          <objective step="$MissionCue.$ObjectiveStep_UseSpacesuit" action="objective.usespacesuit" slot="$TransporterSlot" />
+                        </briefing>
+                      </update_mission>
+                    </do_elseif>
+                    <do_else>
+                      <update_mission cue="$MissionCue">
+                        <briefing>
+                          <objective step="$MissionCue.$ObjectiveStep_UseSpacesuit" action="objective.usespacesuit" />
+                        </briefing>
+                      </update_mission>
+                    </do_else>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_UseSpacesuit" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'RepairSignalLeak'">
+                    <sort_group group="$MissionCue.$SignalLeaks_ToRepair" sortbydistanceto="player.entity" sortdescending="false" />
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_Repair" action="objective.repair" group="$MissionCue.$SignalLeaks_ToRepair" text="$MissionCue.$StationComponentName" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_Repair" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'ReEnterStation'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_ReturnToDisabledStation" action="objective.board" object="$MissionCue.$Station_Disabled" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_ReturnToDisabledStation" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'ReturnToShip'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_ReturnToShip" action="objective.board" object="$MissionCue.$Ship_Rescue" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_ReturnToShip" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'PickUpRefugees'">
+                    <add_to_group groupname="$Refugees" group="$ObjectiveCue.namespace.$Refugees_Waiting" />
+                    <add_to_group groupname="$Refugees" group="$ObjectiveCue.namespace.$Refugees_Walking" />
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_WaitForEmbarkation" action="objective.wait" group="$Refugees" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective cue="$MissionCue" step="$MissionCue.$ObjectiveStep_WaitForEmbarkation" action="objective.wait" group="$Refugees">
+                      <progress text="{30615,104}" progress="$ObjectiveCue.namespace.$Refugees_Embarked.count" max="$ObjectiveCue.namespace.$Count_FreeBerths - (player.ship == $ObjectiveCue.namespace.$Ship_Refugees)" />
+                    </set_objective>
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'DockAtHospital'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_DockAtHospital" action="objective.dockat" object="$MissionCue.$Station_Hospital" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_DockAtHospital" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'DisembarkRefugees' or $ObjectiveCueName == 'DisembarkRefugees_Docked'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_DockAtHospital" action="objective.wait" group="$ObjectiveCue.namespace.$Refugees_Embarked" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective cue="$MissionCue" step="$MissionCue.$ObjectiveStep_DockAtHospital" action="objective.wait" group="$ObjectiveCue.namespace.$Refugees_Embarked">
+                      <progress text="{30615,105}" progress="$ObjectiveCue.namespace.$Count_FreeBerths - $ObjectiveCue.namespace.$Refugees_Embarked.count" max="$ObjectiveCue.namespace.$Count_FreeBerths - (player.ship == $ObjectiveCue.namespace.$Ship_Refugees)" />
+                    </set_objective>
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'Raiders_Blockade'">
+                    <do_if value="@$MissionCue.$ObjectiveCue_LastName == 'DockAtHospital'">
+                      <set_value name="$Max" exact="$ObjectiveCue.namespace.$Ship.maxradarrange" />
+                      <set_value name="$Perc" exact="100 - $ObjectiveCue.namespace.$Ship.distanceto.{$MissionCue.$Station_Hospital} / ($Max)f * 100" />
+                      <set_objective cue="$MissionCue" step="$MissionCue.$ObjectiveStep_DockAtHospital" action="objective.dockat" object="$MissionCue.$Station_Hospital">
+                        <progress text="{30615,106}" progress="$Perc" max="100" />
+                      </set_objective>
+                    </do_if>
+                  </do_elseif>
+                  <do_if value="$ObjectiveCueName != 'Raiders_Blockade'">
+                    <set_value name="$MissionCue.$ObjectiveCue_LastName" exact="$ObjectiveCueName" />
+                    <debug_text text="'$MissionCue.$ObjectiveCue_LastName (updated): ' + $MissionCue.$ObjectiveCue_LastName" chance="$MissionCue.$DebugChance" />
+                  </do_if>
+                </do_if>
+              </actions>
+            </library>
+            <cue name="ActivateFirstObjective">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <do_if value="$MissionCue.$Ship_Rescue.station == $MissionCue.$Station_Disabled">
+                  <signal_cue cue="Spacewalk" />
+                </do_if>
+                <do_else>
+                  <signal_cue cue="EngineerMode_TakeEngineerSeat" />
+                </do_else>
+              </actions>
+            </cue>
+            <cue name="EngineerMode_TakeEngineerSeat">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <set_value name="$Status_ActorsInSeats" exact="-1" />
+                <set_value name="$Status_ActorsInSeatsLast" exact="0" />
+                <set_value name="$IsEmbarkCutscenePlayed" exact="false" />
+              </actions>
+              <cues>
+                <cue name="EngineerMode_TakeEngineerSeat_Interval" checkinterval="1s" instantiate="true">
+                  <delay exact="0.25s" />
+                  <actions>
+                    <set_value name="$Status_ActorsInSeats" exact="
+                      player.entity.hascontext.{$MissionCue.$Ship_Rescue} +
+                      (player.entity.roomslot != null) +
+                      (player.entity.roomslot == $EngineerSeat) +
+                      ($MissionCue.$Actor_Rescuer.roomslot and (not $MissionCue.$Actor_Rescuer.iswalking)) +
+                      player.entity.hascontext.{$MissionCue.$Station_Disabled}" />
+                    <debug_text text="'$Status_ActorsInSeats: ' + $Status_ActorsInSeats" chance="$MissionCue.$DebugChance" />
+                    <do_if value="$Status_ActorsInSeats != $Status_ActorsInSeatsLast">
+                      <set_value name="$Status_ActorsInSeatsLast" exact="$Status_ActorsInSeats" />
+                      <set_value name="$IsInMidMission" exact="
+                        $MissionCue.$IsRealMissionTimerStarted or
+                        @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.exists" />
+                      <!-- <do_if value="DockAtDisabledStation.state != cuestate.waiting and $MissionCue.$Ship_Rescue.hascontext.{$MissionCue.$Station_Disabled}">
+                        <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                      </do_if>
+                      <do_elseif value="DockAtHospital.state != cuestate.waiting and $MissionCue.$Ship_Rescue.hascontext.{$MissionCue.$Station_Hospital}">
+                        <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                      </do_elseif>
+                      <do_else> -->
+                        <debug_text text="'$IsInMidMission: ' + $IsInMidMission" chance="$MissionCue.$DebugChance" />
+                        <do_if value="player.entity.roomslot == $EngineerSeat" comment="player is in the engineer's seat">
+                          <do_if value="not $IsInMidMission" comment="otherwise, PickUpRefugeesCue controls ai rescuer's orders">
+                            <include_actions ref="md.Scenario_Transport_Refugees.SetRescueShipToApproachDisabledStation" />
+                          </do_if>
+                          <do_if value="(not $IsEmbarkCutscenePlayed) and (not Cutscenes.$IsPlaying)" comment="played embark cutscene if required">
+                            <set_value name="$IsEmbarkCutscenePlayed" exact="true" />
+                            <do_if value="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$Refugees_Waiting.count or @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$Refugees_Walking.count">
+                              <signal_cue cue="$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$PickUpRefugeesPlayCutsceneCue" />
+                            </do_if>
+                          </do_if>
+                          <do_if value="$MissionCue.$Actor_Rescuer.roomslot and (not $MissionCue.$Actor_Rescuer.iswalking)" comment="npc rescuer is in pilot seat">
+                            <do_if value="$IsInMidMission and $MissionCue.$IsRealMissionTimerStarted and player.age gt $MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime">
+                              <reset_cue cue="EngineerMode_StationApproach" />
+                              <reset_cue cue="DockAtDisabledStation" />
+                              <do_if value="DockAtHospital.state == cuestate.waiting">
+                                <signal_cue cue="DockAtHospital" />
+                              </do_if>
+                            </do_if>
+                            <do_else>
+                              <do_if value="EngineerMode_StationApproach.state == cuestate.waiting">
+                                <signal_cue cue="EngineerMode_StationApproach" />
+                              </do_if>
+                              <reset_cue cue="DockAtDisabledStation" />
+                              <reset_cue cue="DockAtHospital" />
+                            </do_else>
+                          </do_if>
+                          <do_else comment="npc rescuer is NOT in pilot seat">
+                            <reset_cue cue="EngineerMode_StationApproach" />
+                            <reset_cue cue="DockAtHospital" />
+                            <reset_cue cue="DockAtDisabledStation" />
+                          </do_else>
+                        </do_if>
+                        <do_else comment="player is NOT in engineer's seat">
+                          <do_if value="not $IsInMidMission" comment="otherwise, PickUpRefugeesCue controls ai rescuer's orders">
+                            <run_actions ref="md.Scenario_Transport_Refugees.CancelOrders">
+                              <param name="MissionCue" value="$MissionCue" />
+                              <param name="Ship" value="$MissionCue.$Ship_Rescue" />
+                            </run_actions>
+                          </do_if>
+                          <do_if value="player.occupiedship == $MissionCue.$Ship_Rescue" comment="player has taken control of the ship">
+                            <do_if value="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$Refugees_Embarked.count and @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$Refugees_Embarked.count == @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$Count_FreeBerths">
+                              <reset_cue cue="EngineerMode_StationApproach" />
+                              <reset_cue cue="DockAtDisabledStation" />
+                              <do_if value="DockAtHospital.state == cuestate.waiting">
+                                <signal_cue cue="DockAtHospital" />
+                              </do_if>
+                            </do_if>
+                            <do_else>
+                              <reset_cue cue="EngineerMode_StationApproach" />
+                              <reset_cue cue="DockAtDisabledStation" comment="DockAtDisabledStation initiated by docking started event and not manually signalled" />
+                              <reset_cue cue="DockAtHospital" />
+                            </do_else>
+                          </do_if>
+                          <do_else>
+                            <reset_cue cue="EngineerMode_StationApproach" />
+                            <reset_cue cue="DockAtDisabledStation" />
+                            <reset_cue cue="DockAtHospital" />
+                          </do_else>
+                        </do_else>
+                        <do_if value="not $MissionCue.hasmission">
+                          <run_actions ref="CreateMission_RunActions">
+                            <param name="MissionCue" value="$MissionCue" />
+                          </run_actions>
+                        </do_if>
+                        <do_else>
+                          <run_actions ref="UpdateMission">
+                            <param name="MissionCue" value="$MissionCue" />
+                            <param name="ObjectiveCue" value="EngineerMode_TakeEngineerSeat" />
+                          </run_actions>
+                        </do_else>
+                      <!-- </do_else> -->
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="EngineerMode_StationApproach">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <signal_cue_instantly cue="UpdateMissionTimer" param="table[$MissionTime_Add = $MissionCue.$Time_For1Trip, $IsSilent = true, $IsStartNowIfNotStarted = true]"
+                  comment="gamify: add time to prevent station exploding during prologue" />
+              </actions>
+              <cues>
+                <cue name="EngineerMode_StationApproach_Interval" checktime="player.age + 5s" onfail="cancel">
+                  <conditions comment="in case player ignores first objective and time runs out, prevent station approach event from happening after station destruction">
+                    <check_value value="$MissionCue.$Station_Disabled.isoperational" />
+                    <check_value value="not $MissionCue.$IsStationDestroyed_Actual" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <set_actor_lookat actor="$MissionCue.$Actor_Rescuer" component="player.entity" />
+                    <!-- <set_actor_lookat actor="player.entity" component="$MissionCue.$Actor_Rescuer" /> -->
+                    <signal_cue_instantly cue="Cutscenes.$PlayCutsceneCue" param="table[
+                              $ObjectiveCue        = EngineerMode_StationApproach,
+                              $DialogueScene       = 'station analyse',
+                              $DialogueCompleteCue = EngineerMode_StationApproach_Analyse2,
+                              $From = this.name]" />
+                    <set_value name="$Dist" exact="1.5km" />
+                    <find_object_component name="$DockingBay" object="$MissionCue.$Station_Disabled" class="class.dockingbay" sortbydistanceto="$MissionCue.$Ship_Rescue" />
+                    <create_position name="$Pos_RescueShip" space="$MissionCue.$Station_Disabled.sector" object="$MissionCue.$Ship_Rescue" />
+                    <debug_text text="'$Pos_RescueShip (pre warp): ' + $Pos_RescueShip" chance="$MissionCue.$DebugChance" />
+                    <create_position name="$Pos" space="$MissionCue.$Station_Disabled.sector" object="$DockingBay" />
+                    <debug_text text="'$Pos_RescueShip.distanceto.{$Pos}: ' + $Pos_RescueShip.distanceto.{$Pos}" chance="$MissionCue.$DebugChance" />
+                    <create_position name="$Pos_Warp" space="$MissionCue.$Station_Disabled.sector" object="$DockingBay" y="$Dist * 0.75" z="$Dist * -1" />
+                    <debug_text text="'$Pos: ' + $Pos" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$Pos_Warp: ' + $Pos_Warp" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$Pos_Warp.distanceto.{$Pos}: ' + $Pos_Warp.distanceto.{$Pos}" chance="$MissionCue.$DebugChance" />
+                    <create_orientation name="$Rot" orientation="look_at" refposition="$Pos">
+                      <position value="$Pos_Warp" />
+                    </create_orientation>
+                    <warp object="$MissionCue.$Ship_Rescue" sector="$MissionCue.$Station_Disabled.sector">
+                      <position value="$Pos_Warp" />
+                      <rotation value="$Rot" />
+                    </warp>
+                  </actions>
+                  <delay exact="1s" />
+                  <actions>
+                    <create_position name="$Pos_RescueShip" space="$MissionCue.$Station_Disabled.sector" object="$MissionCue.$Ship_Rescue" />
+                    <debug_text text="'$Pos_RescueShip (post warp): ' + $Pos_RescueShip" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$Pos_RescueShip.distanceto.{$Pos}: ' + $Pos_RescueShip.distanceto.{$Pos}" chance="$MissionCue.$DebugChance" />
+                    <include_actions ref="md.Scenario_Transport_Refugees.SetRescueShipToApproachDisabledStation" />
+                  </actions>
+                </cue>
+                <cue name="EngineerMode_StationApproach_Analyse2">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <signal_cue_instantly cue="VideoComms.$PlayVideoCommCue" param="table[
+                                  $MissionCue   = $MissionCue,
+                                  $ObjectiveCue = this,
+                                  $Scene        = 'station analyse',
+                                  $From = this.name]" />
+                    <signal_cue_instantly cue="VideoComms.$PlayVideoCommCue" param="table[
+                                  $MissionCue   = $MissionCue,
+                                  $ObjectiveCue = this,
+                                  $Scene        = 'help with repairs',
+                                  $VideoCommStoppedCue = EngineerMode_StationApproach_FlightCutscene,
+                                  $From = this.name]" />
+                  </actions>
+                </cue>
+                <cue name="EngineerMode_StationApproach_FlightCutscene">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <clear_actor_lookat actor="$MissionCue.$Actor_Rescuer" />
+                    <!-- <clear_actor_lookat actor="player.entity" /> -->
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <signal_cue_instantly cue="Cutscenes.$PlayCutsceneCue" param="table[
+                              $ObjectiveCue = this,
+                              $From = this.name]" />
+                  </actions>
+                </cue>
+                <cue name="EngineerMode_StationApproach_DockingStarted">
+                  <conditions>
+                    <event_object_docking_started object="$MissionCue.$Ship_Rescue" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <signal_cue_instantly cue="Cutscenes.$StopCutsceneCue" param="table[$ObjectiveCue = EngineerMode_StationApproach]" />
+                    <cancel_cue cue="EngineerMode_StationApproach" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="DockAtDisabledStation">
+              <conditions>
+                <check_any>
+                  <event_object_docking_started object="$MissionCue.$Ship_Rescue" />
+                  <event_object_docked object="$MissionCue.$Ship_Rescue" />
+                </check_any>
+                <check_value value="event.param == $Station_Disabled" />
+              </conditions>
+              <actions>
+                <do_if value="$MissionCue.$IsGameSequenceRandom">
+                  <signal_cue_instantly cue="GenerateSignalLeaks" />
+                </do_if>
+                <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="DockAtDisabledStation_DockingBayValidated">
+                  <conditions>
+                    <event_npc_slots_validated object="$MissionCue.$Ship_Rescue.dock.dockarea" />
+                  </conditions>
+                  <actions>
+                      <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                  </actions>
+                  <cues>
+                    <cue name="DockAtDisabledStation_DockingBayValidated_Timeout" checktime="player.age + 1s">
+                      <actions>
+                        <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                        <run_actions ref="UpdateMission" comment="update mission so that mission guidance line points at the transporter room below the air marshal slot. otherwise, the mission guidance line points back towards the ship's transporter room">
+                          <param name="MissionCue" value="$MissionCue" />
+                        </run_actions>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+                <cue name="DockAtDisabledStation_Undocked">
+                  <conditions>
+                    <event_object_undocked object="$MissionCue.$Ship_Rescue" />
+                  </conditions>
+                  <actions>
+                      <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                      <reset_cue cue="DockAtDisabledStation" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="Spacewalk">
+              <conditions>
+                <event_cue_signalled />
+                <check_value value="not @player.ship.isclass.spacesuit" />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="CheckSpacesuit" checkinterval="10s" instantiate="true">
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <do_if value="not @player.ship.isclass.spacesuit">
+                      <run_actions ref="UpdateMission">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="ObjectiveCue" value="Spacewalk" />
+                      </run_actions>
+                    </do_if>
+                    <cancel_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="EnterSpacesuit">
+                  <conditions>
+                    <event_object_changed_room object="player.entity" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <debug_text text="'player.ship.class: ' + @player.ship.class" chance="$DebugChance" />
+                    <do_if value="not @player.ship.isclass.spacesuit">
+                      <run_actions ref="UpdateMission">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="ObjectiveCue" value="Spacewalk" />
+                      </run_actions>
+                    </do_if>
+                    <do_else>
+                      <set_object_min_shield object="player.ship" exact="100" />
+                      <set_object_min_hull object="player.ship" exact="100" />
+                      <do_if value="player.age lt $MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime or (not @$MissionCue.$IsRealMissionTimerStarted)">
+                        <do_if value="(not $MissionCue.$MissionTime_Start) or (not @$MissionCue.$IsRealMissionTimerStarted)">
+                          <signal_cue_instantly cue="UpdateMissionTimer" param="table[$IsStartNowIfNotStarted = true, $IsReset = true]"
+                            comment="mission timer is started when the scenario starts BUT timers for scoring starts at these times:
+                            (1) rescue scenario: when the player first undocks from the disabled station,
+                            (2) engineer scenario: when the player first spacewalks,
+                            (3) escort scenario: when the player's ships first detects the blockade OR, in case the escort doesn't patrol the blockade, when the AI engineer enters the station.
+                            mission timer is started when the scenario starts IN CASE the player doesn't do any of the above.
+                            $IsReset is called so that MissionTime_Start is set to any of the 3 conditions above.
+                            this reset can only happen once." />
+                        </do_if>
+                      </do_if>
+                      <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="Event" value="'start'" />
+                      </run_actions>
+                      <signal_cue cue="RepairSignalLeak" />
+                      <reset_cue cue="parent" />
+                    </do_else>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="RepairSignalLeak" instantiate="true" namespace="this">
+              <conditions>
+                <event_cue_signalled />
+                <check_value value="@parent.namespace.$MissionCue.$Station_Disabled.isoperational" />
+                <check_value value="not parent.namespace.$MissionCue.$IsStationDestroyed_Actual" />
+                <check_any>
+                  <check_value value="parent.namespace.$MissionCue.$SignalLeaks_ToRepair.count" />
+                  <check_value value="parent.namespace.$MissionCue.$GameSequence_SignalLeaks.count" />
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$MissionCue" exact="parent.namespace.$MissionCue" />
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <set_value name="$MissionCue.$RepairSignalLeakCue" exact="this" />
+                <debug_text text="'$MissionCue.$RepairSignalLeakCue: ' + $MissionCue.$RepairSignalLeakCue" chance="$MissionCue.$DebugChance" />
+                <set_value name="$Module_SignalLeak" exact="null" />
+                <run_actions ref="GetIsReturnToShip" result="$IsReturnToShip">
+                  <param name="MissionCue" value="$MissionCue" />
+                </run_actions>
+                <debug_text text="'$IsReturnToShip ' + $IsReturnToShip" chance="$MissionCue.$DebugChance" />
+                <do_if value="$IsReturnToShip">
+                  <debug_text text="'signal_cue ' + ReturnToShip" chance="$MissionCue.$DebugChance" />
+                  <do_if value="ReturnToShip.state == cuestate.waiting">
+                    <signal_cue cue="ReturnToShip" />
+                  </do_if>
+                  <cancel_cue cue="this" />
+                  <cancel_cue cue="this.static" />
+                </do_if>
+                <do_else>
+                  <debug_text text="'$MissionCue.$Station_Disabled.isphysicsready: ' + $MissionCue.$Station_Disabled.isphysicsready" chance="$MissionCue.$DebugChance" />
+                  <do_if value="$MissionCue.$Station_Disabled.attention ge attention.visible and $MissionCue.$Station_Disabled.isphysicsready">
+                    <set_value name="$Max" exact="[$MissionCue.$Count_SignalLeaksPerMissionUpdate - $MissionCue.$SignalLeaks_ToRepair.count, $MissionCue.$GameSequence_SignalLeaks.count].min" />
+                    <do_if value="Debug_SignalLeaks.state == cuestate.waiting">
+                      <do_if value="$MissionCue.$IsShowNearestSignalLeaksAlways">
+                        <do_for_each name="$SignalLeak_Current" in="$MissionCue.$SignalLeaks_Current">
+                          <append_to_list name="$MissionCue.$GameSequence_SignalLeaks" exact="$SignalLeak_Current" />
+                        </do_for_each>
+                        <set_value name="$MissionCue.$SignalLeaks_Current" exact="[]" />
+                      </do_if>
+                    </do_if>
+                    <do_all counter="$Count" exact="$Max">
+                      <do_if value="Debug_SignalLeaks.state == cuestate.waiting">
+                        <do_if value="$MissionCue.$IsShowNearestSignalLeaksAlways">
+                          <sort_list list="$MissionCue.$GameSequence_SignalLeaks" sortbyvalue="player.entity.distanceto.[$MissionCue.$Station_Disabled, loop.element.$Pos]" sortdescending="false" />
+                        </do_if>
+                      </do_if>
+                      <do_else>
+                        <do_if value="not $MissionCue.$Debug_SignalLeaks_Index">
+                          <sort_list list="$MissionCue.$GameSequence_SignalLeaks" sortbyvalue="player.entity.distanceto.[$MissionCue.$Station_Disabled, loop.element.$Pos]" sortdescending="false" />
+                        </do_if>
+                        <do_else>
+                          <sort_list list="$MissionCue.$GameSequence_SignalLeaks" sortbyvalue="$MissionCue.$GameSequence_SignalLeaks.{$MissionCue.$Debug_SignalLeaks_Index}.distanceto.{loop.element.$Pos}" sortdescending="false" />
+                        </do_else>
+                      </do_else>
+                      <set_value name="$Pos_SignalLeak" exact="null" />
+                      <create_position name="$Pos_SignalLeak" value="$MissionCue.$GameSequence_SignalLeaks.{1}.$Pos" />
+                      <create_rotation name="$Rot_SignalLeak" value="$MissionCue.$GameSequence_SignalLeaks.{1}.$Rot" />
+                      <find_object_component groupname="$Modules_Operational" object="$MissionCue.$Station_Disabled" class="[class.module, class.connectionmodule]" multiple="true" />
+                      <sort_group group="$Modules_Operational" sortbyvalue="loop.element.distanceto.[$MissionCue.$Station_Disabled, $Pos_SignalLeak]" sortdescending="false" />
+                      <set_value name="$Module_SignalLeak" exact="@$Modules_Operational.{1}" comment="not ideal, but close enough" />
+                      <do_if value="$Pos_SignalLeak and $Rot_SignalLeak and $Module_SignalLeak">
+                        <debug_text text="'$Pos_SignalLeak: ' + $Pos_SignalLeak" chance="$MissionCue.$DebugChance" />
+                        <do_if value="$MissionCue.$SignalLeakMacro == macro.interactive_repairpanel_01_macro" comment="doesn't work, disabled by not setting $MissionCue.$SignalLeakMacro to macro.interactive_repairpanel_01_macro">
+                          <create_position name="$Pos_AtSector" space="$MissionCue.$Station_Disabled.sector" object="$Module_SignalLeak" value="$Pos_SignalLeak" />
+                          <create_object name="$SignalLeak" sector="$Sector" macro="$MissionCue.$SignalLeakMacro" owner="$MissionCue.$Station_Disabled.owner">
+                            <position value="$Pos_AtSector" />
+                            <rotation value="$Rot_SignalLeak" />
+                          </create_object>
+                        </do_if>
+                        <do_else>
+                          <create_signal_leak name="$SignalLeak" type="signalleaktype.data" object="$MissionCue.$Station_Disabled" macro="$MissionCue.$SignalLeakMacro">
+                            <position value="$Pos_SignalLeak" />
+                            <rotation value="$Rot_SignalLeak" />
+                          </create_signal_leak>
+                        </do_else>
+                        <add_effect effect="'smoketrail_s_long_duration'" object="$SignalLeak" strength="0.25">
+                          <position x="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" y="$SignalLeak.height * 1" z="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" />
+                        </add_effect>
+                        <add_effect effect="'firetrail_s_long_duration'" object="$SignalLeak" strength="0.06125">
+                          <position x="0" y="$SignalLeak.height * -0.75" z="0" />
+                        </add_effect>
+                        <add_to_group groupname="$MissionCue.$SignalLeaks_ToRepair" object="$SignalLeak" />
+                        <set_value name="$MissionCue.$GameSequence_SignalLeaks.{1}.$SignalLeak" exact="$SignalLeak" />
+                        <set_value name="$MissionCue.$GameSequence_SignalLeaks.{1}.$Module" exact="$Module_SignalLeak" />
+                        <append_to_list name="$MissionCue.$SignalLeaks_Current" exact="$MissionCue.$GameSequence_SignalLeaks.{1}" />
+                        <do_if value="Debug_SignalLeaks.state == cuestate.waiting">
+                          <remove_value name="$MissionCue.$GameSequence_SignalLeaks.{1}" />
+                        </do_if>
+                        <append_to_list name="$MissionCue.$GameSequence_SavedSignalLeaks" exact="table[$Pos = $Pos_SignalLeak, $Rot = $Rot_SignalLeak]" />
+                        <debug_text text="'$Module_SignalLeak: ' + $Module_SignalLeak + ' ' + @$Module_SignalLeak.knownname" chance="$MissionCue.$DebugChance" />
+                        <debug_text text="'$SignalLeak.distanceto.{$Module_SignalLeak}: ' + @$SignalLeak.distanceto.{$Module_SignalLeak}" chance="$MissionCue.$DebugChance" />
+                      </do_if>
+                    </do_all>
+                    <run_actions ref="md.Scenario_Transport_Refugees.StationComponents_GetOne" result="$MissionCue.$StationComponentName">
+                      <param name="MissionCue" value="$MissionCue" />
+                    </run_actions>
+                    <debug_text text="'$MissionCue.$StationComponentName: ' + $MissionCue.$StationComponentName" chance="$MissionCue.$DebugChance" />
+                    <run_actions ref="UpdateMission">
+                      <param name="MissionCue" value="$MissionCue" />
+                      <param name="ObjectiveCue" value="RepairSignalLeak" />
+                    </run_actions>
+                  </do_if>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="RepairSignalLeak_SignalLeakCreationFailed" checktime="player.age + 0.25s" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $MissionCue.$SignalLeaks_ToRepair.count" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <do_if value="$MissionCue.$GameSequence_SignalLeaks.count">
+                      <signal_cue cue="parent.static" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="MissionEnd" />
+                    </do_else>
+                    <cancel_cue cue="parent" />
+                    <cancel_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="RepairSignalLeak_Interval" checktime="player.age + $MissionCue.$Time_PerRepair_Optimal * 0.33333" onfail="cancel">
+                  <conditions>
+                    <check_value value="$MissionCue.$Station_Disabled.isoperational" />
+                    <check_value value="not $MissionCue.$MissionCue.$IsStationDestroyed_Delayed" />
+                    <check_value value="not $MissionCue.$MissionCue.$IsStationDestroyed_Actual" />
+                  </conditions>
+                  <actions>
+                    <run_actions ref="UpdateMission">
+                      <param name="MissionCue" value="$MissionCue" />
+                      <param name="ObjectiveCue" value="RepairSignalLeak" />
+                    </run_actions>
+                    <reset_cue cue="RepairSignalLeak_Interval" />
+                  </actions>
+                </cue>
+                <cue name="RepairSignalLeak_Repaired">
+                  <conditions>
+                    <event_object_hull_repaired group="$MissionCue.$SignalLeaks_ToRepair" />
+                    <check_value value="event.object.hullpercentage ge 100" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name (confirmed): ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <set_value name="$SignalLeak_Repaired" exact="event.object" />
+                    <debug_text text="'$MissionCue.$SignalLeaks_Current.count: ' + $MissionCue.$SignalLeaks_Current.count" chance="$MissionCue.$DebugChance" />
+                    <do_for_each name="$SignalLeakData" in="$MissionCue.$SignalLeaks_Current" counter="$Count" reverse="true">
+                      <do_if value="$SignalLeakData.$SignalLeak == $SignalLeak_Repaired">
+                        <remove_value name="$MissionCue.$SignalLeaks_Current.{$Count}" />
+                        <debug_text text="'$MissionCue.$SignalLeaks_Current.count (post removed repaired): ' + $MissionCue.$SignalLeaks_Current.count" chance="$MissionCue.$DebugChance" />
+                        <break />
+                      </do_if>
+                    </do_for_each>
+                    <remove_from_group group="$MissionCue.$SignalLeaks_ToRepair" object="$SignalLeak_Repaired" />
+                    <set_spacesuit_oxygen object="player.ship" percent="player.ship.oxygenpercentage + 1" />
+                    <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                      <param name="MissionCue" value="$MissionCue" />
+                      <param name="Event" value="'repair'" />
+                    </run_actions>
+                    <debug_text text="'$MissionCue.$Station_Disabled.isoperational: ' + $MissionCue.$Station_Disabled.isoperational" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$MissionCue.$IsStationDestroyed_Delayed: ' + $MissionCue.$IsStationDestroyed_Delayed" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$MissionCue.$IsStationDestroyed_Actual: ' + $MissionCue.$IsStationDestroyed_Actual" chance="$MissionCue.$DebugChance" />
+                    <do_if value="@$MissionCue.$Station_Disabled.isoperational and (not $MissionCue.$IsStationDestroyed_Delayed) and (not $MissionCue.$IsStationDestroyed_Actual)">
+                      <signal_cue_instantly cue="UpdateMissionTimer" param="table[$MissionTime_Add = $MissionCue.$Time_DestructionDelayedPerRepair]" />
+                    </do_if>
+                    <do_elseif value="ReturnToShip.state == cuestate.waiting">
+                      <signal_cue cue="ReturnToShip" />
+                    </do_elseif>
+                    <signal_cue cue="parent.static" />
+                    <cancel_cue cue="parent" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="RepairSignalLeak_CancelForNewInstance">
+                  <conditions>
+                    <event_cue_signalled cue="parent.static" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <cancel_cue cue="parent" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="GenerateSignalLeaks">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <!-- <set_value name="$MissionCue.$GameSequence_SignalLeaks" exact="[]" /> -->
+                <debug_text text="event.name" />
+              </actions>
+              <cues>
+                <cue name="GenerateSignalLeaks_Timeout" checktime="player.age + 10min">
+                  <actions>
+                    <debug_text text="event.name" />
+                    <reset_cue cue="GenerateSignalLeaks" />
+                  </actions>
+                </cue>
+                <cue name="GenerateSignalLeaks_Now" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <check_value value="$MissionCue.$Station_Disabled.isphysicsready" />
+                  </conditions>
+                  <actions>
+                    <!-- <debug_text text="event.name" /> -->
+                    <signal_cue_instantly cue="GenerateSignalLeak" />
+                  </actions>
+                </cue>
+                <cue name="GenerateSignalLeaksDone">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="event.name" />
+                    <reset_cue cue="GenerateSignalLeaks" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="GenerateSignalLeak">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <do_if value="$MissionCue.$GameSequence_SignalLeaks.count lt $Count_SignalLeaks_Max or Debug_SignalLeaks.state != cuestate.waiting">
+                  <do_if value="not $MissionCue.$Y_DockingBayTop?">
+                    <find_dockingbay name="$DockingBays" object="$MissionCue.$Station_Disabled" multiple="true">
+                      <match_dock size="tag.dock_m"/>
+                    </find_dockingbay>
+                    <create_position name="$Pos_DockingBay" space="$MissionCue.$Station_Disabled" object="$DockingBays.{1}" />
+                    <debug_text text="'$Pos_DockingBay: ' + $Pos_DockingBay" chance="$MissionCue.$DebugChance" />
+                    <set_value name="$MissionCue.$Y_DockingBayTop" exact="$Pos_DockingBay.y + $DockingBays.{1}.height * 0.5" />
+                    <debug_text text="'$MissionCue.$Y_DockingBayTop: ' + $MissionCue.$Y_DockingBayTop" chance="$MissionCue.$DebugChance" />
+                  </do_if>
+                  <find_object_component groupname="$Modules_Operational" object="$MissionCue.$Station_Disabled" class="[class.module, class.connectionmodule]" multiple="true" />
+                  <do_if value="Debug_SignalLeaks.state != cuestate.waiting">
+                    <do_if value="@event.param.$Module">
+                      <add_to_group groupname="$Modules_Operational" object="event.param.$Module" replace="true" />
+                    </do_if>
+                    <do_else>
+                      <sort_group group="$Modules_Operational" sortbydistanceto="player.entity" sortdescending="false" />
+                    </do_else>
+                  </do_if>
+                  <do_elseif value="$MissionCue.$GameSequence_SignalLeaks.count">
+                    <sort_group group="$Modules_Operational" sortbyvalue="loop.element.distanceto.[$MissionCue.$Station_Disabled, $MissionCue.$GameSequence_SignalLeaks.{$MissionCue.$GameSequence_SignalLeaks.count}.$Pos]" sortdescending="false" />
+                  </do_elseif>
+                  <do_else>
+                    <sort_group group="$Modules_Operational" sortbydistanceto="$DockingBays.{1}" sortdescending="false" />
+                  </do_else>
+                  <do_if value="@$MissionCue.$GameSequence_SignalLeaks.count / 7 % 2 == 0 or Debug_SignalLeaks.state != cuestate.waiting">
+                    <set_value name="$IsTrendUpwards" exact="true" />
+                    <set_value name="$IsTrendDownwards" exact="false" />
+                  </do_if>
+                  <do_else>
+                    <set_value name="$IsTrendUpwards" exact="false" />
+                    <set_value name="$IsTrendDownwards" exact="true" />
+                  </do_else>
+                  <set_value name="$Count_TriesAtModule" exact="0" />
+                  <do_for_each name="$Module" in="$Modules_Operational">
+                    <set_value name="$Count_TriesAtModule" operation="add" exact="1" />
+                    <set_value name="$IsPosRotsGenerated" exact="false" />
+                    <do_all counter="$Count_TriesAtTrend" exact="1000">
+                      <do_if value="Debug_SignalLeaks.state != cuestate.waiting">
+                        <create_position name="$Pos_Surface" space="$MissionCue.$Station_Disabled" object="player.entity" z="50m" />
+                        <set_value name="$Rot_Surface" exact="player.entity.relativerotation.{$MissionCue.$Station_Disabled}" />
+                        <create_rotation name="$Rot_Surface" yaw="$Rot_Surface.yaw" pitch="$Rot_Surface.pitch + 90deg" roll="$Rot_Surface.roll" />
+                        <sort_group group="$Modules_Operational" sortbyvalue="loop.element.bboxdistanceto.{player.entity}" sortdescending="false" />
+                        <set_value name="$Module" exact="$Modules_Operational.{1}" />
+                      </do_if>
+                      <do_else>
+                        <find_object_surface posname="$Pos_Surface" rotname="$Rot_Surface" space="$MissionCue.$Station_Disabled" object="$MissionCue.$Station_Disabled" component="$Module" height="$MissionCue.$SignalLeakMacro.boundingbox.max.y - $MissionCue.$SignalLeakMacro.boundingbox.center.y">
+                          <offsetrotation pitch="-90deg" />
+                        </find_object_surface>
+                      </do_else>
+                      <do_if value="$Pos_Surface">
+                        <set_value name="$Dist" exact="0" />
+                        <set_value name="$IsDistOk" exact="false" />
+                        <do_if value="Debug_SignalLeaks.state != cuestate.waiting">
+                          <set_value name="$Dist" exact="player.entity.distanceto.[$MissionCue.$Station_Disabled, $Pos_Surface]" />
+                          <set_value name="$IsDistOk" exact="true" />
+                        </do_if>
+                        <do_elseif value="$MissionCue.$GameSequence_SignalLeaks.count">
+                          <set_value name="$Dist" exact="$MissionCue.$GameSequence_SignalLeaks.{$MissionCue.$GameSequence_SignalLeaks.count}.$Pos.distanceto.{$Pos_Surface}" />
+                          <set_value name="$IsDistOk" exact="$Dist gt 250m and $Dist lt 750m" />
+                        </do_elseif>
+                        <do_else>
+                          <set_value name="$Dist" exact="$DockingBays.{1}.distanceto.[$MissionCue.$Station_Disabled, $Pos_Surface]" />
+                          <set_value name="$IsDistOk" exact="$Dist lt 500m" />
+                        </do_else>
+                        <do_if value="$IsDistOk">
+                          <do_if value="
+                            Debug_SignalLeaks.state != cuestate.waiting or
+                            (
+                              (
+                                $Pos_Surface.y gt $MissionCue.$Y_DockingBayTop or
+                                $MissionCue.$GameSequence_SignalLeaks.count
+                              ) and
+                              (
+                                (not $MissionCue.$GameSequence_SignalLeaks.count) or
+                                ($IsTrendUpwards and $Pos_Surface.y gt $MissionCue.$GameSequence_SignalLeaks.{$MissionCue.$GameSequence_SignalLeaks.count}.$Pos.y + 50m) or
+                                ($IsTrendDownwards and $Pos_Surface.y le $MissionCue.$GameSequence_SignalLeaks.{$MissionCue.$GameSequence_SignalLeaks.count}.$Pos.y - 50m)
+                              )
+                            )
+                          ">
+                            <set_value name="$IsPosRotsGenerated" exact="true" />
+                            <append_to_list name="$MissionCue.$GameSequence_SignalLeaks" exact="table[$Pos = $Pos_Surface, $Rot = $Rot_Surface, $Module = $Module]" />
+                            <debug_text text="'$MissionCue.$GameSequence_SignalLeaks.count: ' + $MissionCue.$GameSequence_SignalLeaks.count + ' $Dist: ' + $Dist + ' $IsTrendUpwards: ' + $IsTrendUpwards + ' $Count_TriesAtModule: ' + $Count_TriesAtModule + ' $Count_TriesAtTrend: ' + $Count_TriesAtTrend + ' table[$Pos=' + $Pos_Surface + ', $Rot=' + $Rot_Surface +', $Dist=' + $Dist + ', $IsTrendUpwards=' + $IsTrendUpwards+ ']'" chance="$MissionCue.$DebugChance" />
+                            <break />
+                          </do_if>
+                        </do_if>
+                      </do_if>
+                    </do_all>
+                    <do_if value="$IsPosRotsGenerated">
+                      <break />
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+                <do_else>
+                  <!-- <debug_text text="'GenerateSignalLeaksDone.state: ' + GenerateSignalLeaksDone.state" chance="$MissionCue.$DebugChance" /> -->
+                  <do_if value="GenerateSignalLeaksDone.state == cuestate.waiting">
+                    <signal_cue cue="GenerateSignalLeaksDone" />
+                  </do_if>
+                </do_else>
+                <reset_cue cue="GenerateSignalLeak" />
+              </actions>
+            </cue>
+            <cue name="Debug_SignalLeaks">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <create_position name="$Pos_LastSignalLeakDebug" space="$MissionCue.$Station_Disabled" object="player.entity" />
+                <do_for_each name="$SignalLeak" in="$SignalLeaks_ToRepair" reverse="true">
+                  <destroy_object object="$SignalLeak" />
+                </do_for_each>
+                <include_actions ref="md.Scenario_Transport_Refugees.GameSequence_SignalLeaks_IncludeLibrary" />
+                <set_value name="$Dist_Last" exact="-1" />
+                <set_value name="$Debug_SignalLeaks_Index" exact="0" />
+                <do_if value="$MissionCue.$GameSequence_SignalLeaks.count">
+                  <signal_cue cue="Debug_SignalLeaks_GoToNext" />
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Debug_SignalLeaks_Scan" instantiate="true">
+                  <conditions>
+                    <event_player_signal_unlock_started />
+                  </conditions>
+                  <actions>
+                    <abort_scan />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Interval" checkinterval="1s" instantiate="true">
+                  <actions>
+                    <create_position name="$Pos_Player" space="$MissionCue.$Station_Disabled" object="player.entity" />
+                    <set_value name="$Dist_FromCurrent" exact="$Pos_Player.distanceto.{$Pos_LastSignalLeakDebug}" />
+                    <do_if value="not $Debug_SignalLeaks_Index">
+                      <show_notification text="'no signal leaks in list.\ncreate one with Debug_SignalLeaks_GenerateInFrontOfPlayer.'" />
+                    </do_if>
+                    <do_elseif value="$Dist_FromCurrent != $Dist_Last">
+                      <set_value name="$Dist_Last" exact="$Dist_FromCurrent" />
+                      <set_value name="$Text" exact="$Debug_SignalLeaks_Index + ' (' + @$SignalLeak + ')/' + $MissionCue.$GameSequence_SignalLeaks.count + {1001,120}" />
+                      <do_if value="$Debug_SignalLeaks_Index gt 1">
+                        <set_value name="$Dist" exact="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index - 1}.$Pos.distanceto.{$Pos_LastSignalLeakDebug}" />
+                        <set_value name="$Text" exact="$Text + '   p:' + $Dist" />
+                      </do_if>
+                      <set_value name="$Text" exact="$Text + '   c:' + $Dist_FromCurrent" />
+                      <do_if value="$Debug_SignalLeaks_Index lt $MissionCue.$GameSequence_SignalLeaks.count">
+                        <set_value name="$Dist" exact="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index + 1}.$Pos.distanceto.{$Pos_LastSignalLeakDebug}" />
+                        <set_value name="$Text" exact="$Text + '   n:' + $Dist" />
+                      </do_if>
+                      <debug_text text="$Text" />
+                      <show_notification text="$Text" />
+                    </do_elseif>
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_GenerateInFrontOfPlayer" comment="used to create a signal leak that is not added to the list. usefull for creating one quickly to get its pos and rot data.">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="event.name" chance="$MissionCue.$DebugChance" />
+                    <do_if value="@$SignalLeak.exists">
+                      <destroy_object object="$SignalLeak" />
+                    </do_if>
+                    <create_position name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Pos" space="$MissionCue.$Station_Disabled" object="player.ship" z="50m" />
+                    <create_rotation name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot" value="player.ship.rotation" />
+                    <create_signal_leak name="$SignalLeak" type="signalleaktype.data" object="$Station_Disabled" macro="$MissionCue.$SignalLeakMacro">
+                      <position value="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Pos" />
+                      <rotation value="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot" />
+                    </create_signal_leak>
+                    <signal_cue cue="Debug_SignalLeaks_GoToSignalLeak" />
+                    <set_spacesuit_oxygen object="player.ship" percent="100" />
+                    <reset_cue cue="Debug_SignalLeaks_GenerateInFrontOfPlayer" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_GoToSignalLeak">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="UpdateMissionTimer" param="table[$MissionTime_Add = 1h]" />
+                    <do_if value="@$SignalLeak.exists">
+                      <destroy_object object="$SignalLeak" />
+                    </do_if>
+                    <!-- <set_value name="$Pos_SignalLeak" exact="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}" /> -->
+                    <do_if value="$MissionCue.$GameSequence_SignalLeaks.count lt $Debug_SignalLeaks_Index">
+                      <set_value name="$Debug_SignalLeaks_Index" exact="$MissionCue.$GameSequence_SignalLeaks.count" />
+                    </do_if>
+                    <debug_text text="'$MissionCue.$GameSequence_SignalLeaks.{' + $Debug_SignalLeaks_Index + '}: ' + $MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}" />
+                    <create_position name="$Pos_SignalLeak" space="$Station_Disabled" object="$Station_Disabled" value="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Pos" />
+                    <set_value name="$Pos_LastSignalLeakDebug" exact="$Pos_SignalLeak" />
+                    <create_rotation name="$Rot_SignalLeak" value="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot" />
+                    <set_value name="$Yaw" exact="@$Rot_SignalLeak.yaw" />
+                    <do_if value="not $Yaw">
+                      <set_value name="$Yaw" exact="0deg" />
+                    </do_if>
+                    <set_value name="$Pitch" exact="@$Rot_SignalLeak.pitch" />
+                    <do_if value="not $Pitch">
+                      <set_value name="$Pitch" exact="0deg" />
+                    </do_if>
+                    <set_value name="$Roll" exact="@$Rot_SignalLeak.roll" />
+                    <do_if value="not $Roll">
+                      <set_value name="$Roll" exact="0deg" />
+                    </do_if>
+                    <create_signal_leak name="$SignalLeak" type="signalleaktype.data" object="$Station_Disabled" macro="$MissionCue.$SignalLeakMacro">
+                      <position value="$Pos_SignalLeak" />
+                      <rotation value="$Rot_SignalLeak" />
+                    </create_signal_leak>
+                    <!-- <add_effect effect="'smoketrail_s_long_duration'" object="$SignalLeak" strength="0.25">
+                      <position x="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" y="$SignalLeak.height * 1" z="$SignalLeak.width * [-0.5, -0.25, 0, 0.25, 0.5].random" />
+                    </add_effect>
+                    <add_effect effect="'firetrail_s_long_duration'" object="$SignalLeak" strength="0.06125">
+                      <position x="0" y="$SignalLeak.height * -0.75" z="0" />
+                    </add_effect> -->
+                    <!-- <show_notification text="'$Debug_SignalLeaks_Index: ' + $Debug_SignalLeaks_Index" /> -->
+                    <set_spacesuit_oxygen object="player.ship" percent="100" />
+                    <!-- <signal_cue cue="Debug_SignalLeaks_WarpTo" /> -->
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_GoToNext">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <do_if value="not event.param">
+                      <do_if value="not $Debug_SignalLeaks_Index">
+                        <set_value name="$Debug_SignalLeaks_Index" exact="1" />
+                      </do_if>
+                      <do_else>
+                        <set_value name="$Debug_SignalLeaks_Index" operation="add" exact="1" />
+                      </do_else>
+                    </do_if>
+                    <do_else>
+                      <do_if value="not $Debug_SignalLeaks_Index">
+                        <set_value name="$Debug_SignalLeaks_Index" exact="$MissionCue.$GameSequence_SignalLeaks.count" />
+                      </do_if>
+                      <do_else>
+                        <set_value name="$Debug_SignalLeaks_Index" operation="subtract" exact="1" />
+                      </do_else>
+                    </do_else>
+                    <do_if value="$Debug_SignalLeaks_Index lt 1">
+                      <set_value name="$Debug_SignalLeaks_Index" exact="$MissionCue.$GameSequence_SignalLeaks.count" />
+                    </do_if>
+                    <do_elseif value="$Debug_SignalLeaks_Index gt $MissionCue.$GameSequence_SignalLeaks.count">
+                      <set_value name="$Debug_SignalLeaks_Index" exact="1" />
+                    </do_elseif>
+                    <signal_cue cue="Debug_SignalLeaks_GoToSignalLeak" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_GoToPrevious">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToNext" param="-1" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_MoveForward">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="UpdateMissionTimer" param="table[$MissionTime_Add = 1h]" />
+                    <create_position name="$Pos_Player" space="player.sector" object="player.ship" />
+                    <create_position name="$Pos_SignalLeak" space="player.sector" object="$SignalLeak" />
+                    <create_orientation name="$Rot_PlayerToSignalLeak" orientation="look_at" refobject="$SignalLeak">
+                      <position object="player.ship" />
+                    </create_orientation>
+                    <debug_text text="'$Pos_SignalLeak: ' + $Pos_SignalLeak" />
+                    <debug_text text="'$Pos_Player.distanceto.{$Pos_SignalLeak}: ' + $Pos_Player.distanceto.{$Pos_SignalLeak}" />
+                    <set_value name="$Move" exact="$SignalLeak.height * 0.25" />
+                    <do_if value="event.param">
+                      <set_value name="$Move" exact="$Move * event.param" />
+                    </do_if>
+                    <debug_text text="'$Move: ' + $Move" />
+                    <create_position name="$Pos_SignalLeak_New"
+                                x="$Pos_SignalLeak.x + $Move * sin($Rot_PlayerToSignalLeak.yaw) * cos($Rot_PlayerToSignalLeak.pitch)"
+                                y="$Pos_SignalLeak.y + $Move * sin($Rot_PlayerToSignalLeak.pitch)"
+                                z="$Pos_SignalLeak.z + $Move * cos($Rot_PlayerToSignalLeak.yaw) * cos($Rot_PlayerToSignalLeak.pitch)" />
+                    <destroy_object object="$SignalLeak" />
+                    <debug_text text="'$Pos_SignalLeak_New: ' + $Pos_SignalLeak_New" />
+                    <debug_text text="'$Pos_Player.distanceto.{$Pos_SignalLeak_New}: ' + $Pos_Player.distanceto.{$Pos_SignalLeak_New}" />
+                    <create_position name="$Pos_SignalLeak_New" space="$MissionCue.$Station_Disabled" object="player.sector" value="$Pos_SignalLeak_New" />
+                    <set_value name="$Pos_LastSignalLeakDebug" exact="$Pos_SignalLeak_New" />
+                    <set_value name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Pos" exact="$Pos_SignalLeak_New" />
+                    <debug_text text="'$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}: ' + $MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}" />
+                    <set_spacesuit_oxygen object="player.ship" percent="player.ship.oxygenpercentage + 1" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToSignalLeak" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_MoveBack">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_MoveForward" param="-1" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Rotate">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <set_value name="$Direction" exact="event.param.$Direction" />
+                    <!-- <set_value name="$Angle" exact="@$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.{$Direction}" /> -->
+                    <set_value name="$Angle" exact="$SignalLeak.rotation.{$Direction}" />
+                    <do_if value="not $Angle">
+                      <set_value name="$Angle" exact="0deg" />
+                    </do_if>
+                    <set_value name="$Mult" exact="1" />
+                    <do_if value="@event.param.$Mult">
+                      <set_value name="$Mult" exact="event.param.$Mult" />
+                    </do_if>
+                    <set_value name="$Angle" exact="$Angle + 15deg * $Mult" />
+                    <debug_text text="'$Angle: ' + $Angle" />
+                    <!-- <set_value name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.{$Direction}" exact="$Angle" /> -->
+                    <do_if value="$Direction == 'yaw'">
+                      <create_rotation name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot"
+                        yaw="$Angle"
+                        pitch="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.pitch"
+                        roll="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.roll" />
+                    </do_if>
+                    <do_elseif value="$Direction == 'pitch'">
+                      <create_rotation name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot"
+                        yaw="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.yaw"
+                        pitch="$Angle"
+                        roll="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.roll" />
+                    </do_elseif>
+                    <do_elseif value="$Direction == 'roll'">
+                      <create_rotation name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot"
+                        yaw="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.yaw"
+                        pitch="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot.pitch"
+                        roll="$Angle" />
+                    </do_elseif>
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToSignalLeak" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_ResetRotation">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <create_rotation name="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}.$Rot" value="rotation.[0,0,0]" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToSignalLeak" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Yaw">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'yaw']" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Pitch">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'pitch']" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Roll">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'roll']" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_YawMinus">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'yaw', $Mult = -1]" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_PitchMinus">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'pitch', $Mult = -1]" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_RollMinus">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="Debug_SignalLeaks_Rotate" param="table[$Direction = 'roll', $Mult = -1]" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_List">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <debug_text text="'$Debug_SignalLeaks_Index: ' + @$Debug_SignalLeaks_Index" />
+                    <set_value name="$PosRotData_Previous" exact="null" />
+                    <do_for_each name="$PosRotData" in="$MissionCue.$GameSequence_SignalLeaks" counter="$Count">
+                      <do_if value="$PosRotData_Previous">
+                        <set_value name="$IsTrendUpwards" exact="$PosRotData.$Pos.y gt $PosRotData_Previous.$Pos.y" />
+                        <set_value name="$Dist" exact="$PosRotData.$Pos.distanceto.{$PosRotData_Previous.$Pos}" />
+                        <do_if value="($Dist)f != (@$PosRotData.$Dist)f">
+                          <set_value name="$Dist_Old" exact="@$PosRotData.$Dist" />
+                          <set_value name="$PosRotData.$Dist" exact="$Dist" />
+                          <debug_text text="'$Count: ' + $Count + ' $Dist (updated from ' + $Dist_Old + '): ' + $Dist + ' table[$Pos=' + $PosRotData.$Pos + ', $Rot=' + $PosRotData.$Rot + ', $Dist=' + @$PosRotData.$Dist + ', $IsTrendUpwards=' + @$IsTrendUpwards + ']'" />
+                        </do_if>
+                        <do_else>
+                          <debug_text text="'$Count: ' + $Count + ' $Dist: ' + $Dist + ' table[$Pos=' + $PosRotData.$Pos + ', $Rot=' + $PosRotData.$Rot + ', $Dist=' + @$PosRotData.$Dist + ', $IsTrendUpwards=' + @$IsTrendUpwards + ']'" />
+                        </do_else>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$IsTrendUpwards" exact="true" />
+                        <set_value name="$Dist" exact="0" />
+                        <debug_text text="'$Count: ' + $Count + ' $Dist: ' + $Dist + ' table[$Pos=' + $PosRotData.$Pos + ', $Rot=' + $PosRotData.$Rot + ', $Dist=' + @$PosRotData.$Dist + ', $IsTrendUpwards=' + @$IsTrendUpwards + ']'" />
+                      </do_else>
+                      <set_value name="$PosRotData_Previous" exact="$PosRotData" />
+                    </do_for_each>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_WarpTo">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue_instantly cue="UpdateMissionTimer" param="table[$MissionTime_Add = 1h]" />
+                    <create_position name="$Pos" space="$MissionCue.$Station_Disabled.zone" object="$SignalLeak" x="@event.param.$X" y="if @event.param.$Y then event.param.$Y else 100m" />
+                    <create_position name="$Pos_SignalLeak_Zone" space="$MissionCue.$Station_Disabled.zone" object="$SignalLeak" />
+                    <!-- <do_if value="player.entity.distanceto.[$MissionCue.$Station_Disabled.zone, $Pos_SignalLeak_Zone] gt 100m"> -->
+                      <create_orientation name="$Rot" orientation="look_at" refposition="$Pos_SignalLeak_Zone">
+                        <position value="$Pos" />
+                      </create_orientation>
+                      <create_rotation name="$Rot" yaw="$Rot.yaw" pitch="$Rot.pitch" roll="$Rot.roll" />
+                      <warp object="player.ship" zone="$MissionCue.$Station_Disabled.zone">
+                        <position value="$Pos" />
+                        <rotation value="$Rot" />
+                      </warp>
+                    <!-- </do_if> -->
+                    <reset_cue cue="Debug_SignalLeaks_WarpTo" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_WarpToNext">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToNext" />
+                    <signal_cue cue="Debug_SignalLeaks_WarpTo" />
+                    <reset_cue cue="Debug_SignalLeaks_WarpToNext" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_WarpToPrevious">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Debug_SignalLeaks_GoToPrevious" />
+                    <signal_cue cue="Debug_SignalLeaks_WarpTo" />
+                    <reset_cue cue="Debug_SignalLeaks_WarpToPrevious" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_WarpToLeft">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Debug_SignalLeaks_WarpTo" param="table[$X = -50m, $Y = 12m]" />
+                    <reset_cue cue="Debug_SignalLeaks_WarpToLeft" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_WarpToRight">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="Debug_SignalLeaks_WarpTo" param="table[$X = 50m, $Y = 12m]" />
+                    <reset_cue cue="Debug_SignalLeaks_WarpToRight" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_Delete">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <do_if value="$SignalLeak">
+                      <destroy_object object="$SignalLeak" />
+                      <remove_from_list name="$MissionCue.$GameSequence_SignalLeaks" exact="$MissionCue.$GameSequence_SignalLeaks.{$Debug_SignalLeaks_Index}" />
+                      <set_value name="$Debug_SignalLeaks_Index" exact="$MissionCue.$GameSequence_SignalLeaks.count" />
+                    </do_if>
+                    <!-- <signal_cue cue="Debug_SignalLeaks_GoToSignalLeak" /> -->
+                    <reset_cue cue="Debug_SignalLeaks_Delete" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_SelectModule">
+                  <conditions>
+                    <check_any>
+                      <event_player_attacked_object />
+                      <event_player_repaired_object />
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="@event.param.knownname" />
+                    <show_notification text="@event.param.knownname" />
+                    <set_value name="$Debug_SignalLeaks_Module" exact="event.param" />
+                    <reset_cue cue="Debug_SignalLeaks_SelectModule" />
+                  </actions>
+                </cue>
+                <cue name="Debug_SignalLeaks_ViewFromSides">
+                  <conditions>
+                    <event_cue_signalled />
+                    <check_value value="$SignalLeak" />
+                  </conditions>
+                  <actions>
+                    <play_cutscene key="'Lookat_Target_Keyframed_Shot'">
+                      <param name="duration"      number="5s" />
+                      <param name="anchor"        object="$SignalLeak" />
+                      <param name="camerapos_x_1" number="$SignalLeak.width * 10" />
+                      <param name="camerapos_x_2" number="$SignalLeak.width * -10" />
+                      <param name="camerapos_y_1" number="$SignalLeak.height * 5" />
+                      <param name="camerapos_y_2" number="$SignalLeak.height * 5" />
+                      <param name="camerapos_z_1" number="0" />
+                      <param name="camerapos_z_2" number="0" />
+                      <param name="lookat"        object="$SignalLeak" />
+                      <param name="lookatpos_x_1" number="0" />
+                      <param name="lookatpos_x_2" number="0" />
+                      <param name="lookatpos_y_1" number="0" />
+                      <param name="lookatpos_y_2" number="0" />
+                      <param name="lookatpos_z_1" number="0" />
+                      <param name="lookatpos_z_2" number="0" />
+                    </play_cutscene>
+                    <reset_cue cue="Debug_SignalLeaks_ViewFromSides" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="Debug_UpdateSignalLeakList" instantiate="true">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <include_actions ref="md.Scenario_Transport_Refugees.GameSequence_SignalLeaks_IncludeLibrary" />
+              </actions>
+            </cue>
+            <library name="GetIsReturnToShip" purpose="run_actions">
+              <params>
+                <param name="MissionCue" />
+              </params>
+              <actions>
+                <set_value name="$Destination" exact="@$MissionCue.$Ship_Rescue.orders.{1}.$destination" />
+                <do_if value="not $Destination">
+                  <set_value name="$Destination" exact="@$MissionCue.$Ship_Rescue.orders.{2}.$destination" />
+                </do_if>
+                <debug_text text="'$MissionCue.$Ship_Rescue.isoperational: ' + $MissionCue.$Ship_Rescue.isoperational" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$Destination: ' + $Destination + ' ' + @$Destination.knownname" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$Destination == $MissionCue.$Station_Disabled: ' + ($Destination == $MissionCue.$Station_Disabled)" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$MissionCue.$Ship_Rescue.distanceto.{$MissionCue.$Station_Disabled}: ' + $MissionCue.$Ship_Rescue.distanceto.{$MissionCue.$Station_Disabled}" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$MissionCue.$Ship_Rescue.maxradarrange: ' + ($MissionCue.$Ship_Rescue.maxradarrange * 0.25)" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$MissionCue.$Ship_Rescue.distanceto.{$MissionCue.$Station_Disabled} le $MissionCue.$Ship_Rescue.maxradarrange: ' + ($MissionCue.$Ship_Rescue.distanceto.{$MissionCue.$Station_Disabled} le $MissionCue.$Ship_Rescue.maxradarrange)" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'player.age: ' + player.age" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime: ' + ($MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime)" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'player.age gt $MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime: ' + (player.age gt $MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime)" chance="$MissionCue.$DebugChance" />
+                <set_value name="$IsReturnToShip" exact="
+                              @$MissionCue.$Ship_Rescue.isoperational and
+                              $MissionCue.$Ship_Rescue.hascontext.{$MissionCue.$Station_Disabled} and
+                              (
+                                (not $MissionCue.$MissionTime_Start) or
+                                player.age gt $MissionCue.$MissionTime_Destruct - $MissionCue.$Time_OutOfTime
+                              )" />
+                <debug_text text="'$IsReturnToShip: ' + $IsReturnToShip" chance="$MissionCue.$DebugChance" />
+                <return value="$IsReturnToShip" />
+              </actions>
+            </library>
+            <cue name="ReEnterStation">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                <reset_cue cue="ReturnToShip" />
+                <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                <debug_text text="'EngineerMode_TakeEngineerSeat.state: ' + EngineerMode_TakeEngineerSeat.state" chance="$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="ReEnterStation_Now">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <run_actions ref="UpdateMission">
+                      <param name="MissionCue" value="$MissionCue" />
+                      <param name="ObjectiveCue" value="ReEnterStation" />
+                    </run_actions>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="ReEnterStation_ReEntered">
+                  <conditions>
+                    <event_object_changed_room object="player.entity" />
+                    <check_value value="player.station == $MissionCue.$Station_Disabled" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue cue="ReturnToShip" />
+                    <reset_cue cue="parent" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="ReEnterStation_RunOnce">
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <do_if value="player.station == $MissionCue.$Station_Disabled">
+                      <signal_cue cue="ReturnToShip" />
+                      <reset_cue cue="ReEnterStation" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="ReEnterStation_Now" />
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="ReturnToShip">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name + ' $RepairSignalLeakCue.exists: ' + @$RepairSignalLeakCue.exists" chance="$DebugChance" />
+                <do_if value="$RepairSignalLeakCue.exists">
+                  <cancel_cue cue="$RepairSignalLeakCue" />
+                  <debug_text text="'$RepairSignalLeakCue.exists: ' + @$RepairSignalLeakCue.exists" chance="$DebugChance" />
+                </do_if>
+                <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                <debug_text text="'EngineerMode_TakeEngineerSeat.state: ' + EngineerMode_TakeEngineerSeat.state" chance="$DebugChance" />
+                <reset_cue cue="ReEnterStation" />
+              </actions>
+              <cues>
+                <cue name="ReturnToShip_Now">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled />
+                      <check_all>
+                        <event_object_changed_room object="player.entity" />
+                        <check_value value="not player.entity.hascontext.{$MissionCue.$Ship_Rescue}" />
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <run_actions ref="UpdateMission">
+                      <param name="MissionCue" value="$MissionCue" />
+                      <param name="ObjectiveCue" value="ReturnToShip" />
+                    </run_actions>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="ReturnToShip_Returned">
+                  <conditions>
+                    <event_object_changed_room object="player.entity" />
+                    <check_value value="player.entity.hascontext.{$MissionCue.$Ship_Rescue}" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <signal_cue cue="EngineerMode_TakeEngineerSeat" />
+                    <reset_cue cue="parent" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+                <cue name="ReturnToShip_RunOnce">
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$DebugChance" />
+                    <do_if value="player.station != $MissionCue.$Station_Disabled">
+                      <signal_cue cue="ReEnterStation" />
+                      <reset_cue cue="ReturnToShip" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="ReturnToShip_Now" />
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="DockAtHospital">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <run_actions ref="UpdateMission">
+                  <param name="MissionCue" value="$MissionCue" />
+                  <param name="ObjectiveCue" value="DockAtHospital" />
+                </run_actions>
+              </actions>
+              <cues>
+                <cue name="DockAtHospital_Docked">
+                  <conditions>
+                    <event_object_docked object="$Ship_Rescue" />
+                    <check_value value="event.param == $Station_Hospital" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <reset_cue cue="EngineerMode_TakeEngineerSeat" />
+                  </actions>
+                </cue>
+                <cue name="DockAtHospital_Undocked">
+                  <conditions>
+                    <event_object_undocked object="$Ship_Rescue" />
+                    <check_value value="event.param == $Station_Hospital" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <reset_cue cue="DockAtHospital" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="ForceTransporterRoomOfShipDock">
+              <conditions>
+                <event_object_changed_room object="player.entity" />
+                <check_value value="player.entity.room" />
+                <check_value value="player.entity.hascontext.{$MissionCue.$Station_Disabled}" />
+                <check_value value="not player.entity.hascontext.{$MissionCue.$Ship_Rescue}" />
+              </conditions>
+              <actions>
+                <debug_text text="event.name" chance="$MissionCue.$DebugChance" />
+                <find_npc_waypoint name="$TransporterSlots" object="$MissionCue.$Station_Disabled" tags="tag.npctransport" multiple="true" excludeblocked="false" />
+                <sort_list list="$TransporterSlots" sortbyvalue="player.entity.distanceto.[loop.element.component, loop.element.offset]" />
+                <set_value name="$TransporterSlot_NearestToPlayer" exact="$TransporterSlots.{1}" />
+                <set_value name="$Dist_ToNearestTransporterSlot" exact="player.entity.distanceto.[$TransporterSlot_NearestToPlayer.component, $TransporterSlot_NearestToPlayer.offset]" />
+                <set_value name="$IsEnteredStation" exact="@event.param.container != @event.param2.container and @event.param2.container.isclass.spacesuit" />
+                <do_if value="$Dist_ToNearestTransporterSlot le player.entity.race.height or $IsEnteredStation">
+                  <debug_text text="'$Dist_ToNearestTransporterSlot: ' + $Dist_ToNearestTransporterSlot" chance="$MissionCue.$DebugChance" />
+                  <do_if value="$MissionCue.$Ship_Rescue.hascontext.{$MissionCue.$Station_Disabled}">
+                    <debug_text text="'force to transporter room of ship dock'" chance="$MissionCue.$DebugChance" />
+                    <find_npc_waypoint name="$TransporterSlot_ShipDock" object="$MissionCue.$Ship_Rescue.dock" tags="tag.npctransport" excludeblocked="false" />
+                    <do_if value="$TransporterSlot_ShipDock">
+                      <debug_text text="'$TransporterSlot_ShipDock: ' + $TransporterSlot_ShipDock" chance="$MissionCue.$DebugChance" />
+                      <create_position name="$Pos_TransporterRoom" value="$TransporterSlot_ShipDock.offset" y="player.entity.race.height" />
+                      <add_actor_to_room actor="player.entity" object="$TransporterSlot_ShipDock.component" />
+                      <set_player_entity_position>
+                        <position value="$Pos_TransporterRoom" />
+                        <rotation value="rotation.[0,0,0]" />
+                      </set_player_entity_position>
+                    </do_if>
+                  </do_if>
+                </do_if>
+                <reset_cue cue="this" />
+              </actions>
+            </cue>
+            <!-- cues common in all modes except $Mode_Engineer -->
+            <cue name="UserDataEvents_Escort" ref="md.Scenario_Transport_Refugees.UserDataEvents_Escort_CueLibrary">
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="RaidersCue" value="Raiders" />
+            </cue>
+            <cue name="UserDataEvents_Engineer" ref="md.Scenario_Transport_Refugees.UserDataEvents_Engineer_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+            </cue>
+            <!-- cues common in all modes -->
+            <cue name="MissionEnd" ref="md.Scenario_Transport_Refugees.MissionEnd_CueLibrary">
+              <param name="ResultWindowCue" value="ResultWindow" />
+              <param name="CutscenesCue" value="Cutscenes" />
+            </cue>
+            <cue name="UpdateMissionTimer" ref="md.Scenario_Transport_Refugees.UpdateMissionTimer_CueLibrary" />
+            <cue name="Cutscenes" ref="md.Scenario_Transport_Refugees.Cutscenes_CueLibrary">
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+            </cue>
+            <cue name="VideoComms" ref="md.Scenario_Transport_Refugees.VideoComms_CueLibrary" />
+            <cue name="StationDestruction" ref="md.Scenario_Transport_Refugees.StationDestruction_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+            </cue>
+            <cue name="PickUpRefugees" ref="md.Scenario_Transport_Refugees.PickUpRefugees_CueLibrary">
+              <param name="MissionEndCue"                  value="MissionEnd" />
+              <param name="UpdateMissionRunActions"        value="UpdateMission" />
+              <param name="UpdateMissionTimerCue"          value="UpdateMissionTimer" />
+              <param name="StationDestructionCue"          value="StationDestruction" />
+              <param name="UserDataEvents_EscortCue"       value="UserDataEvents_Escort" />
+              <param name="UserDataEvents_EngineerCue"     value="UserDataEvents_Engineer" />
+              <param name="CutscenesCue"                   value="Cutscenes" />
+              <param name="VideoCommsCue"                  value="VideoComms" />
+              <param name="RaidersCue"                     value="Raiders" />
+              <param name="ModeEngineer_SpacewalkCue"      value="Spacewalk" />
+              <param name="ModeEngineer_ReturnToShipCue"   value="ReturnToShip" />
+              <param name="ModeEngineer_DockAtHospitalCue" value="DockAtHospital" />
+            </cue>
+            <cue name="Raiders" ref="md.Scenario_Transport_Refugees.Raiders_CueLibrary">
+              <param name="UpdateMissionRunActions" value="UpdateMission" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+              <param name="StationDestructionCue" value="StationDestruction" />
+            </cue>
+            <cue name="ShipRescueDestruction" ref="md.Scenario_Transport_Refugees.ShipRescueDestruction_CueLibrary">
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+            </cue>
+            <cue name="RandomExplosions" ref="md.Scenario_Transport_Refugees.RandomExplosions_CueLibrary" />
+            <!-- disabled as spacesuit AI flight is poor near asteroid veins -->
+            <!-- <cue name="RandomNPCEngineers" ref="md.Scenario_Transport_Refugees.RandomNPCEngineers_CueLibrary" /> -->
+            <cue name="MaydayStart" ref="md.Scenario_Transport_Refugees.MaydayStart_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="QuickStartCue" value="QuickStart" />
+            </cue>
+            <cue name="QuickStart" ref="md.Scenario_Transport_Refugees.QuickStart_CueLibrary">
+              <param name="PickUpRefugeesCue" value="PickUpRefugees" />
+              <param name="RaidersCue" value="Raiders" />
+              <param name="QuickStart_CompleteCue" value="QuickStart_Engineer" />
+            </cue>
+            <cue name="QuickStart_Engineer">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="QuickStart_Engineer_SetPlayerPosition">
+                  <conditions>
+                    <event_player_teleport_successful />
+                    <check_value value="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$NPCLocations" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <set_value name="$NPCLocations" exact="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$NPCLocations" />
+                    <debug_text text="'$NPCLocations.$PosData_DockingBay_RallyPoint: ' + $NPCLocations.$PosData_DockingBay_RallyPoint" chance="$MissionCue.$DebugChance" />
+                    <add_actor_to_room actor="player.entity" object="$NPCLocations.$PosData_DockingBay_RallyPoint.$Object" />
+                    <create_position name="$Pos_Ship" space="$NPCLocations.$PosData_DockingBay_RallyPoint.$Object" object="$MissionCue.$Ship_Rescue" />
+                    <create_orientation name="$Rot" orientation="look_at" refposition="$Pos_Ship">
+                      <position value="$NPCLocations.$PosData_DockingBay_RallyPoint.$Pos" />
+                    </create_orientation>
+                    <set_value name="$Yaw_ToShip" exact="$Rot.yaw" />
+                    <set_value name="$Dist" exact="5" />
+                    <set_value name="$Yaw" exact="$Yaw_ToShip + 180deg" />
+                    <set_value name="$Pitch" exact="0deg" />
+                    <create_position name="$Pos"
+                              x="$NPCLocations.$PosData_DockingBay_RallyPoint.$Pos.x + $Dist * sin($Yaw) * cos($Pitch)"
+                              y="$NPCLocations.$PosData_DockingBay_RallyPoint.$Pos.y + $Dist * sin($Pitch) + player.entity.race.height"
+                              z="$NPCLocations.$PosData_DockingBay_RallyPoint.$Pos.z + $Dist * cos($Yaw) * cos($Pitch)" />
+                    <debug_text text="'$Pos: ' + $Pos" chance="$MissionCue.$DebugChance" />
+                    <create_rotation name="$Rot" yaw="$Rot.yaw" pitch="0deg" roll="0deg" />
+                    <debug_text text="'$Rot: ' + $Rot" chance="$MissionCue.$DebugChance" />
+                    <set_player_entity_position>
+                      <position value="$Pos" />
+                      <rotation value="$Rot" />
+                    </set_player_entity_position>
+                    <do_if value="not $MissionCue.hasmission">
+                      <run_actions ref="CreateMission_RunActions">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="IsUseSpacesuitObjective" value="true" />
+                      </run_actions>
+                    </do_if>
+                    <do_elseif value="ActivateFirstObjective.state == cuestate.waiting">
+                      <signal_cue cue="ActivateFirstObjective" />
+                    </do_elseif>
+                    <do_elseif value="Spacewalk.state == cuestate.waiting">
+                      <signal_cue cue="Spacewalk" />
+                    </do_elseif>
+                    <do_else>
+                      <run_actions ref="UpdateMission">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="ObjectiveCue" value="Spacewalk" />
+                      </run_actions>
+                    </do_else>
+                    <cancel_cue cue="QuickStart_Engineer" />
+                  </actions>
+                </cue>
+                <cue name="QuickStart_Engineer_Interval" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <check_value value="player.entity.hascontext.{$MissionCue.$Ship_Rescue}" />
+                    <debug_text text="'player.entity.hascontext.{$MissionCue.$Ship_Rescue}: ' + @player.entity.hascontext.{$MissionCue.$Ship_Rescue}" debugchance="$MissionCue.$DebugChance" />
+                    <check_value value="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$NPCLocations" />
+                    <debug_text text="'$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}: ' + @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}" debugchance="$MissionCue.$DebugChance" />
+                    <debug_text text="'$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$NPCLocations: ' + @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.$NPCLocations" debugchance="$MissionCue.$DebugChance" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <do_if value="$MissionCue.$Ship_Rescue.dock">
+                      <debug_text text="'$MissionCue.$Ship_Rescue.assigneddock: ' + $MissionCue.$Ship_Rescue.assigneddock" chance="$MissionCue.$DebugChance" />
+                      <debug_text text="'$MissionCue.$Ship_Rescue.dock: ' + $MissionCue.$Ship_Rescue.dock" chance="$MissionCue.$DebugChance" />
+                      <teleport_player object="$MissionCue.$Station_Disabled" instant="true" force="true" />
+                    </do_if>
+                  </actions>
+                </cue>
+                <!-- <cue name="QuickStart_Engineer_RunOnce" checktime="player.age + 0.5s">
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <do_if value="$MissionCue.$Ship_Rescue.dock">
+                      <debug_text text="'$MissionCue.$Ship_Rescue.assigneddock: ' + $MissionCue.$Ship_Rescue.assigneddock" chance="$MissionCue.$DebugChance" />
+                      <debug_text text="'$MissionCue.$Ship_Rescue.dock: ' + $MissionCue.$Ship_Rescue.dock" chance="$MissionCue.$DebugChance" />
+                      <teleport_player object="$MissionCue.$Station_Disabled" instant="true" force="true" />
+                    </do_if>
+                  </actions>
+                </cue> -->
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <event_cue_signalled comment="only accept signals to end mission to allow the station destruction cutscene to play" />
+          </conditions>
+          <actions>
+            <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="(not @player.container.isoperational) and (not player.entity.hascontext.{$MissionCue.$Station_Disabled})" comment="always accept that the player never dies UNLESS the station or ship they are in is destroyed or they have no object context - unless the player is at the disabled station. when at the disabled station, the station destruction's cutscene will play anyway." />
+            <debug_text text="'$ResultData.$PlayerDied: ' + $ResultData.$PlayerDied" chance="$MissionCue.$DebugChance" />
+            <set_value name="$ResultData.$CustomStats" exact="table[]"/>
+            <set_value name="$MaxScore" exact="10000" />
+            <!-- repairs -->
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_00_Repairs" exact="$MissionCue.$Scenario_Transport_Refugees_engineer_repairs" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_01_TimeAdded" exact="$MissionCue.$Scenario_Transport_Refugees_engineer_repairs * $MissionCue.$Time_DestructionDelayedPerRepair" />
+            <!-- <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_02_TimeRequired" exact="$MissionCue.$Time_AdditionalReq" /> -->
+            <!-- <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_03_RepairsFactor" exact="$ResultData.$CustomStats.$Score_Step1_RepairScore_01_TimeAdded / ($ResultData.$CustomStats.$Score_Step1_RepairScore_02_TimeRequired)f" /> -->
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_02_RepairsRequired" exact="($MissionCue.$Count_RepairsReq)i" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_03_RepairsFactor" exact="$ResultData.$CustomStats.$Score_Step1_RepairScore_00_Repairs / ($ResultData.$CustomStats.$Score_Step1_RepairScore_02_RepairsRequired)f" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_99_Final" exact="$ResultData.$CustomStats.$Score_Step1_RepairScore_03_RepairsFactor * $MaxScore"
+                      comment="Score_Step1_RepairScore_99_Final is player's total score based on number of repairs * maxscore.
+                      and Score_Step2_Efficiency_99_Final = THAT score * efficiency factor = the players TOTAL score.
+                      because stats need to be addends, make Score_Step1_RepairScore_99_Addend = first score component = repair score * half max score.
+                      therefore Score_Step2_Efficiency_99_Addend = Score_Step2_Efficiency_99_Final - Score_Step1_RepairScore_99_Addend." />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_RepairScore_99_Addend" exact="($ResultData.$CustomStats.$Score_Step1_RepairScore_99_Final * 0.5)i" />
+            <add_scenario_stat id="'repairs'" name="{30615,211}"
+              description="{30615,212}"
+              uivalue="$ResultData.$CustomStats.$Score_Step1_RepairScore_00_Repairs"
+              score="$ResultData.$CustomStats.$Score_Step1_RepairScore_99_Addend"
+              maxscore="$MaxScore * 0.5" />
+            <!-- efficiency -->
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_01_RepairTime" exact="$MissionCue.$Scenario_Transport_Refugees_engineer_last_repair - $MissionCue.$Scenario_Transport_Refugees_engineer_first_repair" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimeOptimal" exact="($MissionCue.$Time_PerRepair_Optimal)f - 1" comment="gamify:  difficulty = subtract 1s from optimal" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step1_RepairScore_00_Repairs">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerRepair" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_01_RepairTime / ($ResultData.$CustomStats.$Score_Step1_RepairScore_00_Repairs)f" />
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerRepair" exact="0" />
+            </do_else>
+            <do_if value="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerRepair">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimeOptimal / ($ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerRepair)f" />
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" exact="0" />
+            </do_else>
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_05_EfficiencyFactor" exact="$ResultData.$CustomStats.$Score_Step1_RepairScore_03_RepairsFactor * $ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final" exact="$MaxScore * $ResultData.$CustomStats.$Score_Step2_Efficiency_05_EfficiencyFactor" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend" exact="($ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final - $ResultData.$CustomStats.$Score_Step1_RepairScore_99_Addend)i" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend gt 0">
+              <set_value name="$StatName" exact="{30615,213}" />
+            </do_if>
+            <do_else>
+              <set_value name="$StatName" exact="{30615,215}" />
+            </do_else>
+            <substitute_text text="$StatDescription" source="readtext.{30615}.{214}">
+              <replace string="'$NUM_REPAIRS_TO_BEAT$'" with="($MissionCue.$Count_RepairsReq)i"/>
+              <replace string="'$TIME_TO_BEAT$'"        with="(($ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimeOptimal * 100)i / 100.0)s"/>
+              <replace string="'$TIME_UNIT_MINUTES$'"   with="{1001,100}"/>
+              <replace string="'$TIME_PLAYER$'"         with="(($ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerRepair * 100)i / 100.0)s"/>
+              <replace string="'$TIME_UNIT_MINUTES$'"   with="{1001,100}"/>
+            </substitute_text>
+            <add_scenario_stat id="'efficiency'" name="$StatName"
+              description="$StatDescription"
+              uivalue="'%s%%'.[($ResultData.$CustomStats.$Score_Step2_Efficiency_05_EfficiencyFactor * 100 * 100)i / 100.0]"
+              score="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend"
+              maxscore="$MaxScore * 0.5" />
+            <!-- final score -->
+            <set_value name="$ResultData.$Score" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final" />
+            <set_value name="$MissionCue.$Scenario_Transport_Refugees_engineer_score" exact="$ResultData.$Score" />
+            <run_actions ref="md.Scenario_Transport_Refugees.LoadFromUserData" result="$Values">
+              <param name="Keys" value="['scenario_transport_refugees_engineer_score']" />
+              <param name="Difficulty" value="$MissionCue.$Difficulty" />
+              <param name="DebugChance" value="$MissionCue.$DebugChance" />
+            </run_actions>
+            <set_value name="$LastScore" exact="$Values.{1}" />
+            <do_if value="$MissionCue.$Scenario_Transport_Refugees_engineer_score ge $LastScore">
+              <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                <param name="MissionCue" value="$MissionCue" />
+                <param name="Event" value="'save'" />
+              </run_actions>
+            </do_if>
+            <do_for_each name="$CustomStat_Name" valuename="$CustomStat_Value" in="$ResultData.$CustomStats">
+              <debug_text text="'$CustomStat_Name: ' + $CustomStat_Name + ' $CustomStat_Value: ' + $CustomStat_Value" chance="$DebugChance" />
+            </do_for_each>
+            <debug_text text="'$ResultData.$Score: ' + $ResultData.$Score" chance="$DebugChance" />
+            <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$ResultData.$Score}"/>
+            <set_value name="$IsCustomOutroMusic" exact="
+              $Rating lt 1 and
+              (
+                (not $MissionCue.$Station_Disabled.isoperational) or
+                $MissionCue.$IsStationDestroyed_Actual
+              )" comment="custom outro music if rating lt 1 AND station has already been destroyed.
+              i.e. do not play failure outro music after station has been destroyed because that cutscene plays the same outro music.
+              i.e. play the failure outro music IF rating is lt 1 AND station is still active. i.e. the player died with rating of lt 1." />
+              <debug_text text="'$IsCustomOutroMusic: ' + $IsCustomOutroMusic" chance="$DebugChance" />
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+              <param name="CustomOutroMusic" value="$IsCustomOutroMusic" />
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+  </cues>
+</mdscript>
+<!--
+ONE SIGNAL LEAK SHOWN AT A TIME
+to get a base optimum time between repairs, i've set the scenario to show only one signal leak at a time, removing the distraction of the two other leaks.
+
+26 Mar 2025, 11:50
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 26.0788
+
+12:48
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 9
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.6335
+
+13:15
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.4275
+
+13:30
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.4092
+
+13:42
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.4151
+
+
+
+3 SIGNAL LEAKS SHOWN AT A TIME
+
+findings:
+average time between repair ($Score_Step2_Efficiency_02_TimePerRepair): (29.3354 + 28.2184 + 27.1667 + 28.3832 + 26.9627) / 5 = 28.01328
+
+27 Mar 2025, 10:32: spacesuit scanner inactive
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 9
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 29.3354
+
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 9
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.2184
+
+11:04: spacesuit scanner active
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 14
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.1667
+
+11:12
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 9
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.3832
+
+11:26: spacesuit scanner inactive
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 13
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 26.9627
+
+
+
+WITH $Time_PerRepair_Optimal at 28.01328s
+
+12:13:
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 13
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.0394
+
+13:29
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 26.9798
+
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.2952
+
+14:45
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 13
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.5238
+
+15:06
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 12
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.584
+
+
+
+WITH $Time_PerRepair_Optimal at 28.51328s (added 0.5 to time directly above)
+
+21:27
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 12
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 27.2196
+
+22:10
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 14
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.7789
+
+22:49
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 15
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.8806
+
+23:14
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 18
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.9249
+
+
+
+4 Apr, 12:40
+ResultWindow: $CustomStat_Name: $Score_Step1_RepairScore_00_Repairs $CustomStat_Value: 16
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerRepair $CustomStat_Value: 28.1263
+-->

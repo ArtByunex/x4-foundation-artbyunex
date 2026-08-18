@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Split_Funeral_Accelerator_2" />
+  
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Undocking" start="0">
+	  
+        <shot name="PanShip" environment="scenezone" duration="60000">
+          <!-- <camera_panover reference="target_ship" showing="right" pan_direction="leftwards" panstart="50" panend="0" interpolation="linear"> -->
+            <!-- <begin distance="60" pitch="60" yaw="60"/> -->
+            <!-- <end distance="60" pitch="45" yaw="0"/> -->
+          <!-- </camera_panover> -->
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="1200" pitch="20" yaw="170"/>
+            <end distance="1400" pitch="10" yaw="180" />
+          </camera_follow>
+        </shot>
+		
+        <!-- <shot name="Shot1" environment="scenezone" duration="10000"> -->
+          <!-- <camera_follow reference="target_ship" orient_to="ecliptic"> -->
+            <!-- <begin distance="100" pitch="60" yaw="60" /> -->
+            <!-- <end distance="400" pitch="45" yaw="0" /> -->
+          <!-- </camera_follow> -->
+        <!-- </shot> -->
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

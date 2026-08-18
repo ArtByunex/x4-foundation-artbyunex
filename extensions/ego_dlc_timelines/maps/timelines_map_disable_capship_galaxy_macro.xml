@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_disable_capship_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate026to049" ref="gates">
+        <offset>
+          <position x="-24958.969" z="16964.752"/>
+          <rotation yaw="179.99995"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+      <connection name="env_debris_xenon_xxl_02_macro" ref="anything">
+        <offset>
+          <position x="-5705.002" y="-9272.999" z="47234"/>
+        </offset>
+        <macro connection="space" ref="env_debris_xenon_xxl_02_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_59167" ref="stations">
+        <offset>
+          <position x="3913.565" z="5870.369"/>
+        </offset>
+        <macro connection="space" ref="station_xen_defence_base_01_macro">
+          <properties>
+            <identification owner="xenon"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7760011}" description="{20004,7760012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_111380" ref="zones">
+        <macro ref="timelines_map_disable_capship_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zone004_timelines_map_disable_capship_cluster_001sector001_connection" ref="zones">
+        <offset>
+          <position x="87251.453" z="84626.305"/>
+        </offset>
+        <macro ref="timelines_map_disable_capship_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_59260" ref="zones">
+        <offset>
+          <position x="-83156.898" z="-219096.359"/>
+        </offset>
+        <macro ref="timelines_map_disable_capship_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_timelines_map_disable_capship_cluster_001_sector_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_timelines_map_disable_capship_cluster_001_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_timelines_map_disable_capship_cluster_001_sector_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_timelines_map_disable_capship_cluster_001_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_disable_capship_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7760001}" description="{20003,7760002}"/>
+    </properties>
+    <connections>
+      <connection name="timelines_map_disable_capship_cluster_001_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_disable_capship_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c26s02_region002_connection" ref="regions">
+        <offset>
+          <position x="26673982" y="-25000" z="-55409964"/>
+        </offset>
+        <macro ref="timelines_map_disable_capship_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c26s01_region001_connection" ref="regions">
+        <macro ref="timelines_map_disable_capship_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="c26s02_region001_connection" ref="regions">
+        <offset>
+          <position x="26673982" z="-55409964"/>
+        </offset>
+        <macro ref="timelines_map_disable_capship_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="c26s01_region002_connection" ref="regions">
+        <offset>
+          <position y="-25000"/>
+        </offset>
+        <macro ref="timelines_map_disable_capship_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_26"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_disable_capship_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_111243" ref="clusters">
+        <macro ref="timelines_map_disable_capship_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

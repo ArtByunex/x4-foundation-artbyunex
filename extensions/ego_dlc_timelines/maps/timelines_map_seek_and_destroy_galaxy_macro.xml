@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <!-- REGIONS -->
+  <!-- REGIONS C11 Pontifex's Claim -->
+  <macro name="timelines_map_seek_and_destroy_region_c11_01" class="region">
+    <component connection="cluster" ref="standardregion" />
+    <properties>
+      <region ref="region_cluster_11_sector_001" />
+    </properties>
+  </macro>
+  <macro name="timelines_map_seek_and_destroy_audioregion_c11_01" class="region">
+    <component connection="cluster" ref="standardregion" />
+    <properties>
+      <region ref="audioregion_cluster_11_sector_001" />
+    </properties>
+  </macro>  
+  <macro name="timelines_map_seek_and_destroy_minefield" class="region">
+    <component connection="cluster" ref="standardregion" />
+    <properties>
+      <region ref="timelines_map_seek_and_destroy_minefield" />
+    </properties>    
+  </macro>
+  <macro name="timelines_map_seek_and_destroy_wreckfield_large" class="region">
+    <component connection="cluster" ref="standardregion" />
+    <properties>
+      <region ref="timelines_map_seek_and_destroy_wreckfield_large" />
+    </properties>    
+  </macro>
+  <macro name="timelines_map_seek_and_destroy_wreckfield_small" class="region">
+    <component connection="cluster" ref="standardregion" />
+    <properties>
+      <region ref="timelines_map_seek_and_destroy_wreckfield_small" />
+    </properties>    
+  </macro>
+  <!-- sechighways / zonehighways -->
+  
+  <!-- ZONES -->
+  <!-- ZONES C11 Pontifex's Claim -->
+  <macro name="timelines_map_seek_and_destroy_c11_s01_zone_01_macro" class="zone">
+    <component ref="standardzone" connection="sector"/>
+    <connections>
+      <!-- active gates -->
+      <connection name="gates_1" ref="gates">
+        <offset>
+          <position x="44978.953125" y="500" z="5665.6796875" />
+          <quaternion qx="0" qy="-0.8660253882" qz="0" qw="0.5" />
+        </offset>
+        <macro ref="props_anc_gate_01_blocked_macro" connection="space" />
+      </connection>
+      <!-- inpassable gates which should look active -->
+      <connection name="gates_2" ref="gates">
+        <offset>
+          <position x="-46112.1640625" y="500" z="5436.2104492188" />
+          <quaternion qx="0" qy="0.8660253286" qz="0" qw="0.5000000596" />
+        </offset>
+        <macro ref="props_anc_gate_01_blocked_macro" connection="space" />
+      </connection>
+      <!--<connection ref="highway1_connection2">
+        <offset>
+          <position x="-6932.5102539062" y="0" z="-21567.962890625" />
+        </offset>
+      </connection>
+      <connection ref="highway1_connection1">
+        <offset>
+          <position x="-15582.19921875" y="0" z="-21542.572265625" />
+        </offset>
+      </connection>
+      <connection ref="highway2_connection1">
+        <offset>
+          <position x="-46362.16796875" y="0" z="5003.1967773438" />
+        </offset>
+      </connection>
+      <connection ref="highway3_connection2">
+        <offset>
+          <position x="-45862.1640625" y="0" z="5869.224609375" />
+        </offset>
+      </connection>
+      <connection ref="highway2_connection2">
+        <offset>
+          <position x="45228.94921875" y="0" z="5232.666015625" />
+        </offset>
+      </connection>
+      <connection ref="highway3_connection1">
+        <offset>
+          <position x="44728.953125" y="0" z="6098.6938476562" />
+        </offset>
+      </connection>-->
+    </connections>
+  </macro>
+
+  <!-- SECTORS -->
+  <!-- SECTORS C11 -->
+  <macro name="timelines_map_seek_and_destroy_c11_sector_01_macro" class="sector">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7730011}" description="{20004,7730012}"/>
+    </properties>
+    <properties>
+      <identification name="{20004,110011}"/>
+    </properties>
+    <connections>
+      <connection name="zones_1" ref="zones">
+        <macro ref="timelines_map_seek_and_destroy_c11_s01_zone_01_macro" connection="sector" />
+      </connection>
+    </connections>
+  </macro>
+  
+  <!-- CLUSTERS -->
+  <!-- CLUSTERS C11 Pontifex's Claim -->
+  <macro name="timelines_map_seek_and_destroy_cluster_11_macro" class="cluster">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7730001}" description="{20003,7730002}"/>
+    </properties>
+    <connections>
+      <connection name="sectors_1" ref="sectors">
+        <macro ref="timelines_map_seek_and_destroy_c11_sector_01_macro" connection="cluster" />
+      </connection>
+      <connection ref="content">
+        <macro>
+          <!-- Skybox -->
+          <component connection="space" ref="Cluster_11" />
+        </macro>
+      </connection>
+      <connection name="regions_1" ref="regions">
+        <macro ref="timelines_map_seek_and_destroy_region_c11_01" connection="cluster"/>
+      </connection>
+      <connection name="regions_2" ref="regions">
+        <macro ref="timelines_map_seek_and_destroy_minefield" connection="cluster"/>
+        <offset>
+          <!-- -20km from active gate towards inactive gate -->
+          <position x="25000.0" y="500" z="5500.0" />
+        </offset>
+      </connection>
+      <connection name="regions_3" ref="regions">
+        <macro ref="timelines_map_seek_and_destroy_wreckfield_large" connection="cluster"/>
+        <offset>
+          <!-- -20km from active gate towards inactive gate -->
+          <position x="25000.0" y="500" z="5500.0" />
+        </offset>
+      </connection>
+      <connection name="regions_4" ref="regions">
+        <macro ref="timelines_map_seek_and_destroy_wreckfield_small" connection="cluster"/>
+        <offset>
+          <!-- -35km from active gate towards inactive gate -->
+          <position x="10000.0" y="500" z="5500.0" />
+        </offset>
+      </connection>
+      <connection name="audioregions_1" ref="regions">
+        <macro ref="timelines_map_seek_and_destroy_audioregion_c11_01" connection="cluster"/>
+      </connection>
+    </connections>
+  </macro>
+    
+  <!-- GALAXY -->
+  <macro name="timelines_map_seek_and_destroy_galaxy_macro" class="galaxy">
+    <component ref="standardgalaxy" />
+    <connections>
+      <connection name="clusters_1" ref="clusters">
+        <macro ref="timelines_map_seek_and_destroy_cluster_11_macro" connection="galaxy" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

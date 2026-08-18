@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Split2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_split2" version="2">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Split_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+        <set_value name="md.$RML_Debugging" exact="0"/>
+
+        <!-- starting location: fires of victory -->
+        <find_sector name="$FiresOfSector" macro="macro.cluster_421_sector001_macro"/>
+        <set_object_name object="$FiresOfSector.cluster" name="'{20005,5041}'"/>
+        <set_object_name object="$FiresOfSector" name="'{20005,5041}'"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="Start.hasmission and (LongtermGoal.state == cuestate.waiting)">
+          <update_mission cue="Start" group="missiongroup.gs_split2"/>
+        </do_if>
+      </patch>
+      <cues>
+
+        <cue name="Setup" comment="similar to GS_Split1.Setup, but not entirely">
+          <actions>
+
+            <find_sector name="$FiresOfDefeatSector" macro="macro.cluster_421_sector001_macro"/>
+
+            <!-- Original region connection position
+            <create_position name="$Battlefield" object="$FiresOfDefeatSector" x="295000" y="-5000" z="313000" comment="C421S01_Region002_connection (dlc4_clusters.xml)"/>-->
+            <create_position name="$Battlefield" object="$FiresOfDefeatSector" x="42000" y="-5000" z="120000" comment="C421S01_Region002_connection (dlc4_clusters.xml)"/>
+
+            <!-- create exploding ship -->
+
+            <create_ship name="$ExplodingShip" macro="ship_spl_l_destroyer_01_a_macro" sector="$FiresOfDefeatSector" commandeerable="false">
+              <owner exact="faction.freesplit" overridenpc="true" />
+              <pilot>
+                <select faction="faction.freesplit" tags="tag.traderpilot"/>
+              </pilot>
+              <loadout>
+                <level exact="0.6"/>
+                <variation exact="0"/>
+              </loadout>
+              <!-- Original absolute position
+              <position x="295886" z="313667.5"/>-->
+              <position x="$Battlefield.x + 886" y="$Battlefield.y + 5000" z="$Battlefield.z + 667.5"/>
+              <rotation yaw="-28.33151deg" pitch="2.15724deg" roll="0.15055deg"/>
+            </create_ship>
+
+            <set_relation_boost object="$ExplodingShip" otherobject="player.entity" value="-0.15" />
+            <set_object_shield object="$ExplodingShip" exact="0"/>
+            <set_object_hull object="$ExplodingShip" exact="5"/>
+            <get_safe_pos result="$ExplodingPos" sector="$ExplodingShip.sector" space="$ExplodingShip.sector" object="$ExplodingShip" z="15km" radius="$ExplodingShip.size" direction="quadrant.front" directionobject="$ExplodingShip" allowyaxis="false"/>
+
+            <create_order object="$ExplodingShip" id="'MoveWait'" name="$order" immediate="true">
+              <param name="destination" value="[$ExplodingShip.sector, $ExplodingPos]"/>
+              <param name="precise" value="true"/>
+            </create_order>
+
+            <!-- speaker for cutscenes -->
+            <create_cue_actor name="$NarratorAdmiral" cue="namespace" macro="character_commander_split_gamestart2_macro">
+              <page exact="10405" comment="SM3"/>
+              <owner exact="faction.split"/>
+              <skills>
+                <skill type="management"  exact="9"/>
+                <skill type="morale"      exact="15"/>
+                <skill type="piloting"    exact="9"/>
+                <skill type="engineering" exact="15"/>
+                <skill type="boarding"    exact="1"/>
+              </skills>
+            </create_cue_actor>
+            <set_entity_traits entity="$NarratorAdmiral" missionactor="true"/>
+
+            <create_cue_actor name="$NarratorFirstMate" cue="namespace" macro="character_firstmate_split_gamestart2_macro">
+              <page exact="10406" comment="SF3"/>
+              <owner exact="faction.split"/>
+              <skills>
+                <skill type="management"  exact="10"/>
+                <skill type="morale"      exact="13"/>
+                <skill type="piloting"    exact="5"/>
+                <skill type="engineering" exact="8"/>
+                <skill type="boarding"    exact="0"/>
+              </skills>
+            </create_cue_actor>
+            <set_entity_traits entity="$NarratorFirstMate" missionactor="true"/>
+
+            <!-- create victorious split fleet -->
+            <create_group groupname="$VictoryFleet"/>
+
+            <create_ship name="$VictoryFlagship" macro="macro.ship_spl_l_destroyer_01_a_macro" sector="$FiresOfDefeatSector" commandeerable="false">
+              <owner exact="faction.split" overridenpc="true" />
+              <pilot actor="$NarratorAdmiral"/>
+              <people ref="split_elite_military_crew"/>
+              <loadout>
+                <level exact="1.0"/>
+                <variation exact="0"/>
+              </loadout>
+              <position x="$Battlefield.x - 2525" y="$Battlefield.y + 3960" z="$Battlefield.z - 1711"/>
+              <rotation yaw="-55deg" pitch="0.0deg" roll="4.2deg"/>
+            </create_ship>
+
+            <signal_objects object="$VictoryFlagship.defencenpc" param="'attack'" param2="$ExplodingShip" param3="[[], true, false, [], null, [], $ExplodingShip]"/>
+
+            <add_to_group groupname="$VictoryFleet" object="$VictoryFlagship"/>
+
+            <!-- Original absolute position
+            <set_value name="$EnemyFleetSetup"   exact="[
+                   [ macro.ship_spl_l_destroyer_01_a_macro, [$FiresOfDefeatSector, position.[297525,-1040,  314711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_m_corvette_01_a_macro,  [$FiresOfDefeatSector, position.[294793,-1040,  315616],   rotation.[ -8deg,  0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_m_corvette_01_a_macro,  [$FiresOfDefeatSector, position.[290249, 1040,  315955],   rotation.[ 6deg,  0.0deg,   0.11deg]] ],
+                   ]" comment="Player starts on the 3rd ship, which is created in the gamestarts.xml for the gs-split2"/>-->
+
+            <set_value name="$EnemyFleetSetup"   exact="[
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y + 2960, $Battlefield.z - 1711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y + 4960, $Battlefield.z - 1711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y + 1960, $Battlefield.z - 1711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y +  960, $Battlefield.z - 1711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y + 3960, $Battlefield.z -  711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfDefeatSector, position.[$Battlefield.x - 2525, $Battlefield.y + 3960, $Battlefield.z - 2711],   rotation.[ -55deg,  0.0deg,   4.2deg]] ],
+
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfDefeatSector, position.[$Battlefield.x -  207, $Battlefield.y + 3960, $Battlefield.z + 2616],   rotation.[  -8deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x -  207, $Battlefield.y + 2960, $Battlefield.z + 2616],   rotation.[  -8deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x -  207, $Battlefield.y + 1960, $Battlefield.z + 2616],   rotation.[  -8deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x -  207, $Battlefield.y + 3960, $Battlefield.z + 1616],   rotation.[  -8deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x -  207, $Battlefield.y + 3960, $Battlefield.z + 3616],   rotation.[  -8deg,  0.0deg,  0.11deg]] ],
+
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfDefeatSector, position.[$Battlefield.x - 4751, $Battlefield.y + 3960, $Battlefield.z + 2955],   rotation.[   6deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x - 4751, $Battlefield.y + 2960, $Battlefield.z + 2955],   rotation.[   6deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x - 4751, $Battlefield.y + 4960, $Battlefield.z + 2955],   rotation.[   6deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x - 4751, $Battlefield.y + 3960, $Battlefield.z + 1955],   rotation.[   6deg,  0.0deg,  0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfDefeatSector, position.[$Battlefield.x - 4751, $Battlefield.y + 3960, $Battlefield.z + 3955],   rotation.[   6deg,  0.0deg,  0.11deg]] ],
+                   ]" comment="Player starts on an additional ship, which is created in the gamestarts.xml for the gs-split2"/>
+
+            <do_all exact="$EnemyFleetSetup.count" counter="$f">
+              <create_ship name="$VictoryShip" macro="$EnemyFleetSetup.{$f}.{1}" sector="$FiresOfDefeatSector" commandeerable="false">
+                <owner exact="faction.split" overridenpc="true" />
+                <pilot>
+                  <select faction="faction.split" tags="tag.fighterpilot"/>
+                </pilot>
+                <people ref="split_elite_military_crew"/>
+                <loadout>
+                  <level exact="1.0"/>
+                  <variation exact="0"/>
+                </loadout>
+                <position x  ="$EnemyFleetSetup.{$f}.{2}.{2}.x"   y    ="$EnemyFleetSetup.{$f}.{2}.{2}.y"     z   ="$EnemyFleetSetup.{$f}.{2}.{2}.z"/>
+                <rotation yaw="$EnemyFleetSetup.{$f}.{2}.{3}.yaw" pitch="$EnemyFleetSetup.{$f}.{2}.{3}.pitch" roll="$EnemyFleetSetup.{$f}.{2}.{3}.roll"/>
+              </create_ship>
+              <add_to_group groupname="$VictoryFleet" object="$VictoryShip"/>
+              <set_object_shield object="$VictoryShip" min="0" max="100"/>
+              <set_object_hull object="$VictoryShip" min="10" max="100" profile="increasing"/>
+
+              <!--create_order object="$VictoryShip" id="'Attack'" immediate="true">
+                <param name="primarytarget" value="$ExplodingShip"/>
+                <param name="pursuetargets" value="true"/>
+              </create_order-->
+              <create_order id="'AssignCommander'" object="$VictoryShip" immediate="true">
+                <param name="commander" value="$VictoryFlagship"/>
+                <param name="assignment" value="assignment.defence"/>
+                <param name="cancelorders" value="false"/>
+              </create_order>
+              <!--set_turret_targets object="$VictoryShip" target="[$ExplodingShip]" weaponmode="weaponmode.defend" /-->
+              <do_if value="[shiptype.frigate, shiptype.corvette, shiptype.destroyer, shiptype.carrier].indexof.{$VictoryShip.type}">
+                <signal_objects object="$VictoryShip.defencenpc" param="'attack'" param2="$ExplodingShip" param3="[[], true, false, [], null, [], $ExplodingShip]"/>
+              </do_if>
+            </do_all>
+
+            <!-- set turret targets for exploding ship -->
+            <!--set_turret_targets object="$ExplodingShip" target="$VictoryFleet.list" weaponmode="weaponmode.defend" /-->
+            <set_value name="$loctarget" exact="$VictoryFleet.random"/>
+            <signal_objects object="$ExplodingShip.defencenpc" param="'attack'" param2="$loctarget" param3="[$VictoryFleet.list, true, false, [], null, [], $loctarget]"/>
+            <remove_value name="$loctarget"/>
+
+            <!-- set part of the map to known -->
+            <set_value name="$InitialMap" exact="[
+              macro.cluster_416_sector001_macro, 
+              macro.cluster_418_sector001_macro, 
+              macro.cluster_419_sector001_macro, 
+              macro.cluster_420_sector001_macro, 
+              macro.cluster_421_sector001_macro]"/>
+
+            <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+              <param name="InitialMap" value="$InitialMap"/>
+            </run_actions>
+
+            <!-- and start the mission -->
+            <signal_cue cue="StartMission"/>
+          </actions>
+        </cue>
+
+        <cue name="StartMission">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <play_music music="'music_dlc_split_gamestart_2'" comment="408s"/>
+            <append_to_list name="md.$MissionDND" exact="StartMission"/>
+
+            <create_mission cue="Start" type="missiontype.plot" name="{30281,1001}" description="{30281,1002}" difficulty="level.easy" faction="faction.split" abortable="false" group="missiongroup.gs_split2">
+              <briefing>
+                <objective step="1" action="objective.kill" text="{30281,1010}"/>
+              </briefing>
+            </create_mission>
+            <set_objective_from_briefing cue="Start" step="1"/>
+          </actions>
+          <cues>
+            <cue name="ExplodeShip">
+              <delay exact="13s"/>
+              <actions>
+                <!--add_effect object="$ExplodingShip" effect="'plotship_l_explosion_generator'" comment="manually trigger an explosion with a 100% chance for shockwave"/-->
+                <destroy_object object="$ExplodingShip" explosion="true" comment="default explosion with 30% chance for a shockwave, this wrecks the ship"/>
+              </actions>
+            </cue>
+
+            <cue name="VictoryFleetAttackSector">
+              <delay exact="20s"/>
+              <actions>
+                <!-- Fleet does not attack the other Free Split in this sector -->
+                <do_for_each in="$VictoryFleet" name="$CurrentShip">
+                  <set_relation_boost object="$CurrentShip" faction="faction.freesplit" value="1.0" decay="0"/>
+                </do_for_each>
+                <!-- Fleet goes straight for the closest Argon sector -->
+                <find_sector name="$ArgonSector" macro="macro.Cluster_416_Sector001_macro"/>
+                <find_station name="$ArgonDefenceStation" defencestation="true" space="$ArgonSector" multiple="false" owner="faction.argon"/>
+                <find_station name="$ArgonStations" space="$ArgonSector" multiple="true" owner="faction.argon"/>
+                <cancel_all_orders object="$VictoryFlagship"/>
+                <create_order id="'Attack'" object="$VictoryFlagship" immediate="true">
+                  <param name="primarytarget" value="$ArgonDefenceStation"/>
+                  <param name="secondarytargets" value="$ArgonStations"/>
+                  <param name="pursuetargets" value="true"/>
+                  <param name="checkrelation" value="false"/>
+                  <param name="allowothertargets" value="true"/>
+                </create_order>
+                <create_order id="'Attack'" object="$VictoryFlagship" >
+                  <param name="primarytarget" value="$ArgonStations.random"/>
+                  <param name="pursuetargets" value="true"/>
+                  <param name="checkrelation" value="false"/>
+                  <param name="allowothertargets" value="false"/>
+                </create_order>
+              </actions>
+            </cue>
+
+            <cue name="SurrenderSpeech_Commander">
+              <delay exact="2s"/>
+              <actions>
+                <speak actor="$NarratorAdmiral" priority="100">
+                  <text page="10405" line="30281010" comment="...and in his wisdom, the Patriarch of all Split graciously offers to accept your capitulation."/>
+                  <text page="10405" line="30281011" comment="Surrender now and your executions will be honourable and swift."/>
+                </speak>
+              </actions>
+              <cues>
+                <cue  name="SurrenderSpeech_FirstMate">
+                  <conditions>
+                    <event_speak_finished actor="$NarratorAdmiral" line="30281010"/>
+                  </conditions>
+                  <delay exact="6s"/>
+                  <actions>
+                    <speak actor="$NarratorFirstMate" priority="100">
+                      <text page="10406" line="30281010" comment="Commander, there is nobody left to surrender."/>
+                    </speak>
+                  </actions>
+                  <cues>
+                    <cue name="SurrenderSpeech_Commander_Continued">
+                      <conditions>
+                        <event_speak_finished actor="$NarratorFirstMate" line="30281010"/>
+                      </conditions>
+                      <actions>
+                        <speak actor="$NarratorAdmiral" priority="100">
+                          <text page="10405" line="30281012" comment="Good! No more useless negotiations."/>
+                          <text page="10405" line="30281013" comment="Inform the fleet!"/>
+                        </speak>
+                      </actions>
+                      <cues>
+                        <cue name="SurrenderSpeech_FirstMate_Continued">
+                          <conditions>
+                            <event_speak_finished actor="$NarratorAdmiral" line="30281012"/>
+                          </conditions>
+                          <actions>
+                            <speak actor="$NarratorFirstMate" priority="100">
+                              <text page="10406" line="30281011" comment="All pilots!"/>
+                              <text page="10406" line="30281012" comment="You have performed as expected."/>
+                              <text page="10406" line="30281013" comment="Distraction dealt with."/>
+                              <text page="10406" line="30281014" comment="Military campaign against wretched Argon creatures can continue."/>
+                              <text page="10406" line="30281015" comment="Patriarch expects true Split to show initiative."/>
+                            </speak>
+                          </actions>
+                          <cues>
+                            <cue name="SurrenderSpeech_Done">
+                              <conditions>
+                                <event_speak_finished actor="$NarratorFirstMate" line="30281011"/>
+                              </conditions>
+                              <delay exact="1s"/>
+                              <actions>
+                                <remove_mission cue="Start" type="completed"/>
+                                <remove_from_list name="md.$MissionDND" exact="StartMission"/>
+
+                                <signal_cue cue="LongtermGoal"/>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="LongtermGoal">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="5s"/>
+              <actions>
+
+                <!-- find argon sectors in split space -->
+                <!--find_sector name="$ArgonAnchorSector" macro="macro.cluster_417_sector001_macro"/>
+                <find_sector_in_range object="$ArgonAnchorSector" maxdistance="2" distances="$ArgonSectorsTable" multiple="true" owner="faction.argon"/-->
+
+                <set_value name="$ArgonSectorMacros" exact="[macro.cluster_416_sector001_macro, macro.cluster_416_sector002_macro, macro.cluster_417_sector001_macro]"/>
+                <create_list name="$ArgonSectors"/>
+                <do_all exact="$ArgonSectorMacros.count" counter="$i">
+                  <find_sector name="$ArgonSector" macro="$ArgonSectorMacros.{$i}"/>
+                  <do_if value="$ArgonSector.exists">
+                    <append_to_list name="$ArgonSectors" exact="$ArgonSector"/>
+                  </do_if>
+                </do_all>
+
+                <set_value name="$BriefingText" exact="{30281,2002} + '\n\n' + {30281,2003}"/>
+                <do_all exact="$ArgonSectors.count" counter="$i">
+                  <set_value name="$BriefingText" exact="$BriefingText + '\n- ' + $ArgonSectors.{$i}.knownname"/>
+                </do_all>
+
+                <!-- no story/gs missiongroup - not supported for missiontype.fight, would end up as guild mission -->
+                <create_mission cue="Start" type="missiontype.fight" name="{30281,2001}" description="$BriefingText  + '\n\n' + {30004,1511}" difficulty="level.veryhard" faction="faction.split" rewardtext="{30281,2020}" abortable="false" activate="false">
+                  <briefing>
+                    <objective step="1" action="objective.claim"    text="{30281,2011}" comment="RML will update specifics"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="Start" step="1"/>
+              </actions>
+              <cues>
+
+                <cue name="TravelDriveHint">
+                  <cues>
+                    <cue name="TravelDriveHintShow">
+                      <delay exact="10s"/>
+                      <actions>
+                        <show_help line="4302" log="true" position="13" force="true" width="250" duration="10s" comment="Every ship engine can accelerate beyond its normal top speed using TRAVEL MODE." allowclose="false"/>
+                        <show_help line="4301" log="true" position="13" force="true" width="250" duration="10s" comment="Press $INPUT_ACTION_TOGGLE_TRAVEL_MODE$ or activate TRAVEL MODE from the SHIP MENU \($INPUT_ACTION_OPEN_COCKPIT_MENU$\)." allowclose="false"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="TravelDriveHintRemove">
+                      <conditions>
+                        <event_player_changed_activity activity="activity.travel"/>
+                      </conditions>
+                      <actions>
+                        <cancel_cue cue="TravelDriveHintShow"/>
+                        <remove_help line="4301"/>
+                        <remove_help line="4302"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="ClaimSpace">
+                  <conditions>
+                    <event_cue_completed cue="LongtermGoal"/>
+                  </conditions>
+                  <cues>
+                    <cue name="ClaimSpace_Ref" ref="md.RML_Claim_Space.ClaimSpace">
+                      <!-- always pass these -->
+                      <param name="EndSignalCue"    value="MissionEnded"/>
+                      <param name="MissionCue"      value="Start"/>
+                      <param name="UpdateBriefing"  value="true"/>
+                      <param name="DebugChance"     value="$DebugChance"/>
+                      <param name="Text_Objective"  value="''"/>
+                      <!-- mission-related parameters -->
+                      <param name="ClaimSpaces"   value="$ArgonSectors"/>
+                      <param name="ClaimFactions" value="[faction.player, faction.split]"/>
+                    </cue>
+                    <cue name="MissionEnded">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <do_if value="MissionEnded.$EndFeedbackValue" min="1">
+                          <debug_text text="'Claim success: ' + MissionEnded.$EndFeedbackValue"/>
+                          <signal_cue cue="ClaimSpace_Congratulations"/>
+                        </do_if>
+                        <do_else>
+                          <debug_text text="'Claim failure: ' + MissionEnded.$EndFeedbackValue"/>
+                          <signal_cue cue="ClaimSpace_Failed"/>
+                        </do_else>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="ClaimSpace_Failed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <remove_mission cue="Start" type="failed"/>
+                    <signal_cue cue="Cleanup"/>
+                  </actions>
+                </cue>
+
+                <cue name="ClaimSpace_Congratulations">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="3s"/>
+                  <actions>
+                    <speak actor="$NarratorAdmiral" priority="100">
+                      <text line="30281020" comment="Admiral speaking!"/>
+                      <text line="30281021" comment="Conquest successful!"/>
+                      <text line="30281022" comment="Miserable Argon colonies wiped off face of Split territory!"/>
+                      <text line="30281023" comment="Commanders have achieved great honour for their families!"/>
+                      <text line="30281024" comment="Patriarch will be pleased!"/>
+                    </speak>
+                  </actions>
+                  <cues>
+                    <cue name="Vengeance_Congratulations_Achievement">
+                      <conditions>
+                        <event_speak_finished actor="$NarratorAdmiral" line="30281020"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <unlock_achievement name="SV_PLOT_GS2" comment="They Are Gone" />
+                        <add_inventory entity="player.entity" ware="ware.inv_split_ceremonial_dagger"/>
+                        <show_notification text="{1015,90} + '\n' + ware.inv_split_ceremonial_dagger.name" sound="notification_achievement" comment="Reward received"/>
+                        <remove_mission cue="Start" type="completed"/>
+                        <signal_cue cue="Cleanup"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Cleanup">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Start"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+
+    </cue>
+  </cues>
+</mdscript>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<influencelistconfigurations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xsi:noNamespaceSchemaLocation="influenceconfigurations.xsd">
+  <influencelist id="disruptor_missile" name="{20230,2003}" description="{20230,2004}" icon="heavy_engine_disruption">
+    <influences>
+      <influence type="disableboost">
+        <profile type="continuous" duration="30" />
+      </influence>
+      <influence type="disabletravel">
+        <profile type="continuous" duration="30" />
+      </influence>
+      <influence type="forwardacceleration">
+        <profile type="envelope" startvalue="0.0" sustainvalue="0.5" endvalue="1" attackduration="4" sustainduration="2" releaseduration="10" />
+      </influence>
+      <influence type="reverseacceleration">
+        <profile type="envelope" startvalue="0.0" sustainvalue="0.5" endvalue="1" attackduration="4" sustainduration="2" releaseduration="10" />
+      </influence>
+      <!-- disallow movement for a longer time -->
+      <influence type="maxforwardspeed">
+        <profile type="envelope" startvalue="0.5" sustainvalue="0.5" endvalue="1" attackduration="2" sustainduration="2" releaseduration="10" />
+      </influence>
+      <influence type="maxreversespeed">
+        <profile type="envelope" startvalue="0.5" sustainvalue="0.5" endvalue="1" attackduration="2" sustainduration="2" releaseduration="10" />
+      </influence>
+      <influence type="steeringacceleration">
+        <profile type="envelope" startvalue="0" sustainvalue="0.5" endvalue="1" attackduration="4" sustainduration="2" releaseduration="10" />
+      </influence>
+    </influences>
+  </influencelist>
+</influencelistconfigurations>

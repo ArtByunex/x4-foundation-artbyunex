@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/library[@name='InitStationActions']/actions/do_if/do_if[@value='$tradestation?']" pos="before">
+    <do_elseif value="$modulesets.indexof.{'tradestation_split'}">
+      <set_value name="$tradestation" exact="true"/>
+      <!-- food wares -->
+      <add_tradeware object="$controllable" ware="ware.cheltmeat" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <add_tradeware object="$controllable" ware="ware.scruffinfruits" allowbuy="true" allowsell="true" lockavgprice="true" />
+      <!-- buy nividium -->
+      <add_tradeware object="$controllable" ware="ware.nividium" allowbuy="true" allowsell="true" lockavgprice="true" />
+    </do_elseif>
+  </add>
+
+</diff>

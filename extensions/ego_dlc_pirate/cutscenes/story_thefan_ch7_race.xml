@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Terran gate cutscene (started on X-universe side) -->
+  <director key="Story_Fan_Race" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <environment_implicit name="finishscene" zone="@auto:target_finish" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+      <reference object="target_finish" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="FollowShip" environment="scenezone" duration="10000">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="400" pitch="7" yaw="-40" />
+            <end distance="150" pitch="10" yaw="-60" time="9000" />
+          </camera_follow>
+        </shot>
+
+        <shot name="StaticCameraShot" environment="finishscene" duration="11000">
+          <camera>
+            <position>
+              <reference object="target_finish" x="-25" z="-700" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_finish"/>
+            </lookdirection>        
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

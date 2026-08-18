@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_hub_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="objects_1" ref="objects">
+        <offset>
+          <rotation yaw="148" pitch="-22"/>
+        </offset>
+        <macro connection="space" ref="station_soh_hub_01_macro">
+          <properties>
+            <identification owner="civilian" description="{20102,2112}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_hub_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20006,301}"/>
+    </properties>
+    <connections>
+      <connection name="zones_1" ref="zones">
+        <macro ref="timelines_map_hub_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_hub_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20006,101}"/>
+    </properties>
+    <connections>
+      <connection name="sectors_1" ref="sectors">
+        <macro ref="timelines_map_hub_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_69302" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_702_v1"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_hub_cluster_002_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7100011}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_hub_cluster_002_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7100001}"/>
+    </properties>
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <macro ref="timelines_map_hub_cluster_002_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content_71203" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_710_v1"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_hub_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="clusters_1" ref="clusters">
+        <macro ref="timelines_map_hub_cluster_001_macro" connection="galaxy"/>
+      </connection>
+      <connection name="clusters_66843" ref="clusters">
+        <offset>
+          <position x="-15000000" z="8660254"/>
+        </offset>
+        <macro ref="timelines_map_hub_cluster_002_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

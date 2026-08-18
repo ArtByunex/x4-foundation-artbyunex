@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<aiscript name="move.attack.object.capital.steering" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" version="3">
+  <!-- this is supposed to perform all movement-related activities of a capital ship engaging a target that is not (part of a) station. -->
+  <params>
+    <param name="target" comment="The object to attack" />
+    <param name="escort" comment="Objects to escort - stay at 'pursuedistance' and shoot enemies attacking this" />
+    <param name="pursuedistance" comment="Distance to pursue/escort (if pursuetargets true or 'escort' provided). Default: this.ship.maxradarrange" />
+    <param name="pursuetargets" comment="Pursue the target no matter what. Default: false" />
+    <param name="allowothertargets" comment="Whether the script shall keep running when all primary targets have been destroyed. Default: true" />
+    <param name="checkrelation" comment="Whether we check the relation if we may attack the target. Default: true" />
+    <param name="disable" default="false" comment="Instructs this ship to only try to disable the target or targets without destroying it."/>
+    <param name="disablehullpercentagethreshold" default="20" comment="If disable is set, this ship will stop firing if the hull of the target is at or below this percentage."/>
+    <param name="minrange" default="if this.ship.maxcombatrange.turrets and not @$target.iscapitalship and not $target.isrealclass.station and not $target.container.isrealclass.station then (this.ship.maxcombatrange.turrets * 0.6) else (this.ship.maxcombatrange.all * 0.6)" comment="Minimum distance we should try to maintain relative to the target. Default: this.ship.maxcombatrange.all * 0.6"/>
+    <param name="maxrange" default="if this.ship.maxcombatrange.turrets and not @$target.iscapitalship and not $target.isrealclass.station and not $target.container.isrealclass.station then (this.ship.maxcombatrange.turrets * 0.9) else (this.ship.maxcombatrange.all * 0.9)" comment="Maximum distance we should try to maintain relative to the target. Default: this.ship.maxcombatrange.all * 0.9"/>
+    <param name="maintaindistance" comment="If a carrier, use radar range instead of weapon range to determine range thresholds. Default: false"/>
+    <param name="boardingbehavior" comment="If not null, the behavior assigned to this ship while boarding primarytarget."/>
+    <param name="behaviortargetclasses" comment="Target classes associated with boardingbehavior. disablehullpercentagethreshold will be ignored if current target is a behavior target. (Otherwise, we could have a situation where the hull threshold is reached but the boarding phase threshold has not been reached thus stalling the boarding operation.)"/>
+    <param name="allowboost" default="true" comment="Allow use of boost while in combat."/>
+
+    <param name="radius" default="null" comment="disengage if target goes beyond this distance relative to radiusanchorpos in radiusanchorspace"/>
+    <param name="radiusanchorpos" default="null"/>
+    <param name="radiusanchorspace" default="null"/>
+
+    <param name="forceprimarytarget" default="false"/>
+    <param name="enforceradius" default="this.isplayerowned" comment="Disengages hostile targets outside radius if a radius is defined."/>
+    <param name="debugchance" default="0" />
+  </params>
+  <interrupts>
+    <handler ref="DisengageHandler"/>
+    <handler ref="TargetInvalidHandler"/>
+    <handler ref="LostReservationHandler"/>
+    <handler>
+      <!-- TEMP: problem is that the attention level on load can be different than on save, due to the camera being in a different location. blocking action listeners won't receive the attention change event.
+           temporary solution: resume at current label on load, assuming an unhandled attention change could've taken place. This needs to be removed and replaced with proper attention handling soon! -->
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <debug_text text="'event_game_loaded - resuming at current label, assuming an unhandled attention change.'" chance="$debugchance"/>
+        <abort_called_scripts/>
+      </actions>
+    </handler>
+  </interrupts>
+  <patches>
+    <!-- no patch for version 1 needed - all new variables are defined before usage, because all blocking actions are at the very end of the do_while and all variables are defined inside the do_while. -->
+    <patch sinceversion="2">
+      <!-- declares the quadrants to choose from -->
+      <set_value name="$quadrants" exact="[quadrant.left, quadrant.right, quadrant.front]"/>
+
+      <!-- determine max turret dps quadrant -->
+      <set_value name="$quadranttable" exact="table[]" />
+      <do_all exact="$quadrants.count" counter="$i">
+        <!-- left, right, front -->
+        <set_value name="$quadranttable.{$quadrants.{$i}}" exact="this.ship.dps.turrets.{$quadrants.{$i}}" />
+      </do_all>
+      <set_value name="$bestquadrant" exact="$quadranttable.keys.sorted.last" />
+    </patch>
+  </patches>
+  <attention min="unknown">
+    <actions>
+      <!-- sanity checks / early-outs performed once -->
+      <do_if value="not $minrange or not $maxrange">
+        <debug_text text="'minrange or maxrange is 0. disengaging.\nmaxcombatrange.all: %sm\nmaxcombatrange.turrets: %sm'.[this.assignedcontrolled.maxcombatrange.all, this.assignedcontrolled.maxcombatrange.turrets]" chance="$debugchance"/>
+        <resume label="finish"/>
+      </do_if>
+
+      <do_if value="not this.assignedcontrolled.defencenpc.exists">
+        <debug_text text="'this.assignedcontrolled has no defence NPC, so combat movement is not sensible. finishing the attack order.'" chance="$debugchance"/>
+        <resume label="finish"/>
+      </do_if>
+
+      <!-- static values that don't need to be computed every iteration -->
+      <set_value name="$targetdistance" min="[this.assignedcontrolled.maxradarrange, $pursuedistance].min * 0.6" max="[this.assignedcontrolled.maxradarrange, $pursuedistance].min * 0.9" comment="only used for carriers which are ordered to maintain distance."/>
+      <set_value name="$updatefrequency" exact="30s" comment="a guaranteed minimum update frequency. tuning this to have really low values can have a performance impact."/>
+
+      <!-- DisengageHandler will land us here. -->
+      <label name="fight"/>
+
+      <do_if value="@$target.zone.isclass.highway">
+        <debug_text text="'target is in a highway. finishing the attack order.'" chance="$debugchance"/>
+        <resume label="finish"/>
+      </do_if>
+
+      <do_if value="@$target.dock">
+        <debug_text text="'target ' + $target.knownname + 'is docked. finishing the attack order.'" chance="$debugchance"/>
+        <resume label="finish"/>
+      </do_if>
+
+      <set_value name="$quadrants" exact="[quadrant.left, quadrant.right, quadrant.front]"/>
+
+      <do_while value="$target.canbeattacked">
+        <!-- sanity checks / early-outs performed regularly (see $updatefrequency for how often, might be more often if blocking actions interrupt based on target invalid events) -->
+
+        <do_if value="($checkrelation and not this.ship.mayattack.{$target})">
+          <debug_text text="this.assignedcontrolled.name + ' is not enemy to ' + $target.knownname" chance="$debugchance"/>
+          <resume label="finish"/>
+        </do_if>
+
+        <set_value name="$refobject" exact="this.assignedcontrolled"/>
+        <do_if value="$escort.isoperational">
+          <!-- if we are escorting, we want to judge whether we are allowed to pursue from the escort's location, not from our's. -->
+          <set_value name="$refobject" exact="$escort"/>
+        </do_if>
+
+        <do_if value="this.sector != $target.sector or (not $pursuetargets and ((not $escort and $radius) or ($refobject.bboxdistanceto.{$target} gt $pursuedistance)) and (not $radius or not $radiusanchorspace.exists or $target.distanceto.[$radiusanchorspace, $radiusanchorpos] gt $radius))">
+          <debug_text text="this.ship.name + ' is not within pursuit distance of ' + $target.knownname + '. finishing the attack order.'" chance="$debugchance"/>
+          <resume label="finish"/>
+        </do_if>
+
+        <!-- this.ship.dps.lasers.all == primary and secondary weapon DPS, excluding missile launchers -->
+        <set_value name="$laserweapondps" exact="this.assignedcontrolled.dps.lasers.all"/>
+        <!-- this.ship.dps.missiles.all == primary and secondary weapon DPS exclusively if they are missile launchers -->
+        <set_value name="$missileweapondps" exact="this.assignedcontrolled.dps.missiles.all"/>
+        <set_value name="$weapondps" exact="$laserweapondps + $missileweapondps"/>
+        <set_value name="$turretdps" exact="this.assignedcontrolled.dps.turrets.all"/>
+        <do_if value="not $weapondps and not $turretdps">
+          <debug_text text="this.ship.knownname + ' does not have any dps output itself (weapon + turret output totals 0). finishing the attack order.'" chance="$debugchance"/>
+          <resume label="finish"/>
+        </do_if>
+
+        <set_value name="$turretcount" exact="this.assignedcontrolled.turrets.operational.count"/>
+        <do_if value="(not this.assignedcontrolled.dps.lasers.all and this.assignedcontrolled.dps.missiles.all) or ($turretcount and $turretcount == this.assignedcontrolled.missileturrets.operational.count)">
+          <set_value name="$needsammo"/>
+        </do_if>
+        <remove_value name="$turretcount"/>
+
+        <!-- determine max turret dps quadrant -->
+        <set_value name="$quadranttable" exact="table[]" />
+        <do_all exact="$quadrants.count" counter="$i">
+          <!-- left, right, front -->
+          <set_value name="$quadranttable.{$quadrants.{$i}}" exact="this.ship.dps.turrets.{$quadrants.{$i}}" />
+        </do_all>
+        <set_value name="$bestquadrant" exact="$quadranttable.keys.sorted.last" />
+
+        <do_if value="$needsammo?">
+          <do_if value="this.assignedcontrolled.ammostorage.missile.count">
+            <do_for_each name="$locammo" in="this.assignedcontrolled.ammostorage.missile.list">
+              <do_for_each name="$locweapon" in="this.assignedcontrolled.weapons.operational.list">
+                <do_if value="$locweapon.ammo.iscompatible.{$locammo}">
+                  <set_value name="$hasammo"/>
+                  <break/>
+                </do_if>
+              </do_for_each>
+              <do_if value="$hasammo?">
+                <break/>
+              </do_if>
+              <do_for_each name="$locturret" in="this.assignedcontrolled.turrets.operational.list">
+                <do_if value="$locturret.ammo.iscompatible.{$locammo}">
+                  <set_value name="$hasammo"/>
+                  <break/>
+                </do_if>
+              </do_for_each>
+              <do_if value="$hasammo?">
+                <break/>
+              </do_if>
+            </do_for_each>
+          </do_if>
+
+          <do_if value="not $hasammo? and @this.trueowner.doesresupply">
+            <do_if value="not @this.$resupplier.isoperational and not @$localresupplier.isoperational and this.sector">
+              <find_ship name="$localresupplier" cansupplyclass="this.assignedcontrolled.class" owner="this.owner" space="this.sector"/>
+            </do_if>
+            <do_if value="not this.isplayerowned or @this.$resupplier.isoperational or @$localresupplier.isoperational">
+              <debug_text text="'%s %s %s out of ammo. moving to drydock for supplies.'.[this.assignedcontrolled.idcode, this.assignedcontrolled.knownname, this.assignedcontrolled]" chance="$debugchance"/>
+              <set_value name="$resupplier" exact="null"/>
+              <do_if value="@this.$resupplier.isoperational">
+                <set_value name="$resupplier" exact="this.$resupplier"/>
+              </do_if>
+              <do_elseif value="@$localresupplier.isoperational">
+                <set_value name="$resupplier" exact="$localresupplier"/>
+              </do_elseif>
+              <create_order id="'Resupply'" object="this.assignedcontrolled" immediate="true">
+                <param name="param_station" value="$resupplier"/>
+                <param name="prioritize_ammo" value="true"/>
+                <param name="internalorder" value="true"/>
+                <param name="debugchance" value="$debugchance"/>
+              </create_order>
+              <!-- cancel the attack order so we don't keep trying to attack in case resupply fails -->
+              <do_if value="this.assignedcontrolled.nextorder and (this.assignedcontrolled.nextorder.id != 'Board')">
+                <!-- if we are out of ammo, cannot attack, and are boarding, do not cancel the board order. situation is handled when that script initializes. -->
+                <cancel_order order="this.assignedcontrolled.nextorder"/>
+              </do_if>
+            </do_if>
+            <do_else>
+              <debug_text text="'player-owned ship %s %s %s out of ammo. sending notification and stopping attack.'.[this.assignedcontrolled.idcode, this.assignedcontrolled.knownname, this.assignedcontrolled]" chance="$debugchance"/>
+              <do_if value="notification.npc_out_of_ammo.active">
+                <!-- INTERACTION: out of ammo. cannot attack. -->
+                <run_script name="'player.interaction'" result="$locresponse">
+                  <param name="Line" value="5028" comment="Requesting instructions."/>
+                  <param name="UIText" value="{1015, 35}.[this.ship.idcode, this.ship.name]" comment="Requesting Orders"/>
+                  <param name="ConversationParam" value="'g_playerownedship_attacking_outofammo'"/>
+                  <param name="MaxQueueDelay" value="10s"/>
+                  <param name="caption" value="{1015, 43} + ' - ' + {1016,6}.[this.assignedcontrolled.knownname, this.assignedcontrolled.idcode]" comment="Out of ammo"/>
+                  <param name="debugchance" value="$debugchance"/>
+                </run_script>
+              </do_if>
+              <do_if value="@$locresponse != 'getammo' and this.assignedcontrolled.order">
+                <write_to_logbook category="general" title="{1015, 43}" text="{1016, 95}.[this.assignedcontrolled.knownname, this.assignedcontrolled.idcode]" interaction="showonmap" object="this.assignedcontrolled"/>
+                <do_if value="this.assignedcontrolled.order.id != 'Board'">
+                  <!-- if we are out of ammo, cannot attack, and are boarding, do not cancel the board order. situation is handled when that script initializes. -->
+                  <cancel_order order="this.assignedcontrolled.order"/>
+                </do_if>
+              </do_if>
+            </do_else>
+            <do_if value="@$locresponse != 'getammo'">
+              <create_order id="'Flee'" object="this.assignedcontrolled" immediate="true">
+                <param name="method" value="'boost'"/>
+                <param name="attacker" value="$target"/>
+                <param name="donotdrop" value="true"/>
+                <param name="deploydistraction" value="true"/>
+                <param name="log" value="false"/>
+                <param name="debugchance" value="$debugchance"/>
+              </create_order>
+            </do_if>
+            <remove_value name="$locresponse"/>
+          </do_if>
+          <remove_value name="$hasammo"/>
+        </do_if>
+
+        <set_value name="$iscarrier" exact="false"/>
+        <!-- re-evaluate if we're still carrying subordinates whose purpose is to fight -->
+        <do_if value="this.assignedcontrolled.type == shiptype.carrier">
+          <do_for_each name="$locsub" in="this.assignedcontrolled.subordinates">
+            <do_if value="not $locsub.iscapitalship and ($locsub.primarypurpose == purpose.fight) and not $locsub.subordinategroupdockoverride and ($locsub.assignment == assignment.defence or $locsub.assignment == assignment.attack or ($locsub.assignment == assignment.interception and not @$target.iscapitalship) or ($locsub.assignment == assignment.bombardment and @$target.iscapitalship))">
+              <set_value name="$iscarrier"/>
+              <break/>
+            </do_if>
+          </do_for_each>
+        </do_if>
+
+        <set_command_action commandaction="commandaction.attackingto" param="$target" />
+        <do_if value="($iscarrier and $maintaindistance) or (this.assignedcontrolled.attention lt attention.visible)">
+          <do_if value="$iscarrier and $maintaindistance">
+            <set_value name="$attackdistance" exact="$targetdistance"/>
+            <set_value name="$mindistance" exact="$pursuedistance * 0.6"/>
+            <set_value name="$maxdistance" exact="$pursuedistance * 0.9"/>
+          </do_if>
+          <do_else>
+            <!-- implies this.assignedcontrolled.attention lt attention.visible -->
+            <do_if value="$disable or not $weapondps">
+              <set_value name="$maxcombatrange" exact="this.assignedcontrolled.maxcombatrange.turrets"/>
+              <set_value name="$mindistance" exact="[$maxcombatrange * 0.6, $minrange].min"/>
+              <set_value name="$maxdistance" exact="[$maxcombatrange * 0.9, $maxrange].min"/>
+              <remove_value name="$maxcombatrange"/>
+            </do_if>
+            <do_else>
+              <set_value name="$maxcombatrange" exact="this.assignedcontrolled.maxcombatrange.lasers.all"/>
+              <set_value name="$mindistance" exact="[$maxcombatrange * 0.6, $minrange].min"/>
+              <set_value name="$maxdistance" exact="[$maxcombatrange * 0.9, $maxrange].min"/>
+              <remove_value name="$maxcombatrange"/>
+            </do_else>
+            <set_value name="$attackdistance" min="$mindistance" max="$maxdistance"/>
+          </do_else>
+          <set_value name="$distance" exact="this.assignedcontrolled.bboxdistanceto.{$target}" comment="bbox distance to target"/>
+          <do_if value="$distance gt $maxdistance">
+            <!-- we're too far away - close distance with a move_to set to interrupt on approach of the target with the $maxdistance combat range as the radius-->
+
+            <do_if value="@$safezone">
+              <cancel_space_reservation component="this.assignedcontrolled" index="$rindex" zone="$safezone"/>
+            </do_if>
+            <remove_value name="$safezone"/>
+            <set_to_default_flight_control_model object="this.assignedcontrolled"/>
+            <!-- in high attention, this will reset it to spline. -->
+            <move_to object="this.assignedcontrolled" destination="$target" boost="true" travel="true" uselocalhighways="false" radius="$maxdistance" finishonapproach="true" sinceversion="3">
+              <interrupt>
+                <conditions>
+                  <check_any>
+                    <event_object_destroyed object="$target"/>
+                    <check_all>
+                      <!-- ship has changed FCM due to visibility transition -->
+                      <event_object_changed_attention object="this.assignedcontrolled"/>
+                      <debug_text text="'%1 has changed attention from %2 to %3'.[this.assignedcontrolled, event.param2, event.param]" debugchance="$debugchance"/>
+                      <check_value value="(event.param lt attention.visible and event.param2 ge attention.visible) or (event.param ge attention.visible and event.param2 lt attention.visible)"/>
+                    </check_all>
+                    <check_all>
+                      <event_object_changed_zone object="$target"/>
+                      <check_value value="event.param.isclass.highway"/>
+                    </check_all>
+                  </check_any>
+                </conditions>
+              </interrupt>
+            </move_to>
+          </do_if>
+          <do_elseif value="$distance lt $mindistance">
+            <!--too close - gain distance with a reservation-->
+            <create_position name="$relativeoffset" space="$target" object="this.assignedcontrolled"/>
+            <create_position name="$mysectoroffset" space="$target.sector" object="this.assignedcontrolled"/>
+            <set_value name="$xz_distance" exact="sqrt($relativeoffset.x ^ 2 + $relativeoffset.z ^ 2)"/>
+            <create_position name="$distantoffset" space="$target" x="($relativeoffset.x / [$xz_distance, 1m].max) * $attackdistance" y="0" z="($relativeoffset.z / [$xz_distance, 1m].max) * $attackdistance"/>
+            <create_position name="$distantoffset" space="this.sector" object="$target" value="$distantoffset"/>
+            <!-- transforms relative offset to sector space -->
+            <create_position name="$distantoffset" x="$distantoffset.x" y="$mysectoroffset.y" z="$distantoffset.z"/>
+            <do_if value="$disable or not $weapondps">
+              <do_if value="$bestquadrant" exact="quadrant.left">
+                <create_orientation name="$rotation" orientation="align_left" refobject="$target">
+                  <position value="$distantoffset" object="this.sector" space="this.sector"/>
+                </create_orientation>
+              </do_if>
+              <do_elseif value="$bestquadrant" exact="quadrant.right">
+                <create_orientation name="$rotation" orientation="align_right" refobject="$target">
+                  <position value="$distantoffset" object="this.sector" space="this.sector"/>
+                </create_orientation>
+              </do_elseif>
+              <do_else>
+                <!-- only other acceptable quadrant at the moment is quadrant.front - so look_at. -->
+                <create_orientation name="$rotation" orientation="look_at" refobject="$target">
+                  <position value="$distantoffset" object="this.sector" space="this.sector"/>
+                </create_orientation>
+              </do_else>
+            </do_if>
+            <do_else>
+              <create_orientation name="$rotation" orientation="look_at" refobject="$target">
+                <position value="$distantoffset" object="this.sector" space="this.sector"/>
+              </create_orientation>
+            </do_else>
+            <!-- remove helper variables -->
+            <remove_value name="$relativeoffset"/>
+            <remove_value name="$mysectoroffset"/>
+            <remove_value name="$xz_distance"/>
+
+            <!-- safe pos and reserve our target -->
+            <do_if value="@$safezone">
+              <cancel_space_reservation component="this.assignedcontrolled" index="$rindex" zone="$safezone"/>
+            </do_if>
+            <get_safe_pos result="$distantoffset" value="$distantoffset" sector="this.sector" radius="this.assignedcontrolled.safesize / 2m">
+              <spacereservation component="this.assignedcontrolled" duration="1800s" index="$rindex" safezone="$safezone">
+                <!-- we are a carrier and want our subordinates to attack, which usually come out our bow. look at the target. -->
+                <rotation value="$rotation"/>
+              </spacereservation>
+            </get_safe_pos>
+            <set_to_default_flight_control_model object="this.assignedcontrolled"/>
+            <!-- in high attention, this will reset it to spline. -->
+            <move_to object="this.assignedcontrolled" destination="this.sector" boost="true" travel="true" uselocalhighways="false" finishonapproach="false">
+              <position value="$distantoffset"/>
+              <rotation value="$rotation"/>
+              <interrupt>
+                <conditions>
+                  <check_any>
+                    <event_object_destroyed object="$target"/>
+                    <check_all>
+                      <!-- ship has changed FCM due to visibility transition -->
+                      <event_object_changed_attention object="this.assignedcontrolled"/>
+                      <debug_text text="'%1 has changed attention from %2 to %3'.[this.assignedcontrolled, event.param2, event.param]" debugchance="$debugchance"/>
+                      <check_value value="(event.param lt attention.visible and event.param2 ge attention.visible) or (event.param ge attention.visible and event.param2 lt attention.visible)"/>
+                    </check_all>
+                    <check_all>
+                      <event_object_changed_zone object="$target"/>
+                      <check_value value="event.param.isclass.highway"/>
+                    </check_all>
+                  </check_any>
+                </conditions>
+              </interrupt>
+            </move_to>
+          </do_elseif>
+          <do_else>
+            <!-- we consider ourselves to be in an adequate position, no lateral movement required. wait for target destruction, target inaccessibility, or update frequency to pass. -->
+            <!-- update rotation. intendedly aborts previous path points before the next wait. if this move_to is removed, replace it with a stop_moving. -->
+
+            <do_if value="$disable or not $weapondps">
+              <do_if value="$bestquadrant" exact="quadrant.left">
+                <create_orientation name="$rotation" orientation="align_left" refobject="$target">
+                  <position object="this.assignedcontrolled" space="this.zone"/>
+                </create_orientation>
+              </do_if>
+              <do_elseif value="$bestquadrant" exact="quadrant.right">
+                <create_orientation name="$rotation" orientation="align_right" refobject="$target">
+                  <position object="this.assignedcontrolled" space="this.zone"/>
+                </create_orientation>
+              </do_elseif>
+              <do_else>
+                <!-- only other acceptable quadrant at the moment is quadrant.front - so look_at. -->
+                <create_orientation name="$rotation" orientation="look_at" refobject="$target">
+                  <position object="this.assignedcontrolled" space="this.zone"/>
+                </create_orientation>
+              </do_else>
+            </do_if>
+            <do_else>
+              <create_orientation name="$rotation" orientation="look_at" refobject="$target">
+                <position object="this.assignedcontrolled" space="this.zone"/>
+              </create_orientation>
+            </do_else>
+            <move_to object="this.assignedcontrolled" destination="this.zone" forcerotation="true" forceposition="false" sinceversion="1">
+              <position object="this.assignedcontrolled" z="this.assignedcontrolled.speed + 10m" />
+              <rotation value="$rotation" />
+              <interrupt>
+                <conditions>
+                  <check_any>
+                    <event_object_destroyed object="$target"/>
+                    <check_all>
+                      <!-- ship has changed FCM due to visibility transition -->
+                      <event_object_changed_attention object="this.assignedcontrolled"/>
+                      <debug_text text="'%1 has changed attention from %2 to %3'.[this.assignedcontrolled, event.param2, event.param]" debugchance="$debugchance"/>
+                      <check_value value="(event.param lt attention.visible and event.param2 ge attention.visible) or (event.param ge attention.visible and event.param2 lt attention.visible)"/>
+                    </check_all>
+                    <check_all>
+                      <event_object_changed_zone object="$target"/>
+                      <check_value value="event.param.isclass.highway"/>
+                    </check_all>
+                  </check_any>
+                </conditions>
+                <actions>
+                  <set_value name="$interrupted"/>
+                </actions>
+              </interrupt>
+            </move_to>
+            <do_if value="not $interrupted? and $target.canbeattacked">
+              <wait>
+                <interrupt>
+                  <conditions>
+                    <check_any>
+                      <event_object_destroyed object="$target"/>
+                      <check_all>
+                        <!-- ship has changed FCM due to visibility transition -->
+                        <event_object_changed_attention object="this.assignedcontrolled"/>
+                        <debug_text text="'%1 has changed attention from %2 to %3'.[this.assignedcontrolled, event.param2, event.param]" debugchance="$debugchance"/>
+                        <check_value value="(event.param lt attention.visible and event.param2 ge attention.visible) or (event.param ge attention.visible and event.param2 lt attention.visible)"/>
+                      </check_all>
+                      <check_all>
+                        <event_object_changed_zone object="$target"/>
+                        <check_value value="event.param.isclass.highway"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                </interrupt>
+                <interrupt_after_time time="$updatefrequency"/>
+              </wait>
+            </do_if>
+            <remove_value name="$interrupted"/>
+          </do_else>
+        </do_if>
+        <do_else>
+          <do_if value="$target.isclass.ship and not $target.iscapitalship">
+            <!-- this behaviour just stays in range of the target without actively facing it. (we might face it when it gets out of range, to catch up) -->
+            <set_value name="$flightbehaviour" exact="flightbehaviour.keepinrangecapitalcombat"/>
+          </do_if>
+          <do_elseif value="$bestquadrant != quadrant.front and ($disable or not $weapondps)">
+            <do_if value="$bestquadrant" exact="quadrant.left">
+              <set_value name="$flightbehaviour" exact="flightbehaviour.leftbroadsidecapitalcombat"/>
+            </do_if>
+            <do_elseif value="$bestquadrant" exact="quadrant.right">
+              <set_value name="$flightbehaviour" exact="flightbehaviour.rightbroadsidecapitalcombat"/>
+            </do_elseif>
+            <do_else>
+              <debug_text text="'pilot %1 of %2 has unhandled bestquadrant %3.'.[this.id, this.assignedcontrolled.debugname, @$bestquadrant]" filter="error"/>
+            </do_else>
+          </do_elseif>
+          <do_else>
+            <set_value name="$flightbehaviour" exact="flightbehaviour.frontalcapitalcombat"/>
+          </do_else>
+          <!-- avoidance parameter naming is confusing here. in high attention, we will be in the SteeringFCM for the below move_to, so as of now:
+                  - bigobjects="false" means we will NOT use our whiskers at all, because they will put us in relative movement to navoctree objects they hit
+                  - smallobjects="true" means we still want to create space between us and ships of the same size or larger and therefore we use separation forces
+          -->
+          <set_avoid_collisions object="this.assignedcontrolled" bigobjects="true" smallobjects="true"/>
+          <move_to object="this.assignedcontrolled" destination="$target" abortpath="true" boost="true" travel="true" forcesteering="true" flightbehaviour="$flightbehaviour" forcerotation="false" forceposition="false" uselocalhighways="false">
+            <interrupt>
+              <conditions>
+                <check_any>
+                  <event_object_destroyed object="$target"/>
+                  <check_all>
+                    <!-- ship has changed FCM due to visibility transition -->
+                    <event_object_changed_attention object="this.assignedcontrolled"/>
+                    <debug_text text="'%1 has changed attention from %2 to %3'.[this.assignedcontrolled, event.param2, event.param]" debugchance="$debugchance"/>
+                    <check_value value="(event.param lt attention.visible and event.param2 ge attention.visible) or (event.param ge attention.visible and event.param2 lt attention.visible)"/>
+                  </check_all>
+                  <check_all>
+                    <event_object_changed_zone object="$target"/>
+                    <check_value value="event.param.isclass.highway"/>
+                  </check_all>
+                </check_any>
+              </conditions>
+            </interrupt>
+            <interrupt_after_time time="$updatefrequency"/>
+            <!-- interval interrupt required for checking:
+              - weapon and turret range changes, in case any are destroyed (behaviour will reset and query weapon ranges)
+              - ammo state (do we need to start moving to our resupplier?) -->
+          </move_to>
+        </do_else>
+      </do_while>
+
+      <label name="finish"/>
+      <set_to_default_flight_control_model object="this.assignedcontrolled"/>
+      <reset_avoid_collisions object="this.assignedcontrolled"/>
+      <do_if value="@$safezone">
+        <cancel_space_reservation component="this.assignedcontrolled" index="$rindex" zone="$safezone"/>
+      </do_if>
+    </actions>
+  </attention>
+  <on_abort>
+    <do_if value="@this.assignedcontrolled.isoperational">
+      <set_to_default_flight_control_model object="this.assignedcontrolled"/>
+      <reset_avoid_collisions object="this.assignedcontrolled"/>
+      <do_if value="@$safezone">
+        <cancel_space_reservation component="this.assignedcontrolled" index="$rindex" zone="$safezone"/>
+      </do_if>
+    </do_if>
+  </on_abort>
+</aiscript>

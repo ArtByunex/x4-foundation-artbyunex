@@ -1,0 +1,1409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Fleet_Battle_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Nick and Manuel"/>
+  </documentation>
+  <cues>
+
+    <cue name="Start" namespace="this" module="scenario_fleet_battle_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.fight"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <set_ambient_sound_state active="false"/>
+        <set_value name="$friend" exact="faction.argon"/>
+        <set_value name="$foe" exact="faction.paranid"/>
+        <find_sector name="$TrueSight" macro="macro.timelines_map_fleet_battle_1_cluster_001_sector_001_macro" required="true"/>
+        <find_sector name="$Flashpoint" macro="macro.timelines_map_fleet_battle_1_cluster_002_sector_001_macro" required="true"/>
+        <find_station name="$GoalStation" space="$TrueSight" owner="faction.argon" required="true"/>
+        <create_position name="$GoalStationPosition" space="$TrueSight" object="$GoalStation"/>
+        <!-- these assume that there are only one active gate each in the two sectors. -->
+        <find_gate name="$gate_TrueSight" space="$TrueSight" active="true" required="true"/>
+        <find_gate name="$gate_Flashpoint" space="$Flashpoint" active="true" required="true"/>
+        <find_gate name="$inactivegates_Flashpoint" space="$Flashpoint" active="false" multiple="true" required="true"/>
+        <find_ship_by_true_owner name="$PlayerFlagship" faction="faction.player" space="$TrueSight" godshipentry="'scenario_fleet_battle_1_playerflagship'" required="true"/>
+        <find_ship_by_true_owner name="$PlayerDestroyer1" faction="faction.player" space="$TrueSight" godshipentry="'scenario_fleet_battle_1_playerdestroyer_1'" required="true"/>
+        <find_ship_by_true_owner name="$PlayerDestroyer2" faction="faction.player" space="$TrueSight" godshipentry="'scenario_fleet_battle_1_playerdestroyer_2'" required="true"/>
+        <create_position name="$gate_Flashpoint_sectorpos" space="$Flashpoint" object="$gate_Flashpoint"/>
+        <create_position name="$GoalStation_sectorpos" space="$TrueSight" object="$GoalStation"/>
+        <debug_text text="'dist: %sm'.[$GoalStation.bboxdistanceto.{$gate_TrueSight}]" chance="$DebugChance"/>
+
+        <add_research ware="ware.research_teleportation"/>
+        <add_inventory ware="ware.inv_timewarp" exact="1" comment="SETA"/>
+
+        <set_known object="$Flashpoint" known="true"/>
+        <set_known object="$Flashpoint.cluster" known="true"/>
+
+        <set_faction_relation faction="faction.argon" otherfaction="faction.paranid" value="-1.0"/>
+        <set_faction_relation faction="faction.paranid" otherfaction="faction.argon" value="-1.0"/>
+        <set_faction_relation_locked faction="$friend" locked="true"/>
+        <set_faction_relation_locked faction="$foe" locked="true"/>
+        <set_value name="md.$SuppressTempRelationDropped" exact="true"/>
+
+        <!-- two claiming stations are placed; but the order in which they are placed, hence sector ownership, is random. -->
+        <set_owner object="$TrueSight" faction="faction.argon"/>
+
+        <do_if value="$GoalStation.availableunits.{unitcategory.defence}.count">
+          <remove_units object="$GoalStation" category="unitcategory.defence" mk="1" exact="$GoalStation.availableunits.{unitcategory.defence}.count"/>
+        </do_if>
+
+        <add_to_group groupname="$MissionRelevantObjects" object="$GoalStation"/>
+      </actions>
+      <cues>
+
+        <cue name="StopUseCase"/>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_ParanidFleet" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_ArgonFleet" chance="if $HasError then 0 else 100"/>
+
+                <!-- Disable station repairs -->
+                <find_object_component name="$stationmodules" object="$GoalStation" multiple="true" class="class.module"/>
+                <do_for_each in="$stationmodules" name="$currentmodule">
+                  <set_object_hull_unrepairable object="$currentmodule" unrepairable="true"/>
+                </do_for_each>
+                <remove_value name="$stationmodules"/>
+                <remove_value name="$currentmodule"/>
+                <destroy_object object="$GoalStation.engineer"/>
+
+                <add_to_group groupname="$MissionRelevantObjects" group="$EnemyFleet"/>
+                <set_value name="userdata.fleetbattle1_argon"/>
+                <set_value name="$EnemyKillsCount" exact="0"/>
+                <set_value name="$EnemyFleetMaxSize" exact="0"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario_IntroCutscene"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Place_Satellites">
+              <actions>
+                <!-- NB: two more are added when ARG carrier and PAR destroyer are created. -->
+                <create_object name="$sat" sector="$TrueSight" macro="macro.eq_arg_satellite_01_macro" owner="faction.player">
+                  <safepos object="$gate_TrueSight" min="$gate_TrueSight.size" max="$gate_TrueSight.size + 1km"/>
+                </create_object>
+                <set_object_radar_visible object="$sat" visible="false"/>
+                <create_object name="$sat" sector="$Flashpoint" macro="macro.eq_arg_satellite_01_macro" owner="faction.player">
+                  <safepos object="$gate_Flashpoint" min="$gate_Flashpoint.size" max="$gate_Flashpoint.size + 1km"/>
+                </create_object>
+                <set_object_radar_visible object="$sat" visible="false"/>
+                <create_object name="$sat" sector="$GoalStation.sector" macro="macro.eq_arg_satellite_02_macro" owner="faction.player">
+                  <safepos object="$GoalStation" min="$GoalStation.size" max="$GoalStation.size + 1km"/>
+                </create_object>
+                <set_object_radar_visible object="$sat" visible="false"/>
+                <remove_value name="$sat"/>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <set_value name="player.entity.$PlayerTaxi" exact="$PlayerFlagship"/>
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error" chance="$DebugChance"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet" purpose="include_actions">
+              <actions>
+                <!-- Create player fleet and assign capitals spawned by god -->
+                <add_to_group groupname="$PlayerFleet" object="$PlayerFlagship"/>
+                <set_object_fleet_name object="$PlayerFlagship" name="'{30622,1540}'"/>
+                <add_to_group groupname="$PlayerFleet" object="$PlayerDestroyer1"/>
+                <add_to_group groupname="$PlayerFleet" object="$PlayerDestroyer2"/>
+                <!-- Initialize capitals -->
+                <set_value name="this.$index" exact="0"/>
+                <do_for_each name="$ship" in="[$PlayerFlagship, $PlayerDestroyer1, $PlayerDestroyer2]" counter="$i">
+                  <warp object="$ship" sector="$GoalStation.sector">
+                    <safepos object="$GoalStation" z="30km + (this.$index * 2km)" y="-0.4km" x="-6km + (this.$index * 2km)"/>
+                    <rotation value="rotation.[-190deg, 0.000000deg, -0.000000deg]" comment="190 so it's not so obviously super-nicely aligned"/>
+                  </warp>
+                  <set_turrets_armed object="$ship" armed="true"/>
+                  <find_object_component object="$ship" weapontype="combat" multiple="true" name="$weapons" />
+                  <do_for_each name="$weapon" in="$weapons">
+                    <set_weapon_mode weapon="$weapon" weaponmode="weaponmode.attackenemies" />
+                  </do_for_each>
+                  <set_value name="this.$index" operation="add" exact="1"/>
+                </do_for_each>
+
+                <!-- Create lists for dockingbays and internal storage -->
+                <find_dockingbay name="$dockingbays" object="$PlayerFlagship" multiple="true">
+                  <match_dock size="tag.dock_s" free="true" storage="false" walkable="true"/>
+                </find_dockingbay>
+                <find_dockingbay name="$storagebay" object="$PlayerFlagship">
+                  <match_dock size="tag.dock_s" free="true" storage="true"/>
+                </find_dockingbay>
+                <debug_text text="'Player-Carrier: num external docks: %s, num internal docks: %s'.[$dockingbays.count, $storagebay.shipstorage.capacity]" chance="$DebugChance"/>
+
+                <!-- Spawn and init Interceptor Leader -->
+                <create_ship name="$InterceptorLead" groupname="$PlayerInterceptors" dock="$dockingbays.{1}" macro="macro.ship_arg_s_fighter_01_a_macro">
+                  <owner exact="faction.player" overridenpc="true"/>
+                  <loadout ref="'timelines_scenario_fleet_battle_1_player_interceptor'"/>
+                  <pilot>
+                    <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                  </pilot>
+                  <people>
+                    <fillpercent exact="50"/>
+                    <person role="service">
+                      <!-- mixed source faction -->
+                      <select tags="[tag.service, tag.elite]"/>
+                    </person>
+                  </people>
+                </create_ship>
+                <set_object_name object="$InterceptorLead" page="30622" line="1710"/>
+                <remove_value name="$dockingbays.{1}"/>
+
+                <!-- Spawn and init Interceptor subordinates -->
+                <set_value name="$locdockorders" exact="[]"/>
+                <do_all exact="5" counter="$i" reverse="true">
+                  <do_if value="$dockingbays.{$i}">
+                    <create_ship name="$interceptor" groupname="$PlayerInterceptors" dock="$dockingbays.{$i}" macro="macro.ship_arg_s_fighter_01_a_macro">
+                      <owner exact="faction.player" overridenpc="true"/>
+                      <loadout ref="'timelines_scenario_fleet_battle_1_player_interceptor'"/>
+                      <pilot>
+                        <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                      </pilot>
+                      <people>
+                        <fillpercent exact="50"/>
+                        <person role="service">
+                          <!-- mixed source faction -->
+                          <select tags="[tag.service, tag.elite]"/>
+                        </person>
+                      </people>
+                    </create_ship>
+                    <create_order id="'AssignCommander'" object="$interceptor">
+                      <param name="commander" value="$InterceptorLead"/>
+                      <param name="assignment" value="assignment.attack"/>
+                      <param name="cancelorders" value="false"/>
+                    </create_order>
+                    <create_order name="$locdockorder" id="'DockAndWait'" object="$interceptor">
+                      <param name="destination" value="$PlayerFlagship"/>
+                      <param name="isdockfollower" value="true"/>
+                    </create_order>
+                    <append_to_list name="$locdockorders" exact="$locdockorder"/>
+                    <remove_value name="$dockingbays.{$i}"/>
+                  </do_if>
+                </do_all>
+                <add_to_group groupname="$PlayerFleet" group="$PlayerInterceptors"/>
+                <set_object_fleet_name object="$InterceptorLead" name="'{30622,1510}'"/>
+                <remove_value name="$locdockorder"/>
+                <remove_value name="$locdockorders"/>
+                <remove_value name="$interceptor"/>
+
+                <!-- Spawn and init Bomber Leader -->
+                <do_if value="$storagebay">
+                  <create_ship name="$BomberLead" groupname="$PlayerBombers" dock="$storagebay" macro="macro.ship_tel_s_fighter_02_b_macro">
+                    <owner exact="faction.player" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_player_bomber'"/>
+                    <pilot>
+                      <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                    </pilot>
+                    <people>
+                      <fillpercent exact="50"/>
+                      <person role="service">
+                        <!-- mixed source faction -->
+                        <select tags="[tag.service, tag.elite]"/>
+                      </person>
+                    </people>
+                  </create_ship>
+                  <set_object_name object="$BomberLead" page="30622" line="1720"/>
+
+                  <!-- Spawn and init Bomber subordinates -->
+                  <set_value name="$locdockorders" exact="[]"/>
+                  <do_all exact="5" counter="$i" reverse="true">
+                    <do_if value="$storagebay.shipstorage.free gt 1">
+                      <create_ship name="$bomber" groupname="$PlayerBombers" dock="$storagebay" macro="macro.ship_tel_s_fighter_02_b_macro">
+                        <owner exact="faction.player" overridenpc="true"/>
+                        <loadout ref="'timelines_scenario_fleet_battle_1_player_bomber'"/>
+                        <pilot>
+                          <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                        </pilot>
+                        <people>
+                          <fillpercent exact="50"/>
+                          <person role="service">
+                            <!-- mixed source faction -->
+                            <select tags="[tag.service, tag.elite]"/>
+                          </person>
+                        </people>
+                      </create_ship>
+                      <create_order id="'AssignCommander'" object="$bomber">
+                        <param name="commander" value="$BomberLead"/>
+                        <param name="assignment" value="assignment.attack"/>
+                        <param name="cancelorders" value="false"/>
+                      </create_order>
+                      <create_order name="$locdockorder" id="'DockAndWait'" object="$bomber">
+                        <param name="destination" value="$PlayerFlagship"/>
+                        <param name="isdockfollower" value="true"/>
+                      </create_order>
+                      <append_to_list name="$locdockorders" exact="$locdockorder"/>
+                    </do_if>
+                  </do_all>
+                  <add_to_group groupname="$PlayerFleet" group="$PlayerBombers"/>
+                  <set_object_fleet_name object="$BomberLead" name="'{30622,1520}'"/>
+                  <remove_value name="$locdockorder"/>
+                  <remove_value name="$locdockorders"/>
+                  <remove_value name="$bomber"/>
+
+                <!-- Spawn and init Fighter Leader -->
+                  <create_ship name="$MultiroleLead" groupname="$PlayerFighters" dock="$storagebay" macro="macro.ship_par_s_fighter_02_a_macro">
+                    <owner exact="faction.player" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_player_multirole'"/>
+                    <pilot>
+                      <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                    </pilot>
+                    <people>
+                      <fillpercent exact="50"/>
+                      <person role="service">
+                        <!-- mixed source faction -->
+                        <select tags="[tag.service, tag.elite]"/>
+                      </person>
+                    </people>
+                  </create_ship>
+                  <set_object_name object="$MultiroleLead" page="30622" line="1730"/>
+                  <set_value name="$locdockorders" exact="[]"/>
+
+                  <!-- Spawn and init Fighter subordinates -->
+                  <do_all exact="5" counter="$i" reverse="true">
+                    <do_if value="$storagebay.shipstorage.free">
+                      <create_ship name="$multirole" groupname="$PlayerFighters" dock="$storagebay" macro="macro.ship_par_s_fighter_02_a_macro">
+                        <owner exact="faction.player" overridenpc="true"/>
+                        <loadout ref="'timelines_scenario_fleet_battle_1_player_multirole'"/>
+                        <pilot>
+                          <select tags="[tag.elitepilot]" faction="[faction.argon, faction.teladi, faction.paranid]"/>
+                        </pilot>
+                        <people>
+                          <fillpercent exact="50"/>
+                          <person role="service">
+                            <!-- mixed source faction -->
+                            <select tags="[tag.service, tag.elite]"/>
+                          </person>
+                        </people>
+                      </create_ship>
+                      <create_order id="'AssignCommander'" object="$multirole">
+                        <param name="commander" value="$MultiroleLead"/>
+                        <param name="assignment" value="assignment.attack"/>
+                        <param name="cancelorders" value="false"/>
+                      </create_order>
+                      <create_order name="$locdockorder" id="'DockAndWait'" object="$multirole">
+                        <param name="destination" value="$PlayerFlagship"/>
+                        <param name="isdockfollower" value="true"/>
+                      </create_order>
+                      <append_to_list name="$locdockorders" exact="$locdockorder"/>
+                    </do_if>
+                  </do_all>
+                  <add_to_group groupname="$PlayerFleet" group="$PlayerFighters"/>
+                  <set_object_fleet_name object="$MultiroleLead" name="'{30622,1530}'"/>
+                  <remove_value name="$locdockorder"/>
+                  <remove_value name="$locdockorders"/>
+                  <remove_value name="$multirole"/>
+                </do_if>
+
+                <set_value name="$Player_InitialNumShips" exact="$PlayerFleet.count"/>
+                <debug_text text="'Player fleet ship count: ' + $Player_InitialNumShips" chance="$DebugChance"/>
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <set_value name="$ship.pilot.$donotbail"/>
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'PlayerFleet ship does not exist'" filter="error" chance="$DebugChance"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$dockingbays"/>
+                <remove_value name="$storagebay"/>
+              </actions>
+            </library>
+
+            <library name="Setup_ParanidFleet" purpose="include_actions">
+              <actions>
+                <!-- Create PAR Fleet Spawnpos -->
+                <create_position name="$ParanidFleetStartPos" x="$GoalStation_sectorpos.x - 15km" y="$GoalStation_sectorpos.y - 2km" z="$GoalStation_sectorpos.z - 15km"/>
+                <create_orientation name="$ParanidFleetStartRot" refobject="$GoalStation" orientation="look_at">
+                  <position value="$ParanidFleetStartPos" object="$TrueSight" space="$TrueSight"/>
+                </create_orientation>
+
+                <!-- Spawn carrier -->
+                <create_ship name="$ParanidFlagship" groupname="$ParanidDestroyers" sector="$TrueSight" macro="macro.ship_par_xl_carrier_02_a_macro">
+                  <owner exact="faction.paranid" overridenpc="true"/>
+                  <loadout ref="'timelines_scenario_fleet_battle_1_par_carrier'"/>
+                  <pilot>
+                    <select faction="faction.paranid" tags="tag.aipilot"/>
+                  </pilot>
+                  <position value="$ParanidFleetStartPos" space="$TrueSight"/>
+                  <rotation value="$ParanidFleetStartRot"/>
+                </create_ship>
+                <add_paint_mod object="$ParanidFlagship" ware="ware.paintmod_0009"/>
+                <create_order id="'ProtectPosition'" object="$ParanidFlagship" default="true">
+                  <param name="destination" value="[$TrueSight, $GoalStationPosition]"/>
+                  <param name="radius" value="40km"/>
+                  <param name="targetclasses" value="[class.station, class.ship_xl, class.ship_l]"/>
+                  <param name="enforceradius" value="true"/>
+                  <param name="pursuetargets" value="false"/>
+                  <param name="attackonsight" value="true"/>
+                </create_order>
+
+                <!-- Spawn player owned sattelite at spawnpos -->
+                <create_object name="$sat" sector="$ParanidFlagship.sector" macro="macro.eq_arg_satellite_01_macro" owner="faction.player">
+                  <safepos object="$ParanidFlagship" min="5km" max="6km"/>
+                </create_object>
+                <set_object_radar_visible object="$sat" visible="false"/>
+                <remove_value name="$sat"/>
+
+                <!-- Spawn destroyers -->
+                <do_all exact="5">
+                  <create_ship name="$destroyersub" groupname="$ParanidDestroyers" sector="$TrueSight" macro="macro.ship_par_l_destroyer_02_a_macro">
+                    <owner exact="faction.paranid" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_par_destroyer'"/>
+                    <pilot>
+                      <select faction="faction.paranid" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$ParanidFlagship" radius="3km" allowyaxis="false"/>
+                    <rotation value="$ParanidFlagship.rotation"/>
+                  </create_ship>
+                  <add_paint_mod object="$destroyersub" ware="ware.paintmod_0009"/>
+                </do_all>
+                <remove_value name="$destroyersub"/>
+                <add_to_group groupname="$EnemyFleet" group="$ParanidDestroyers"/>
+                <do_for_each name="$ship" in="$ParanidDestroyers" counter="$i">
+                  <set_turrets_armed object="$ship" armed="true"/>
+                  <find_object_component object="$ship" weapontype="combat" multiple="true" name="$weapons" />
+                  <do_for_each name="$weapon" in="$weapons">
+                    <set_weapon_mode weapon="$weapon" weaponmode="weaponmode.attackenemies" />
+                  </do_for_each>
+                  <create_order id="'ProtectPosition'" object="$ship" default="true" comment="Giving each ship its own order makes the entire fleet weaker which we want">
+                    <param name="destination" value="[$TrueSight, $GoalStationPosition]"/>
+                    <param name="radius" value="17km"/>
+                    <param name="targetclasses" value="[class.station, class.ship_xl, class.ship_l]"/>
+                    <param name="enforceradius" value="true"/>
+                    <param name="pursuetargets" value="false"/>
+                    <param name="attackonsight" value="true"/>
+                  </create_order>
+                </do_for_each>
+
+                <!-- Create lists for dockingbays and internal storage -->
+                <find_dockingbay name="$dockingbays_m" object="$ParanidFlagship" multiple="true">
+                  <match_dock size="tag.dock_m" free="true" storage="false" walkable="true"/>
+                </find_dockingbay>
+                <find_dockingbay name="$storagebay_m" object="$ParanidFlagship">
+                  <match_dock size="tag.dock_m" free="true" storage="true"/>
+                </find_dockingbay>
+
+                <!-- Spawn bomber group -->
+                <do_all exact="6">
+                  <do_if value="$storagebay_m">
+                    <create_ship name="$ship" groupname="$ParanidBombers" dock="$storagebay_m" macro="ship_par_m_frigate_01_a_macro">
+                      <owner exact="faction.paranid" overridenpc="true"/>
+                      <loadout ref="'timelines_scenario_fleet_battle_1_par_torpedobomber'"/>
+                      <pilot>
+                        <select faction="faction.paranid" tags="tag.aipilot"/>
+                      </pilot>
+                    </create_ship>
+                    <add_paint_mod object="$ship" ware="ware.paintmod_0009"/>
+                    <create_order id="'AssignCommander'" object="$ship" comment="Bombardment does not include stations! But there should be enough cap targets for now">
+                      <param name="commander" value="$ParanidFlagship"/>
+                      <param name="assignment" value="assignment.bombardment"/>
+                      <param name="cancelorders" value="true"/>
+                    </create_order>
+                  </do_if>
+                </do_all>
+                <add_to_group groupname="$EnemyFleet" group="$ParanidBombers"/>
+                <remove_value name="$ship"/>
+
+                <!-- Create Initial skirmish (Recon + Fighters). Does not count towards score (not added to $EnemyFleet) -->
+
+                <!-- Spawn Recon -->
+                <create_ship name="$probe" sector="$TrueSight" ref="'paranid_scout_s'">
+                  <owner exact="faction.paranid" overridenpc="true"/>
+                  <safepos object="$ParanidFlagship"/>
+                  <rotation value="$ParanidFlagship.rotation"/>
+                </create_ship>
+                <add_paint_mod object="$probe" ware="ware.paintmod_0009"/>
+                <create_order id="'ProtectPosition'" object="$probe" default="true">
+                  <param name="destination" value="[$gate_TrueSight.zone, $gate_TrueSight.position]"/>
+                </create_order>
+                <remove_value name="$probe"/>
+
+                <!-- Spawn Fighter Lead -->
+                <create_ship name="$picketlead" sector="$TrueSight" ref="'paranid_fighter_s'">
+                  <owner exact="faction.paranid" overridenpc="true"/>
+                  <safepos object="$ParanidFlagship"/>
+                  <rotation value="$ParanidFlagship.rotation"/>
+                </create_ship>
+                <add_paint_mod object="$picketlead" ware="ware.paintmod_0009"/>
+                <create_order id="'ProtectPosition'" object="$picketlead" default="true">
+                  <param name="destination" value="[$gate_TrueSight.zone, $gate_TrueSight.position]"/>
+                </create_order>
+                <!-- Spawn Fighter Subordinates -->
+                <do_all exact="6">
+                  <create_ship name="$picketsub" sector="$TrueSight" ref="'paranid_fighter_s'">
+                    <owner exact="faction.paranid" overridenpc="true"/>
+                    <safepos object="$picketlead"/>
+                    <rotation value="$picketlead.rotation"/>
+                  </create_ship>
+                  <add_paint_mod object="$picketsub" ware="ware.paintmod_0009"/>
+                  <set_object_commander object="$picketsub" commander="$picketlead" assignment="assignment.interception"/>
+                </do_all>
+                <force_wingmen_to_formation_offset leader="$picketlead" matchspeed="true"/>
+                <remove_value name="$picketsub"/>
+                <remove_value name="$picketlead"/>
+
+                <!-- Finish PAR initialization -->
+                <set_value name="$EnemyFleetMaxSize" exact="$EnemyFleet.count"/>
+                <debug_text text="'Paranid fleet ship count: ' + $EnemyFleetMaxSize" chance="$DebugChance"/>
+
+                <do_for_each in="$EnemyFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'ParanidFleet ship does not exist'" filter="error" chance="$DebugChance"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$dockingbays_m"/>
+                <remove_value name="$storagebay_m"/>
+              </actions>
+            </library>
+
+            <library name="Setup_ArgonFleet" purpose="include_actions">
+              <actions>
+                <!-- Create ARG Fleet Spawnpos -->
+                <create_position name="$ArgonFleetStartPos" object="$gate_Flashpoint" z="18km" y="-0.4km" x="-6km"/>
+                <create_orientation name="$ArgonFleetStartRot" refobject="$gate_Flashpoint" orientation="look_at">
+                  <position value="$ArgonFleetStartPos" object="$Flashpoint" space="$Flashpoint"/>
+                </create_orientation>
+
+                <!-- Spawn Carrier -->
+                <create_ship name="$ArgonFlagship" groupname="$ArgonFleet" sector="$Flashpoint" macro="macro.ship_arg_xl_carrier_02_a_macro">
+                  <loadout ref="'timelines_scenario_fleet_battle_1_arg_carrier'"/>
+                  <owner exact="faction.argon" overridenpc="true"/>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.aipilot"/>
+                  </pilot>
+                  <position value="$ArgonFleetStartPos" space="$Flashpoint"/>
+                  <rotation value="$ArgonFleetStartRot"/>
+                </create_ship>
+                <set_turrets_armed object="$ArgonFlagship" armed="true"/>
+                <find_object_component object="$ArgonFlagship" weapontype="combat" multiple="true" name="$weapons" />
+                <do_for_each name="$weapon" in="$weapons">
+                  <set_weapon_mode weapon="$weapon" weaponmode="weaponmode.attackenemies" />
+                </do_for_each>
+                <add_paint_mod object="$ArgonFlagship" ware="ware.paintmod_0002"/>
+                <!-- further orders will be issued after fleet assembles. -->
+                <create_order id="'Wait'" object="$ArgonFlagship" default="true"/>
+
+                <!-- Spawn player owned sattelite at spawnpos -->
+                <create_object name="$sat" sector="$ArgonFlagship.sector" macro="macro.eq_arg_satellite_01_macro" owner="faction.player">
+                  <safepos object="$ArgonFlagship" min="5km" max="6km"/>
+                </create_object>
+                <set_object_radar_visible object="$sat" visible="false"/>
+                <remove_value name="$sat"/>
+
+                <!-- start scattered. assemble, then reassign before pushing. -->
+                <!-- Carrier Subordinates -->
+                <!-- Spawn Torpedo Boats -->
+                <do_all exact="12">
+                  <create_ship name="$fighter" groupname="$ArgonTorpedoBoats" sector="$Flashpoint" macro="macro.ship_arg_s_fighter_01_a_macro">
+                    <owner exact="faction.argon" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_arg_torpedoboat'"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$inactivegates_Flashpoint.random"/>
+                  </create_ship>
+                  <add_paint_mod object="$fighter" ware="ware.paintmod_0002"/>
+                  <set_object_commander object="$fighter" commander="$ArgonFlagship" assignment="assignment.attack"/>
+                </do_all>
+                <add_to_group groupname="$ArgonFleet" group="$ArgonTorpedoBoats"/>
+
+                <!-- fighters. not counted towards score. -->
+                <!-- Spawn Pulsars -->
+                <do_all exact="8">
+                  <create_ship name="$fighter" groupname="$ArgonFighters" sector="$Flashpoint" macro="macro.ship_arg_s_fighter_03_a_macro">
+                    <owner exact="faction.argon" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_pulsar'"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$inactivegates_Flashpoint.random"/>
+                  </create_ship>
+                  <add_paint_mod object="$fighter" ware="ware.paintmod_0002"/>
+                  <set_object_commander object="$fighter" commander="$ArgonFlagship" assignment="assignment.interception"/>
+                </do_all>
+
+                <!-- Spawn Eclipses -->
+                <do_all exact="4">
+                  <create_ship name="$fighter" groupname="$ArgonFighters" sector="$Flashpoint" macro="macro.ship_arg_s_heavyfighter_02_a_macro">
+                    <owner exact="faction.argon" overridenpc="true"/>
+                    <loadout ref="'timelines_scenario_fleet_battle_1_eclipse'"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$inactivegates_Flashpoint.random"/>
+                  </create_ship>
+                  <add_paint_mod object="$fighter" ware="ware.paintmod_0002"/>
+                  <create_order id="'ProtectPosition'" object="$fighter" default="true">
+                    <param name="destination" value="[$gate_TrueSight.zone, $gate_TrueSight.position]"/>
+                  </create_order>
+                  <do_all exact="2">
+                    <create_ship name="$fightersub" groupname="$ArgonFighters" sector="$Flashpoint" macro="macro.ship_arg_s_heavyfighter_02_a_macro">
+                      <owner exact="faction.argon" overridenpc="true"/>
+                      <pilot>
+                        <select faction="faction.argon" tags="tag.aipilot"/>
+                      </pilot>
+                      <safepos object="$inactivegates_Flashpoint.random"/>
+                    </create_ship>
+                    <add_paint_mod object="$fightersub" ware="ware.paintmod_0002"/>
+                    <set_object_commander object="$fightersub" commander="$fighter" assignment="assignment.attack"/>
+                  </do_all>
+                </do_all>
+                <remove_value name="$fighter"/>
+                <remove_value name="$fightersub"/>
+
+                <!-- Spawn Destroyers -->
+                <do_all exact="2">
+                  <create_ship name="$destroyer" groupname="$ArgonFleet" sector="$Flashpoint" macro="macro.ship_arg_l_destroyer_02_a_macro">
+                    <loadout ref="'timelines_scenario_fleet_battle_1_arg_destroyer'"/>
+                    <owner exact="faction.argon" overridenpc="true"/>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="$ArgonFlagship"/>
+                    <rotation value="$ArgonFlagship.rotation"/>
+                  </create_ship>
+                  <add_paint_mod object="$destroyer" ware="ware.paintmod_0002"/>
+                  <set_object_commander object="$destroyer" commander="$ArgonFlagship" assignment="assignment.bombardment"/>
+                </do_all>
+                <remove_value name="$destroyer"/>
+
+                <!-- Finish ARG initialization -->
+                <debug_text text="'Argon fleet ship count: ' + $ArgonFleet.count" chance="$DebugChance"/>
+
+                <do_for_each in="$ArgonFleet" name="$ship">
+                  <do_if value="not $ship.exists">
+                    <debug_text text="'ArgonFleet ship does not exist'" filter="error" chance="$DebugChance"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+              <cues>
+                <cue name="DestroyAllEnemies">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$EnemyFleet.count">
+                      <destroy_group group="$EnemyFleet" explosion="true"/>
+                    </do_if>
+                    <do_else>
+                      <destroy_group group="$ArgonFleet" explosion="true"/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario_IntroCutscene">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$ParanidCaptain" exact="$ParanidFlagship.pilot"/>
+            <set_value name="$ArgonCaptain" exact="$ArgonFlagship.pilot"/>
+            <set_value name="$StationManager" exact="$GoalStation.tradenpc"/>
+            <set_value name="$CutsceneActors" exact="table[]"/>
+            <set_value name="$CutsceneActors.$PARCaptain" exact="table[ $entity = $ParanidCaptain ]"/>
+            <set_value name="$CutsceneActors.$ARGCaptain" exact="table[ $entity = $ArgonCaptain ]"/>
+            <set_value name="$CutsceneActors.$ARGManager" exact="table[ $entity = $StationManager ]"/>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                          $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                                                          $script = [
+                                                                    2s,
+                                                                    table [$actor = '$ARGManager', $speak = [10195,306220101], $recipient = 'player', $comment='This is Argon Station Security calling all allies in the vicinity of True Sight.'],
+                                                                    table [$actor = '$ARGManager', $speak = [10195,306220102], $recipient = 'player', $comment='There is a Paranid Fleet on an attack vector toward this station.'],
+                                                                    table [$actor = '$ARGManager', $speak = [10195,306220103], $recipient = 'player', $comment='Defences are not online, repeat, station is undefended. Request immediate assistance.'],
+                                                                    2s,
+                                                                    table [$actor = '$PARCaptain', $speak = [10363,306220101], $recipient = 'player', $comment='This is Paranid space, your station is violating its sanctity.'],
+                                                                    2s,
+                                                                    table [$actor = '$ARGCaptain', $speak = [10135,306220101], $recipient = 'player', $comment='Argon station, help is on the way. Hold out until we arrive.'],
+                                                                    table [$actor = '$ARGCaptain', $speak = [10135,306220102], $recipient = 'player', $comment='Any freelance commanders in the region? Help us fend off the Paranid. You will be doing the right thing.'],
+                                                                    ],
+                                                                    $callbackcue = StopScenario_IntroCutscene,
+                                                                    $abortcallbackcue = StopScenario_IntroCutscene,
+                                                                    $abortonsignalledcue = StopUseCase
+                                                          ]"/>
+            <play_cutscene result="this.$FB1Cutscene" key="'scenario_fleet_battle_1_intro_cutscene'" abortable="true">
+              <param name="PlayerFlagship" object="$PlayerFlagship"/>
+              <param name="ARGStation" object="$GoalStation"/>
+              <param name="PARFlagship" object="$ParanidFlagship"/>
+              <param name="ARGFlagship" object="$ArgonFlagship"/>
+            </play_cutscene>
+          </actions>
+          <!-- MAINTENANCE: keep delays roughly synced with shot durations in scenario_fleet_battle_1_intro_cutscene -->
+          <delay exact="23.5s"/>
+          <actions>
+            <fade_screen fadeout="1.5s" holdtime="1s" fadein="2s" realtime="true"/>
+          </actions>
+          <delay exact="17s"/>
+          <actions>
+            <set_ambient_sound_state active="true"/>
+            <set_ambient_volume volume="0.2"/>
+            <fade_screen fadeout="1s" fadein="500ms" realtime="true"/>
+          </actions>
+          <cues>
+            <cue name="StopScenario_IntroCutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <stop_cutscene cutscene="parent.$FB1Cutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="Start_Scenario_IntroCutscene_End">
+              <conditions>
+                <event_cutscene_stopped cutscene="parent.$FB1Cutscene"/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+                <!-- repeated in case cutscene is aborted -->
+                <set_ambient_sound_state active="true"/>
+                <set_ambient_volume volume="0.2"/>
+              </actions>
+              <cues>
+                <cue name="FadeIn_AmbientSound">
+                  <delay exact="150ms"/>
+                  <actions>
+                    <do_if value="not parent.$volume?">
+                      <set_value name="parent.$volume" exact="0.2"/>
+                    </do_if>
+                    <do_if value="parent.$volume ge 1.0">
+                      <cancel_cue cue="Start_Scenario_IntroCutscene"/>
+                      <signal_cue cue="StopUseCase" check="false"/>
+                      <signal_cue cue="Start_Scenario"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="parent.$volume" exact="[parent.$volume + 0.2, 1.0].min"/>
+                      <set_ambient_volume volume="parent.$volume"/>
+                      <debug_text text="'vol: %s'.[parent.$volume]" chance="$DebugChance"/>
+                      <reset_cue cue="this"/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+
+            <cue name="SetupMission">
+              <actions>
+                <signal_cue cue="Paranid_Fighter_Respawn_Loop"/>
+                <show_help line="1071" position="13" width="256" allowclose="true" timeout="false" force="true" comment="Remember that you can pause the game at any time with $INPUT_ACTION_PAUSE$."/>
+                <debug_text text="'Cue SetupMission started'" chance="$DebugChance"/>
+                <set_value name="$StartTime" exact="player.age"/>
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false"
+                                name="{30622,1020}" description="{30622,1022}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                  <briefing>
+                    <objective step="1" action="objective.protect" object="$GoalStation" showunknownpath="true"/>
+                  </briefing>
+                </create_mission>
+                <remove_value name="$objectivetext"/>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+              <cues>
+                <cue name="BriefingStarted" instantiate="true">
+                  <conditions>
+                    <event_briefing_started cue="$MissionCue"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$RenderTarget" exact="event.param.{1}"/>
+                    <set_value name="$OpenHolomap"/>
+                    <set_value name="$MapTarget" exact="$GoalStation"/>
+                    <debug_text text="'Briefing started'" chance="$DebugChance"/>
+                  </actions>
+                  <cues>
+                    <cue name="DisplayHolomap" onfail="cancel">
+                      <conditions>
+                        <check_value value="$OpenHolomap?"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="not $HoloMap?">
+                          <add_holomap name="$HoloMap" rendertarget="$RenderTarget"/>
+                        </do_if>
+                        <remove_value name="$OpenHolomap" />
+                      </actions>
+                      <cues>
+                        <cue name="HolomapRef" ref="md.LIB_HolomapTarget.Start">
+                          <param name="EndSignalCue" value="HolomapEnd"/>
+
+                          <param name="HoloMap" value="$HoloMap" />
+                          <param name="Components" value="[$GoalStation, $ParanidFlagship, $TrueSight, $Flashpoint, $ArgonFlagship, $PlayerFlagship]"/>
+                          <param name="ShowUnknown" value="false"/>
+                          <param name="PanTime" value="5s"/>
+                          <param name="ZoomTime" value="2s"/>
+                          <param name="IsReplay" value="true"/>
+                          <param name="SkipComponentPath" value="true"/>
+                          <param name="verbosedebugchance" value="0"/>
+                        </cue>
+                        <cue name="HolomapEnd">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <debug_text text="'Holomap animation end'" chance="$DebugChance"/>
+                          </actions>
+                          <cues>
+                            <cue name="PlayBriefingCutscene" onfail="cancel">
+                              <actions>
+                                <do_if value="$HoloMap?">
+                                  <remove_holomap />
+                                  <remove_value name="$HoloMap"/>
+                                </do_if>
+                              </actions>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                    <cue name="BriefingStopped">
+                      <conditions>
+                        <event_briefing_cancelled cue="$MissionCue"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="$HoloMap?">
+                          <remove_holomap/>
+                          <remove_value name="$HoloMap"/>
+                        </do_if>
+
+                        <cancel_cue cue="BriefingStarted"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="MitsunoHack">
+              <delay min="7s" max="19s"/>
+              <actions>
+                <debug_text text="'Cue MitsunoHack started'" chance="$DebugChance"/>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_PlayerFleetObserver_Interceptor">
+              <conditions>
+                  <event_object_undocking_started object="$InterceptorLead"/>
+              </conditions>
+              <actions>
+                <debug_text text="'undock_check'" chance="$DebugChance"/>
+                <do_for_each name="$ship" in="$PlayerInterceptors">
+                  <do_if value="$ship.order and $ship.order.id == 'DockAndWait'">
+                    <debug_text text="'undock interceptors'" chance="$DebugChance"/>
+                    <cancel_order order="$ship.order"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Setup_PlayerFleetObserver_Bomber">
+              <conditions>
+                  <event_object_undocking_started object="$BomberLead"/>
+              </conditions>
+              <actions>
+                <debug_text text="'undock_check'" chance="$DebugChance"/>
+                <do_for_each name="$ship" in="$PlayerBombers">
+                  <do_if value="$ship.order and $ship.order.id == 'DockAndWait'">
+                    <debug_text text="'undock bombers'" chance="$DebugChance"/>
+                    <cancel_order order="$ship.order"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Setup_PlayerFleetObserver_Fighter">
+              <conditions>
+                  <check_any>
+                    <event_object_undocking_started object="$MultiroleLead"/>
+                  </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'undock_check'" chance="$DebugChance"/>
+                <do_for_each name="$ship" in="$PlayerFighters">
+                  <do_if value="$ship.order and $ship.order.id == 'DockAndWait'">
+                    <debug_text text="'undock fighters'" chance="$DebugChance"/>
+                    <cancel_order order="$ship.order"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="ArgonAI_Assembled">
+              <conditions>
+                <event_object_docked_at container="$ArgonFlagship"/>
+                <debug_text text="'%s %s %s docked at %s %s %s'.[event.param.idcode, event.param.knownname, event.param, event.object.idcode, event.object.knownname, event.object]" debugchance="$DebugChance"/>
+                <check_all exact="$ArgonFleet.count" counter="$i">
+                  <check_value value="$ArgonFleet.{$i}.hascontext.{$ArgonFlagship.zone}"/>
+                </check_all>
+                <debug_text text="'Argon Fleet assembled. Moving.'" debugchance="$DebugChance"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Cue ArgonAI_Assembled started'" chance="$DebugChance"/>
+                <create_order id="'ProtectPosition'" object="$ArgonFlagship" default="true">
+                  <param name="destination" value="[$TrueSight, $GoalStationPosition]"/>
+                  <param name="radius" value="40km"/>
+                  <param name="enforceradius" value="true"/>
+                  <param name="pursuetargets" value="false"/>
+                  <param name="attackonsight" value="true"/>
+                </create_order>
+              </actions>
+            </cue>
+
+            <cue name="Paranid_DestroyerLookForTargets_Loop" comment="This hack of manually assigning targets is necessary. Otherwise the PAR destroyer would be waaay to sticky on fighting the unarmed station. Without this hack, the scenario is an auto-win for the ARG. Even if the player decides to not even participate in combat.">
+              <conditions>
+                <check_all>
+                  <event_cue_signalled/>
+                </check_all>
+              </conditions>
+              <cues>
+                <cue name="Paranid_DestroyerLookForTargets">
+                  <delay min="10s" max="20s"/>
+                  <actions>
+                    <debug_text text="'Cue Paranid_DestroyerLookForTargets started'" chance="0"/>
+                    <find_ship name="$targets" space="$GoalStation.sector" class="[class.ship_xl, class.ship_l]" multiple="true">
+                      <match_distance object="$GoalStation" max="20km"/>
+                      <match owner="faction.paranid" negate="true"/>
+                    </find_ship>
+                    <debug_text text="'Targetcount: %s, %s'.[$targets.count, $targets]" chance="0"/>
+                    <do_if value="$targets.count gt 0">
+                      <do_for_each name="$ship" in="$ParanidDestroyers" counter="$i">
+                        <debug_text text="'Ship: %s, Order: %s, AttackingGoalStation: %s, Target: %s'.[$ship.debugname, @$ship.order.name, ($ship.order.id == 'Attack' and @$ship.order.$primarytarget.parent == $GoalStation), @$ship.order.$primarytarget.debugname]" chance="0"/>
+                        <do_if value="$ship.orders.count == 0 or ($ship.order.id == 'Attack' and @$ship.order.$primarytarget.parent == $GoalStation)" comment="Only ever add orders if we do not have one or attack the station">
+                          <set_value name="$target" exact="$targets.random"/>
+                          <create_order id="'Attack'" object="$ship" immediate="true" chance="25" comment="'execution chance' AND 'random target selection' to reduce the scenario's difficulty. Even with 'execution chance', all destroyer will eventually turn away from the station towards attacking other destroyers over time, as this cue repeats itself! It basically reduces the PAR destroyer's reaction time drastically.">
+                            <param name="primarytarget" value="$target"/>
+                            <param name="pursuetargets" value="false"/>
+                            <param name="allowothertargets" value="false"/>
+                            <param name="debugchance" value="0"/>
+                          </create_order>
+                          <debug_text text="'Ship: %s, New Order: %s, Target: %s'.[$ship.debugname, @$ship.order.name, @$ship.order.$primarytarget.debugname]" chance="$DebugChance"/>
+                        </do_if>
+                      </do_for_each>
+                      <remove_value name="$ship"/>
+                    </do_if>
+                    <remove_value name="$targets"/>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="ArgonAI_Attacks">
+              <conditions>
+                <check_any>
+                  <check_all>
+                    <event_object_order_ready object="$ArgonFlagship"/>
+                    <check_value value="event.param.id == 'Attack'"/>
+                    <set_value name="$loctarget" exact="event.param.$primarytarget"/>
+                    <debug_text text="'attacked: %s %s %s'.[@$loctarget.idcode, $loctarget.knownname, $loctarget]" debugchance="$DebugChance"/>
+                    <check_value value="$ParanidDestroyers.indexof.{$loctarget}"/>
+                    <remove_value name="$loctarget"/>
+                  </check_all>
+                  <check_all>
+                    <event_object_changed_sector object="$ArgonFlagship" sector="$TrueSight"/>
+                    <check_any exact="$ParanidDestroyers.count" counter="$i">
+                      <check_value value="@$ParanidDestroyers.{$i}.order.id == 'Attack'"/>
+                    </check_any>
+                    <debug_text text="'Argon Flagship moved to True Sight and Paranid fleet is already engaged. Engaging.'" debugchance="$DebugChance"/>
+                  </check_all>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'Cue ArgonAI_Attacks started'" chance="$DebugChance"/>
+                <set_value name="$loctargets" exact="$ParanidDestroyers.list"/>
+                <do_if value="$foe == faction.argon">
+                  <append_to_list name="$loctargets" exact="$PlayerFlagship"/>
+                </do_if>
+                <sort_list list="$loctargets" sortbydistanceto="$ArgonFlagship"/>
+                <do_for_each name="$locship" in="$ArgonTorpedoBoats">
+                  <cancel_all_orders object="$locship"/>
+                  <debug_text text="'resetting default order of %s %s %s'.[$locship.idcode, $locship.knownname, $locship]" chance="$DebugChance"/>
+                  <do_for_each name="$loctarget" in="$loctargets">
+                    <create_order id="'AssignCommander'" object="$locship" immediate="true">
+                      <param name="commander" value="$ArgonFlagship"/>
+                      <param name="assignment" value="assignment.bombardment"/>
+                    </create_order>
+                    <create_order id="'Attack'" object="$locship">
+                      <param name="primarytarget" value="$loctarget"/>
+                      <param name="pursuetargets" value="true"/>
+                      <param name="allowothertargets" value="false"/>
+                    </create_order>
+                    <create_order id="'Repair'" object="$locship">
+                      <param name="destination" value="$ArgonFlagship"/>
+                      <param name="hullpercent" value="100"/>
+                      <param name="acceptedcost" value="0Cr"/>
+                    </create_order>
+                    <debug_text text="'ordering torpedo boat %s %s %s to attack %s %s %s'.[$locship.idcode, $locship.knownname, $locship, $loctarget.idcode, $loctarget. knownname, $loctarget]" chance="0"/>
+                  </do_for_each>
+                </do_for_each>
+                <debug_text text="'Torpedo boats away'" chance="$DebugChance"/>
+                <remove_value name="$loctargets"/>
+
+                <debug_text text="'reassigning %s remaining argon fighters'.[$ArgonFighters.count]" chance="$DebugChance"/>
+                <do_for_each name="$locship" in="$ArgonFighters">
+                  <do_if value="not $locship.commander">
+                    <create_order id="'AssignCommander'" object="$locship" immediate="true">
+                      <param name="commander" value="$ArgonFlagship"/>
+                      <param name="assignment" value="assignment.interception"/>
+                    </create_order>
+                  </do_if>
+                </do_for_each>
+                <signal_cue cue="Paranid_DestroyerLookForTargets_Loop"/>
+              </actions>
+            </cue>
+
+            <cue name="ArgonAI_Fighters" instantiate="true">
+              <conditions>
+                <event_object_attacked group="$ArgonTorpedoBoats"/>
+                <check_value value="event.param.isclass.ship"/>
+                <check_value value="not event.param.isunit"/>
+                <check_value value="event.param.canbeattacked"/>
+                <check_value value="$ArgonFighters.count"/>
+                <check_any exact="$ArgonFighters.count" counter="$i">
+                  <check_all>
+                    <check_value value="not $ArgonFighters.{$i}.orders.count"/>
+                    <check_value value="$ArgonFighters.{$i}.mayattack.{event.param}"/>
+                  </check_all>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'Cue ArgonAI_Fighters started'" chance="$DebugChance"/>
+                <do_if value="event.param.canbeattacked">
+                  <do_for_each name="$locship" in="$ArgonFighters">
+                    <cancel_all_orders object="$locship"/>
+                    <create_order id="'Attack'" object="$locship">
+                      <param name="primarytarget" value="event.param"/>
+                      <param name="allowothertargets" value="true"/>
+                    </create_order>
+                    <debug_text text="'ordering %s %s %s to attack %s %s %s'.[$locship.idcode, $locship.knownname, $locship, event.param.idcode, event.param.knownname, event.param]" chance="$DebugChance"/>
+                  </do_for_each>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Paranid_Fighter_Respawn_Loop">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_group groupname="$ParanidSpawnedFighters"/>
+                <create_group groupname="$ParanidSpawnedBombers"/>
+              </actions>
+              <cues>
+                <cue name="Paranid_Fighter_Respawn">
+                  <delay min="180s" max="200s"/>
+                  <actions>
+                    <debug_text text="'Cue Paranid_Fighter_Respawn started'" chance="$DebugChance"/>
+                    <do_if value="$ParanidFlagship.isoperational and $ParanidFlagship.owner == $foe">
+                      <do_if value="$ParanidSpawnedFighters.count lt 13">
+                        <find_dockingbay name="$storagebay_s" object="$ParanidFlagship">
+                          <match_dock size="tag.dock_s" free="true" storage="true"/>
+                        </find_dockingbay>
+                        <do_all exact="4">
+                          <do_if value="$storagebay_s">
+                            <create_ship name="$ship" groupname="$ParanidSpawnedFighters" dock="$storagebay_s" ref="'paranid_fighter_s'">
+                              <owner exact="faction.paranid" overridenpc="true"/>
+                              <pilot>
+                                <select faction="faction.paranid" tags="tag.aipilot"/>
+                              </pilot>
+                            </create_ship>
+                            <add_paint_mod object="$ship" ware="ware.paintmod_0009"/>
+                            <create_order id="'AssignCommander'" object="$ship">
+                              <param name="commander" value="$ParanidFlagship"/>
+                              <param name="assignment" value="assignment.interception"/>
+                              <param name="cancelorders" value="true"/>
+                            </create_order>
+                            <set_value name="$EnemyFleetMaxSize" operation="add" exact="1"/>
+                          </do_if>
+                        </do_all>
+                        <remove_value name="$storagebay_s"/>
+                        <remove_value name="$ship"/>
+                      </do_if>
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Paranid_Bomber_Respawn">
+                  <delay min="2min" max="3min"/>
+                  <actions>
+                    <debug_text text="'Cue Paranid_Bomber_Respawn started'" chance="$DebugChance"/>
+                    <do_if value="$ParanidFlagship.isoperational and $ParanidFlagship.owner == $foe">
+                      <do_if value="$ParanidSpawnedBombers.count lt 5">
+                        <find_dockingbay name="$storagebay_m" object="$ParanidFlagship">
+                          <match_dock size="tag.dock_m" free="true" storage="true"/>
+                        </find_dockingbay>
+                        <do_all exact="2">
+                          <do_if value="$storagebay_m">
+                            <create_ship name="$ship" groupname="$ParanidSpawnedBombers" dock="$storagebay_m" macro="ship_par_m_frigate_01_a_macro">
+                              <loadout ref="'timelines_scenario_fleet_battle_1_par_torpedobomber'"/>
+                              <owner exact="faction.paranid" overridenpc="true"/>
+                              <pilot>
+                                <select faction="faction.paranid" tags="tag.aipilot"/>
+                              </pilot>
+                            </create_ship>
+                            <add_paint_mod object="$ship" ware="ware.paintmod_0009"/>
+                            <create_order id="'AssignCommander'" object="$ship">
+                              <param name="commander" value="$ParanidFlagship"/>
+                              <param name="assignment" value="assignment.bombardment"/>
+                              <param name="cancelorders" value="true"/>
+                            </create_order>
+                            <add_to_group groupname="$EnemyFleet" object="$ship"/>
+                            <set_value name="$EnemyFleetMaxSize" operation="add" exact="1"/>
+                          </do_if>
+                        </do_all>
+                        <remove_value name="$storagebay_m"/>
+                        <remove_value name="$ship"/>
+                      </do_if>
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_SuitEjected" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$PlayerFleet"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <debug_text text="'Cue Player_SuitEjected started'" chance="$DebugChance"/>
+                <find_ship_by_true_owner name="$locsuits" faction="faction.player" class="class.spacesuit" space="$TrueSight" multiple="true"/>
+                <do_if value="@$locsuits.count">
+                  <do_for_each name="$locsuit" in="$locsuits">
+                    <do_if value="$locsuit.oxygenpercentage gt 10">
+                      <!-- total scenario duration is expected to be shorter than normal spacesuit oxygen supply -->
+                      <set_spacesuit_oxygen object="$locsuit" percent="10"/>
+                      <debug_text text="'Spacesuit O2 supply of %s reduced'.[$locsuit]" chance="$DebugChance"/>
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+                <remove_value name="$locsuits"/>
+              </actions>
+            </cue>
+
+            <cue name="StationDestroyed">
+              <conditions>
+                <event_object_destroyed object="$GoalStation"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Cue StationDestroyed started'" chance="$DebugChance"/>
+                <cancel_cue cue="EnemyDestroyed"/>
+                <cancel_cue cue="EnemyFledCheck"/>
+                <signal_cue cue="Finish"/>
+              </actions>
+            </cue>
+
+            <cue name="EnemyDestroyed" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed group="$EnemyFleet"/>
+                  <event_object_abandoned group="$EnemyFleet"/>
+                  <event_object_changed_true_owner group="$EnemyFleet"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'Cue EnemyDestroyed started. Enemies left: %s'.[$EnemyFleet.count]" chance="$DebugChance"/>
+                <set_value name="$EnemyKillsCount" operation="add" exact="1"/>
+                <remove_from_group group="$EnemyFleet" object="event.object" comment="manually removed for the non-event_object_destroyed case, so it was either abandoned or changed owner"/>
+                <remove_from_group group="$ParanidDestroyers" object="event.object" comment="manually removed for the non-event_object_destroyed case, so it was either abandoned or changed owner"/>
+                <do_if value="EnemyFledCheck.state == cuestate.waiting and $ParanidDestroyers.count == 0">
+                  <signal_cue cue="EnemyFledCheck"/>
+                </do_if>
+                <do_if value="$EnemyFleet.count == 0">
+                  <cancel_cue cue="EnemyFledCheck"/>
+                  <signal_cue cue="Finish"/>
+                </do_if>
+                <do_elseif value="$EnemyFleet.count le 7 and not @$ObjectivePrecised">
+                  <set_value name="$capcount" exact="0"/>
+                  <do_for_each name="$ship" in="$EnemyFleet">
+                    <do_if value="$ship.iscapitalship">
+                      <set_value name="$capcount" operation="add" exact="1"/>
+                    </do_if>
+                  </do_for_each>
+                  <do_if value="$capcount le 3">
+                    <set_objective cue="$MissionCue" step="1" action="objective.destroy" group="$EnemyFleet" updatebriefing="true"/>
+                    <set_value name="$ObjectivePrecised" exact="true"/>
+                  </do_if>
+                  <remove_value name="$capcount"/>
+                </do_elseif>
+              </actions>
+            </cue>
+
+            <cue name="EnemyFledCheck">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="CheckDistance">
+                  <delay exact="1s"/>
+                  <actions>
+                    <debug_text text="'Cue CheckDistance started.'" chance="$DebugChance"/>
+                    <set_value name="$closestdistance" exact="999km"/>
+                    <set_value name="$currentdistance" exact="0"/>
+                    <do_for_each name="$ship" in="$EnemyFleet">
+                      <set_value name="$currentdistance" exact="$ship.distanceto.{$GoalStation}"/>
+                      <do_if value="$currentdistance lt $closestdistance">
+                        <set_value name="$closestdistance" exact="$currentdistance"/>
+                      </do_if>
+                    </do_for_each>
+                    <do_if value="$closestdistance gt 25km">
+                        <cancel_cue cue="EnemyDestroyed"/>
+                        <do_for_each name="$ship" in="$EnemyFleet">
+                          <remove_from_group group="$EnemyFleet" object="$ship"/>
+                        </do_for_each>
+                        <set_value name="$EnemyKillsCount" operation="add" exact="$EnemyFleet.count"/>
+                        <signal_cue cue="Finish"/>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'Closest Distance: %s'.[$closestdistance]" chance="$DebugChance"/>
+                      <reset_cue cue="this"/>
+                    </do_else>
+                    <remove_value name="$ship"/>
+                    <remove_value name="$closestdistance"/>
+                    <remove_value name="$currentdistance"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Finish">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="5s"/>
+              <actions>
+                <debug_text text="'Cue Finish started'" chance="$DebugChance"/>
+                <!--Calculate score, speak line appropriate to rating-->
+                <set_value name="$TotalScore" exact="0"/>
+
+                <!-- Station Hull Score -->
+                <set_value name="$StationHullScore" exact="0"/>
+                <do_if value="$GoalStation.isoperational">
+                  <set_value name="$StationHullScore" exact="(92.875 * (1.0404 ^ [$GoalStation.hullpercentage, 60].min))i + 1" comment="function that runs through the points 0%|0score, 25%|250score and 60%|1000score"/>
+                </do_if>
+                <!-- Hull Score Scaler -->
+                <set_value name="$StationHullScoreScaler" exact="0.7" comment="Getting aggro of PAR fleet became way easier. Therefore, the HullScore cannot play the same dominant role it used to be."/>
+                <set_value name="$StationHullScore" exact="$StationHullScore * $StationHullScoreScaler"/>
+                <set_value name="$StationMaxHullScore" exact="1000 * $StationHullScoreScaler" comment="Formular above flats out at 1000"/>
+                <debug_text text="'StationHull score: %s'.[$StationHullScore]" chance="$DebugChance"/>
+                <set_value name="$TotalScore" exact="$TotalScore + $StationHullScore"/>
+
+                <!-- Player ships surviving Score -->
+                <set_value name="$PlayerCarrierUIValue" exact="$PlayerFlagship.isoperational"/>
+                <set_value name="$PlayerCarrierScore" exact="$PlayerFlagship.isoperational * 100"/>
+                <set_value name="$PlayerDestroyerUIValue" exact="$PlayerDestroyer1.isoperational + $PlayerDestroyer2.isoperational"/>
+                <set_value name="$PlayerDestroyerScore" exact="$PlayerDestroyerUIValue * 50"/>
+                <set_value name="$PlayerFighterUIValue" exact="$PlayerInterceptors.count + $PlayerBombers.count + $PlayerFighters.count"/>
+                <set_value name="$PlayerFighterScore" exact="$PlayerFighterUIValue * 3"/>
+                <set_value name="$TotalScore" exact="$TotalScore + $PlayerCarrierScore + $PlayerDestroyerScore + $PlayerFighterScore"/>
+
+                <!-- Enemies killed Score -->
+                <set_value name="$EnemiesKilledUIValue" exact="$EnemyKillsCount"/>
+                <set_value name="$EnemiesKilledScore" exact="$EnemyKillsCount * 5"/>
+                <debug_text text="'EnemyKillsCount: %s, EnemiesKilledScore: %s, EnemyFleetMaxSize: %s, EnemiesKilled * 5: %s'.[$EnemyKillsCount, $EnemiesKilledScore, $EnemyFleetMaxSize, $EnemyKillsCount * 5]" chance="$DebugChance"/>
+                <set_value name="$TotalScore" exact="$TotalScore + $EnemiesKilledScore"/>
+
+                <set_value name="$SurvivingCaptain" exact="null"/>
+                <do_if value="$ArgonFlagship.isoperational">
+                  <set_value name="$SurvivingCaptain" exact="$ArgonFlagship.pilot"/>
+                </do_if>
+                <do_elseif value="$ArgonFleet.count">
+                  <set_value name="$SurvivingCaptain" exact="$ArgonFleet.random.pilot"/>
+                </do_elseif>
+
+                <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$TotalScore}"/>
+                <do_if value="not $SurvivingCaptain or $Rating == 0">
+                  <signal_cue cue="ResultWindow"/>
+                </do_if>
+                <do_elseif value="$Rating lt 3">
+                  <set_value name="$FinalLine" exact="10037" comment="{10301,10037}"/>
+                </do_elseif>
+                <do_elseif value="$Rating lt 4">
+                  <set_value name="$FinalLine" exact="10036" comment="{10301,10036}"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="$FinalLine" exact="10038" comment="{10301,10038}"/>
+                </do_else>
+                <do_if value="$SurvivingCaptain and @$FinalLine">
+                  <set_value name="$CutsceneActors" exact="table[]"/>
+                  <set_value name="$CutsceneActors.$SurvivingCaptain" exact="table[ $entity = $SurvivingCaptain ]"/>
+                  <debug_text text="'triggering usecase.\nsurviving captain: %s %s on board %s %s %s'.[$TotalScore, $SurvivingCaptain.knownname, $SurvivingCaptain, $SurvivingCaptain.assignedcontrolled.idcode, $SurvivingCaptain.assignedcontrolled.knownname, $SurvivingCaptain.assignedcontrolled]" chance="$DebugChance"/>
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                    $caller = this, $preset = '$plotlike', $nofullscreenmenu = false, $actors = $CutsceneActors, $debugchance = 0,
+                                    $script = [
+                                              table [$actor = '$SurvivingCaptain', $speak = $FinalLine, $recipient = 'player'],
+                                              ],
+                                              $callbackcue = FinalSpeakFinished,
+                                              $abortcallbackcue = FinalSpeakFinished,
+                                              $abortonsignalledcue = StopUseCase
+                                  ]" />
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="FinalSpeakFinished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$GoalStation.isoperational">
+                      <play_cutscene letterbox="true" movesoundcamera="true" result="$EndingCutscene" key="'OrbitParameterized'">
+                        <param name="targetobject" object="$GoalStation"/>
+                        <param name="orbitdist" number="$GoalStation.width"/>
+                        <param name="orbitelevation" number="$GoalStation.height * 1.3"/>
+                      </play_cutscene>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="ResultWindow"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Stop_EndingCutscene">
+                      <delay exact="15s"/>
+                      <actions>
+                        <stop_cutscene cutscene="$EndingCutscene"/>
+                      </actions>
+                    </cue>
+                    <cue name="EndingCutscene_Stopped">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="$EndingCutscene"/>
+                      </conditions>
+                      <actions>
+                        <fade_screen color="black" fadein="2s" fadeout="0s" realtime="true"/>
+                        <cancel_cue cue="Stop_EndingCutscene"/>
+                        <signal_cue cue="ResultWindow"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <debug_text text="'Cue ResultWindow started'" chance="$DebugChance"/>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <do_if value="$TotalScore?">
+              <add_scenario_stat id="'stationhealth'" name="{30622,1210}" description="{30622,1211}" uivalue="$StationHullScore" score="$StationHullScore" maxscore="$StationMaxHullScore"/>
+              <add_scenario_stat id="'playercarrier'" name="{30622,2203}" uivalue="$PlayerCarrierUIValue" score="$PlayerCarrierScore" maxscore="100" comment="Surviving XL ships"/>
+              <add_scenario_stat id="'playerdestroyer'" name="{30622,2204}" uivalue="$PlayerDestroyerUIValue" score="$PlayerDestroyerScore" maxscore="100" comment="Survining L ships"/>
+              <add_scenario_stat id="'playerfighter'" name="{30622,2206}" uivalue="$PlayerFighterUIValue" score="$PlayerFighterScore" maxscore="54" comment="Survining S ships"/>
+              <add_scenario_stat id="'enemieskilled'" name="{30604,3002}" uivalue="$EnemiesKilledUIValue" score="$EnemiesKilledScore" maxscore="$EnemyFleetMaxSize * 5"/>
+              <set_value name="$ResultData.$Score" exact="$TotalScore"/>
+            </do_if>
+            <do_elseif value="not $friend">
+              <add_scenario_stat id="'avoided'" name="{30622,1240}" description="{30622,1241}" uivalue="0" score="0"/>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_elseif>
+            <do_else>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_else>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

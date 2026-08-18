@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_dragonfyre_outro_cutscene"/>
+
+  <environments>
+    <environment_implicit name="destgatezone" zone="@auto:destgate" />
+    <environment_implicit name="gatezone" zone="@auto:jumpgate" />
+    <environment_implicit name="bridgezone" zone="@auto:bridge" />
+    <object_group name="target_group">
+      <reference object="dragonfyre" />
+      <reference object="bridge" />
+      <reference object="spacesuit" />
+      <reference object="jumpgate" />
+      <reference object="destgate" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Sequence1" start="0">
+        <!--CAMERA SHOWS the DRAGONFYRE and the rest of the Earth fleet approaching the gate. Terraformers are in close pursuit.-->
+        <!--KELLY: Prepped for EVA. Goodbye, Nate.-->
+        <!--GUNNE (hiding grief): Naomi, I... Good luck.-->
+        <!--We see the Earth fleet go through the gate, then dozens of Terraformers.-->
+        <shot name="FleetsApproachingGate_1" duration="1" environment="gatezone">
+          <camera>
+            <position>
+              <reference object="jumpgate" x="500" y="0" z="7000" />
+            </position>
+            <lookdirection>
+              <reference object="jumpgate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="FleetsApproachingGate_2" duration="onevent:ShowSpacesuit" environment="gatezone">
+          <takeover_position interpolation="linear" duration="30000"/>
+          <camera>
+            <position>
+              <reference object="jumpgate" x="500" y="0" z="10000" />
+            </position>
+            <lookdirection>
+              <reference object="jumpgate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence3" start="onevent:ShowSpacesuit">
+        <!--We see the Earth fleet go through the gate, then dozens of Terraformers, while the camera slowly moves towards the gate. It eventually reveals KELLY in her spacesuit, placing charges.-->
+        <!--KELLY (while placing the final charge): And there... we... go.-->
+        <!--The charge arms itself, beginning to glow red. The camera has moved to an over-the-shoulder view of KELLY and moves with the spacesuit, as if attached, as she thrusts backwards.-->
+        <!--KELLY: This is Lieutenant Commander Naomi Kelly to Earth Fleet. The last of the Terraformers are about to pass through. Once I pull the trigger you will be on your own, isolated in uncharted space, relentlessly hounded by the demons we created.-->
+        <shot name="ZoomToSpaceSuit" duration="onevent:ShowDragonfyre" environment="gatezone">
+          <camera>
+            <position>
+              <reference object="spacesuit" x="0.5" y="0.5" z="-2" />
+            </position>
+            <lookdirection>
+              <reference object="spacesuit" x="0.5" y="0.5" z="2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence4" start="onevent:ShowDragonfyre">
+        <!--CUT TO the DRAGONFYRE on the far side of the gate, skirmishing with a Terraformer vanguard. There is no sound except for KELLY and a swelling music track.-->
+        <!--KELLY (over comms): But I know that you can make it. You’re the strongest people I’ve ever known, and you have the bravest, most devoted and inspiring leader of our time.-->
+        <shot name="DragonfyreInBattle_1" duration="1" environment="destgatezone">
+          <camera>
+            <position>
+              <reference object="destgate" x="0" y="0" z="50000" />
+            </position>
+            <lookdirection>
+              <reference object="destgate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="DragonfyreInBattle_2" duration="onevent:ShowDragonfyreBridge" environment="destgatezone">
+          <takeover_position interpolation="linear" duration="30000"/>
+          <camera>
+            <position>
+              <reference object="destgate" x="500" y="-500" z="45000" />
+            </position>
+            <lookdirection>
+              <reference object="destgate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence5" start="onevent:ShowDragonfyreBridge">
+        <!--CUT TO DRAGONFYRE bridge. The camera shakes from an explosion. GUNNE is shouting commands, but we still only hear KELLY.-->
+        <!--KELLY: Thanks to all of you humanity will have a chance to rebuild. We are never going to forget you.-->
+        <shot name="DragonfyreBridge" duration="onevent:ShowSpacesuitAgain" environment="bridgezone">
+          <camera>
+            <position>
+              <reference object="bridge" x="-0.5" y="-3.9" z="5.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="-0.5" y="-3.9" z="10" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence6" start="onevent:ShowSpacesuitAgain">
+        <!--CUT BACK TO the shoulder cam of KELLY’S spacesuit. The gate is now far enough away that we can see it in its entirety. One last Terraformer transitions through it.-->
+        <!--KELLY: Godspeed.-->
+        <!--We hear a beep as KELLY triggers the charges. Several explosions go off and the gate breaks apart.-->
+        <!--In the aftermath there is an almost eerie silence. We only hear KELLY’S breathing.-->
+        <!--FADE TO BLACK.-->
+        <shot name="OverShoulder" duration="onevent:stopscene" environment="gatezone">
+          <camera>
+            <position>
+              <reference object="spacesuit" x="0.5" y="0.5" z="-2" />
+            </position>
+            <lookdirection>
+              <reference object="spacesuit" x="0.5" y="0.5" z="2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+</cutscene>

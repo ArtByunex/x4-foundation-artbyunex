@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/gamestarts/groups">
+    <group group="8" name="{1021, 63}" />
+  </add>
+
+  <!--replace sel="/gamestarts/comment()[. = ' DLC3A_SPOILERFREE_PLACEHOLDER ']"-->
+  <replace sel="/gamestarts/gamestart[@id='x4ep1_gamestart_pirate1']">
+    <gamestart id="x4ep1_gamestart_pirate1" name="{1021,1100}" description="{1021,1101}" image="gamestart_pirate1" group="8">
+      <info>
+        <!-- Name, Gender, Location, Starting Ship(,2)/Ships(,10), Cash, Property -->
+        <item name="{1021,8}"   value="{1021,1102}" />
+        <item name="@player" />
+        <item />
+        <item />
+        <item name="{1021,1}"   value="{1021,1103}" />
+        <item />
+        <item name="{1021,2}"   value="{1021,1104}" />
+        <item name="{1021,3}"   value="{1021,1105}" />
+        <item name="{1021,5}"   value="{1021,41}" />
+      </info>
+      <cutscene ref="gamestart_pirate1" voice="gamestart_pirate1_selected" />
+      <intro ref="gamestart5" voice="gamestart_pirate1_started" length="35.0" fadeout="2.0" />
+      <type name="{1021,92}" description="{1021,93}" recommendation="16" />
+      <location galaxy="xu_ep2_universe_macro" sector="cluster_503_sector001_macro">
+        <position x="-257163.031" z="6986.142"/>
+        <rotation yaw="82.24239" pitch="-0.888501" roll="-0.135398"/>
+      </location>
+      <!--location galaxy="xu_ep2_universe_macro" sector="cluster_501_sector001_macro">
+        <position x="-3532.522" z="-22129.08"/>
+        <rotation yaw="0" pitch="0"/>
+      </location-->
+      <player macro="character_player_pirate_gamestart1_macro" money="5000" name="{1021,1102}">
+        <ship macro="ship_pir_s_trans_container_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_s_allround_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_s_allround_01_mk1_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon_01"/>
+              <shield macro="shield_arg_s_standard_01_mk1_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="eq_arg_satellite_01_macro" exact="5"/>
+              <ammunition macro="eq_arg_resourceprobe_01_macro" exact="5"/>
+              <ammunition macro="env_deco_nav_beacon_t1_macro" exact="5"/>
+            </ammunition>
+            <software>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk1"/>
+              <software ware="software_scannerobjectmk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk1_macro"/>
+            </virtualmacros>
+          </loadout>
+          <modification paint="paintmod_0126"/>
+        </ship>
+        <inventory>
+          <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
+          <ware ware="software_scannerobjectmk3" amount="1" />
+        </inventory>
+        <blueprints>
+          <ware ware="clothingmod_0001" />
+          <ware ware="clothingmod_0002" />
+          <ware ware="module_arg_dock_m_01_lowtech" />
+          <ware ware="module_arg_pier_l_03" />
+          <ware ware="module_arg_stor_container_s_01" />
+          <ware ware="module_arg_conn_base_01" />
+          <ware ware="module_arg_conn_cross_01" />
+          <ware ware="module_arg_conn_vertical_01" />
+          <ware ware="module_gen_prod_energycells_01" />
+          <ware ware="module_arg_prod_meat_01" />
+          <ware ware="paintmod_0006"/>
+          <ware ware="paintmod_0048"/>
+          <ware ware="paintmod_0049"/>
+          <ware ware="paintmod_0050"/>
+          <ware ware="paintmod_0097"/>
+          <ware ware="paintmod_0098"/>
+          <ware ware="paintmod_0099"/>
+          <ware ware="paintmod_0100"/>
+        </blueprints>
+        <research>
+          <ware ware="research_radioreceiver" />
+          <ware ware="research_sensorbooster" />
+          <ware ware="research_tradeinterface" />
+        </research>
+        <encyclopedia>
+          <entry type="warebasket" ref="research_gamestart_common"/>
+        </encyclopedia>
+        <theme paint="painttheme_player_01" />
+      </player>
+      <universe>
+        <factions>
+          <relations>
+            <!-- Slight bonus for VIG and malus for RIP because you're working with VIG. -->
+            <relation faction="loanshark" otherfaction="player" relation="0.0032"/>
+            <relation faction="scavenger" otherfaction="player" relation="-0.0032"/>
+          </relations>
+        </factions>
+      </universe>
+      <custom>
+        <item value="player" state="standard" list="character_player_pirate_gamestart1_macro character_player_pirate_gamestart1_female_macro" />
+        <item value="playerfemale" state="standard" />
+        <item value="playername" state="standard" />
+      </custom>
+    </gamestart>
+  </replace>
+
+  <!--replace sel="/gamestarts/comment()[. = ' DLC3B_SPOILERFREE_PLACEHOLDER ']"-->
+  <replace sel="/gamestarts/gamestart[@id='x4ep1_gamestart_pirate2']">
+    <gamestart id="x4ep1_gamestart_pirate2" name="{1021,1200}" description="{1021,1201}" image="gamestart_pirate2" group="8">
+      <info>
+        <item name="{1021,8}"   value="{1021,1202}" />
+        <item name="@player" />
+        <item />
+        <item />
+        <item name="{1021,1}"   value="{1021,1203}" />
+        <item />
+        <item name="{1021,2}"   value="{1021,1204}" />
+        <item name="{1021,3}"   value="{1021,1205}" />
+        <item name="{1021,5}"   value="{1021,41}" />
+      </info>
+      <cutscene ref="gamestart_pirate2" voice="gamestart_pirate2_selected" />
+      <intro ref="gamestart5" voice="gamestart_pirate2_started" length="45.0" fadeout="2.0" />
+      <type name="{1021,90}" description="{1021,91}" recommendation="20" />
+      <location galaxy="xu_ep2_universe_macro" sector="cluster_02_sector001_macro" stationgodentry="story_prison_station_id">
+        <!-- center cell -->
+        <player disembarked="true">
+          <position x="0.165" y="1.651" z="-7.728"/>
+          <rotation yaw="-161" pitch="-6.37119"/>
+          <!--position x="0.0" y="1.62" z="-6" />
+          <rotation yaw="0.526415" pitch="-4.07935" /-->
+        </player>
+        
+        <!-- left cell -->
+        <!--player disembarked="true">
+          <position x="3.014" y="1.585" z="-6.656"/>
+          <rotation yaw="-90.1916" pitch="5.61494"/>
+        </player-->
+        <!--interior module="dockarea_ter_m_station_01_hightech_macro" corridor="room_arg_corridor_01_macro" door="con_room_01" room="room_gen_infrastructureoffice_01_macro" name="{20007,1301}"/-->
+        <interior module="landmarks_gen_prison_01_macro" corridor="prison_escape_v2_macro" door="con_room_02" room="room_gen_detentioncell_01_macro" private="true" persistent="true" renderoutside="true" name="{30288,100}"/>
+      </location>
+      <player macro="character_player_pirate_gamestart2_macro" female="true" money="0" name="{1021,1202}">
+        <inventory>
+          <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
+          <ware ware="software_scannerobjectmk3" amount="1" />
+          <ware ware="inv_unstablecrystal" amount="2"/>
+        </inventory>
+        <blueprints>
+          <ware ware="clothingmod_0001" />
+          <ware ware="clothingmod_0002" />
+          <ware ware="module_arg_dock_m_01_lowtech" />
+          <ware ware="module_arg_pier_l_03" />
+          <ware ware="module_arg_stor_container_s_01" />
+          <ware ware="module_arg_conn_base_01" />
+          <ware ware="module_arg_conn_cross_01" />
+          <ware ware="module_arg_conn_vertical_01" />
+          <ware ware="module_gen_prod_energycells_01" />
+          <ware ware="module_arg_prod_meat_01" />
+          <ware ware="paintmod_0006"/>
+          <ware ware="paintmod_0048"/>
+          <ware ware="paintmod_0049"/>
+          <ware ware="paintmod_0050"/>
+          <ware ware="paintmod_0097"/>
+          <ware ware="paintmod_0098"/>
+          <ware ware="paintmod_0099"/>
+          <ware ware="paintmod_0100"/>
+        </blueprints>
+        <research>
+          <ware ware="research_radioreceiver" />
+          <ware ware="research_sensorbooster" />
+          <ware ware="research_tradeinterface" />
+        </research>
+        <encyclopedia>
+          <entry type="warebasket" ref="research_gamestart_common"/>
+        </encyclopedia>
+        <theme paint="painttheme_player_01" />
+      </player>
+      <universe>
+        <factions>
+          <relations>
+            <!-- Slight malus for MIN because you're in their prison. -->
+            <relation faction="ministry" otherfaction="player" relation="-0.0032"/>
+          </relations>
+        </factions>
+      </universe>
+      <custom>
+        <item value="player" state="standard" list="character_player_pirate_gamestart2_macro character_player_pirate_gamestart2_male_macro" />
+        <item value="playerfemale" state="standard" />
+        <item value="playername" state="standard" />
+      </custom>
+    </gamestart>
+  </replace>
+
+  <!--====== Criminal story situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_criminal_wildcard" group="arcadian_endeavours" index="1" name="{1021,13101}" description="{1021,13102}">
+      <states>
+        <state ref="story_criminal_wildcard"/>
+      </states>
+    </story>
+
+    <story ref="story_criminal_arrested_curs" group="arcadian_endeavours" index="2" name="{1021,13111}" description="{1021,13112}">
+      <states>
+        <state ref="story_criminal_arrested_curs"/>
+      </states>
+    </story>
+  </add>
+
+  <!--====== Twin story situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_twin_northriver" group="northriver_company" index="1" name="{1021,13201}" description="{1021,13202}">
+      <states>
+        <state ref="story_twin_northriver"/>
+      </states>
+    </story>
+
+    <story ref="story_twin_rival" group="northriver_company" index="2" name="{1021,13211}" description="{1021,13212}">
+      <states>
+        <state ref="story_twin_rival"/>
+      </states>
+    </story>
+  </add>
+
+  <!--====== Erlking situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_erlking_possession" group="erliking_situation" index="1" name="{1021,13301}" description="{1021,13302}">
+      <states>
+        <state ref="story_erlking_possession"/>
+      </states>
+    </story>
+
+    <story ref="story_erlking_upgrade" group="erliking_situation" index="2" name="{1021,13311}" description="{1021,13312}">
+      <states>
+        <state ref="story_erlking_upgrade"/>
+      </states>
+      <dependencies>
+        <dependency>
+          <budget ref="story_hq_boso"/>
+          <budget ref="story_hq_dal"/>
+        </dependency>
+      </dependencies>
+    </story>
+  </add>
+
+  <!-- Sector Knowledge -->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/known/parameters/space">
+    <sector sector="cluster_500_sector001_macro" factor="0">
+      <unlock locked="1" hidden="1"/>
+    </sector>
+    <sector sector="cluster_500_sector002_macro" factor="0">
+      <unlock locked="1" hidden="1"/>
+    </sector>
+    <sector sector="cluster_500_sector003_macro" factor="0">
+      <unlock locked="1" hidden="1"/>
+    </sector>
+    <sector sector="cluster_501_sector001_macro" factor="1.4"/>
+    <sector sector="cluster_502_sector001_macro" factor="1.1"/>
+    <sector sector="cluster_503_sector001_macro" factor="0.9"/>
+    <sector sector="cluster_504_sector001_macro" factor="0">
+      <unlock locked="1" hidden="1"/>
+    </sector>
+  </add>
+
+  <!-- Station Knowledge -->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/known/parameters/objects">
+    <sector sector="cluster_501_sector001_macro" factor="1.8"/>
+    <sector sector="cluster_502_sector001_macro" factor="1.4"/>
+    <sector sector="cluster_503_sector001_macro" factor="1"/>
+  </add>
+
+  <!--People budgets-->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/people/parameters/people">
+    <!-- Vigor Syndicate -->
+    <people ref="player_loanshark_regular_freighter_crew" factor="390"/>
+    <people ref="player_loanshark_regular_military_crew" factor="390"/>
+    <people ref="player_loanshark_veteran_freighter_crew" factor="1360"/>
+    <people ref="player_loanshark_veteran_military_crew" factor="1360"/>
+    <people ref="player_loanshark_elite_freighter_crew" factor="4090"/>
+    <people ref="player_loanshark_elite_military_crew" factor="4090"/>
+
+    <!-- Riptide Rakers-->
+    <people ref="player_scavenger_regular_freighter_crew" factor="390"/>
+    <people ref="player_scavenger_regular_military_crew" factor="390"/>
+    <people ref="player_scavenger_veteran_freighter_crew" factor="1360"/>
+    <people ref="player_scavenger_veteran_military_crew" factor="1360"/>
+    <people ref="player_scavenger_elite_freighter_crew" factor="4090"/>
+    <people ref="player_scavenger_elite_military_crew" factor="4090"/>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/custom/item[@value='player']">
+    <extension list="character_npc_player_pirate_gamestart2_macro
+                     character_npc_player_pirate_gamestart2_male_macro
+                     character_npc_player_pirate_gamestart1_macro
+                     character_npc_player_pirate_gamestart1_female_macro" />
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/custom/item[@value='player']">
+    <extension list="character_npc_player_pirate_gamestart2_macro
+                     character_npc_player_pirate_gamestart2_male_macro
+                     character_npc_player_pirate_gamestart1_macro
+                     character_npc_player_pirate_gamestart1_female_macro" />
+  </add>
+
+  <!--====== Criminal story situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_criminal_wildcard" group="arcadian_endeavours" index="1" name="{1021,13101}" description="{1021,13102}">
+      <states>
+        <state ref="story_criminal_wildcard"/>
+      </states>
+    </story>
+
+    <story ref="story_criminal_arrested_curs" group="arcadian_endeavours" index="2" name="{1021,13111}" description="{1021,13112}">
+      <states>
+        <state ref="story_criminal_arrested_curs"/>
+      </states>
+    </story>
+  </add>
+
+  <!--====== Twin story situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_twin_northriver" group="northriver_company" index="1" name="{1021,13201}" description="{1021,13202}">
+      <states>
+        <state ref="story_twin_northriver"/>
+      </states>
+    </story>
+
+    <story ref="story_twin_rival" group="northriver_company" index="2" name="{1021,13211}" description="{1021,13212}">
+      <states>
+        <state ref="story_twin_rival"/>
+      </states>
+    </story>
+  </add>
+
+  <!--====== Erlking situation ======-->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_erlking_possession" group="erliking_situation" index="1" name="{1021,13301}" description="{1021,13302}">
+      <states>
+        <state ref="story_erlking_possession"/>
+      </states>
+    </story>
+
+    <story ref="story_erlking_upgrade" group="erliking_situation" index="2" name="{1021,13311}" description="{1021,13312}">
+      <states>
+        <state ref="story_erlking_upgrade"/>
+      </states>
+      <dependencies>
+        <dependency>
+          <budget ref="story_hq_boso"/>
+          <budget ref="story_hq_dal"/>
+        </dependency>
+      </dependencies>
+    </story>
+  </add>
+
+</diff>

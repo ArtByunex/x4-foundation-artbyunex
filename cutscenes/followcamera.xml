@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+	FollowCamera.xml
+	Cutscene by Apoch
+	   
+	Simple event monitor cutscene for just following around a flying object.
+	Does pretty much what it says on the tin.
+	   
+	Assumes that a reference object "targetobject" is provided when the scene is started.
+	
+	Playback duration is fully dynamic; the object will be displayed until a specific
+	event ("stopscene") is triggered from control code either in the engine itself or
+	via a controlling MD script.
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="FollowObjectCutscene" />
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="FollowObjectSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <shot name="FollowObjectShot" environment="scenezone" duration="onevent:stopscene">
+          <!-- Do a little pan/zoom effect to zero in on the object, makes it look a bit cooler. -->
+          <camera_follow reference="targetobject" orient_to="ecliptic">
+            <begin distance="600" pitch="60" yaw="60" />
+            <end distance="50" pitch="25" yaw="210" time="1000" />
+          </camera_follow>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Split" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false" version="6">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="global.$smugglercoverfactions?">
+          <do_if value="not global.$smugglercoverfactions.indexof.{faction.split}">
+            <append_to_list name="global.$smugglercoverfactions" exact="faction.split"/>
+          </do_if>
+          <do_if value="not global.$smugglercoverfactions.indexof.{faction.freesplit}">
+            <append_to_list name="global.$smugglercoverfactions" exact="faction.freesplit"/>
+          </do_if>
+          <remove_from_list name="global.$smugglercoverfactions" list="[faction.court]"/>
+        </do_if>
+        <do_if value="player.galaxy.macro == macro.xu_ep2_universe_macro"  comment="only in main-galaxy" >
+          <!-- Grab Heretics End sector for Gate Cutscene check -->
+          <find_sector name="$HereticsEndSector"      macro="macro.cluster_31_sector001_macro"  required="true" />
+          <do_if value="faction.paranid.isactive">
+            <set_job_active job="'paranid_corvette_patrol_m_sector_spl_mission'" activate="true"/>
+          </do_if>
+          <do_if value="md.Story_Paranid.Unification_Stage_3_FactionMerge_Complete.state == cuestate.complete">
+            <!-- $locParJobs contains only currently active jobs -->
+            <get_suitable_job result="$locParJobs" faction="faction.paranid" exceedquota="true" multiple="true"/>
+            <do_if value="$locParJobs.indexof.{'paranid_carrier_patrol_xl_cluster_spl'}">
+              <set_job_active job="'paranid_carrier_patrol_xl_cluster_spl'" successor="'trinity_carrier_patrol_xl_cluster_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_carrier_patrol_xl_cluster_spl'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_corvette_patrol_m_sector_spl'}">
+              <set_job_active job="'paranid_corvette_patrol_m_sector_spl'" successor="'trinity_corvette_patrol_m_sector_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_corvette_patrol_m_sector_spl'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_corvette_patrol_m_sector_spl_mission'}">
+              <set_job_active job="'paranid_corvette_patrol_m_sector_spl_mission'" successor="'trinity_corvette_patrol_m_sector_spl_mission'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_corvette_patrol_m_sector_spl_mission'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_fighter_patrol_s_zone_spl'}">
+              <set_job_active job="'paranid_fighter_patrol_s_zone_spl'" successor="'trinity_fighter_patrol_s_zone_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_fighter_patrol_s_zone_spl'" activate="true"/>
+            </do_else>
+            <remove_value name="$locParJobs"/>
+            <set_value name="$Patch_ParanidUnifiedBeforeSplitDLC"/>
+          </do_if>
+        </do_if>
+
+        <!--Add new location for Kha'ak base station spawning-->
+        <find_sector groupname="md.Khaak_Activity.Manager.$PotentialHiveStationSectors" macro="macro.cluster_419_sector001_macro" comment="Open Market"/>
+
+        <!-- Set vars for use in other dlcs -->
+        <set_value exact="macro.ship_spl_s_trans_container_01_a_macro"    name="$ShipMacroTuataraCourier"/>
+        <set_value exact="macro.ship_spl_s_miner_solid_01_a_macro"        name="$ShipMacroTuataraMiner"/>
+        <set_value exact="macro.ship_spl_s_scout_01_a_macro"              name="$ShipMacroJaguar"/>
+        <set_value exact="macro.ship_spl_s_fighter_01_a_macro"            name="$ShipMacroMamba"/>
+        <set_value exact="macro.ship_spl_s_fighter_02_a_macro"            name="$ShipMacroAsp"/>
+        <set_value exact="macro.ship_spl_s_fighter_02_b_macro"            name="$ShipMacroAspRaider"/>
+        <set_value exact="macro.ship_spl_s_heavyfighter_01_a_macro"       name="$ShipMacroChimera"/>
+        <set_value exact="macro.ship_spl_s_heavyfighter_02_a_macro"       name="$ShipMacroBalaur"/>
+        <set_value exact="macro.ship_spl_m_corvette_01_a_macro"           name="$ShipMacroDragon"/>
+        <set_value exact="macro.ship_spl_m_corvette_01_b_macro"           name="$ShipMacroDragonRaider"/>
+        <set_value exact="macro.ship_spl_m_frigate_01_a_macro"            name="$ShipMacroCobra"/>
+        <set_value exact="macro.ship_spl_m_trans_container_01_a_macro"    name="$ShipMacroBoa"/>
+        <set_value exact="macro.ship_spl_m_miner_liquid_01_a_macro"       name="$ShipMacroAlligatorGas"/>
+        <set_value exact="macro.ship_spl_m_miner_solid_01_a_macro"        name="$ShipMacroAlligatorMineral"/>
+        <set_value exact="macro.ship_spl_l_destroyer_01_a_macro"          name="$ShipMacroRattlesnake"/>
+        <set_value exact="macro.ship_spl_l_trans_container_01_a_macro"    name="$ShipMacroBuffalo"/>
+        <set_value exact="macro.ship_spl_l_miner_solid_01_a_macro"        name="$ShipMacroWyvernMineral"/>
+        <set_value exact="macro.ship_spl_l_miner_liquid_01_a_macro"       name="$ShipMacroWyvernGas"/>
+        <set_value exact="macro.ship_spl_xl_resupplier_01_a_macro"        name="$ShipMacroMonitor"/>
+        <set_value exact="macro.ship_spl_xl_carrier_01_a_macro"           name="$ShipMacroRaptor"/>
+        <set_value exact="macro.ship_spl_xl_builder_01_a_macro"           name="$ShipMacroElephant"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.split}" exact="table[$DiplomatAvailable = ['yes', tag.group_06],
+                                                                                                $EventCapable = 'yes',
+                                                                                                $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.freesplit}" exact="table[$DiplomatAvailable = ['yes', tag.group_04],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.court}" exact="table[$DiplomatAvailable = ['conditional', tag.group_03],
+                                                                                                $EventCapable = 'conditional',
+                                                                                                $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.fallensplit}" exact="table[$DiplomatAvailable = ['yes', null],
+                                                                                                      $EventCapable = 'no',
+                                                                                                      $InateAgentExperience = 'no_agents']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_microbrewdrink}" other="[faction.freesplit]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.court, faction.split]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_nividiumjewel}" other="[faction.freesplit, faction.court]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.split]" create="true"/>
+
+        <!-- Set the faction pairings that are initially non-interacteable 
+        base_3: Integrated Faction
+        dlc1_1: Split Story-->
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.argon" flags="dlc1_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.court" flags="dlc1_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.freesplit" flags="base_3"/>
+        
+        <!-- Split DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="md.$DLCBoronFactions.{1}" flags="dlc4_1"/>
+          <reset_cue cue="md.Setup_DLC_Boron.Herald_Missions_Complete_Check"/>
+        </do_if>
+      </actions>
+      <patch sinceversion="1">
+        <do_if value="player.galaxy.macro == macro.xu_ep2_universe_macro">
+          <do_if value="faction.court.isactive">
+            <debug_text text="'PATCH: activating added court jobs'" filter="savegame"/>
+            <set_job_active job="'court_frigate_patrol_m_sector_mission'" activate="true"/>
+          </do_if>
+          <do_if value="faction.paranid.isactive">
+            <debug_text text="'PATCH: activating added paranid jobs'" filter="savegame"/>
+            <set_job_active job="'paranid_corvette_patrol_m_sector_spl_mission'" activate="true"/>
+          </do_if>
+          <do_if value="faction.trinity.isactive">
+            <debug_text text="'PATCH: activating trinity jobs'" filter="savegame"/>
+            <!-- $locParJobs contains only currently active jobs -->
+            <get_suitable_job result="$locParJobs" faction="faction.paranid" exceedquota="true" multiple="true"/>
+            <do_if value="$locParJobs.indexof.{'paranid_carrier_patrol_xl_cluster_spl'}">
+              <set_job_active job="'paranid_carrier_patrol_xl_cluster_spl'" successor="'trinity_carrier_patrol_xl_cluster_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_carrier_patrol_xl_cluster_spl'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_corvette_patrol_m_sector_spl'}">
+              <set_job_active job="'paranid_corvette_patrol_m_sector_spl'" successor="'trinity_corvette_patrol_m_sector_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_corvette_patrol_m_sector_spl'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_corvette_patrol_m_sector_spl_mission'}">
+              <set_job_active job="'paranid_corvette_patrol_m_sector_spl_mission'" successor="'trinity_corvette_patrol_m_sector_spl_mission'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_corvette_patrol_m_sector_spl_mission'" activate="true"/>
+            </do_else>
+            <do_if value="$locParJobs.indexof.{'paranid_fighter_patrol_s_zone_spl'}">
+              <set_job_active job="'paranid_fighter_patrol_s_zone_spl'" successor="'trinity_fighter_patrol_s_zone_spl'" activate="false"/>
+            </do_if>
+            <do_else>
+              <set_job_active job="'trinity_fighter_patrol_s_zone_spl'" activate="true"/>
+            </do_else>
+            <remove_value name="$locParJobs"/>
+          </do_if>
+        </do_if>
+      </patch>
+      <patch sinceversion="2">
+        <!--Add new location for Kha'ak base station spawning-->
+        <find_sector groupname="md.Khaak_Activity.Manager.$PotentialHiveStationSectors" macro="macro.cluster_419_sector001_macro" comment="Open Market"/>
+      </patch>
+      <patch sinceversion="3">
+        <!-- Grab Heretics End sector for Gate Cutscene check -->
+        <do_if value="player.galaxy.macro == macro.xu_ep2_universe_macro"  comment="only in main-galaxy" >
+          <find_sector name="$HereticsEndSector"      macro="macro.cluster_31_sector001_macro"  required="true" />
+        </do_if>
+      </patch>
+      <patch sinceversion="4">
+        <do_if value="md.Story_Paranid.Unification_Stage_3_FactionMerge_Complete.state == cuestate.complete">
+          <find_object name="this.$objects" owner="[faction.paranid, faction.holyorder]" space="player.galaxy" recursive="true" multiple="true"/>
+          <do_if value="this.$objects.count">
+            <set_value name="$Patch_ParanidUnifiedBeforeSplitDLC"/>
+          </do_if>
+        </do_if>
+      </patch>
+      <patch sinceversion="5">
+        <!-- Add seating definition for diplomacy -->
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.split}"       exact="table[$DiplomatAvailable = ['yes', tag.group_06],
+                                                                                                      $EventCapable = 'yes',
+                                                                                                      $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.freesplit}"   exact="table[$DiplomatAvailable = ['yes', tag.group_04],
+                                                                                                      $EventCapable = 'yes',
+                                                                                                      $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.court}"       exact="table[$DiplomatAvailable = ['conditional', tag.group_03],
+                                                                                                      $EventCapable = 'conditional',
+                                                                                                      $InateAgentExperience = 'espionage']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.fallensplit}" exact="table[$DiplomatAvailable = ['yes', null],
+                                                                                                      $EventCapable = 'no',
+                                                                                                      $InateAgentExperience = 'no_agents']"/>
+        
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_microbrewdrink}" other="[faction.freesplit]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.court, faction.split]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_nividiumjewel}" other="[faction.freesplit, faction.court]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.split]" create="true"/>
+
+        <!-- Set the faction pairings that are initially non-interacteable 
+        base_2: Paranid Story
+        dlc1_1: Split Story-->
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.argon" flags="dlc1_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.court" flags="dlc1_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="faction.freesplit" flags="dlc1_1"/>
+
+        <!-- Split DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <set_faction_diplomacy_exclusion faction="faction.split" otherfaction="md.$DLCBoronFactions.{1}" flags="dlc4_1"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="6">
+        <!-- Split DLC to Boron DLC dependencies -->
+        <do_if value="md.$DLCBoronFactions.count">
+          <reset_cue cue="md.Setup_DLC_Boron.Herald_Missions_Complete_Check"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Patch_Mantis1257_Trinity" onfail="cancel">
+          <conditions>
+            <check_value value="md.Story_Paranid.Start.$PATCH_DeactivatedTrinity?"/>
+            <check_value value="not faction.trinity.isactive" comment="players could get the patch and activate the split dlc later with trinity valid again"/>
+          </conditions>
+          <actions>
+            <reset_cue cue="parent" comment="allow to run should trinity be activated again"/>
+
+            <set_job_active activate="false" successor="'paranid_carrier_patrol_xl_cluster_spl'"        job="'trinity_carrier_patrol_xl_cluster_spl'"/>
+            <set_job_active activate="false" successor="'paranid_corvette_patrol_m_sector_spl'"         job="'trinity_corvette_patrol_m_sector_spl'"/>
+            <set_job_active activate="false" successor="'paranid_corvette_patrol_m_sector_spl_mission'" job="'trinity_corvette_patrol_m_sector_spl_mission'"/>
+            <set_job_active activate="false" successor="'paranid_fighter_patrol_s_zone_spl'"            job="'trinity_fighter_patrol_s_zone_spl'"/>
+
+          </actions>
+        </cue>
+        <cue name="Patch_Trinity_Ownership_Change" onfail="cancel">
+          <conditions>
+            <check_value value="$Patch_ParanidUnifiedBeforeSplitDLC?"/>
+          </conditions>
+          <delay exact="3s" comment="If the Split DLC just got activated, the universe hasn't finished generating yet, so the cue in story_paranid can't find the new objects. We have to wait a little."/>
+          <actions>
+            <force_cue cue="md.Story_Paranid.Unification_Stage_3_FactionMerge_Immediate"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this" version="2">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+      <patch sinceversion="2">
+        <get_ware_definition result="md.$EquipmentTable.{faction.court}" faction="faction.court" flags="equipment" />
+      </patch>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+        <do_if value="not md.$EquipmentTable?">
+          <set_value name="md.$EquipmentTable" exact="table[]"/>
+        </do_if>
+        <get_ware_definition result="md.$EquipmentTable.{faction.split}" faction="faction.split" flags="equipment" />
+        <get_ware_definition result="md.$EquipmentTable.{faction.freesplit}" faction="faction.freesplit" flags="equipment" />
+        <get_ware_definition result="md.$EquipmentTable.{faction.court}" faction="faction.court" flags="equipment" />
+        <do_if value="not md.$FactionData?">
+          <set_value name="md.$FactionData" exact="table[]"/>
+        </do_if>
+        <!-- Patch for existing savegames with Split DLC: Prevent tables being set multiple times -->
+        <do_if value="not md.$FactionData.{faction.split}?">
+          <set_value name="md.$FactionData.{faction.split}" exact="table[]" />
+        </do_if>
+        <do_if value="not md.$FactionData.{faction.freesplit}?">
+          <set_value name="md.$FactionData.{faction.freesplit}" exact="table[]" />
+        </do_if>
+        <do_if value="not md.$SplitFactions?">
+          <set_value name="md.$SplitFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$SplitFactions" other="[faction.split, faction.freesplit, faction.court]"/>
+        <do_if value="not md.$SplitPatriarchyFactions?">
+          <set_value name="md.$SplitPatriarchyFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$SplitPatriarchyFactions" other="[faction.split, faction.freesplit]"/>
+        <do_if value="not md.$SplitCurbFactions?">
+          <set_value name="md.$SplitCurbFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$SplitCurbFactions" other="[faction.court]"/>
+        <!-- terran GS1 expects md.$SplitCurbFactions.{1} to be faction.court -->
+        <do_if value="not md.$DLCPirateFactions?">
+          <set_value name="md.$DLCPirateFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCPirateFactions" other="[faction.fallensplit]"/>
+        
+        <!-- Activate additional job if Boron DLC active -->
+        <do_if value="md.$DLCBoronFactions? and md.$DLCBoronFactions.count ge 1">
+          <do_if value="md.Setup_DLC_Boron.Boron_Gates_Open_HereticsEnd.state == cuestate.complete">
+            <signal_cue_instantly cue="md.Setup_DLC_Boron.Boron_Jobs_ActivateSplitJobs" check="false"/>
+          </do_if>
+        </do_if>
+      </actions>
+    </library>
+
+    <cue name="Update_HQ_Plot_Data">
+      <conditions>
+        <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.Start"/>
+      </conditions>
+      <actions>
+        <append_list_elements name="md.X4Ep1_Mentor_Subscriptions.Start.$SignalLeakStationFactions" other="[faction.court, faction.fallensplit, faction.freesplit, faction.split]"/>
+      </actions>
+    </cue>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- TODO station init, gate activation... -->
+
+    <cue name="DLC_Split_Prelude" mapeditor="false" version="2">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+
+        <find_sector name="$SplitSectors" extension="'ego_dlc_split'" multiple="true"/>
+        <find_sector name="$BaseSectors" extension="''" multiple="true"/>
+        
+        <find_gate name="$Gates" multiple="true" space="player.galaxy"/>
+
+        <create_list name="$SplitDLCGates"/>
+        <do_for_each in="$Gates" name="$g">
+          <do_if value="$SplitSectors.indexof.{$g.sector} and $g.exit and $BaseSectors.indexof.{$g.exit.sector}">
+            <append_to_list name="$SplitDLCGates" exact="$g"/>
+            <append_to_list name="$SplitDLCGates" exact="$g.exit"/>
+          </do_if>
+        </do_for_each>
+
+        <!--Custom gamestart flags (only reliable after 6.20 gamestarts)-->
+        <set_value name="$HasSplitCustomGamestartSkip" exact="gamestart.storystate.story_split_faction_decision or
+                   gamestart.storystate.story_split_curbs_declaration or
+                   gamestart.storystate.story_split_curbs_no_colonial_police or
+                   gamestart.storystate.story_split_cabal_coup or
+                   gamestart.storystate.story_split_cabal_complete or
+                   gamestart.storystate.story_split_court_complete"/>
+      </actions>
+      <patch sinceversion="2">
+        <set_value name="$HasSplitCustomGamestartSkip" exact="false"/>
+      </patch>
+      <cues>
+
+        <cue name="Gate_PlayerApproach">
+          <cues>
+            <cue name="Start_Gate_Handlers" checkinterval="1s" version="3">
+              <conditions>
+                <check_value value="player.entity.exists"/>
+              </conditions>
+              <actions>
+                <create_list name="$ApproachHandlers"/>
+                <do_for_each in="$SplitDLCGates" name="$gate">
+                  <signal_cue_instantly cue="Gate_Approach_Handler" param="$gate"/>                  
+                </do_for_each>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <set_value name="$Patch_HasValidGateHandler" exact="false"/>
+                <do_if value="Gate_Intro.state == cuestate.waiting">
+                  <do_for_each name="$ApproachCue" in="$ApproachHandlers">
+                    <do_if value="$ApproachCue.exists">
+                      <set_value name="$Patch_HasValidGateHandler" exact="true"/>
+                      <break/>
+                    </do_if>
+                  </do_for_each>
+                </do_if>
+                <do_if value="not $Patch_HasValidGateHandler">
+                  <debug_text text="'Resetting gate approach hanlders'" filter="savegame"/>
+                  <reset_cue cue="Start_Gate_Handlers"/>
+                </do_if>
+                <remove_value name="$Patch_HasValidGateHandler"/>
+              </patch>
+              <patch sinceversion="3">
+                <do_if value="Gate_Intro.state == cuestate.waiting">
+                  <!-- we added the CancelOnSuccess param to Player_Approach_Gate_Ref, so cancel the previous vesion and reset the Handler -->
+                  <do_all exact="$ApproachHandlers.count" counter="$ah">
+                    <do_if value="$ApproachHandlers.{$ah}.exists">
+                      <cancel_cue cue="$ApproachHandlers.{$ah}"/>
+                    </do_if>
+                  </do_all>
+                  <reset_cue cue="Start_Gate_Handlers"/>
+                </do_if>
+              </patch>
+            </cue>
+
+            <cue name="Gate_Approach_Handler" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$GateApproach" exact="event.param"/>
+                <append_to_list name="$ApproachHandlers" exact="this"/>
+              </actions>
+              <cues>
+                <cue name="Player_Approach_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                  <param name="ApproachTarget"    value="$GateApproach"/>
+                  <param name="ApproachDistance"  value="30km"/>
+                  <param name="CancelOnSuccess" value="false"/>
+                  <param name="SuccessSignalCue"      value="Gate_Intro"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Gate_intro_Debug2" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$Gate" exact="$SplitDLCGates.{10}"/>
+            <reset_cue cue="Gate_Intro"/>
+            <signal_cue_instantly cue="Gate_Intro" param="$Gate"/>
+          </actions>
+        </cue>
+
+        <cue name="Gate_Intro">
+          <conditions>
+            <event_cue_signalled/>
+            <!--Disable for Split gamestart shortcuts-->
+            <check_value value="not $HasSplitCustomGamestartSkip"/>
+            <check_any>
+              <!-- The cutscene should proceed either if the player is not in Heretics End anyway, or only after the Boron Gate has come active -->
+              <check_value value="event.param.sector != Setup.$HereticsEndSector"/>
+              <check_value value="md.$DLCBoronFactions? and md.$DLCBoronFactions.count lt 1"/>
+              <check_all>
+                <check_value value="md.$DLCBoronFactions? and md.$DLCBoronFactions.count ge 1"/>
+                <count_gates result="$InactiveGate" active="false" space="Setup.$HereticsEndSector" negate="true"/>
+              </check_all>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$Gate" exact="event.param"/>
+
+            <do_if value="not $Gate.exists">
+              <!--set_value name="$Gate" exact="$SplitDLCGates.{10}" comment="triggers Gate_Intro_Split"/-->
+              <set_value name="$Gate" exact="$SplitDLCGates.{11}" comment="triggers Gate_Intro_Argon"/>
+            </do_if>
+
+            <!-- Abort all Gate listeners -->
+            <do_all exact="$ApproachHandlers.count" counter="$ah">
+              <do_if value="$ApproachHandlers.{$ah}.exists">
+                <cancel_cue cue="$ApproachHandlers.{$ah}"/>
+              </do_if>
+            </do_all>
+            <remove_value name="$ApproachHandlers"/>
+
+            <!-- Add cool gate opening cutscenes, news broadcasts and
+                     - either a Split fleet entering through the gate here
+                     - or make the player explore this, maybe with mentor guidance -->
+
+            <!--debug_text text="'Split gate cutscene at target: ' + $Gate + ' in ' + $Gate.sector.knownname"/-->
+          </actions>
+          <cues>
+
+            <!-- Started on the split side, argon moving into split territory -->
+            <cue name="Gate_Intro_Split" onfail="cancel">
+              <conditions>
+                <check_value value="$Gate.exists"/>
+                <check_value value="$SplitSectors.indexof.{$Gate.sector}"/>
+              </conditions>
+              <actions>
+
+                <create_cue_actor name="$NarratorArgon" cue="Gate_Intro_Split" macro="character_rescue_split_gamestart1_macro">
+                  <page exact="10102"/>
+                  <owner exact="faction.argon"/>
+                  <skills>
+                    <skill type="management"  exact="9"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="0"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$NarratorArgon" missionactor="true"/>
+
+                <do_if value="false">
+                  <!-- create gate-ship -->
+                  <set_value name="$OtherGate" exact="$Gate.exit"/>
+                  <create_ship name="$ArgonShip" macro="ship_arg_m_frigate_01_a_macro" zone="$OtherGate.zone" commandeerable="false" capturable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <people ref="argon_freighter_crew"/>
+                    <orientation orientation="look_at" refobject="$OtherGate" comment="requires create_ship using zone='$OtherGate.zone' "/>
+                    <position x="0km" y="0km" z="2km" object="$OtherGate" />
+                  </create_ship>
+                  <!-- Approach gate -->
+                  <get_safe_pos result="$zonepos" sector="$OtherGate.sector" space="$OtherGate.sector" object="$OtherGate" z="4km" radius="$ArgonShip.size" direction="quadrant.front" directionobject="$OtherGate" ignored="$ArgonShip"/>
+                  <debug_text text="'adding movement order to %s in %s, %sm away.'.[$zonepos, $OtherGate.sector, $ArgonShip.distanceto.[$OtherGate.sector, $zonepos]]" chance="0"/>
+                  <create_order object="$ArgonShip" id="'MoveWait'" name="$order">
+                    <param name="destination" value="[$OtherGate.sector, $zonepos]"/>
+                    <param name="precise" value="true"/>
+                  </create_order>
+                  <!-- and through gate -->
+                  <get_safe_pos result="$zonepos" sector="$OtherGate.destination.sector" space="$OtherGate.destination.sector" object="$OtherGate.exit" z="8km" radius="$ArgonShip.size" direction="quadrant.front" directionobject="$OtherGate.exit"/>
+                  <debug_text text="'adding movement order to %s in %s, %sm away.'.[$zonepos, $OtherGate.destination.sector, $ArgonShip.distanceto.[$OtherGate.destination.sector, $zonepos]]" chance="0"/>
+                  <create_order object="$ArgonShip" id="'MoveWait'" name="$order">
+                    <param name="destination" value="[$OtherGate.destination.sector, $zonepos]"/>
+                    <param name="precise" value="true"/>
+                  </create_order>
+                </do_if>
+                <do_else>
+                  <create_ship name="$ArgonShip" macro="ship_arg_m_frigate_01_a_macro" zone="$Gate.zone" commandeerable="false">
+                    <owner exact="faction.argon" overridenpc="true" />
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <pilot>
+                      <select faction="faction.argon" tags="tag.fighterpilot"/>
+                    </pilot>
+                    <people ref="argon_freighter_crew"/>
+                    <orientation orientation="look_away" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                    <position x="0km" y="0km" z="1km" object="$Gate" />
+                  </create_ship>
+                  <set_object_name object="$ArgonShip" page="30282" line="101" comment="argon expedition"/>
+
+                  <!-- move away from gate -->
+                  <get_safe_pos result="$zonepos" sector="$Gate.sector" space="$Gate.sector" object="$Gate" z="8km" radius="$ArgonShip.size" direction="quadrant.front" directionobject="$Gate"/>
+                  <debug_text text="'adding movement order to %s in %s, %sm away.'.[$zonepos, $Gate.sector, $ArgonShip.distanceto.[$Gate.sector, $zonepos]]" chance="0"/>
+                  <create_order object="$ArgonShip" id="'MoveWait'" name="$order">
+                    <param name="destination" value="[$Gate.sector, $zonepos]"/>
+                    <param name="precise" value="true"/>
+                  </create_order>
+                </do_else>
+                
+                <!-- Stop the player ship. -->
+                <force_player_speed speed="0"/>
+              </actions>
+              <cues>
+
+                <cue name="Gate_Intro_Split_Speak">
+                  <delay exact="4s"/>
+                  <actions>
+                    <speak actor="$NarratorArgon" priority="100">
+                      <text line="30282001" comment="In the name of the Argon Federation, and with the mandate of the federal Presidency, we come in peace."/>
+                      <text line="30282002" comment="We seek safe passage to the rumoured lost colonies of our fellow Argon citizens."/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Gate_Intro_Split_ArgonOrders" version="2">
+                  <delay exact="20s"/>
+                  <actions>
+
+                    <!-- find any argon station in one of the split dlc argon sectors -->
+                    <set_value name="$SplitDLCArgonSectors" exact="[macro.cluster_416_sector001_macro, macro.cluster_416_sector002_macro, macro.cluster_417_sector001_macro]"/>
+                    <do_all exact="$SplitDLCArgonSectors.count" counter="$i">
+                      <find_sector name="$ArgonSector" macro="$SplitDLCArgonSectors.{$i}"/>
+                      <do_if value="$ArgonSector.exists">
+                        <find_station name="$Stations" space="$ArgonSector" multiple="true"/>
+                        <do_if value="$Stations.count">
+                          <break/>
+                        </do_if>
+                      </do_if>
+                    </do_all>
+
+                    <!-- and move there -->
+                    <do_if value="$ArgonShip.isoperational">
+                      <cancel_all_orders object="$ArgonShip"/>
+
+                      <do_if value="$Stations.count">
+                        <set_value name="$TargetStation" exact="$Stations.random"/>
+                        <!--debug_text text="'Selected station: ' + $TargetStation.knownname + ' in ' + $TargetStation.sector.knownname"/-->
+
+                        <!-- Move to target station first. -->
+                        <create_order object="$ArgonShip" id="'MoveToObject'">
+                          <param name="destination" value="$TargetStation"/>
+                          <param name="noattackresponse" value="true"/>
+                        </create_order>
+
+                        <!-- And queue MoveDie, so that it docks once it arrives. -->
+                        <create_order object="$ArgonShip" id="'MoveDie'">
+                          <param name="atstation" value="$TargetStation"/>
+                          <param name="byidle" value="false"/>
+                          <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                        </create_order>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$TargetStation" exact="null"/>
+                        <create_order object="$ArgonShip" id="'MoveDie'"/>
+                      </do_else>
+                    </do_if>
+                  </actions>
+                  <patch sinceversion="2">
+                    <do_if value="$ArgonShip.isoperational">
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </patch>
+                  <cues>
+                    <cue name="Gate_Intro_Split_Approach">
+                      <conditions>
+                        <event_cue_completed cue="Gate_Intro_Split_ArgonOrders"/>
+                      </conditions>
+                      <cues>
+                        <cue name="Gate_Intro_Split_Approach_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                          <param name="ApproachObject"    value="$ArgonShip"/>
+                          <param name="ApproachTarget"    value="$TargetStation"/>
+                          <param name="ApproachDistance"  value="20km"/>
+                          <param name="SuccessSignalCue"  value="Gate_Intro_Split_Arrived"/>
+                        </cue>
+
+                        <cue name="Gate_Intro_Split_Arrived">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <!-- Additional background lore, if the player followed and was nearby on arrival -->
+                            <do_if value="(player.sector == $ArgonShip.sector) and (player.entity.distanceto.{$ArgonShip} lt 200km)">
+                              <speak actor="$NarratorArgon" priority="100">
+                                <text line="30282003" comment="Your assistance is much appreciated."/>
+                                <text line="30282004" comment="Please accept this as a token of our thanks."/>
+                              </speak>
+                              <add_faction_relation faction="faction.player" otherfaction="faction.argon" value="0.007" reason="relationchangereason.missioncompleted"/>
+                            </do_if>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+                
+
+                <cue name="Gate_Intro_Split_StartCutscene">
+                  <actions>
+                    <play_cutscene result="this.$CutsceneID" key="'Story_Split_Gate_1'">
+                      <param name="target_gate" object="$Gate"/>
+                      <param name="target_ship" object="$ArgonShip"/>
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="Gate_Intro_Split_EndCutscene">
+                      <delay exact="20s"/>
+                      <actions>
+                        <stop_cutscene cutscene="parent.$CutsceneID"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- Started on the argon side, slave ship escaping into argon universe -->
+            <cue name="Gate_Intro_Argon" onfail="cancel">
+              <conditions>
+                <check_value value="$Gate.exists"/>
+                <check_value value="$BaseSectors.indexof.{$Gate.sector}"/>
+              </conditions>
+              <actions>
+
+                <!-- slave cue actor -->
+                <create_cue_actor name="$NarratorSlave" cue="Gate_Intro_Argon" macro="character_rescue_split_gamestart1_macro">
+                  <page exact="10107"/>
+                  <owner exact="faction.argon"/>
+                  <skills>
+                    <skill type="management"  exact="9"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="0"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$NarratorSlave" missionactor="true"/>
+
+                <!-- escaping slave ship -->
+
+                <create_ship name="$SlaveShip" macro="ship_spl_s_trans_container_01_a_macro" zone="$Gate.zone" commandeerable="false" capturable="false" >
+                  <owner exact="faction.argon" overridenpc="true" />
+                  <loadout>
+                    <quantity exact="1.0"     comment="all slots filled">
+                      <variation exact="0.0"  comment="all slots filled"/>
+                    </quantity>
+                    <quality exact="0.1"/>
+                  </loadout>
+                  <pilot>
+                    <select faction="faction.argon" tags="tag.traderpilot"/>
+                  </pilot>
+                  <people ref="argon_freighter_crew"/>
+                  <orientation orientation="look_away" refobject="$Gate" comment="requires create_ship using zone='$Gate.zone' "/>
+                  <position x="0km" y="0km" z="1km" object="$Gate" />
+                </create_ship>
+                <set_object_name object="$SlaveShip" page="30282" line="100" comment="Escaped Slave Ship"/>
+
+                <!-- Stop the player ship. -->
+                <force_player_speed speed="0"/>
+              </actions>
+              <cues>
+
+                <cue name="Gate_Intro_Argon_Speak">
+                  <delay exact="4s"/>
+                  <actions>
+                    <speak actor="$NarratorSlave" priority="100">
+                      <text line="30282101" comment="Hey, I think I know where we are."/>
+                      <text line="30282102" comment="I'm pretty sure those star patterns match the ones from the pre-shutdown gate maps."/>
+                      <text line="30282103" comment="This is the way to the old Federation!"/>
+                    </speak>
+                  </actions>
+                </cue>
+
+                <cue name="Gate_Intro_Argon_Orders" version="2">
+                  <delay exact="4s"/>
+                  <actions>
+
+                    <!-- find any friendly station in nearest base-game sectors (with friendly shipyard/wharf/trade-station) -->
+                    <find_sector name="$BaseSectors" macro="[macro.cluster_14_sector001_macro, macro.cluster_34_sector001_macro, macro.cluster_15_sector001_macro]" sortbydistanceto="player.entity" multiple="true"/>
+                    <do_all exact="$BaseSectors.count" counter="$i">
+                      <find_station name="$Stations" space="$BaseSectors.{$i}" multiple="true" append="true" >
+                        <match_any>
+                          <match wharf="true"/>
+                          <match tradestation="true"/>
+                          <match shipyard="true"/>
+                        </match_any>
+                        <match_relation_to object="$SlaveShip" relation="dock" comparison="ge" />
+                      </find_station>
+                      <do_if value="$Stations.count">
+                        <break/>
+                      </do_if>
+                    </do_all>
+
+                    <cancel_all_orders object="$SlaveShip"/>
+
+                    <do_if value="$Stations.count">
+                      <set_value name="$TargetStation" exact="$Stations.random"/>
+                      <!--debug_text text="'Selected station: ' + $TargetStation.knownname + ' in ' + $TargetStation.sector.knownname"/-->
+
+                      <!-- Move to target station first. -->
+                      <create_order object="$SlaveShip" id="'MoveToObject'">
+                        <param name="destination" value="$TargetStation"/>
+                        <param name="noattackresponse" value="true"/>
+                      </create_order>
+
+                      <!-- And queue MoveDie, so that it docks once it arrives. -->
+                      <create_order object="$SlaveShip" id="'MoveDie'">
+                        <param name="atstation" value="$TargetStation"/>
+                        <param name="byidle" value="false"/>
+                        <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                      </create_order>
+
+                    </do_if>
+                    <do_else>
+                      <set_value name="$TargetStation" exact="null"/>
+                      <create_order object="$SlaveShip" id="'MoveDie'"/>
+                    </do_else>
+
+                  </actions>
+                  <patch sinceversion="2">
+                    <do_if value="$SlaveShip.isoperational">
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </patch>
+                  <cues>
+                    <cue name="Gate_Intro_Argon_Approach">
+                      <conditions>
+                        <event_cue_completed cue="Gate_Intro_Argon_Orders"/>
+                      </conditions>
+                      <cues>
+                       <cue name="Gate_Intro_Argon_Approach_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                          <param name="ApproachObject"    value="$SlaveShip"/>
+                          <param name="ApproachTarget"    value="$TargetStation"/>
+                          <param name="ApproachDistance"  value="20km"/>
+                          <param name="SuccessSignalCue"  value="Gate_Intro_Argon_Arrived"/>
+                        </cue>
+                    
+                        <cue name="Gate_Intro_Argon_Arrived">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <!-- Additional background lore, if the player followed and was nearby on arrival -->
+                            <do_if value="(player.sector == $SlaveShip.sector) and (player.entity.distanceto.{$SlaveShip} lt 200km)">
+                              <speak actor="$NarratorSlave" priority="100">
+                                <text line="30282104" comment="You know, I think we're actually free."/>
+                              </speak>
+                              <add_faction_relation faction="faction.player" otherfaction="faction.argon" value="0.007" reason="relationchangereason.missioncompleted"/>
+                            </do_if>
+                          </actions>
+                        </cue>                    
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              
+                <cue name="Gate_Intro_Argon_StartCutscene">
+                  <actions>
+                    <play_cutscene result="this.$CutsceneID" key="'Story_Split_Gate_1'">
+                      <param name="target_gate" object="$Gate"/>
+                      <param name="target_ship" object="$SlaveShip"/>
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="Gate_Intro_Argon_End">
+                      <delay exact="20s"/>
+                      <actions>
+                        <stop_cutscene cutscene="parent.$CutsceneID"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+
+        </cue>
+
+        <cue name="InitialiseShadyGuys" checkinterval="1s">
+          <conditions>
+            <cue_is_waiting cue="md.NPC_ShadyGuy.EvaluateSectors"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$DebugChance" exact="0"/>
+            <set_value name="this.$PreviousCount" exact="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count"/>
+            <debug_text text="'Attempting to trigger shady guy spawns in Split DLC space'" chance="this.$DebugChance"/>
+            <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="$SplitSectors"/>
+            <do_all chance="this.$DebugChance">
+              <do_if value="this.$PreviousCount == md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" chance="this.$DebugChance">
+                <debug_text text="'no shady guys added'"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'added: ' + (md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count - this.$PreviousCount)"/>
+                <do_for_each name="$TestStation" in="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup">
+                  <set_value name="$TestShadyGuy" exact="$TestStation.shadyguy"/>
+                  <do_if value="$TestStation.shadyguy">
+                    <debug_text text="'Shady Guy: ' + $TestShadyGuy.name + ' is aboard ' + $TestStation.knownname + ' in ' + $TestStation.sector.knownname + '. Unlocked status is: ' + $TestShadyGuy.tradesvisible" />
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$TestShadyGuy"/>
+              </do_else>
+            </do_all>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="Split_WarForge" mapeditor="false" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+        <find_station name="$WarForge" godstationentry="'shipyard_split_warforge_01'" space="player.galaxy" owner="faction.split"/>
+        <do_if value="not $WarForge">
+          <cancel_cue cue="Split_WarForge"/>
+        </do_if>
+        <do_else>
+          <set_value name="$WarForgeSector" exact="$WarForge.sector"/>
+          <set_value name="$Shiplist" exact="[ware.ship_spl_xl_carrier_01_a]"/>
+          <get_safe_pos result="$WarForgePos" sector="$WarForgeSector" object="$WarForge" max="40km" allowyaxis="false"/>
+          <set_ship_wares_absolute object="$WarForge" wares="$Shiplist"/>
+        </do_else>
+      </actions>
+      <cues>
+        <cue name="Split_WarForge_SignalFactionlogic">
+          <!--TODO @Owen would rather not have to delay like this but the listener is not yet set-->
+          <delay exact="1ms"/>
+          <actions>
+            <signal_cue_instantly cue="md.FactionLogic.FactionSignalled" param="[faction.split, 'add_excluded_station', $WarForge]"/>
+          </actions>
+        </cue>
+
+        <cue name="Split_WarForge_Destroyed">
+          <conditions>
+            <event_object_destroyed object="$WarForge" />
+          </conditions>
+          <actions>
+            <debug_text text="'War Forge Destroyed'" chance="$DebugChance"/>
+            <set_value name="$Time" min="player.age + 1800s" max="player.age + 2700s"/>
+            <do_if value="player.debug">
+              <set_value name="$Time" min="player.age + 30s" max="player.age + 60s"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="Forge_LocationCheck" checkinterval="1h" checktime="$Time" instantiate="true">
+              <conditions>
+                <check_value value="Split_WarForge_Rebuild.state != cuestate.complete"/>
+              </conditions>
+              <actions>
+                <do_if value="$WarForgeSector.owner" exact="faction.split">
+                  <signal_cue cue="Split_WarForge_Rebuild" />
+                </do_if>
+                <do_else>
+                  <find_sector groupname="$AlternateSectors" macro="[macro.cluster_403_sector001_macro, macro.cluster_418_sector001_macro]" comment="Wretched Skies V Family Phi, Family Nhuut">
+                    <match owner="faction.split" />
+                  </find_sector>
+                  <do_if value="$AlternateSectors?">
+                    <set_value name="$WarForgeSector" exact="$AlternateSectors.random" />
+                    <signal_cue cue="Split_WarForge_Rebuild" />
+                  </do_if>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="Split_WarForge_Rebuild">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_station rawname="'{20102,1751}'" name="$WarForge" sector="$WarForgeSector" macro="macro.station_gen_factory_base_01_macro" owner="faction.split">
+                  <position value="$WarForgePos" />
+                  <safepos includeplotbox="1" />
+                </create_station>
+                <set_value name="$Buildstorage" exact="$WarForge.buildstorage" />
+                <set_value name="$Buildmodule" exact="$Buildstorage.buildmodule" />
+                <add_build_to_expand_station object="$Buildstorage" buildobject="$WarForge" constructionplan="'spl_shipyard_warforge'" />
+                <reset_cue cue="Split_WarForge_Destroyed" />
+                <debug_text text="$WarForge.name + ' construction has started in  ' + $WarForgeSector.knownname" chance="$DebugChance"/>
+              </actions>
+              <cues>
+                <cue name="Split_WarForge_SignalFactionlogic_Rebuilt">
+                  <!--TODO @Owen would rather not have to delay like this but the listener is not yet set-->
+                  <delay exact="1ms"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.FactionLogic.FactionSignalled" param="[faction.split, 'add_excluded_station', $WarForge]"/>
+                  </actions>
+                </cue>
+
+                <cue name="Split_WarForge_Setup">
+                  <conditions>
+                    <event_build_finished_components object="$WarForge.buildingmodule" />
+                    <count_object_components object="$WarForge" class="[class.buildmodule]" min="1" />
+                  </conditions>
+                  <actions>
+                    <set_ship_wares_absolute object="$WarForge" wares="$Shiplist"/>
+                    <reset_cue cue="Split_WarForge_Rebuild" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- DEBUG -->
+        <cue name="Split_WarForge_DEBUG">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <destroy_object object="$WarForge" explosion="false" />
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="WaresAllocationPatch_SV" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <do_if value="not md.Setup.Start.$WaresAllocationPatch_SV?">
+          <cancel_cue cue="WaresAllocationPatch_SV"/>
+        </do_if>
+      </actions>
+      <delay exact="60s"/>
+      <actions>
+        <find_station name="$Wharf_SPL" godstationentry="['wharf_split_01', 'wharf_split_02', 'wharf_freesplit_01']" multiple="1" space="player.galaxy"/>
+        <find_station name="$Shipyard_SPL" godstationentry="['shipyard_split_01', 'shipyard_freesplit_01']" multiple="1" space="player.galaxy"/>
+        <do_for_each in="$Wharf_SPL" counter="$SPL">
+          <add_build_to_expand_station result="$BuildTask" buildobject="$Wharf_SPL.{$SPL}" object="$Wharf_SPL.{$SPL}.buildstorage" constructionplan="'spl_wharf'"/>
+          <debug_text text="'Build task Added to ' + $Wharf_SPL.{$SPL}.name " filter="savegame"/>
+        </do_for_each>
+        <do_for_each in="$Shipyard_SPL" counter="$SPL">
+          <add_build_to_expand_station result="$BuildTask" buildobject="$Shipyard_SPL.{$SPL}" object="$Shipyard_SPL.{$SPL}.buildstorage" constructionplan="'spl_shipyard'"/>
+          <debug_text text="'Build task Added to ' + $Shipyard_SPL.{$SPL}.name " filter="savegame"/>
+        </do_for_each>
+      </actions>
+    </cue>
+
+    <!-- 9.00 -->
+    <cue name="Patch900Stations_SV" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <set_job_active job="'freesplit_scavenger_free_tug_m'"/>
+        <do_if value="not md.Setup.Start.$900PatchingTrigger?">
+          <cancel_cue cue="Patch900Stations_SV"/>
+        </do_if>
+      </actions>
+      <delay exact="5s"/>
+      <actions>
+        <!-- Stations -->
+        <create_god_station groupname="$Stations900_SV" id="'frf_khaakscrap_01'"/>
+        <!-- InitUniverse -->
+        <do_for_each name="$Station" in="$Stations900_SV">
+          <signal_objects object="player.galaxy" param="'init station'" param2="$Station" param3="false"/>
+        </do_for_each>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

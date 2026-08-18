@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_protect_object_intro_cutscene"/>
+
+  <environments>
+    <environment_implicit name="playerzone" zone="@auto:@playership" />
+    <object_group name="target_group">
+      <reference object="satellite" />
+      <reference object="enemy" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="ShowSatellite" start="0" endevent="onevent:ShowXenon">
+        <shot name="ShowSatelliteShot" environment="playerzone" duration="onevent:stopscene">
+          <camera_panover reference="satellite" showing="front" pan_direction="rightwards" panstart="50" panend="50" interpolation="linear" distance="200" elevation="20" orient_to="ecliptic" time="2000"/>
+        </shot>
+      </sequence>
+
+      <sequence name="ShowXenon" start="onevent:ShowXenon">
+        <shot name="ShowXenonShot" environment="playerzone" duration="10000">
+          <camera_follow reference="enemy" orient_to="ecliptic">
+            <begin distance="200" pitch="60" yaw="150"/>
+            <end distance="1000" pitch="10" yaw="180" />
+          </camera_follow>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_spacesuit_4_intro_cutscene"/>
+
+  <environments>
+    <environment_implicit name="zone" zone="@auto:level" />
+    <object_group name="target_group">
+      <reference object="level" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="Shot1" duration="onevent:showotherbomb" environment="zone">
+          <camera>
+            <position>
+              <reference object="level" x="172" y="4" z="80" />
+            </position>
+            <lookdirection>
+              <reference object="level" x="180" y="4" z="80" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:showotherbomb">
+        <shot name="Shot2" duration="onevent:showcamera" environment="zone">
+          <camera>
+            <position>
+              <reference object="level" x="230" y="1.5" z="-129" />
+            </position>
+            <lookdirection>
+              <reference object="level" x="232" y="8" z="-149" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:showcamera">
+        <shot name="Shot3" duration="onevent:stopscene" environment="zone">
+          <camera>
+            <position>
+              <reference object="level" x="-2.5" y="90" z="-111.9" />
+            </position>
+            <lookdirection>
+              <reference object="level" x="5.6" y="90" z="-120.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

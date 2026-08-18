@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<components>
+	<component name="fx_special_gateforce_01" class="forceemitter">
+		<source geometry="extensions\ego_dlc_pirate\assets\fx\special\fx_special_gateforce_01_data"/>
+		<layers>
+			<layer>
+				<waypoints>
+					<waypoint name="XU_Waypoint01" tags="start force " x="0" y="0" z="0" qx="-0" qy="-0" qz="-0" qw="-1">
+						<links/>
+					</waypoint>
+				</waypoints>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="185" b="0" range="4000" shadowrange="4000" lighteffect="1" trigger="1" intensity="1.2" specularintensity="1">
+						<animations>
+							<animation name="loop" start="100" end="300"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="100" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="200" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="300" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+						</lightanimations>
+						<offset/>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="forceemitter">
+				<offset/>
+			</connection>
+			<connection name="Connection01" hidden="true" tags="functionactivation detail_xxl animation nocollision skiprender  ">
+				<offset>
+					<position x="0" y="0" z="-7.629395E-06"/>
+				</offset>
+				<animations>
+					<animation name="active" start="0" end="300"/>
+					<animation name="deactivating" start="0" end="0"/>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="0"/>
+				</animations>
+				<parts>
+					<part name="anim_rotlight">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1.multimat"/>
+									<material id="2" ref="generic.generic_p1_hulltexture"/>
+									<material id="3" ref="p1teladi.tel_p1_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.830738" y="0.05" z="4.830739"/>
+							<center x="0" y="0.05" z="0"/>
+						</size>
+						<size_raw>
+							<max x="4.828873" y="0.05" z="4.828874"/>
+							<center x="0" y="0.05" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part nocollision noshadowcaster  ">
+				<offset>
+					<position x="0" y="0" z="-2.321344E-07"/>
+				</offset>
+				<parts>
+					<part name="triggerpart_eventhorizon">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1765.368" y="1765.368" z="6.306029E-05"/>
+							<center x="3.221436" y="2.671814" z="-1.167842E-07"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part iklink nocollision animation textureanimation noshadowcaster  " parent="triggerpart_eventhorizon">
+				<animations>
+					<animation name="loop" start="100" end="300"/>
+				</animations>
+				<parts>
+					<part name="anim_whirl_center">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gatewhirl_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1761.204" y="1761.204" z="75.66709"/>
+							<center x="-1.220703E-04" y="0" z="-1.286156"/>
+						</size>
+						<size_raw>
+							<max x="1761.204" y="1761.204" z="76.95325"/>
+							<center x="-1.220703E-04" y="0" z="-1.286156"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="3">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="100" value="1"/>
+									<key frame="300" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="-2"/>
+									<key frame="300" value="-0"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="100" value="1"/>
+									<key frame="300" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="-2"/>
+									<key frame="300" value="-0"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="100" value="1"/>
+									<key frame="300" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="-2"/>
+									<key frame="300" value="-0"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

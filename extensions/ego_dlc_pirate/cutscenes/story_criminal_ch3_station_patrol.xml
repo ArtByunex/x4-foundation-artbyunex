@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Show the Ship, put the engines in frame to play engine explosions -->
+  <director key="Story_Criminal_Ch3_Station_Patrol" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+      <reference object="player_spacesuit" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="ZoomPoliceShip" environment="scenezone" duration="16000">
+          <camera_orbit reference="target_ship" orient_to="object">
+            <begin angle="-70" distance="400" elevation="0" />
+            <end angle="-90" distance="40" elevation="10" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="OrbitPlayer" environment="scenezone" duration="8000">
+          <camera_orbit reference="player_spacesuit" orient_to="object">
+            <begin angle="-65" distance="04" elevation="0" />
+            <end angle="-90" distance="10" elevation="-6" />
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Terran gate cutscene (started on X-universe side) -->
+  <director key="Story_Terran_Gate_1" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <!--shot name="OrbitOnGate" environment="scenezone" duration="5000">
+          <camera_orbit reference="target_gate" orient_to="object">
+            <begin angle="25" distance="12000" elevation="40" />
+            <end angle="100" distance="2000" elevation="10" />
+          </camera_orbit>
+        </shot-->
+
+        <shot name="StaticGateShot" environment="scenezone" duration="11000">
+          <camera>
+
+            <!-- up slightly angled looking down -->
+            <position>
+              <reference object="target_gate" x="-1173.421265" y="2658.635498" z="225.782043" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="-1173.057983" y="2657.734375" z="226.018555" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.800298"/>
+            </roll>
+
+            <!-- up looking straight down -->
+            <!--position>
+              <reference object="target_gate" x="-59.429630" y="3867.680176" z="464.369232" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="-59.389702" y="3866.689941" z="464.501923" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll-->
+
+            <!-- behind and up -->
+            <!--position>
+              <reference object="target_gate" x="51.927887" y="1711.675781" z="-1614.037720" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="51.935638" y="1711.079346" z="-1613.235107" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll-->
+          </camera>
+        </shot>
+
+        <shot name="FollowShip" environment="scenezone" duration="14000">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="500" pitch="0" yaw="10" />
+            <end distance="150" pitch="10" yaw="60" time="14000" />
+          </camera_follow>
+        </shot>
+
+        <shot name="StaticCameraShot" environment="scenezone" duration="13000">
+          <camera>
+            <position>
+              <reference object="target_ship" x="-26.712997" y="50.323322" z="-114.427750" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship" x="-26.699749" y="50.054039" z="-113.464783" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.011666"/>
+            </roll>          
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

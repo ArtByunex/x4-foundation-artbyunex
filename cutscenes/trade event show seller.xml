@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+	Trade Event Show Seller.xml
+	Cutscene by Apoch
+	   
+	Simple event monitor cutscene for displaying a trading process on the event monitor.
+	   
+	Assumes that reference objects "buyer" and "seller" are provided when the scene is started.
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="TradeEventScene_FocusOnSeller" />
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:seller" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="TradeDisplaySequence" start="0">
+        <shot name="TradeDisplayShot" environment="scenezone" duration="10000">
+          <camera>
+            <position>
+              <perpendicular>
+                <point1>
+                  <reference object="seller" />
+                </point1>
+                <point2>
+                  <reference object="buyer" />
+                </point2>
+                <distance>
+                  <value scaleref="buyer" percentage="200" />
+                </distance>
+              </perpendicular>
+            </position>
+            <lookdirection>
+              <reference object="seller" />
+            </lookdirection>
+            <zoom>
+              <autozoom reference="buyer" fillspace="75" />
+            </zoom>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

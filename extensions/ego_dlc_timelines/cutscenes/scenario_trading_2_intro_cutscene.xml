@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_trading_2_intro_cutscene" />
+  <!--
+  Shot 1:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_targetship" zone="@auto:target_targetship_1" />
+    <object_group name="target_group">
+      <reference object="target_station" />
+      <reference object="target_targetship_1" />
+      <reference object="target_targetship_2" />
+      <reference object="target_targetship_3" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      
+      <sequence name="Sequence01" start="0">
+
+        <shot name="OrbitStation" environment="scenezone_targetship" duration="18000">
+          <camera_orbit reference="target_station" cycle="none" >
+            <begin distance="8800" angle="-50" elevation="100"/>
+            <end distance="7600" angle="-80" time="16500" elevation="-20"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="20000">
+          
+        <shot name="TrackPlayerFleet" environment="scenezone_targetship" duration="20000">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_targetship_1" x="0" y="0" z="0"/>
+                </keyframe>
+                <keyframe timestamp="6000" interpolation="linear">
+                  <reference object="target_targetship_2" x="0" y="0" z="0"/>
+                </keyframe>
+                <keyframe timestamp="12000" interpolation="linear">
+                  <reference object="target_targetship_3" x="0" y="0" z="0"/>
+                </keyframe>
+                <keyframe timestamp="18000" interpolation="linear">
+                  <reference object="target_targetship_1" x="-24" y="110" z="250"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_targetship_1" y="350"/>
+                </keyframe>
+                <keyframe timestamp="18000" interpolation="linear">
+                  <reference object="target_targetship_1" x="38" y="-8" z="-77"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+      
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>

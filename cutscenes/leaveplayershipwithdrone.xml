@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="LeavePlayerShipWithDrone">
+    <params>
+      <param name="npcref" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_plot name="scenezone">
+      <!-- Anchor macro contains a pilot slot reference named "npcref" -->
+      <!--<anchor name="cutscenetest_character_macro" />-->
+      <anchor name="cutscenecore_firenpc_withdrone_01_macro" />
+
+      <teleport zone="tzonecluster_black2_sector01_zone02_macro">
+        <offset>
+          <position x="0" y="0" z="0"/>
+          <rotation yaw="0" pitch="0"/>
+        </offset>
+      </teleport>
+    </environment_plot>
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="TestSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <shot name="TestShot" environment="scenezone" duration="2000">
+
+          <!-- Animated camera placement: Get camera position from animation in referenced object -->
+          <camera_animated reference="animobject">
+          </camera_animated>
+
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

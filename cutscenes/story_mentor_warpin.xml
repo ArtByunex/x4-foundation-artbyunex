@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Mentor_WarpIn" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="DisplayWarpInEffect" start="0">
+
+        <shot name="OrbitEffect" environment="scenezone" duration="48000">
+          <camera_orbit reference="target_object" orient_to="object">
+            <begin angle="0" distance="24000" elevation="5" />
+            <end angle="30" distance="24000" elevation="5" />
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

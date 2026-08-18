@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Heretics End Gate Opening Cutscene -->
+  <director key="Story_Boron_Prelude1" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_allianceship" />
+      <reference object="target_militaryship" />
+      <reference object="target_missionspecialist" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- Sequence of shots Overview
+      Sequence1: Pan over ALI fleet
+      Sequence2: Military ship arrives, camera orbits around it to face Gate
+      Sequence3: Close up of Gate Nacelle
+      Sequence4: Tracking the Mission Specialist
+      Sequence5: Wide shot of the Gate, then slow zoom in
+      Sequence6: Military Ship again, as it flies through the Gate
+      Sequence7: Alliance Ship and Mission Specialist in shot again
+      -->
+
+      <!-- Sequence 1: Pan over ALI Fleet -->
+      <sequence name="Sequence1" start="0">
+        <shot name="PanOverExpedition" environment="scenezone" duration="onevent:TriggerSequence1Done" soundcamera="fullscreen">
+          <camera_panover reference="target_allianceship" showing="back" pan_direction="rightwards" panstart="15" panend="0" interpolation="linear" time="18000">
+            <begin distance="100" elevation="12"/>
+            <end distance="93" elevation="9" time="16"/>
+          </camera_panover>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 2: Military ship arrives, camera orbits aroudn it to face Gate -->
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="FollowMilitaryShip" environment="scenezone" duration="onevent:TriggerSequence2Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_militaryship" orient_to="object" startangle="0">
+            <begin angle="-190" distance="1400" elevation="-180" />
+            <end angle="-130" distance="2000" elevation="-100" time="28000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 3: Close up of Gate Nacelle -->
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="OrbitPlayerShip" environment="scenezone" duration="onevent:TriggerSequence3Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_gate" z="-500" x="950">
+            <begin angle="20" distance="230" elevation="-10" />
+            <end angle="18" distance="260" elevation="-10" time="26000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 4: Tracking the Mission Specialist -->
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="OrbitSpecialistShip" environment="scenezone" duration="onevent:TriggerSequence4Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_missionspecialist" >
+            <begin angle="-140" distance="300" elevation="50" />
+            <end angle="-40" distance="300" elevation="50" time="34000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 5: Wide shot of the Gate, then slow zoom in -->
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="OrbitPlayerShip5" environment="scenezone" duration="onevent:TriggerSequence5Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_gate" orient_to="object" interpolation="smooth">
+            <begin angle="90" distance="5300" elevation="50" />
+            <end angle="90" distance="4800" elevation="50" time="16000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 6: Military Ship again, as it flies through the Gate -->
+      <sequence name="Sequence6" start="onevent:TriggerSequence6Start">
+        <shot name="OrbitPlayerShip6" environment="scenezone" duration="onevent:TriggerSequence6Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_militaryship" orient_to="object">
+            <begin angle="-46" distance="1700" elevation="50" />
+            <end angle="-80" distance="1700" elevation="40" time="13800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Sequence 7: Alliance Ship and Mission Specialist in shot again -->
+      <sequence name="Sequence7" start="onevent:TriggerSequence7Start">
+        <shot name="StaticCameraShot" environment="scenezone" duration="onevent:TriggerSequence7Done" soundcamera="fullscreen">
+          <camera>
+            <position>
+              <reference object="target_missionspecialist" x="5.8" y="7.17" z="42.1"/>
+            </position>
+            <lookdirection>
+              <reference object="target_allianceship" x="50" y="-72" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      
+      <!-- Sequence 8: Wide of everyone and the gate  -->
+      <sequence name="Sequence8" start="onevent:TriggerSequence8Start">
+        <shot name="OrbitGate" environment="scenezone" duration="onevent:TriggerSequence8Done" soundcamera="fullscreen">
+          <camera_orbit reference="target_gate" z="-3100">
+            <begin angle="194" distance="12200" elevation="500" />
+            <end angle="198" distance="12500" elevation="500" time="16000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

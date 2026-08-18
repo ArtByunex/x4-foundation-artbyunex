@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- For best results, position the playership well away from the sector center before playback. -->
+  <director key="Cutscene_flyby1" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+
+    </environments>
+
+  <presentation>
+    <actions>
+      
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="FlyFromTo2" environment="scenezone" duration="8000">
+          <camera_flyby reference="target_object" time="12000" elevation="15%" offset="10%">
+            <begin distance="2100"/>
+            <end distance="900"/>
+          </camera_flyby>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

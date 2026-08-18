@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Stellar Phenomenon Revelation in Ch4 of Story_Boron -->
+  <director key="Story_Boron_Ch4_Stellar_Phenomenon" />
+
+  <!--
+  Shot 1: Rotating player ship in space
+  Shot 2: From player perspective facing stars
+  Shot 3: Nila in her cockpit
+  Shot 4: Zoom between Nila and player ship, ending facing stars again
+  Shot 5: Boso in HQ, slow zoom in
+  Shot 6: Slow Zoom into stars-->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_player_ship" />
+    <environment_implicit name="scenezone_playercharacter" zone="@auto:target_player_character" />
+    <object_group name="target_group">
+      <reference object="target_player_ship" />
+      <reference object="target_player_character" />
+      <reference object="target_nila_character" />
+      <reference object="target_nila_ship" />
+    </object_group>
+    <environment_implicit name="scenezone_hq" zone="@auto:target_boso_character" />
+    <object_group name="target_boso">
+      <reference object="target_boso_character" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="RotatingCameraShot1" environment="scenezone" duration="onevent:TriggerSequence01Done">
+          <camera_orbit reference="target_player_ship" orient_to="ecliptic" y="12">
+            <begin angle="-130">
+              <distance>
+                <value exact="120"/>
+              </distance>
+              <elevation>
+                <value exact="-56"/>
+              </elevation>
+            </begin>
+            <end angle="-90" time="16800">
+              <distance>
+                <value exact="115"/>
+              </distance>
+              <elevation>
+                <value exact="-53"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="StaticCameraShot2" environment="scenezone_playercharacter" duration="onevent:TriggerSequence02Done">
+          <camera>
+            <position>
+              <reference object="target_player_character" x="0.38" y="0.27" z="-1.01"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_character" x="-6.35" y="5.5" z="98" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence03Done">
+          <camera>
+            <position>
+              <reference object="target_nila_character" x="0" y="0.3" z="3.15"/>
+            </position>
+            <lookdirection>
+              <reference object="target_nila_character" x="0" y="1.3" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence04" start="onevent:TriggerSequence04Start" endevent="onevent:TriggerSequence05Start" >
+        <shot name="FlyFromNilaToPlayer04" environment="scenezone" duration="999999">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_nila_ship" distance="240" flyto_reference="target_player_ship" flyto_distance="240" interpolation="smooth" time_firstobject="8000" time_fly="10000" cycle="none"
+                            orbit1_yaw_start="-40" orbit1_yaw_end="-90" orbit1_elevation="-10"
+                            orbit2_yaw_start="180" orbit2_yaw_end="180" orbit2_pitch="-20"/>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence05" start="onevent:TriggerSequence05Start">
+        <shot name="BosoZoomShot05" environment="scenezone_hq" duration="onevent:TriggerSequence05Done">
+          <camera_orbit reference="target_boso_character" orient_to="ecliptic" y="0.2">
+            <begin angle="90">
+              <distance>
+                <value exact="5"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </begin>
+            <end angle="90" time="17000">
+              <distance>
+                <value exact="2.3"/>
+              </distance>
+              <elevation>
+                <value exact="0.55"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence06" start="onevent:TriggerSequence06Start">
+        <shot name="RotatingCameraShot6" environment="scenezone" duration="38000">
+            <camera_panover reference="target_player_ship" showing="front" pan_direction="forwards" elevation="10" orient_to="object" distance="50" />
+          </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

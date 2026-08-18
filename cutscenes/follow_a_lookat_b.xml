@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+  
+  <!--A camera positioned on the vector between 'anchor' and 'target', looking at target. Using negative 'anchordist' both objects are visible.
+  Key frames: None-->
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Follow_A_Lookat_B">
+    <params>
+      <param name="duration" number="true"/>
+      <param name="anchor" object="true" />
+      <param name="target" object="true" />
+      
+      <!--Negative distance will have both objects in view with the anchor closest. Positive will place the camera between the objects.-->
+      <param name="anchordist" number="true"/>
+      <!--Offsets to the centre of the anchor object. Tip: Base values on the size of the relevant side e.g. a factor of the height when setting 'anchor_y'-->
+      <param name="anchor_x" number="true"/>
+      <param name="anchor_y" number="true"/>
+      <param name="anchor_z" number="true"/>
+
+      <!--Offsets to the centre of the target object. Tip: Base values on the size of the relevant side e.g. a factor of the length when setting 'target_z'-->
+      <param name="target_x" number="true"/>
+      <param name="target_y" number="true"/>
+      <param name="target_z" number="true"/>
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="LookatSequence" start="0">
+        <shot name="LookatShot" environment="scenezone" duration="param:duration">
+          <camera>
+            <lookdirection>
+              <reference object="target" x="target_x" y="target_y" z="target_z"/>
+            </lookdirection>
+            <position>
+              <betweenobjects>
+                <distance>
+                  <value var="anchordist"/>
+                </distance>
+                <point1>
+                  <reference object="anchor" x="anchor_x" y="anchor_y" z="anchor_z"/>
+                </point1>
+                <point2>
+                  <reference object="target" x="target_x" y="target_y" z="target_z"/>
+                </point2>
+              </betweenobjects>
+            </position>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

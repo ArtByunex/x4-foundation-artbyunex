@@ -1,0 +1,1742 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Boron" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" version="7" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <!--do_if value="global.$smugglercoverfactions?">
+          <do_if value="not global.$smugglercoverfactions.indexof.{faction.terran}">
+            <append_to_list name="global.$smugglercoverfactions" exact="faction.terran"/>
+          </do_if>
+        </do_if-->
+
+        <create_list name="md.$BoronGateDND" comment="Set to silence Boron gate events, during specific sections of the story" />
+        <!--Prevent Boron showing up on NPC stations across the universe until the gate is open-->
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$ExcludedVisitorFactions" exact="faction.boron"/>
+
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <!--Disable certain game events from happening in certain Sectors -->
+        </do_if>
+
+        <!-- Relation changes that would have been triggered in story cues that are already complete -->
+        <do_if value="md.$TerranYakiFactions?">
+          <do_for_each in="md.$TerranYakiFactions" name="$CurrentFaction">
+            <do_if value="faction.argon.hasrelation.neutral.{$CurrentFaction}">
+              <set_faction_relation faction="faction.boron" otherfaction="$CurrentFaction" value="faction.boron.relation.neutral.mid"/>
+            </do_if>
+          </do_for_each>
+        </do_if>
+
+        <!-- Set vars for use in other dlcs -->
+        <set_value name="$BarracudaShipMacro" exact="macro.ship_bor_s_heavyfighter_01_a_macro"/>
+
+        <find_sector groupname="md.$XenonCrisisIgnoredSectors" macro="macro.cluster_605_sector001_macro" comment="Sanctuary of Darkness"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.boron}"    exact="table[$DiplomatAvailable = ['yes', tag.group_13],
+                                                                                                    $EventCapable = 'conditional',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_aquaponicvegetable}" other="[faction.boron]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_harmonicresonator}" other="[faction.boron]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.boron]" create="true"/>
+
+        <!-- Set the faction pairings that are initially non-interacteable 
+        dlc4_1: Herald Missions -->
+        <set_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.holyorder" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.paranid" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.teladi" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.trinity" otherfaction="faction.boron" flags="dlc4_1"/>
+
+        <!-- Boron DLC to other DLC dependencies -->
+        <do_if value="md.$TerranEarthFactions.count">
+          <set_faction_diplomacy_exclusion faction="md.$TerranEarthFactions.{1}" otherfaction="faction.boron" flags="dlc4_1"/>
+        </do_if>
+        <do_if value="md.$SplitPatriarchyFactions.count">
+          <set_faction_diplomacy_exclusion faction="md.$SplitPatriarchyFactions.{1}" otherfaction="faction.boron" flags="dlc4_1"/>
+        </do_if>
+        <set_userdata name="'limited_blueprint_ship_bor_m_corvette_02_a'" value="1" signed="true" comment="Sets the build limit for this ship to 1"/>
+      </actions>
+      <patch sinceversion="3">
+        <do_if value="not $ExcludedVisitorFactions?">
+          <set_value name="md.NPC_Instantiation.Instantiation.$ExcludedVisitorFactions" exact="[]"/>
+        </do_if>
+        <do_if value="Boron_Gates_Open_HereticsEnd.state != cuestate.complete">
+          <debug_text text="'Adding Boron as an excluded visitor faction'" filter="savegame"/>
+          <append_to_list name="md.NPC_Instantiation.Instantiation.$ExcludedVisitorFactions" exact="faction.boron"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="4">
+        <find_sector groupname="md.$XenonCrisisIgnoredSectors" macro="macro.cluster_605_sector001_macro" comment="Sanctuary of Darkness"/>
+      </patch>
+      <patch sinceversion="5">
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.boron}" exact="table[$DiplomatAvailable = ['yes', tag.group_13],
+                                                                                                $EventCapable = 'conditional',
+                                                                                                $InateAgentExperience = 'negotiation']"/>
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_aquaponicvegetable}" other="[faction.boron]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_harmonicresonator}" other="[faction.boron]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_xenotext}" other="[faction.boron]" create="true"/>
+        
+        <!-- Set the faction pairings that are initially non-interacteable 
+        dlc4_1: Herald Missions -->
+        <set_faction_diplomacy_exclusion faction="faction.argon" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.holyorder" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.paranid" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.teladi" otherfaction="faction.boron" flags="dlc4_1"/>
+        <set_faction_diplomacy_exclusion faction="faction.trinity" otherfaction="faction.boron" flags="dlc4_1"/>
+        
+        <!-- Boron DLC to other DLC dependencies -->
+        <do_if value="md.$TerranEarthFactions.count">
+          <set_faction_diplomacy_exclusion faction="md.$TerranEarthFactions.{1}" otherfaction="faction.boron" flags="dlc4_1"/>
+        </do_if>
+        <do_if value="md.$SplitPatriarchyFactions.count">
+          <set_faction_diplomacy_exclusion faction="md.$SplitPatriarchyFactions.{1}" otherfaction="faction.boron" flags="dlc4_1"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="6">
+        <!-- In a previous version the DiplomatAvailable flag was overwritten when the Boron gates were unified -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.boron}.$DiplomatAvailable.{1}" exact="'yes'"/>
+      </patch>
+      <patch sinceversion="7">
+        <set_userdata name="'limited_blueprint_ship_bor_m_corvette_02_a'" value="1" signed="true" comment="Sets the build limit for this ship to 1"/>
+      </patch>
+      <cues>
+
+        <!--cue name="Setup_PersistentCharacters" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+          </actions>
+        </cue-->
+
+      </cues>
+    </cue>
+
+    <!-- Activate HQ Story Shortcut-->
+    <cue name="X4ep1_Mentor_Subscription_SetUp" mapeditor="false">
+      <conditions>
+        <check_any>
+          <event_cue_completed cue="Start" />
+          <event_cue_completed cue="Game_Loaded" />
+        </check_any>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy" />
+      </conditions>
+      <delay exact="30s" comment="Give the game more than enough time to set up x4ep1_mentor_subscription" />
+      <actions>
+        <do_if value="player.module != 'x4ep1_gamestart_boron2'">
+          <signal_cue cue="md.X4Ep1_Mentor_Subscriptions.Phase_Boron_HQ_Encounter" />
+        </do_if>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this">
+      <actions>
+        <include_actions ref="Start_Actions" />
+        <cancel_cue cue="Game_Loaded" />
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions" />
+        <cancel_cue cue="Start" />
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+        <do_if value="not md.$EquipmentTable?">
+          <set_value name="md.$EquipmentTable" exact="table[]" />
+        </do_if>
+        <get_ware_definition result="md.$EquipmentTable.{faction.boron}" faction="faction.boron" flags="equipment" />
+        <do_if value="not md.$FactionData?">
+          <set_value name="md.$FactionData" exact="table[]" />
+        </do_if>
+        <!-- Set up empty tables to track faction HQs and representatives throughout the game -->
+        <do_if value="not md.$FactionData.{faction.boron}?">
+          <set_value name="md.$FactionData.{faction.boron}" exact="table[]" />
+        </do_if>
+        <!-- Terran DLC FactionLists (Prevent tables being set multiple times) -->
+
+        <do_if value="not md.$DLCBoronFactions?">
+          <set_value name="md.$DLCBoronFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCBoronFactions" other="[faction.boron]" />
+
+        <!--Set this flag as early as possible on a new game to allow the HQ mission to set itself up in the correct mode-->
+        <set_value name="md.X4Ep1_Mentor_Subscriptions.Start.$BoronVariant" exact="true" />
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- TODO station init, gate activation... -->
+    <!-- NOTE: Variables can be read from outside this script -->
+    <cue name="BoronFaction_States" namespace="this" mapeditor="false" version="3">
+      <conditions>
+        <event_universe_generated />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <!-- Locations -->
+        <find_cluster macro="macro.cluster_601_macro" required="true" name="$Cluster_WatchfulGaze" />
+        <find_cluster macro="macro.cluster_602_macro" required="true" name="$Cluster_BarrenShores" />
+        <find_cluster macro="macro.cluster_603_macro" required="true" name="$Cluster_GreatReef" />
+        <find_cluster macro="macro.cluster_604_macro" required="true" name="$Cluster_OceanOfFantasy" />
+        <find_sector  macro="macro.cluster_31_sector001_macro" space="player.galaxy" required="true" name="$HereticsEndSector" />
+
+        <!-- 11 Boron DLC Sectors -->
+        <!-- Provinces Adrift -->
+        <find_sector macro="macro.cluster_601_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$WatchfulGazeSector" />
+        <find_sector macro="macro.cluster_602_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$BarrenShoresSector" />
+        <find_sector macro="macro.cluster_603_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$GreatReefSector" />
+        <find_sector macro="macro.cluster_604_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$OceanOfFantasySector" />
+        <find_sector macro="macro.cluster_605_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$SoDSector" />
+        <!-- Queendom Space -->
+        <find_sector macro="macro.cluster_606_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$KingdomEndISector" />
+        <find_sector macro="macro.cluster_606_sector002_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$ReflectingStarsSector" />
+        <find_sector macro="macro.cluster_606_sector003_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$ToweringWaveSector" />
+        <find_sector macro="macro.cluster_607_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$RolksDemiseSector" />
+        <find_sector macro="macro.cluster_608_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$AtreusCloudSector" />
+        <find_sector macro="macro.cluster_609_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$MenelausOasisSector" />
+        
+        <find_sector  macro="macro.cluster_48_sector001_macro"  required="true" name="$GetsuFuneSector"/>
+        <find_sector  macro="macro.cluster_721_sector001_macro" required="true" name="$Cluster721Sector"/>
+        <find_sector  macro="macro.cluster_720_sector001_macro" required="true" name="$Cluster720Sector"/>
+
+        <!-- Prevent Faction Logic -->
+        <set_space_faction_logic_allowed space="$WatchfulGazeSector" allow="false" />
+        <set_space_faction_logic_allowed space="$SoDSector" allow="false" />
+
+        <!--Custom gamestart flags (only reliable after 6.20 gamestarts)-->
+        <set_value name="$story_queendom_returned" exact="gamestart.storystate.story_queendom_returned"/>
+        <set_value name="$story_boron_wayfinder" exact="gamestart.storystate.story_boron_wayfinder"/>
+
+        <!-- Disable (and TODO: hide) the highways until they are unlocked by plot progression -->
+        <find_highway name="$SoDHighways" space="$SoDSector" multiple="true" />
+        <do_for_each name="$highway" in="$SoDHighways">
+          <set_object_active object="$highway" activate="false" />
+        </do_for_each>
+
+        <!-- Find Gates -->
+        <find_gate name="$WatchfulGazeGates" multiple="true" space="$WatchfulGazeSector" />
+        <do_for_each name="$g" in="$WatchfulGazeGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $HereticsEndSector)">
+            <set_value name="$HereticsEnd_WatchfulGazeGate" exact="$g.exit" />
+            <set_value name="$WatchfullGaze_HereticsEndGate" exact="$g" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$WatchfulGazeGates" />
+
+        <find_gate name="$SanctuaryOfDarknessGates" multiple="true" space="$SoDSector" active="false" />
+        <do_for_each name="$g" in="$SanctuaryOfDarknessGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $ToweringWaveSector)">
+            <set_value name="$SoD_ToweringWaveGate" exact="$g" />
+            <set_value name="$ToweringWave_SoDGate" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$SanctuaryOfDarknessGates" />
+
+        <find_gate name="$OceanOfFantasyGates" multiple="true" space="$OceanOfFantasySector" active="false" />
+        <do_for_each name="$g" in="$OceanOfFantasyGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $GetsuFuneSector)">
+            <set_value name="$OceanOfFantasy_GetsuFuneGate" exact="$g" />
+            <set_value name="$GetsuFune_OceanOfFantasyGate" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$OceanOfFantasyGates" />
+        
+        <find_gate name="$AtreusCloudGates" multiple="true" space="$AtreusCloudSector" active="false" />
+        <do_for_each name="$g" in="$AtreusCloudGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $Cluster721Sector)">
+            <set_value name="$AtreusCloud_Cluster720Gate" exact="$g" />
+            <set_value name="$Cluster720_AtreusCloudGate" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$AtreusCloudGates" />
+      </actions>
+      <patch sinceversion="2">
+        <set_value name="$story_queendom_returned" exact="false"/>
+        <set_value name="$story_boron_wayfinder" exact="false"/>
+      </patch>
+      <patch sinceversion="3">
+        <!-- Also add the clusters that were added with 7.50-->
+        <find_sector  macro="macro.cluster_48_sector001_macro"  required="true" name="$GetsuFuneSector"/>
+        <find_sector  macro="macro.cluster_721_sector001_macro" required="true" name="$Cluster721Sector"/>
+        <find_sector  macro="macro.cluster_720_sector001_macro" required="true" name="$Cluster720Sector"/>
+        
+        <!-- find the two new gates -->
+        <find_gate name="$OceanOfFantasyGates" multiple="true" space="$OceanOfFantasySector" active="false" />
+        <do_for_each name="$g" in="$OceanOfFantasyGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $GetsuFuneSector)">
+            <set_value name="$OceanOfFantasy_GetsuFuneGate" exact="$g" />
+            <set_value name="$GetsuFune_OceanOfFantasyGate" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$OceanOfFantasyGates" />
+        
+        <find_gate name="$AtreusCloudGates" multiple="true" space="$AtreusCloudSector" active="false" />
+        <do_for_each name="$g" in="$AtreusCloudGates">
+          <do_if value=" ($g.exit.exists) and ($g.exit.sector == $Cluster721Sector)">
+            <set_value name="$AtreusCloud_Cluster720Gate" exact="$g" />
+            <set_value name="$Cluster720_AtreusCloudGate" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$AtreusCloudGates" />
+      </patch>
+      <cues>
+        <cue name="DEBUG_BoronFaction_ActivateKingdomEnd">
+          <!-- open all gates, activate all jobs, build shipyard/highway-->
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <signal_cue_instantly check="false" cue="Boron_Gates_Open_KingdomEnd" comment="will open all gates up to Kingdom End but will leave the Phase 2 gates locked" />
+            <!-- story triggers -->
+            <signal_cue check="false" cue="BoronFaction_Jobs_HatikvahPatrols" />
+            <signal_cue check="false" cue="BoronFaction_Jobs_RiptideSmuggler" />
+            <signal_cue check="false" cue="BoronFaction_ActivateHighway_SoD" />
+            <signal_cue check="false" cue="Terraforming_Effects_OceanOfFantasy" />
+            <signal_cue check="false" cue="BoronFaction_Jobs_ArgonDefender" />
+            <signal_cue check="false" cue="ArgonFaction_Jobs_BoronDefender" />
+          </actions>
+        </cue>
+
+        <cue name="DEBUG_BoronFaction_ActivateEverything">
+          <!-- open all gates, activate all jobs, build shipyard/highway-->
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <signal_cue_instantly check="false" cue="Boron_Gates_Open_RemainingSystems" comment="will open all gates" />
+            <!-- story triggers -->
+            <signal_cue check="false" cue="BoronFaction_Jobs_HatikvahPatrols" />
+            <signal_cue check="false" cue="BoronFaction_Jobs_RiptideSmuggler" />
+            <signal_cue check="false" cue="BoronFaction_ActivateHighway_SoD" />
+            <signal_cue check="false" cue="Terraforming_Effects_OceanOfFantasy" />
+            <signal_cue check="false" cue="BoronFaction_Jobs_ArgonDefender" />
+            <signal_cue check="false" cue="ArgonFaction_Jobs_BoronDefender" />
+          </actions>
+        </cue>
+
+        <cue name="HE_Khaak_Protection_Check" onfail="cancel">
+          <conditions>
+            <cue_is_complete cue="md.Khaak_Activity.Manager"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="HE_Khaak_Protection_Event" check="false"/>
+          </actions>
+        </cue>
+        <cue name="HE_Khaak_Protection_Event">
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_cue_completed cue="md.Khaak_Activity.Manager"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <!--Prevent Khaak from HereticsEnd-->
+            <add_to_group       object="$HereticsEndSector" groupname="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+            <remove_from_group  object="$HereticsEndSector"     group="md.Khaak_Activity.Manager.$PotentialHiveStationSectors"/>
+          </actions>
+          <cues>
+            <cue name="HE_Khaak_Protection_Timeout">
+              <delay exact="24h"/>
+              <actions>
+                <remove_from_group  object="$HereticsEndSector"     group="md.Khaak_Activity.Manager.$IgnoredSectors"/>
+                <add_to_group       object="$HereticsEndSector" groupname="md.Khaak_Activity.Manager.$PotentialHiveStationSectors"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Rename Faction -->
+        <cue name="BoronFaction_Rename_ProvincesAdrift" onfail="cancel" version="4">
+          <!-- We do this here with a double rename to not change it in (custom) game starts where they are already merged -->
+          <conditions>
+            <check_value value="Boron_Gates_Open_KingdomEnd.state == cuestate.waiting" />
+            <check_value value="player.module != 'x4ep1_gamestart_boron2'" comment="starts with the gates open" />
+            <check_value value="not $story_queendom_returned" comment="CGS story state, Queendom merged already"/>
+            <check_value value="not $story_boron_wayfinder"   comment="CGS story state, Queendom merged already"/>
+          </conditions>
+          <actions>
+            <set_faction_identity faction="faction.boron" name="'{20203,3401}'" description="'{20203,3402}'" shortname="'{20203,3403}'" prefixname="'{20203,3404}'" spacename="'{20203,3405}'" homespacename="'{20203,3406}'" icon="'faction_provinces'" />
+          </actions>
+          <patch sinceversion="4">
+            <do_if value="$SoD_ToweringWaveGate.isactive">
+              <set_faction_identity faction="faction.boron" name="'{20203,1301}'" description="'{20203,1302}'" shortname="'{20203,1303}'" prefixname="'{20203,1304}'" spacename="'{20203,1305}'" homespacename="'{20203,1306}'" icon="'faction_boron'" />
+            </do_if>
+            <do_else>
+              <set_faction_identity faction="faction.boron" name="'{20203,3401}'" description="'{20203,3402}'" shortname="'{20203,3403}'" prefixname="'{20203,3404}'" spacename="'{20203,3405}'" homespacename="'{20203,3406}'" icon="'faction_provinces'" />
+            </do_else>
+          </patch>
+        </cue>
+
+        <!-- Jump Gate HE -->
+        <cue name="Boron_Gates_Open_HereticsEnd">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <!-- Gate -->
+            <set_object_active object="$HereticsEnd_WatchfulGazeGate" />
+
+            <!-- Economy Level for high level stations; happens early but Boron will need to build them -->
+            <set_space_economy exact="0.75" space="$Cluster_GreatReef" />
+            <set_space_economy exact="0.5" space="$Cluster_OceanOfFantasy" />
+
+          </actions>
+          <cues>
+            <!-- Update EconomicallyExcludedSectors to start faction logic -->
+            <cue name="Boron_Gates_Open_HereticsEnd_FactionLogic_Check">
+              <actions>
+                <signal_cue_instantly cue="Boron_Gates_Open_HereticsEnd_FactionLogic_Event" />
+              </actions>
+            </cue>
+            <cue name="Boron_Gates_Open_HereticsEnd_FactionLogic_Event">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled />
+                  <event_cue_completed cue="md.FactionLogic.BoronFactionLogic_Manager" />
+                </check_any>
+                <cue_is_complete cue="md.FactionLogic.BoronFactionLogic_Manager" />
+              </conditions>
+              <actions>
+                <!-- Update EconomicallyExcludedSectors to start faction logic -->
+                <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$WatchfulGazeSector" />
+                <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$BarrenShoresSector" />
+                <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$GreatReefSector" />
+                <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$OceanOfFantasySector" />
+                <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$SoDSector" />
+              </actions>
+            </cue>
+
+            <cue name="Boron_Gates_Open_HereticsEnd_Jobs">
+              <!-- Delayed Activation for HE Jobs so they don't rush out into the basegame immediately and the initial exploration is undisturbed -->
+              <delay exact="30min" comment="expecting min 5 mins to handle both gates opening simultanously cases setting $BoronGatesOpenSimultaneously, i.e. Queen's Herald GS"/>
+              <actions>
+                <do_if value="Boron_Gates_Open_KingdomEnd.state == cuestate.waiting">
+                  <!-- If both gates are open, we expect the KE gate event to do the proper activations -->
+                  <signal_cue cue="BoronFaction_Jobs_Border"/>
+                  <signal_cue cue="Boron_Jobs_ActivateSplitJobs"/>
+                  <signal_cue cue="BoronFaction_Jobs_InitialJobs"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Boron_Gates_Open_HereticsEnd_Jobs_Allow_Boron_Visitors">
+              <delay exact="1h"/>
+              <actions>
+                <!--Allow Boron to start appearing on stations across the universe-->
+                <remove_from_list name="md.NPC_Instantiation.Instantiation.$ExcludedVisitorFactions" exact="faction.boron"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Jump Gate KE -->
+        <cue name="Boron_Gates_Open_KingdomEnd" version="5">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <do_if value="cuestate.complete != Boron_Gates_Open_HereticsEnd.state">
+              <set_value name="$BoronGatesOpenSimultaneously" />
+              <signal_cue_instantly cue="Boron_Gates_Open_HereticsEnd" check="false" />
+            </do_if>
+
+            <!-- Gate -->
+            <set_object_active object="$SoD_ToweringWaveGate" />
+            <signal_cue cue="ALI_Station_Phase2" comment="ALI SoD gate appendix" check="false"/>
+
+            <!-- Jobs -->
+            <do_if value="$BoronGatesOpenSimultaneously?">
+              <set_job_active activate="true" job="'boron_scout_patrol_s'" />
+            </do_if>
+            <do_else>
+              <set_job_active activate="false" job="'boron_scout_patrol_s_queenseeker'" successor="'boron_scout_patrol_s'" />
+            </do_else>
+
+            <signal_cue cue="BoronFaction_Jobs_Border"              check="false" comment="possibly activated already by HE event"/>
+            <signal_cue cue="Boron_Jobs_ActivateSplitJobs"          check="false" comment="possibly activated already by HE event"/>
+            <signal_cue cue="BoronFaction_Jobs_InitialJobs"/>
+
+            <set_job_active activate="true" job="'boron_universal_trader_l'" />
+            <set_job_active activate="true" job="'boron_universal_trader_l_hightech'" />
+            <set_job_active activate="true" job="'argon_construction_m_boron'" />
+            <set_job_active activate="true" job="'argon_import_trader_m'" />
+            <set_job_active activate="true" job="'paranid_import_trader_m'" />
+            <set_job_active activate="true" job="'teladi_import_trader_m'" />
+            <set_job_active activate="true" job="'boron_staticdefense_engineer_m'" />
+            <set_job_active activate="true" job="'boron_staticdefense_minelayer_s'" />
+            <set_job_active activate="true" job="'scaleplate_scavenger_m_cluster_bor_core'" />
+            <set_job_active activate="true" job="'scaleplate_scavenger_s_cluster_bor_core'" />
+            <signal_cue cue="BoronFaction_Jobs_BoronFlagship" />
+
+            <!-- Update EconomicallyExcludedSectors to start faction logic -->
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$KingdomEndISector" />
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$ReflectingStarsSector" />
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$ToweringWaveSector" />
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$RolksDemiseSector" />
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$AtreusCloudSector" />
+            <remove_from_list name="global.$FactionManagers.{faction.boron}.$EconomicallyExcludedSectors" exact="$MenelausOasisSector" />
+
+            <!-- Clear Location Tag BoronBorder -->
+            <remove_space_location_tag tag="tag.boronborder" space="$Cluster_WatchfulGaze" />
+            <remove_space_location_tag tag="tag.boronborder" space="$Cluster_BarrenShores" />
+            <remove_space_location_tag tag="tag.boronborder" space="$Cluster_GreatReef" />
+            <remove_space_location_tag tag="tag.boronborder" space="$Cluster_OceanOfFantasy" />
+
+            <!-- Faction Identity -->
+            <set_faction_identity faction="faction.boron" name="'{20203,1301}'" description="'{20203,1302}'" shortname="'{20203,1303}'" prefixname="'{20203,1304}'" spacename="'{20203,1305}'" homespacename="'{20203,1306}'" icon="'faction_boron'" />
+            <set_value name="md.$BoronQueendomReturned"/>
+
+            <!-- Faction Logic -->
+            <set_space_faction_logic_allowed space="$WatchfulGazeSector" allow="true" />
+
+            <!-- Faction Representative Location -->
+            <set_value name="md.FactionLogic.BoronFactionLogic_Manager.$PreferredHQSpaceMacro" exact="macro.Cluster_606_Sector001_macro" comment="KingdomEndISector" />
+            <signal_cue_instantly cue="md.FactionLogic.FactionSignalled" param="[faction.boron, 'relocatehq']"/>
+
+            <!-- Register faction for Diplomatic Events -->
+            <run_actions ref="md.Diplomacy.Diplomacy_ActivateFactionLibrary">
+              <param name="Faction" value="faction.boron"/>
+              <param name="DiplomatCapable" value="true"/>
+              <param name="EventCapable" value="true"/>
+            </run_actions>
+            <!-- Khaak Scrap Setup-->
+            <set_job_active job="'boron_scavenger_free_tug_m'"/>
+            <create_god_station name="$BORKhaakScrap" id="'bor_khaakscrap_01'"/>
+            <signal_objects object="player.galaxy" param="'init station'" param2="$BORKhaakScrap" param3="false"/>
+          </actions>
+          <patch sinceversion="2">
+            <set_job_active activate="true" job="'scaleplate_scavenger_m_cluster_bor_core'" />
+            <set_job_active activate="true" job="'scaleplate_scavenger_s_cluster_bor_core'" />
+          </patch>
+          <patch sinceversion="3">
+            <set_faction_identity faction="faction.boron" name="'{20203,1301}'" description="'{20203,1302}'" shortname="'{20203,1303}'" prefixname="'{20203,1304}'" spacename="'{20203,1305}'" homespacename="'{20203,1306}'" icon="'faction_boron'" />
+          </patch>
+          <patch sinceversion="4">
+            <set_value name="$Boron_Diplomacy_ActivateBoronFaction_Patch"/>
+          </patch>
+          <patch sinceversion="5">
+            <set_job_active job="'boron_scavenger_free_tug_m'"/>
+            <create_god_station name="$BORKhaakScrap" id="'bor_khaakscrap_01'"/>
+            <signal_objects object="player.galaxy" param="'init station'" param2="$BORKhaakScrap" param3="false"/>
+          </patch>
+        </cue>
+
+        <cue name="PatchCue_Check_DiplomacyChanges_ActivateBoronFaction" onfail="cancel">
+          <conditions>
+            <check_value value="md.Diplomacy.Start.state == cuestate.complete"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="PatchCue_DiplomacyChanges_ActivateBoronFaction" check="false"/>
+          </actions>
+        </cue>
+        <cue name="PatchCue_DiplomacyChanges_ActivateBoronFaction">
+          <conditions>
+            <check_all>
+              <check_any>
+                <event_cue_completed cue="md.Diplomacy.Start"/>
+                <event_cue_signalled/>
+              </check_any>
+              <check_value value="$Boron_Diplomacy_ActivateBoronFaction_Patch?"/>
+            </check_all>
+          </conditions>
+          <actions>
+            <!-- Register faction for Diplomatic Events -->
+            <run_actions ref="md.Diplomacy.Diplomacy_ActivateFactionLibrary">
+              <param name="Faction" value="faction.boron"/>
+              <param name="DiplomatCapable" value="true"/>
+              <param name="EventCapable" value="true"/>
+            </run_actions>
+          </actions>
+        </cue>
+
+        <!-- Remaining Jump Gates -->
+        <cue name="Boron_Gates_Open_RemainingSystems">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <!-- In case the cues got triggered out of sequence, make sure the other two gate opening cues run too-->
+            <do_if value="cuestate.complete != Boron_Gates_Open_HereticsEnd.state">
+              <set_value name="$BoronGatesOpenSimultaneously" />
+              <signal_cue_instantly cue="Boron_Gates_Open_HereticsEnd" check="false" />
+            </do_if>
+            <do_if value="cuestate.complete != Boron_Gates_Open_KingdomEnd.state">
+              <signal_cue_instantly cue="Boron_Gates_Open_KingdomEnd" check="false" />
+            </do_if>
+
+            <set_object_active object="$OceanOfFantasy_GetsuFuneGate" />
+            <set_object_active object="$AtreusCloud_Cluster720Gate" />
+            
+            <!-- No further jobs connected to these gates opening -->
+          </actions>
+        </cue>
+        
+        <cue name="Setup_Diplomacy_BOR_ARG_Alliance">
+          <!-- Update the Queendom (not Provinces) relations towards factions which start a story war against the Argon -->
+          <cues>
+
+            <cue name="Condition_BOR_Queendom_Check" onfail="cancel" comment="check if the event completed before we start listening">
+              <conditions>
+                <cue_is_complete cue="Boron_Gates_Open_KingdomEnd"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Condition_BOR_Queendom_Event"/>
+              </actions>
+            </cue>
+            <cue name="Condition_BOR_Queendom_Event">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                  <event_cue_signalled cue="Boron_Gates_Open_KingdomEnd"/>
+                  <event_cue_completed cue="Boron_Gates_Open_KingdomEnd"/>
+                </check_any>
+              </conditions>
+              <!-- Queendom has returned, we don't do this for Provinces Adrift -->
+              <cues>
+
+                <!-- Queendom joins the Trinity-Argon War -->
+                <cue name="Alliance_War_Trinity">
+                  <cues>
+                    <cue name="Alliance_War_Trinity_Check" onfail="cancel" comment="check if the event completed before we start listening">
+                      <conditions>
+                        <cue_is_complete cue="md.Story_Paranid.Tri_War_Diplomatic_Change"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Alliance_War_Trinity_Event"/>
+                      </actions>
+                    </cue>
+                    <cue name="Alliance_War_Trinity_Event">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                          <event_cue_signalled cue="md.Story_Paranid.Tri_War_Diplomatic_Change"/>
+                          <event_cue_completed cue="md.Story_Paranid.Tri_War_Diplomatic_Change"/>
+                        </check_any>
+                        <check_value value="md.Story_Paranid.Start.$TranslatedWarTargets.indexof.{faction.argon}"/>
+                      </conditions>
+                      <actions>
+                        <set_faction_relation faction="faction.trinity" otherfaction="faction.boron" value="faction.trinity.relation.killmilitary.max"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Terran DLC Activation -->
+                <cue name="Diplomacy_Terran_DLC_Activated_Check" onfail="cancel">
+                  <conditions>
+                    <check_value value="md.$TerranEarthFactions? and md.$TerranEarthFactions.count"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Diplomacy_Terran_DLC_Activated_Event"/>
+                  </actions>
+                </cue>
+                <cue name="Diplomacy_Terran_DLC_Activated_Event">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_game_loaded/>
+                    </check_any>
+                    <check_value value="md.$TerranEarthFactions? and md.$TerranEarthFactions.count"/>
+                  </conditions>
+                  <cues>
+                    <!-- Queendom joins the Terran-Argon War; IF: TER-ARG war was started AND BOR-ARG Military pact done -->
+                    <cue name="Alliance_War_Terran">
+                      <cues>
+                        <cue name="Alliance_War_Terran_Check" comment="check if the event completed before we start listening">
+                          <actions>
+                            <signal_cue cue="Alliance_War_Terran_Event"/>
+                          </actions>
+                        </cue>
+                        <cue name="Alliance_War_Terran_Event">
+                          <conditions>
+                            <check_any>
+                              <check_all>
+                                <event_cue_signalled/>
+                                <cue_is_complete cue="md.Story_Covert_Operations.Argon_Side_Impact"/>
+                                <check_value value="cuestate.waiting != md.Story_Boron.Diplomacy_Update_Argon.state"/>
+                              </check_all>
+                              <check_all>
+                                <event_cue_completed cue="md.Story_Covert_Operations.Argon_Side_Impact"/>
+                                <check_value value="cuestate.waiting != md.Story_Boron.Diplomacy_Update_Argon.state"/>
+                              </check_all>
+                              <check_all>
+                                <event_cue_signalled cue="md.Story_Boron.Diplomacy_Update_Argon"/>
+                                <cue_is_complete cue="md.Story_Covert_Operations.Argon_Side_Impact"/>
+                              </check_all>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <set_faction_relation faction="faction.boron" otherfaction="md.$TerranEarthFactions.{1}" value="-0.1" comment="same as arg/ant in cue Argon_Side_Impact"/>
+                            <debug_text text="'BOR-Relation to ' + md.$TerranEarthFactions.{1} + ' ' + md.$TerranEarthFactions.{1}.relation.{md.$TerranEarthFactions.{1}.relationto.{faction.boron}}.uivalue"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Boron_Terran_Trading_Relations_Check" onfail="cancel">
+                      <conditions>
+                        <cue_is_complete cue="md.Story_Boron.Diplomacy_Update_Terran"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Boron_Terran_Trading_Relations"/>
+                      </actions>
+                    </cue>
+                    <cue name="Boron_Terran_Trading_Relations">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                          <!-- Boron and Terran: Herald Mission Done (implies unified Queendom) -->
+                          <event_cue_signalled cue="md.Story_Boron.Diplomacy_Update_Terran"/>
+                        </check_any>
+                        <check_any>
+                          <!-- Argon and Terran: not at war currently -->
+                          <check_value value="cuestate.complete != md.Story_Covert_Operations.Argon_Side_Impact.state"/>
+                          <!-- Argon and Boron: Did not establish military alliance yet -->
+                          <cue_is_waiting cue="md.Story_Boron.Diplomacy_Update_Argon"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <set_value name="$SET_BoronTerranDiplomaticRelations"/>
+                        <set_faction_relation faction="faction.boron" otherfaction="md.$TerranEarthFactions.{1}" value="faction.boron.relation.neutral.mid"/>
+                        <debug_text text="'BOR-Relation to ' + md.$TerranEarthFactions.{1} + ' ' + md.$TerranEarthFactions.{1}.relation.{md.$TerranEarthFactions.{1}.relationto.{faction.boron}}.uivalue"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="DEBUG_Boron_Diplomacy_States">
+                      <cues>
+
+                        <cue name="DEBUG_ARG_TER_WAR">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="md.Story_Covert_Operations.Setup_Remember_Diplomacy_Plot"/>
+                            <signal_cue cue="md.Story_Covert_Operations.Argon_Side_Impact"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="DEBUG_BOR_ARG_DEFENCE_ALLIANCE">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="md.Story_Boron.Diplomacy_Update_Argon"/>
+                          </actions>
+                        </cue>
+
+                        <cue name="DEBUG_BOR_TER_DIPLOMATIC_RELATIONS">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <signal_cue cue="md.Story_Boron.Diplomacy_Update_Terran"/>
+                          </actions>
+                        </cue>
+
+                        <!--<cue name="DEBUG_Spam_Relations" instantiate="true" checkinterval="2s">
+                          <actions>
+                            <debug_text text="'BOR-Relation to ' + md.$TerranEarthFactions.{1} + ' ' + md.$TerranEarthFactions.{1}.relation.{md.$TerranEarthFactions.{1}.relationto.{faction.boron}}.uivalue"/>
+                          </actions>
+                        </cue>-->
+
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name ="Unlock_Faction_Diplomacy">
+          <cues>
+            <cue name="Herald_Missions_Complete_Check" onfail="cancel">
+              <conditions>
+                <check_any>
+                  <check_value value="cuestate.waiting != md.Story_Boron.Ch7_FinalDebrief.state"/>
+                  <check_value value="BoronFaction_States.$story_queendom_returned"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <signal_cue cue="Clear_Diplomacy_Exclusion_Base"    check="false"/>
+                <signal_cue cue="Clear_Diplomacy_Exclusion_Terran"  check="false"/>
+                <signal_cue cue="Clear_Diplomacy_Exclusion_Split"   check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Clear_Diplomacy_Exclusion_Base">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled cue="md.Story_Boron.Ch7_FinalDebrief"/>
+                  <check_all>
+                    <event_cue_signalled/>
+                    <check_any>
+                      <check_value value="cuestate.waiting != md.Story_Boron.Ch7_FinalDebrief.state"/>
+                      <check_value value="BoronFaction_States.$story_queendom_returned"/>
+                    </check_any>
+                  </check_all>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$Boron_Diplomacy_Basefactions_Patch"/>
+                <signal_cue cue="PatchCue_DiplomacyChanges_ClearFactions" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Clear_Diplomacy_Exclusion_Terran">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled cue="md.Story_Boron.Ch7_FinalDebrief"/>
+                  <check_all>
+                    <event_cue_signalled/>
+                    <check_any>
+                      <check_value value="cuestate.waiting != md.Story_Boron.Ch7_FinalDebrief.state"/>
+                      <check_value value="BoronFaction_States.$story_queendom_returned"/>
+                    </check_any>
+                  </check_all>
+                </check_any>
+                <check_value value="md.$TerranEarthFactions.count"/>
+              </conditions>
+              <actions>
+                <set_value name="$Boron_Diplomacy_Terran_Patch"/>
+                <signal_cue cue="PatchCue_DiplomacyChanges_ClearFactions" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Clear_Diplomacy_Exclusion_Split">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled cue="md.Story_Boron.Ch7_FinalDebrief"/>
+                  <check_all>
+                    <event_cue_signalled/>
+                    <check_any>
+                      <check_value value="cuestate.waiting != md.Story_Boron.Ch7_FinalDebrief.state"/>
+                      <check_value value="BoronFaction_States.$story_queendom_returned"/>
+                    </check_any>
+                  </check_all>
+                </check_any>
+                <check_value value="md.$SplitPatriarchyFactions.count"/>
+              </conditions>
+              <actions>
+                <set_value name="$Boron_Diplomacy_Split_Patch"/>
+                <signal_cue cue="PatchCue_DiplomacyChanges_ClearFactions" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="PatchCue_Check_DiplomacyChanges_ClearFactions" onfail="cancel" version="3">
+              <conditions>
+                <check_value value="md.Diplomacy.Start.state == cuestate.complete"/>
+              </conditions>
+              <delay exact="5s" comment="give time for the various patch variables to run through"/>
+              <actions>
+                <signal_cue cue="PatchCue_DiplomacyChanges_ClearFactions" check="false"/>
+              </actions>
+              <patch sinceversion="3">
+                <!-- Previously the timing of the interaction could mean the signal could come before the patch variables were evaluated, so resignal -->
+                <signal_cue cue="PatchCue_DiplomacyChanges_ClearFactions" check="false"/>
+              </patch>
+            </cue>
+            <cue name="PatchCue_DiplomacyChanges_ClearFactions">
+              <conditions>
+                <check_all>
+                  <check_any>
+                    <event_cue_completed cue="md.Diplomacy.Start"/>
+                    <event_cue_signalled/>
+                  </check_any>
+                  <check_any>
+                    <check_value value="$Boron_Diplomacy_Basefactions_Patch?"/>
+                    <check_value value="$Boron_Diplomacy_Terran_Patch?"/>
+                    <check_value value="$Boron_Diplomacy_Split_Patch?"/>
+                  </check_any>
+                </check_all>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <do_if value="$Boron_Diplomacy_Basefactions_Patch">
+                  <clear_faction_diplomacy_exclusion faction="faction.argon"     otherfaction="faction.boron" flags="dlc4_1"/>
+                  <clear_faction_diplomacy_exclusion faction="faction.holyorder" otherfaction="faction.boron" flags="dlc4_1"/>
+                  <clear_faction_diplomacy_exclusion faction="faction.paranid"   otherfaction="faction.boron" flags="dlc4_1"/>
+                  <clear_faction_diplomacy_exclusion faction="faction.teladi"    otherfaction="faction.boron" flags="dlc4_1"/>
+                  <clear_faction_diplomacy_exclusion faction="faction.trinity"   otherfaction="faction.boron" flags="dlc4_1"/>
+                </do_if>
+                <do_if value="$Boron_Diplomacy_Terran_Patch">
+                  <clear_faction_diplomacy_exclusion faction="md.$TerranEarthFactions.{1}"     otherfaction="faction.boron" flags="dlc4_1"/>
+                </do_if>
+                <do_if value="$Boron_Diplomacy_Split_Patch">
+                  <clear_faction_diplomacy_exclusion faction="md.$SplitPatriarchyFactions.{1}" otherfaction="faction.boron" flags="dlc4_1"/>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- STORY TRIGGERS -->
+        <!-- SoD Jump Gate Construction -->
+        <cue name="ALI_Station_Phase1">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <create_object name="$SoD_ToweringWaveGate_S1"  groupname="$SoD_ToweringWaveGate_Group" zone="$SoD_ToweringWaveGate.zone" macro="macro.landmarks_gen_gatestation_01_stage_01_macro" owner="faction.alliance">
+              <position object="$SoD_ToweringWaveGate" x="0m" y="0m" z="0m"/>
+              <rotation value="$SoD_ToweringWaveGate.rotation"/>
+            </create_object>
+            <do_for_each name="$SoD_ToweringWaveGate_Stage" in="$SoD_ToweringWaveGate_Group">
+              <set_object_min_hull object="$SoD_ToweringWaveGate_Stage" exact="100"/>
+            </do_for_each>
+          </actions>
+        </cue>
+        <cue name="ALI_Station_Phase2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_if value="not $SoD_ToweringWaveGate_S1?">
+              <signal_cue_instantly cue="ALI_Station_Phase1"/>
+            </do_if>
+            <create_object name="$SoD_ToweringWaveGate_S2" groupname="$SoD_ToweringWaveGate_Group" zone="$SoD_ToweringWaveGate.zone" macro="macro.landmarks_gen_gatestation_01_stage_02_macro" owner="faction.alliance">
+              <position object="$SoD_ToweringWaveGate" x="0m" y="0m" z="0m"/>
+              <rotation value="$SoD_ToweringWaveGate.rotation"/>
+            </create_object>
+            <do_for_each name="$SoD_ToweringWaveGate_Stage" in="$SoD_ToweringWaveGate_Group">
+              <set_object_min_hull object="$SoD_ToweringWaveGate_Stage" exact="100"/>
+            </do_for_each>
+          </actions>
+        </cue>
+
+        <!-- ZYA Patrols -->
+        <cue name="Boron_Jobs_ActivateSplitJobs">
+          <conditions>
+            <check_all>
+              <event_cue_signalled/>
+              <check_value value="md.$SplitFactions? and md.$SplitFactions.count ge 1"/>
+            </check_all>
+          </conditions>
+          <delay exact="5min"/>
+          <actions>
+            <!-- Activate Split Job -->
+            <set_job_active activate="true" job="'zyarth_corvette_m_raid'"/>
+            <signal_cue_instantly cue="Split_Raid_Handling"/>
+          </actions>
+        </cue>
+
+        <cue name="Split_Raid_Handling">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+
+            <cue name="Check_For_SplitShips" instantiate="true" checkinterval="5min">
+              <conditions>
+                <count_ships result="$SplitRaidShips" job="'zyarth_corvette_m_raid'" multiple="true" space="$HereticsEndSector" commandeerable="true"/>
+              </conditions>
+              <actions>
+                <do_for_each name="$RaidCommander" in="$SplitRaidShips">
+                  <do_any>
+                    <set_value name="this.$Destination" exact="$WatchfulGazeSector" weight="3"/>
+                    <set_value name="this.$Destination" exact="$BarrenShoresSector" weight="2"/>
+                    <set_value name="this.$Destination" exact="$GreatReefSector"    weight="1"/>
+                  </do_any>
+                  <commandeer_object object="$RaidCommander"/>
+                  <cancel_all_orders object="$RaidCommander"/>
+                  <create_order object="$RaidCommander" id="'MoveGeneric'">
+                    <param name="destination" value="this.$Destination"/>
+                  </create_order>
+                  <create_order object="$RaidCommander" id="'Patrol'" default="true">
+                    <param name="space" value="this.$Destination"/>
+                  </create_order>
+                </do_for_each>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!-- HAT Patrols -->
+        <cue name="BoronFaction_Jobs_HatikvahPatrols">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <!-- Hatikvah Licences for Boron Ships -->
+            <add_licence faction="faction.hatikvah" licencefaction="faction.boron" type="generaluseship" />
+            <add_licence faction="faction.hatikvah" licencefaction="faction.boron" type="generaluseequipment" />
+            <add_licence faction="faction.hatikvah" licencefaction="faction.boron" type="militaryship" />
+            <add_licence faction="faction.hatikvah" licencefaction="faction.boron" type="militaryequipment" />
+
+            <set_job_active activate="true" job="'hatikvah_fighter_patrol_s_boron_random'" />
+            <set_job_active activate="true" job="'hatikvah_fighter_patrol_s_boron_tradestation'" />
+          </actions>
+        </cue>
+
+        <!-- RIP Smuggler -->
+        <cue name="BoronFaction_Jobs_RiptideSmuggler">
+          <conditions>
+            <event_cue_signalled />
+            <check_value value="md.$RiptideScavengersFaction.count" />
+          </conditions>
+          <actions>
+            <set_job_active activate="true" job="'boron_water_smuggler_m'" />
+          </actions>
+        </cue>
+
+        <!-- BOR Flagship -->
+        <cue name="BoronFaction_Jobs_BoronFlagship" instantiate="true">
+          <conditions>
+            <check_any>
+              <event_cue_signalled />
+              <check_all>
+                <event_contained_sector_changed_true_owner space="player.galaxy" />
+                <check_value value="event.param2 == faction.boron or event.param3 == faction.boron" />
+              </check_all>
+              <check_all>
+                <event_job_ship_activated />
+                <check_value value="event.param.job == 'boron_carrier_escort_l_flagship'" />
+              </check_all>
+            </check_any>
+          </conditions>
+          <delay exact="1s" />
+          <actions>
+            <find_ship space="player.galaxy" job="'boron_carrier_patrol_xl_flagship'" name="$BoronFlagship" />
+            <do_for_each name="$subgrp" in="$BoronFlagship.activesubordinategroupids">
+              <do_if value="$BoronFlagship.subordinategroupassignment.{$subgrp} == assignment.positiondefence">
+                <release_detached_subordinate_group commander="$BoronFlagship" subordinategroupid="$subgrp" />
+              </do_if>
+            </do_for_each>
+            <cancel_all_orders object="$BoronFlagship" />
+            <activate_job_ship_orders ship="$BoronFlagship" />
+          </actions>
+        </cue>
+
+        <cue name="ArgonFaction_Jobs_BoronDefender">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_job_active activate="true" job="'argon_destroyer_patrol_l_boron'"/>
+          </actions>
+        </cue>
+
+        <!-- ARG Defender -->
+        <cue name="BoronFaction_Jobs_ArgonDefender">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <set_job_active activate="true" job="'boron_carrier_patrol_xl_argon_initial'" />
+          </actions>
+        </cue>
+
+        <!-- ARG Defender transitionion when its built, giving some time to build subordinates -->
+        <cue name="BoronFaction_Jobs_ArgonDefender_Transition">
+          <conditions>
+            <check_all>
+              <event_job_ship_activated />
+              <check_value value="event.param.job == 'boron_carrier_patrol_xl_argon_initial'" />
+            </check_all>
+          </conditions>
+          <delay exact="2400s" />
+          <actions>
+            <set_job_active activate="false" job="'boron_carrier_patrol_xl_argon_initial'" successor="'boron_carrier_patrol_xl_argon'" />
+            <find_ship space="player.galaxy" job="'boron_carrier_patrol_xl_argon'" name="$ArgonDefender" />
+            <do_for_each name="$subgrp" in="$ArgonDefender.activesubordinategroupids">
+              <do_if value="$ArgonDefender.subordinategroupassignment.{$subgrp} == assignment.positiondefence">
+                <release_detached_subordinate_group commander="$ArgonDefender" subordinategroupid="$subgrp" />
+              </do_if>
+            </do_for_each>
+          </actions>
+          <delay exact="1s" />
+          <actions>
+            <cancel_all_orders object="$ArgonDefender" />
+            <find_sector macro="macro.Cluster_14_sector001_macro" space="player.galaxy" required="true" name="$ArgonPrime" />
+            <do_if value="$ArgonPrime.owner" exact="faction.argon">
+              <set_job_ship_mainsector ship="$ArgonDefender" sector="$ArgonPrime" />
+            </do_if>
+            <do_else>
+              <!-- pick random closest argon sector to argon prime if its no longer argon-->
+              <find_sector name="$ArgonSector" reachablefrom="$ArgonPrime" trueowner="faction.argon" sortbygatedistancefrom="$ArgonPrime" />
+              <do_if value="$ArgonSector.exists">
+                <set_job_ship_mainsector ship="$ArgonDefender" sector="$ArgonSector" />
+              </do_if>
+              <do_else>
+                <!-- <debug_text text="'@volodymyr No Argon sector found for Boron Defender job'" chance="$DebugChance" /> -->
+              </do_else>
+            </do_else>
+            <activate_job_ship_orders ship="$ArgonDefender" />
+          </actions>
+        </cue>
+
+        <!-- ARG Defender Rebuild-->
+        <!-- This cue will find the closes argon sector to Argon Prime and re-evaluate position of Argon Defender -->
+        <cue name="BoronFaction_Jobs_ArgonDefender_Rebuild" instantiate="true">
+          <conditions>
+            <check_any>
+              <check_all>
+                <event_job_ship_activated />
+                <check_value value="event.param.job == 'boron_carrier_patrol_xl_argon'" />
+              </check_all>
+              <check_all>
+                <event_contained_sector_changed_true_owner space="player.galaxy" />
+                <check_value value="event.param2 == faction.argon or event.param3 == faction.argon" />
+              </check_all>
+              <check_all>
+                <event_job_ship_activated />
+                <check_value value="event.param.job == 'boron_carrier_escort_l_argon'" />
+                <check_job_active job="'boron_carrier_patrol_xl_argon'"/>
+              </check_all>
+            </check_any>
+          </conditions>
+          <delay exact="1s" />
+          <actions>
+            <find_ship space="player.galaxy" job="'boron_carrier_patrol_xl_argon'" name="$ArgonDefender" />
+            <do_if value="$ArgonDefender.exists">
+              <do_for_each name="$subgrp" in="$ArgonDefender.activesubordinategroupids">
+                <do_if value="$ArgonDefender.subordinategroupassignment.{$subgrp} == assignment.positiondefence">
+                  <release_detached_subordinate_group commander="$ArgonDefender" subordinategroupid="$subgrp" />
+                </do_if>
+              </do_for_each>
+              <cancel_all_orders object="$ArgonDefender" />
+              <find_sector macro="macro.Cluster_14_sector001_macro" space="player.galaxy" required="true" name="$ArgonPrime" />
+              <do_if value="$ArgonPrime.owner" exact="faction.argon">
+                <set_job_ship_mainsector ship="$ArgonDefender" sector="$ArgonPrime" />
+              </do_if>
+              <do_else>
+                <!-- pick random closest argon sector to argon prime if its no longer argon-->
+                <find_sector name="$ArgonSector" reachablefrom="$ArgonPrime" trueowner="faction.argon" sortbygatedistancefrom="$ArgonPrime" />
+                <do_if value="$ArgonSector.exists">
+                  <set_job_ship_mainsector ship="$ArgonDefender" sector="$ArgonSector" />
+                </do_if>
+                <do_else>
+                  <!-- <debug_text text="'@volodymyr No Argon sector found for Boron Defender job'" chance="$DebugChance" /> -->
+                </do_else>
+              </do_else>
+              <activate_job_ship_orders ship="$ArgonDefender" />
+            </do_if>
+            <do_else>
+              <!-- <debug_text text="'@volodymyr Argon Defender is not built/rebuilt yet, no need to reassign to new sector'" chance="$DebugChance" /> -->
+            </do_else>
+          </actions>
+        </cue>
+
+        <!-- ARG Defender Job Activation and deactivation handling -->
+        <!-- Dynamic faction relations can cause a rift betwee ARG and BOR, which will reset the job (and send an informational email the first time around) -->
+        <cue name="BoronFaction_Jobs_ArgonDefender_FactionChangeListener">
+          <conditions>
+            <event_cue_completed cue="ArgonFaction_Jobs_BoronDefender"/>
+          </conditions>
+          <cues>
+
+            <cue name="BoronFaction_Jobs_ArgonDefender_FactionChange_check" onfail="cancel">
+              <conditions>
+                <check_value value="not faction.boron.hasrelation.friend.{faction.argon}"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="BoronFaction_Jobs_ArgonDefender_FactionChange"/>
+              </actions>
+            </cue>
+
+            <cue name="BoronFaction_Jobs_ArgonDefender_FactionChange">
+              <conditions>
+                <check_any>
+                  <check_all>
+                    <event_faction_relation_changed faction="faction.boron" otherfaction="faction.argon"/>
+                    <check_value value="not faction.boron.hasrelation.friend.{faction.argon}"/>
+                  </check_all>
+                  <event_cue_signalled/>
+                </check_any>
+              </conditions>
+              <actions>
+                <do_if value="not $BoronArgonDefender_EmailSent?">
+                  <write_incoming_message title="{30253,11201}" text="{30253,11202} + {30253,10001}" source="{30253,11203}" highpriority="false"/>
+                  <set_value name="$BoronArgonDefender_EmailSent"/>
+                </do_if>
+                <set_job_active activate="false" job="'boron_carrier_patrol_xl_argon_initial'" />
+                <set_job_active activate="false" job="'boron_carrier_patrol_xl_argon'" />
+                <set_job_active activate="false" job="'argon_destroyer_patrol_l_boron'"/>
+
+                <reset_cue cue="BoronFaction_Jobs_ArgonDefender_Transition"/>
+                <reset_cue cue="BoronFaction_Jobs_ArgonDefender_Rebuild"/>
+              </actions>
+              <cues>
+                <cue name="BoronFaction_Jobs_ArgonDefender_FactionChange_Reactivation">
+                  <conditions>
+                    <event_faction_relation_changed faction="faction.boron" otherfaction="faction.argon"/>
+                    <check_value value="faction.boron.hasrelation.friend.{faction.argon}"/>
+                  </conditions>
+                  <actions>
+                    <set_job_active activate="false" job="'boron_carrier_patrol_xl_argon_initial'" />
+                    <set_job_active activate="false" job="'boron_carrier_patrol_xl_argon'" />
+                    <set_job_active activate="false" job="'argon_destroyer_patrol_l_boron'"/>
+
+                    <reset_cue cue="parent"/>
+                  </actions>
+                </cue>
+                
+              </cues>
+            </cue>
+            
+          </cues>
+        </cue>
+
+        <cue name="BoronFaction_Jobs_InitialJobs" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!-- Disable Fake Jobs which are disallowed from leaving Boron Space -->
+            <set_job_active activate="false" job="'boron_bogas_trader_m_fake'"      successor="'boron_bogas_trader_m_initial'"/>
+            <set_job_active activate="false" job="'boron_bio_trader_m_fake'"        successor="'boron_bio_trader_m_initial'"/>
+            <set_job_active activate="false" job="'boron_medical_trader_s_fake'"    successor="'boron_medical_trader_s_initial'"/>
+            <set_job_active activate="false" job="'boron_energycell_trader_m_fake'" successor="'boron_energycell_trader_m_initial'"/>
+            <set_job_active activate="false" job="'boron_refinedgas_trader_m_fake'" successor="'boron_refinedgas_trader_m_initial'"/>
+
+            <do_if comment="HE only open" value="Boron_Gates_Open_KingdomEnd.state == cuestate.waiting">
+              <!-- Activate Initial Jobs when disabling Fake Jobs -->
+              <set_job_active activate="true" job="'boron_bogas_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_bio_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_food_trader_s_initial'"/>
+              <set_job_active activate="true" job="'boron_medical_trader_s_initial'"/>
+              <set_job_active activate="true" job="'boron_energycell_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_construction_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_refinedgas_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_refinedmineral_trader_m_initial'"/>
+              <set_job_active activate="true" job="'boron_free_miner_m_liquid_initial'"/>
+              <set_job_active activate="true" job="'boron_free_miner_m_mineral_initial'"/>
+              <set_job_active activate="true" job="'boron_free_miner_m_ice_initial'"/>
+            </do_if>
+            <do_else comment="KE gate open">
+              <!-- Disabling _Initial jobs as generic jobs should repopulate their space -->
+              <set_job_active activate="false" job="'boron_bogas_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_bio_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_food_trader_s_initial'"/>
+              <set_job_active activate="false" job="'boron_medical_trader_s_initial'"/>
+              <set_job_active activate="false" job="'boron_energycell_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_construction_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_refinedgas_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_refinedmineral_trader_m_initial'"/>
+              <set_job_active activate="false" job="'boron_free_miner_m_liquid_initial'"/>
+              <set_job_active activate="false" job="'boron_free_miner_m_mineral_initial'"/>
+              <set_job_active activate="false" job="'boron_free_miner_m_ice_initial'"/>
+            </do_else>
+          </actions>
+        </cue>
+
+        <cue name="BoronFaction_Jobs_Border">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_if value="not $BoronGatesOpenSimultaneously? and (Boron_Gates_Open_KingdomEnd.state == cuestate.waiting)">
+              <set_job_active activate="true" job="'boron_scout_patrol_s_queenseeker'" />
+            </do_if>
+            <set_job_active activate="true" job="'boron_ship_construction_trader_m_border_only'"/>
+            <set_job_active activate="true" job="'boron_medium_patrol_m_sector_border_mission'"/>
+            <set_job_active activate="true" job="'boron_destroyer_patrol_l_border_only'" />
+            <set_job_active activate="true" job="'boron_water_trader_l_border'" />
+            <set_job_active activate="true" job="'scaleplate_plunderer_l_cluster_bor_outer'" />
+            <set_job_active activate="true" job="'scaleplate_scavenger_m_cluster_bor_outer'" />
+            <do_if value="player.debug">
+              <debug_text text="'Jobs Activated: boron_ship_construction_trader_m_border_only, boron_medium_patrol_m_sector_border_mission, boron_destroyer_patrol_l_border_only, boron_water_trader_l_border, scaleplate_plunderer_l_cluster_bor_outer, scaleplate_scavenger_m_cluster_bor_outer'"/>
+            </do_if>
+          </actions>
+        </cue>
+
+        <!-- Highway -->
+        <cue name="BoronFaction_ActivateHighway_SoD">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <do_for_each name="$highway" in="$SoDHighways">
+              <do_if value="not $highway.isdisabled">
+                <set_object_active object="$highway" activate="true" />
+              </do_if>
+            </do_for_each>
+          </actions>
+          <force>
+            <do_for_each name="$highway" in="$SoDHighways">
+              <set_object_active object="$highway" activate="true" />
+            </do_for_each>
+          </force>
+        </cue>
+
+        <!-- Ocean Of Fantasy Terraforming Economy -->
+        <cue name="Terraforming_Effects_OceanOfFantasy">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <set_space_economy exact="0.75" space="$Cluster_OceanOfFantasy" />
+            <assert value="(cuestate.complete == Boron_Gates_Open_HereticsEnd.state) or (cuestate.active == Boron_Gates_Open_HereticsEnd.state)" text="'HE Gate is not open yet. Opening it will set the economy value of Ocean of Fantasy to a lower value than the Terraforming Effect intends!'" />
+          </actions>
+        </cue>
+
+        <!-- Boron Shipyard Great Reef (GR) -->
+        <cue name="GreatReef_DEBUG" comment="Changing owner to argon test only TODO remove">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <find_sector name="$GreatReef" macro="macro.cluster_603_sector001_macro" />
+            <find_station groupname="$ClaimignStations" multiple="1" canclaimownership="1" space="$GreatReef" />
+            <do_for_each name="$Stations" in="$ClaimignStations">
+              <set_owner object="$Stations" faction="faction.argon" />
+            </do_for_each>
+          </actions>
+        </cue>
+        <cue name="GreatReefShipyard_Start" namespace="this">
+          <actions>
+            <set_value name="$DebugChance" exact="100" />
+            <find_sector name="$ShipyardSector" macro="macro.cluster_603_sector001_macro" required="true" comment="Great Reef" />
+            <find_sector name="$WatchfulGaze" macro="macro.cluster_601_sector001_macro" required="true" />
+            <find_sector name="$HereticsEnd" macro="macro.cluster_31_sector001_macro" required="true" />
+            <find_gate name="$GateToHE" space="$WatchfulGaze" destination="$HereticsEnd" />
+          </actions>
+          <cues>
+            <cue name="GreatReefShipyard_Customgamestart" onfail="cancel">
+              <conditions>
+                <check_value value="BoronFaction_States.$story_boron_wayfinder or BoronFaction_States.$story_queendom_returned"/>
+              </conditions>
+              <actions>
+                <!--No need to manage the station for these custom gamestart states-->
+                <cancel_cue cue="LocationCheck"/>
+                <create_station rawname="'{20102,6531}'" name="$GreatReefShipyard" sector="$ShipyardSector" macro="macro.station_gen_factory_base_01_macro" constructionplan="'bor_shipyard'" owner="faction.boron" state="componentstate.operational">
+                  <position x="60km" y="0km" z="-50km" max="20km" />
+                  <safepos includeplotbox="1" />
+                </create_station>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$GreatReefShipyard" param3="true" comment="Add control entities."/>
+              </actions>
+            </cue>
+
+            <cue name="LocationCheck" checkinterval="300s">
+              <conditions>
+                <check_value value="$GateToHE.isactive" />
+                <check_value value="not BoronFaction_States.$story_boron_wayfinder and not BoronFaction_States.$story_queendom_returned"/>
+              </conditions>
+              <actions>
+                <do_if value="$ShipyardSector.owner" exact="faction.boron">
+                  <signal_cue cue="GreatReefShipyard_Spawn" />
+                </do_if>
+                <do_else>
+                  <find_sector groupname="$AlternateSectors" macro="[macro.cluster_601_sector001_macro, macro.cluster_602_sector001_macro, macro.cluster_604_sector001_macro]" comment="Watchful Gaze, Barron Shores, Ocean of Fantasy">
+                    <match owner="faction.boron" />
+                  </find_sector>
+                  <do_if value="$AlternateSectors?">
+                    <set_value name="$ShipyardSector" exact="$AlternateSectors.random" />
+                    <signal_cue cue="GreatReefShipyard_Spawn" />
+                  </do_if>
+                </do_else>
+              </actions>
+              <!-- if we don't find a Boron sector we try again later -->
+              <delay min="1h" max="2h" profile="bell" />
+              <actions>
+                <do_if value="GreatReefShipyard_Spawn.state != cuestate.complete">
+                  <reset_cue cue="LocationCheck" />
+                </do_if>
+              </actions>
+            </cue>
+            <cue name="GreatReefShipyard_Spawn">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <create_station rawname="'{20102,6531}'" name="$GreatReefShipyard" sector="$ShipyardSector" macro="macro.station_gen_factory_base_01_macro" owner="faction.boron">
+                  <position x="60km" y="0km" z="-50km" max="20km" />
+                  <safepos includeplotbox="1" />
+                </create_station>
+                <set_value name="$Buildstorage" exact="$GreatReefShipyard.buildstorage" />
+                <set_value name="$Buildmodule" exact="$Buildstorage.buildmodule" />
+                <add_build_to_expand_station object="$Buildstorage" buildobject="$GreatReefShipyard" constructionplan="'bor_shipyard'" />
+                <debug_text text="'Shipyard build started in Sector ' + $ShipyardSector.knownname" chance="$DebugChance" />
+                <!-- Assign Construction Vessel -->
+                <find_ship groupname="$BuilderShips" primarypurpose="purpose.build" hasbuildingtask="false" class="class.ship_xl" space="player.galaxy" multiple="true" required="1" sortbygatedistancefrom="$GreatReefShipyard">
+                  <match_relation_to faction="faction.boron" relation="dock" />
+                </find_ship>
+                <signal_objects object="$BuilderShips.{1}" param="'request construction vessel'" param2="$Buildmodule" />
+                <debug_text text="'Copnstruction Ship assigned ' + $BuilderShips.{1}.knownname" chance="$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="GreatReefShipyard_SignalFactionlogic">
+                  <!--TODO @Owen would rather not have to delay like this but the listener is not yet set-->
+                  <delay exact="1ms"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.FactionLogic.FactionSignalled" param="[faction.boron, 'add_excluded_station', $GreatReefShipyard]"/>
+                  </actions>
+                </cue>
+                <!-- Station Rebuilding -->
+                <cue name="GreatReefShipyard_Rebuild">
+                  <conditions>
+                    <event_object_destroyed object="$GreatReefShipyard" />
+                  </conditions>
+                  <delay min="if player.debug then 3min else 30min" max="if player.debug then 9min else 90min" profile="bell" />
+                  <actions>
+                    <reset_cue cue="GreatReefShipyard_Spawn" />
+                    <reset_cue cue="LocationCheck" />
+                  </actions>
+                </cue>
+                <!-- DEBUG -->
+                <cue name="GreatReefShipyard_DEBUG">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <destroy_object object="$GreatReefShipyard" explosion="false" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="X4ep1_StartMenu_Setup" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <find_sector macro="macro.cluster_605_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$SoDSector" />
+        <find_sector macro="macro.cluster_606_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'" required="true" name="$KingdomEndISector" />
+      </actions>
+      <cues>
+        <cue name="X4ep1_Entered_SoD">
+          <conditions>
+            <event_object_changed_sector object="player.entity" sector="$SoDSector"/>
+          </conditions>
+          <actions>
+            <set_value name="userdata.x4ke_sod_discovered" exact="1" />
+          </actions>
+        </cue>
+
+        <cue name="X4ep1_Entered_KE">
+          <conditions>
+            <event_object_changed_sector object="player.entity" sector="$KingdomEndISector"/>
+          </conditions>
+          <actions>
+            <set_value name="userdata.x4ke_ke_discovered" exact="1" />
+            <play_music music="'return_to_kingdom_end'"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="X4ep1_Prelude_Setup" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <!-- find list of gates from Boron DLC into base-game-->
+        <find_sector name="$BoronSectors" extension="'ego_dlc_boron'" multiple="true" />
+        <find_sector name="$BaseSectors" extension="''" multiple="true" />
+        <find_gate name="$Gates" multiple="true" space="player.galaxy" />
+        <create_list name="$BoronDLCGates" />
+        <create_list name="$BoronDLCGatesCutscene" />
+        <do_for_each in="$Gates" name="$g">
+          <do_if value="$BoronSectors.indexof.{$g.sector} and $g.exit.exists and $BaseSectors.indexof.{$g.exit.sector}">
+            <append_to_list name="$BoronDLCGates" exact="$g" />
+            <append_to_list name="$BoronDLCGates" exact="$g.exit" />
+          </do_if>
+        </do_for_each>
+        <remove_value name="$Gates" />
+      </actions>
+      <cues>
+
+        <cue name="Boron_Prelude_Start_Handlers" onfail="cancel">
+          <conditions>
+            <check_value value="$BoronDLCGatesCutscene.count" />
+          </conditions>
+          <actions>
+            <create_list name="$ApproachHandlers" />
+            <do_for_each in="$BoronDLCGatesCutscene" name="$gate">
+              <signal_cue_instantly cue="Boron_Prelude_Approach_Handler" param="$gate" />
+            </do_for_each>
+          </actions>
+        </cue>
+
+        <cue name="Boron_Prelude_Approach_Handler" instantiate="true">
+          <conditions>
+            <event_cue_signalled comment="event.param is a gate" />
+          </conditions>
+          <actions>
+            <set_value name="this.$GateApproach" exact="event.param" />
+            <append_to_list name="$ApproachHandlers" exact="this" />
+          </actions>
+          <cues>
+            <cue name="Boron_Prelude_Player_Approach_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget" value="parent.$GateApproach" />
+              <param name="ApproachDistance" value="20km" />
+              <param name="SuccessSignalCue" value="Boron_Prelude_Approached_Gate_Handler" />
+              <param name="CancelOnSuccess" value="false" />
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- story_Boron_prelude.xml is waiting for this cue to be completed -->
+        <cue name="Boron_Prelude_Approached_Gate_Handler" instantiate="true">
+          <conditions>
+            <event_cue_signalled />
+            <debug_text text="'signalled'" />
+            <check_value value="md.BoronGateDND.count == 0" />
+          </conditions>
+          <actions>
+            <set_value name="$Gate" exact="event.param" />
+            <signal_cue_instantly cue="Boron_Prelude_Approached_Gate" param="$Gate" />
+          </actions>
+          <cues></cues>
+        </cue>
+
+        <cue name="Boron_Prelude_Approached_Gate">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <!-- Abort all other Gate listeners -->
+            <do_all exact="$ApproachHandlers.count" counter="$ah">
+              <do_if value="$ApproachHandlers.{$ah}.exists">
+                <cancel_cue cue="$ApproachHandlers.{$ah}" />
+              </do_if>
+            </do_all>
+            <remove_value name="$ApproachHandlers" />
+          </actions>
+        </cue>
+
+        <cue name="InitialiseShadyGuys" checkinterval="1s">
+          <conditions>
+            <cue_is_waiting cue="md.NPC_ShadyGuy.EvaluateSectors" />
+          </conditions>
+          <actions>
+            <set_value name="this.$DebugChance" exact="0" />
+
+            <set_value name="this.$PreviousCount" exact="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" />
+            <debug_text text="'Attempting to trigger shady guy spawns in Boron DLC space'" chance="this.$DebugChance" />
+            <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="$BoronSectors" />
+
+            <do_all chance="this.$DebugChance">
+              <do_if value="this.$PreviousCount == md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" chance="this.$DebugChance">
+                <debug_text text="'no shady guys added'" />
+              </do_if>
+              <do_else>
+                <debug_text text="'added: ' + (md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count - this.$PreviousCount)" />
+                <do_for_each name="$TestStation" in="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup">
+                  <set_value name="$TestShadyGuy" exact="$TestStation.shadyguy" />
+                  <do_if value="$TestStation.shadyguy">
+                    <debug_text text="'Shady Guy: ' + $TestShadyGuy.name + ' is aboard ' + $TestStation.knownname + ' in ' + $TestStation.sector.knownname + '. Unlocked status is: ' + $TestShadyGuy.tradesvisible" />
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$TestShadyGuy" />
+              </do_else>
+            </do_all>
+          </actions>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="BoronGateDND">
+      <cues>
+        <cue name="BoronGateDND_on" instantiate="true">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <append_to_list name="md.$BoronGateDND" exact="BoronGateDND" />
+          </actions>
+        </cue>
+        <cue name="BoronGateDND_off" instantiate="true">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <remove_from_list name="md.$BoronGateDND" exact="BoronGateDND" />
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!-- Sanctuary of Darkness POIs -->
+    <cue name="SantuaryOfDarkness_POIs" namespace="this" mapeditor="false" version="2">
+      <conditions>
+        <event_universe_generated />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+        <find_sector name="$SanctuaryOfDarkness" macro="macro.cluster_605_sector001_macro" required="true"/>
+        <!-- East POI -->
+        <find_zone name="$XenonPOIE1Zone" macro="macro.zone005_cluster_605_sector001_macro" />
+        <create_object name="$XenonPOI_E1" groupname="$POIsGroup" macro="macro.env_asteroid_xenon_xxl_07_landmark_macro" sector="$SanctuaryOfDarkness" zone="$XenonPOIE1Zone" owner="faction.ownerless" spinning="false">
+          <position x="-11000" y="0" z="28400"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <do_all min="3" max="6">
+          <create_object macro="[macro.env_asteroid_xenon_l_01_macro,
+                                 macro.env_asteroid_xenon_l_02_macro,
+                                 macro.env_asteroid_xenon_m_01_macro,
+                                 macro.env_asteroid_xenon_m_02_macro,
+                                 macro.env_asteroid_xenon_xl_01_macro,
+                                 macro.env_asteroid_xenon_xl_02_macro,
+                                 macro.env_asteroid_xenon_xl_03_macro,
+                                 macro.env_asteroid_xenon_xl_04_macro,
+                                 macro.env_asteroid_xenon_xl_05_macro].random" sector="$SanctuaryOfDarkness" zone="$XenonPOIE1Zone" owner="faction.ownerless" spinning="false">
+            <position object="$XenonPOI_E1" max="4km"/>
+            <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+          </create_object>
+        </do_all>
+        <create_object name="$XenonPOI_E2" groupname="$POIsGroup" macro="macro.env_debris_debris_l_02_container_macro" sector="$SanctuaryOfDarkness" owner="faction.ownerless" spinning="false">
+          <position x="91550" y="0" z="133200"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <!-- West POI -->
+        <find_zone name="$XenonPOIW1Zone" macro="macro.zone003_cluster_605_sector001_macro" />
+        <create_object name="$XenonPOI_W1" groupname="$POIsGroup" macro="macro.env_asteroid_xenon_xxl_07_landmark_macro" zone="$XenonPOIW1Zone" owner="faction.ownerless" spinning="false">
+          <position x="2750" y="1000" z="13250"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <do_all min="3" max="6">
+          <create_object macro="[macro.env_asteroid_xenon_m_01_macro, macro.env_asteroid_xenon_m_02_macro].random" zone="$XenonPOIE1Zone" owner="faction.ownerless" spinning="false">
+            <position object="$XenonPOI_W1" max="4km"/>
+            <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+          </create_object>
+        </do_all>
+        <create_object name="$XenonPOI_W2" groupname="$POIsGroup" macro="macro.env_debris_xenon_l_02_container_macro" sector="$SanctuaryOfDarkness" owner="faction.ownerless" spinning="false">
+          <position x="-157430" y="0" z="7800"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <!-- Central POI -->
+        <find_zone name="$XenonPOIC1Zone" macro="macro.zone001_cluster_605_sector001_macro" />
+        <create_object name="$XenonPOI_C1" groupname="$POIsGroup" macro="macro.env_asteroid_xenon_xxl_07_landmark_macro" zone="$XenonPOIC1Zone" owner="faction.ownerless" spinning="false">
+          <position x="9400" y="0" z="-5350"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <do_all min="4" max="8">
+          <create_object macro="[macro.env_asteroid_xenon_l_01_macro,
+                                 macro.env_asteroid_xenon_l_02_macro,
+                                 macro.env_asteroid_xenon_m_01_macro,
+                                 macro.env_asteroid_xenon_m_02_macro,
+                                 macro.env_asteroid_xenon_xl_01_macro,
+                                 macro.env_asteroid_xenon_xl_02_macro,
+                                 macro.env_asteroid_xenon_xl_03_macro,
+                                 macro.env_asteroid_xenon_xl_04_macro,
+                                 macro.env_asteroid_xenon_xl_05_macro].random" sector="$SanctuaryOfDarkness" zone="$XenonPOIC1Zone" owner="faction.ownerless" spinning="false">
+            <position object="$XenonPOI_C1" min ="1km" max="10km"/>
+            <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+          </create_object>
+        </do_all>
+        <create_object name="$XenonPOI_C2" groupname="$POIsGroup" macro="macro.env_debris_xenon_xl_03_container_macro" sector="$SanctuaryOfDarkness" zone="$XenonPOIC1Zone" owner="faction.ownerless" spinning="false">
+          <position x="-35370" y="0" z="-5075"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <!-- South POI -->
+        <create_object name="$XenonPOI_S1" groupname="$POIsGroup" macro="macro.xenon_asteroid_01_base_01_macro" sector="$SanctuaryOfDarkness" owner="faction.ownerless">
+          <position x="105550" y="0" z="-167050"/>
+          <rotation yaw="0deg" pitch="0deg" roll="0deg"/>
+        </create_object>
+        <do_all exact="$POIsGroup.count" counter="$C">
+          <set_object_min_hull object="$POIsGroup.{$C}" exact="80"/>
+        </do_all>
+      </actions>
+      <patch sinceversion="2">
+        <do_all exact="$POIsGroup.count" counter="$C">
+          <set_object_min_hull object="$POIsGroup.{$C}" exact="80"/>
+        </do_all>
+      </patch>
+      <cues>
+        <cue name="KE_PLOT_3" instantiate="true" version="2">
+          <conditions>
+            <event_object_known_to_player group="$POIsGroup"/>
+          </conditions>
+          <actions>
+            <remove_from_group group="$POIsGroup" object="event.object"/>
+            <do_if value="not $POIsGroup.count">
+              <unlock_achievement name="KE_PLOT_3"/>
+              <cancel_cue cue="KE_PLOT_3.static"/>
+              <debug_text text="'Achievement Darkness Lifted Awarded'" chance="$DebugChance"/>
+            </do_if>
+          </actions>
+          <patch state="waiting" sinceversion="2">
+            <do_if value="not $POIsGroup.count">
+              <unlock_achievement name="KE_PLOT_3"/>
+              <cancel_cue cue="KE_PLOT_3"/>
+              <debug_text text="'Achievement Darkness Lifted Awarded via patch'" chance="$DebugChance"/>
+            </do_if>
+          </patch>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="WaresAllocationPatch_KE" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <do_if value="not md.Setup.Start.$WaresAllocationPatch_KE?">
+          <cancel_cue cue="WaresAllocationPatch_KE"/>
+        </do_if>
+      </actions>
+      <delay exact="60s"/>
+      <actions>
+        <find_station name="$Wharf_BOR" godstationentry="['boron_wharf_603_001', 'boron_wharf_606_001']" multiple="1" space="player.galaxy"/>
+        <find_station name="$Shipyard_BOR" godstationentry="['boron_shipyard_606_001']" multiple="1" space="player.galaxy"/>
+        <do_for_each in="$Wharf_BOR" counter="$BOR">
+          <add_build_to_expand_station result="$BuildTask" buildobject="$Wharf_BOR.{$BOR}" object="$Wharf_BOR.{$BOR}.buildstorage" constructionplan="'bor_wharf'"/>
+          <debug_text text="'Build task Added to ' + $Wharf_BOR.{$BOR}.name " filter="savegame"/>
+        </do_for_each>
+        <do_for_each in="$Shipyard_BOR" counter="$BOR">
+          <add_build_to_expand_station result="$BuildTask" buildobject="$Shipyard_BOR.{$BOR}" object="$Shipyard_BOR.{$BOR}.buildstorage" constructionplan="'bor_shipyard'"/>
+          <debug_text text="'Build task Added to ' + $Shipyard_BOR.{$BOR}.name " filter="savegame"/>
+        </do_for_each>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

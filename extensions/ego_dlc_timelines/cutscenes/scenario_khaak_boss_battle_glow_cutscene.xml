@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_khaak_boss_battle_glow_cutscene" />
+  <!-- Cutscene to show the "glowing" weak spot of the Obliterator behind the playership. -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:ship_pivot" />
+    <object_group name="target_group">
+      <reference object="ship_target" />
+      <reference object="ship_pivot" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Sequence01" start="0">
+        <shot name="ShowPlayerAtBattleship" environment="scenezone" duration="20000">
+          <camera>
+            <position>
+              <lineofsight>
+                <pivot>
+                  <reference object="ship_pivot" z="-150" />
+                </pivot>
+                <target>
+                  <reference object="ship_target"/>
+                </target>
+                <distance>
+                  <value exact="100"/>
+                </distance>
+              </lineofsight>
+            </position>
+            <lookdirection>
+              <reference object="ship_pivot" z="-150" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>

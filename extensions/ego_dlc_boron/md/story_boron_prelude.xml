@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Boron_Prelude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_completed cue="md.Setup_DLC_Boron.X4ep1_Prelude_Setup" />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+        <check_value value="player.module != 'x4ep1_gamestart_boron2'" comment="gs2 starts with both gates open and doesn't get the gate cutscenes"/>
+        <check_value value="not gamestart.storystate.story_boron_wayfinder and not gamestart.storystate.story_queendom_returned"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance"                exact="100"/>
+        <set_value name="$DeepDebugChance"            exact="0"     comment="for AI scripts and similar external code"/>
+        <set_value name="$MissionCue"                 exact="this"/>
+        <set_value name="$Page"                       exact="30283"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup">
+          <actions>
+            <find_sector name="$BoronSectors" extension="'ego_dlc_boron'" multiple="true"/>
+          </actions>
+        </cue>
+
+        <!-- mini-scenes -->
+
+        <!-- The Gate to Watchful Gaze opens as the Aliance of the Word observes-->
+        <cue name="Prelude_Boron_Miniscene">
+          <conditions>
+            <event_cue_completed cue="md.Story_Boron.Setup_AllianceEscort" />
+          </conditions> 
+          <actions>
+            <debug_text text="'Setup Boron Miniscene'" chance="$DebugChance"/>
+            <find_sector name="$HereticsEndSector" macro="macro.cluster_31_sector001_macro" space="player.galaxy"/>
+            <find_sector name="$WatchfulGazeSector" macro="macro.cluster_601_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'"/>
+
+            <find_gate name="$BoronDLCGates" multiple="true" space="$WatchfulGazeSector" active="false"/>
+            <debug_text text="'gates = ' + $BoronDLCGates" chance="$DebugChance"/>
+            <do_for_each name="$g" in="$BoronDLCGates" >
+              <do_if value=" $g.exit.exists and $g.exit.sector == $HereticsEndSector">
+                <set_value name="$BHSGate" exact="$g.exit"/>
+              </do_if>
+            </do_for_each>
+            <remove_value name="$BoronDLCGates"/>
+          </actions>
+          <cues>
+
+            <cue name="Prelude_Boron_ActorSetup">
+              <actions>
+                <!-- TODO: Actually make her a Boron when the assets are in-->
+                <create_cue_actor name="$TeladiTraderActor" cue="namespace" macro="character_story_teladitrader_macro">
+                  <page exact="10562"/>
+                  <owner exact="faction.teladi"/>
+                  <skills>
+                    <skill type="management"  exact="9"/>
+                    <skill type="morale"      exact="6"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="12"/>
+                    <skill type="boarding"    exact="5"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$TeladiTraderActor" missionactor="true" customhandler="true" subtitlename="true"/>
+
+                <!-- Grab an up to date MissionActors table from Story_Boron -->
+                <set_value name="$MissionActors" exact="md.Story_Boron.Start.$MissionActors"/>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$TeladiTraderActor" exact="table[
+                                              $entity = $TeladiTraderActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $forceonplayer = false
+                                              ]
+                                            ]"/>
+              </actions>
+            </cue>
+
+            <cue name="Prelude_Boron_Setup_Ships" version="2">
+              <conditions>
+                <event_cue_completed cue="Prelude_Boron_ActorSetup"/>
+              </conditions>
+              <actions>
+                <get_ship_definition reference="$TeladiTradeShipDef" size="class.ship_l" faction="faction.teladi" tags="tag.container"/>
+
+                <create_ship name="$TeladiTradeShip" capturable="false" sector="$HereticsEndSector" commandeerable="false" ref="$TeladiTradeShipDef">
+                  <owner exact="faction.teladi" overridenpc="true"/>
+                  <loadout>
+                    <level exact="0.8"/>
+                  </loadout>
+                  <pilot actor="$TeladiTraderActor"/>
+                  <orientation orientation="look_at" refobject="$BHSGate"/>
+                  <safepos object="$BHSGate" x="-2km" y="-1km" z="11.5km"/>
+                </create_ship>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$TeladiTradeShip"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="ReachedThresholdSignalCue" value="null"/>
+                  <param name="IncludeEngines" value="true"/>
+                  <param name="IncludeTurrets" value="true"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_min_shield object="$TeladiTradeShip" exact="20"/>
+                <create_order object="$TeladiTradeShip" id="'Wait'" default="true"/>
+
+                <do_all exact="5" counter="$i">
+                  <get_ship_definition reference="$TeladiTrade_MShipDef" size="class.ship_m" faction="faction.teladi" tags="tag.container"/>
+                  <create_ship name="$Teladi_MTrader" capturable="true" sector="$HereticsEndSector" commandeerable="false" ref="$TeladiTrade_MShipDef" groupname="$TeladiShipEscortGroup">
+                    <owner exact="faction.teladi" overridenpc="true"/>
+                    <loadout>
+                      <level exact="0.8"/>
+                    </loadout>
+                    <pilot group="teladi.pilot"/>
+                    <orientation orientation="look_at" refobject="$BHSGate"/>
+                    <safepos object="$TeladiTradeShip" min="1km" max="1.5km"/>
+                  </create_ship>
+
+                  <create_order id="'Escort'" object="$Teladi_MTrader" immediate="true">
+                    <param name="target" value="$TeladiTradeShip"/>
+                    <param name="rollformation" value="true"/>
+                  </create_order>
+                  <create_order id="'Wait'" object="$Teladi_MTrader" default="true"/>
+                </do_all>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="$TeladiTradeShip.isoperational">
+                  <set_object_capturable object="$TeladiTradeShip" capturable="false"/>
+                </do_if>
+              </patch>
+            </cue>
+
+            <cue name="Prelude_Boron_FirstTeladiComm" checkinterval="1s">
+              <conditions>
+                <check_value value="player.entity.distanceto.{$TeladiTradeShip} le 40km"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0, $nofullscreenmenu = false,
+                                                                        $script = [
+                                                                                  table [$actor = '$TeladiTraderActor', $speak = 30253001, $allow_comm_chatter = true, $monitor = false, $comment = 'Exciting!'],
+                                                                                  table [$actor = '$TeladiTraderActor', $speak = 30253002, $allow_comm_chatter = true, $monitor = false, $comment = 'The Teladi Company will not let any opportunity to establish new business relations go to waste!']
+                                                                                  ]
+                                                                      ]" />
+              </actions>
+            </cue>
+
+            <cue name="Prelude_Boron_Approach_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget"      value="$BHSGate"/>
+              <param name="ApproachDistance"    value="25km"/>
+              <param name="HighPriorityTiming"  value="true"/>
+              <param name="CancelOnSuccess"     value="false"/>
+              <param name="SuccessSignalCue"    value="Prelude_Boron_DND"/>
+            </cue>
+
+            <!--TODO @Owen a more solid check for whether the player's started the base game variant mission-->
+            <cue name="Prelude_Boron_DND">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="md.X4Ep1_Mentor_Subscriptions.Start.$MissionCue.hasmission 
+                              or @md.X4Ep1_Mentor_Subscriptions.Start.$TerranVariant
+                              or @md.X4Ep1_Mentor_Subscriptions.Start.$BoronMet
+                              or md.X4Ep1_Mentor_Subscriptions.Phase_Boron_TalkToBoso_Mission.state == cuestate.complete"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Prelude_Boron_Approach_Gate_Ref"/>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Boron_DND_CheckConditions" checkinterval="1s">
+                  <conditions>
+                    <check_value value="not player.isinfullscreenmenu"/>
+                    <check_value value="not player.isinconversation"/>
+                    <check_value value="not player.isscreenshotmode"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Prelude_Boron_DND_Move_Away_From_Gate"/>
+                    <signal_cue cue="Prelude_Boron_Cutscene"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Boron_DND_Move_Away_From_Gate">
+                  <cues>
+
+                    <cue name="Prelude_Boron_DND_Move_Away_From_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$BHSGate"/>
+                      <param name="ApproachDistance"  value="25km"/>
+                      <param name="Invert"            value="true"/>
+                      <param name="SuccessSignalCue"  value="Prelude_Boron_DND_Reset_Approach_Handler"/>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Prelude_Boron_DND_Reset_Approach_Handler">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="Prelude_Boron_Approach_Gate_Ref"/>
+                    <reset_cue cue="parent"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- TODO: Actually adjust the timing to spoken voice lines -->
+            <cue name="Prelude_Boron_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+                
+                <debug_text text="'cutscene'" chance="$DebugChance"/>
+                <set_value name="$AllianceHubShip" exact="md.Story_Boron.Start.$AllianceHubShip"/>
+                <set_value name="$MissionSpecialistActor" exact="md.Story_Boron.Start.$MissionSpecialistActor"/>
+                <set_value name="$MissionSpecialistShip" exact="md.Story_Boron.Start.$MissionSpecialistActor.ship"/>
+                <cancel_all_orders object="$MissionSpecialistShip"/>
+                <create_order object="$MissionSpecialistShip" id="'Wait'" default="true"/>
+                <warp object="$MissionSpecialistShip" sector="$BHSGate.sector">
+                  <orientation orientation="look_at" refobject="$BHSGate"/>
+                  <position object="$BHSGate" x="0.2km" z="6.4km" y="0.5km"/>
+                </warp>
+              </actions>
+              <delay exact="1.5s"/>
+              <actions>
+                <cancel_all_orders object="$MissionSpecialistShip"/>
+                <create_order object="$MissionSpecialistShip" id="'Wait'" default="true"/>
+                
+                <do_if value="$AllianceHubShip.distanceto.{$BHSGate} gt 15km">
+                  <!-- Ship is  not where we expect it to be (possibly due to Gamestart) -->
+                  <cancel_all_orders object="$AllianceHubShip"/>
+
+                  <warp object="$AllianceHubShip" sector="$BHSGate.sector">
+                    <orientation orientation="look_at" refobject="$BHSGate"/>
+                    <safepos object="$BHSGate" z="10.5km" y="0.8km"/>
+                  </warp>
+                  <create_order object="$AllianceHubShip" id="'Wait'" default="true"/>
+                </do_if>
+
+
+                <!-- Get all relevant actors from Story_Boron -->
+                <do_if value="md.$TerranEarthFactions? and md.$TerranEarthFactions.count">
+                  <signal_cue_instantly cue="md.Story_Boron.Setup_CharactersTerranDiplomat"/>
+                </do_if>
+                <do_else>
+                  <signal_cue_instantly cue="md.Story_Boron.Setup_CharactersArgonDiplomat"/>
+                </do_else>
+                <set_value name="$FleetAdmiralActor" exact="md.Story_Boron.Start.$FleetAdmiralActor"/>
+                <set_value name="$ExpeditionLeaderActor" exact="md.Story_Boron.Start.$ExpeditionLeaderActor"/>
+                <set_value name="$MissionSpecialistActor" exact="md.Story_Boron.Start.$MissionSpecialistActor"/>
+                <set_value name="$BosoTa" exact="md.$PersistentCharacters.$BosoTa"/>
+
+                <!-- Create the relevant Fleet  -->
+                <signal_cue_instantly cue="md.Story_Boron.Setup_AdmiralFleet"/>
+                <set_value name="$FleetAdmiralShip" exact="$FleetAdmiralActor.ship"/>
+
+                <!-- Ensure the cutscene is not interrupted by other missions or passing enemy ships-->
+                <append_to_list name="md.$MissionDND" exact="Prelude_Boron_Cutscene"/>
+
+                <force_player_speed speed="0"/>
+                <stop_player_autopilot/>
+                <create_order id="'MoveWait'" immediate="true" object="player.ship" name="$WaitOrder">
+                  <param name="destination" value="[player.ship.zone, player.ship.position]"/>
+                  <param name="timeout" value="5min"/>
+                  <param name="debugchance" value="$DeepDebugChance"/>
+                </create_order>
+
+                <set_value name="this.$CutsceneKey" exact="'Story_Boron_Prelude1'"/>
+                <play_cutscene result="this.$CutsceneID" key="this.$CutsceneKey" letterbox="true" movesoundcamera="true">
+                  <param name="target_allianceship" object="$AllianceHubShip"/>
+                  <param name="target_militaryship" object="$FleetAdmiralShip"/>
+                  <param name="target_gate" object="$BHSGate"/>
+                  <param name="target_missionspecialist" object="$MissionSpecialistShip"/>
+                </play_cutscene>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <play_music music="'music_hq_investigate'" comment="160s"/>
+                <!-- Warp the Alliance Fleets subordinates closer to the commander if they are too far away -->
+                <do_if value="$MissionSpecialistShip.distanceto.{$AllianceHubShip} gt 8km">
+                  <set_value name="$ALI_subordinates" exact="$AllianceHubShip.subordinates"/>
+                  <do_for_each name="$ship" in="$ALI_subordinates">
+                    <warp object="$ship" sector="$AllianceHubShip.sector">
+                      <rotation value="$AllianceHubShip.rotation"/>
+                      <safepos object="$AllianceHubShip" z="3km" y="-0.3"/>
+                    </warp>
+                  </do_for_each>
+                </do_if>
+                
+                <set_value name="$customscript" exact="[]"/>
+
+                <do_if value="md.Story_Boron.Start.$Ch0_Accepted?">
+                  <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253027, $recipient = 'player']"/>
+                  <do_if value="not player.entity.hascontext.{$AllianceHubShip}">
+                    <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253028, $recipient = 'player']"/>
+                    <set_value name="$Player_NotOnExpeditionShip"/>
+                  </do_if>
+                </do_if>
+                <do_else>
+                  <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253026, $recipient = 'player']"/>
+                </do_else>
+
+                <do_if value="$MissionActors.$BosoTa?">
+                  <append_to_list name="$customscript" exact="table [$actor = '$BosoTa', $speak = 30253001, $recipient = 'player']"/>
+                </do_if>
+                <append_to_list name="$customscript" exact="2s"/>
+
+                <do_if value="$FleetAdmiralActor.owner == faction.argon">
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253004, $recipient = 'player']"/>
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253005, $recipient = 'player']"/>
+                </do_if>
+                <do_else>
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253001, $recipient = 'player']"/>
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253002, $recipient = 'player']"/>
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253003, $recipient = 'player']"/>
+                </do_else>
+
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253029, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253030, $recipient = 'player']"/>
+
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253001, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="3s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253002, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="10s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253003, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="2s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253004, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="2s"/>
+
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253031, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="3s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253032, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="3s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253033, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="2s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253034, $recipient = 'player']"/>
+
+                <append_to_list name="$customscript" exact="1s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253006, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253007, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="4s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253008, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253009, $recipient = 'player']"/>
+
+                <do_if value="$FleetAdmiralActor.owner == faction.argon">
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253011, $recipient = 'player']"/>
+                </do_if>
+                <do_else>
+                  <append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253010, $recipient = 'player']"/>
+                </do_else>
+
+                <!--<append_to_list name="$customscript" exact="table [$actor = '$FleetAdmiralActor', $speak = 30253012, $recipient = 'player']"/>-->
+
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253035, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$ExpeditionLeaderActor', $speak = 30253036, $recipient = 'player']"/>
+
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253005, $recipient = 'player']"/>
+                <append_to_list name="$customscript" exact="1s"/>
+                <append_to_list name="$customscript" exact="table [$actor = '$MissionSpecialistActor', $speak = 30253006, $recipient = 'player']"/>
+
+                <!-- Trigger Dialogue Content -->
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0, 
+                                                                              $abortcallbackcue = Prelude_NPCUsecase_Aborted,
+                                                                              $abortonsignalledcue = Prelude_Approach_Cutscene_Aborted,
+                                                                              $script = $customscript
+                                                                              ]" />
+
+              </actions>
+              <cues>
+
+                <cue name="Prelude_NPCUsecase_Aborted" version="2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Prelude_FleetMovesIntoWatchfulGaze" check="false"/>
+                    <!--<signal_cue cue="Prelude_Sequence3_DialogueCutToGate" check="false"/>-->
+                    <signal_cue_instantly cue="md.Setup_DLC_Boron.Boron_Gates_Open_HereticsEnd" check="false" comment="just in case the cutscene has not got to that point yet"/>
+                    <trigger_animation object="$BHSGate" trigger="chargeoff"/>
+                  </actions>
+                  <patch sinceversion="2">
+                    <trigger_animation object="$BHSGate" trigger="chargeoff"/>
+                  </patch>
+                </cue>
+
+                <cue name="Prelude_Approach_Cutscene_Started">
+                  <conditions>
+                    <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <!-- Bring the Fleet Admiral closee to the gate, pretending they are just arriving -->
+                    <cancel_all_orders object="$FleetAdmiralShip"/>
+                    <create_order object="$FleetAdmiralShip" id="'MoveGeneric'">
+                      <param name="destination" value="$BHSGate"/>
+                      <param name="position" value="position.[3km,-0.4km,11.3km]"/>
+                      <param name="precise" value="true"/>
+                      <param name="noboost" value="true"/>
+                    </create_order>
+                    <create_order object="$FleetAdmiralShip" id="'Wait'"/>
+                    <trigger_animation object="$BHSGate" trigger="chargeon"/>
+                  </actions>
+                  <cues>
+
+                    <cue name="Prelude_Sequence2_DialogueCutToMilitary">
+                      <conditions>
+                        <check_any>
+                          <check_all>
+                            <event_speak_finished actor="$ExpeditionLeaderActor" line="30253026"/>
+                          </check_all>
+                          <check_all>
+                            <event_speak_finished actor="$ExpeditionLeaderActor" line="30253027"/>
+                            <check_value value="not $Player_NotOnExpeditionShip?"/>
+                          </check_all>
+                          <check_all>
+                            <event_speak_finished actor="$ExpeditionLeaderActor" line="30253028"/>
+                          </check_all>
+                        </check_any>
+                      </conditions>
+                      <delay exact="0.5s"/>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence1Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence2Start'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence3_DialogueCutToGate">
+                      <conditions>
+                        <check_any>
+                          <event_speak_finished actor="$FleetAdmiralActor" line="30253003"/>
+                          <event_speak_finished actor="$FleetAdmiralActor" line="30253005"/>
+                          <event_cue_signalled/>
+                        </check_any>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence2Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence3Start'"/>
+                      </actions>
+                      <delay exact="7s"/>
+                      <actions>
+                        <!-- Bring the Mission Specialist close to the gate nacelle -->
+                        <cancel_all_orders object="$MissionSpecialistShip"/>
+                        <create_order object="$MissionSpecialistShip" id="'MoveGeneric'">
+                          <param name="destination" value="$BHSGate"/>
+                          <param name="position" value="position.[-2000m,200m,450m]"/>
+                          <param name="precise" value="true"/>
+                        </create_order>
+                        <create_order object="$MissionSpecialistShip" id="'Wait'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence4_DialogueCutToMissionSpecialist">
+                      <conditions>
+                        <event_speak_finished actor="$MissionSpecialistActor" line="30253001"/>
+                      </conditions>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence3Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence4Start'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence5_DialogueCutToGate">
+                      <conditions>
+                        <event_speak_finished actor="$ExpeditionLeaderActor" line="30253032"/>
+                      </conditions>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence4Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence5Start'"/>
+                        
+                        <!-- Have the Mission Specialist retreat away from the Gate -->
+                        <cancel_all_orders object="$MissionSpecialistShip"/>
+                        <create_order id="'Flee'" object="$MissionSpecialistShip" immediate="true">
+                          <param name="method" value="'boost'"/>
+                          <param name="attacker" value="$BHSGate"/>
+                          <param name="donotdrop" value="true"/>
+                          <param name="deploydistraction" value="false"/>
+                          <param name="log" value="false"/>
+                        </create_order>
+                        <create_order object="$MissionSpecialistShip" id="'Wait'"/>
+                      </actions>
+                      <delay exact="0.5s"/>
+                      <actions>
+                        <trigger_animation object="$BHSGate" trigger="gateon"/>
+                      </actions>
+                      <delay exact="7.2s"/>
+                      <actions>
+                        <trigger_animation object="$BHSGate" trigger="chargeoff"/>
+                        <signal_cue_instantly cue="md.Setup_DLC_Boron.Boron_Gates_Open_HereticsEnd"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence6_DialogueCutToMilitaryMovingIn">
+                      <conditions>
+                        <event_speak_finished actor="$FleetAdmiralActor" line="30253007"/>
+                      </conditions>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence5Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence6Start'"/>
+                        
+                        <!-- The Mission Specialist just used a flee order, so cheat a little and warp him back into the shot -->
+                        <warp object="$MissionSpecialistShip" sector="$HereticsEndSector">
+                          <rotation value="$AllianceHubShip.rotation"/>
+                          <position object="$AllianceHubShip" x="0.395km" y="-0.32km" z="0.43km"/>
+                        </warp>
+                        <cancel_all_orders object="$MissionSpecialistShip"/>
+                        <create_order object="$MissionSpecialistShip" id="'Wait'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence7_CutToAllianceExpedition">
+                      <conditions>
+                        <event_speak_finished actor="$ExpeditionLeaderActor" line="30253035"/>
+                      </conditions>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence6Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence7Start'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Sequence8_ShowGate">
+                      <conditions>
+                        <event_speak_finished actor="$MissionSpecialistActor" line="30253005"/>
+                      </conditions>
+                      <delay exact="0.5s"/>
+                      <actions>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence7Done'"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence8Start'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_FleetMovesIntoWatchfulGaze">
+                      <conditions>
+                        <check_any>
+                          <event_speak_finished actor="$FleetAdmiralActor" line="30253007"/>
+                          <event_cue_signalled/>
+                        </check_any>
+                      </conditions>
+                      <delay exact="2s"/>
+                      <actions>
+                        <cancel_all_orders object="$FleetAdmiralActor.ship"/>
+                        <create_order object="$FleetAdmiralActor.ship" id="'MoveGeneric'" name="$moveorder">
+                          <param name="destination" value="$WatchfulGazeSector" />
+                          <param name="position" value="position.[160000m, 450m, 110000m]" />
+                        </create_order>
+                        <create_order object="$FleetAdmiralActor.ship" id="'Patrol'" name="$order" default="true">
+                          <param name="space" value="$WatchfulGazeSector"/>
+                        </create_order>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_DialogueSceneFinished">
+                      <conditions>
+                        <event_speak_finished actor="$MissionSpecialistActor" line="30253006"/>
+                      </conditions>
+                      <delay exact="5s"/>
+                      <actions>
+                        <fade_screen fadein="2s" fadeout="0s" realtime="true"/>
+                        <cutscene_event key="Prelude_Boron_Cutscene.$CutsceneKey" event="'TriggerSequence3Done'"/>
+                        <stop_cutscene cutscene="Prelude_Boron_Cutscene.$CutsceneID"/>
+                      </actions>
+                    </cue>
+
+                    <!-- Cue is signalled to abort NPC usecase alongside Cutscene -->
+                    <cue name="Prelude_Approach_Cutscene_Aborted">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                    </cue>
+
+                    <cue name="Prelude_Approach_Cutscene_Ended">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="Prelude_Boron_Cutscene.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Boron Cutscene ended'" chance="$DebugChance"/>
+                        <remove_from_list name="md.$MissionDND" exact="Prelude_Boron_Cutscene"/>
+                        <set_value name="md.$BoronGate1_Open"/>
+
+                        <do_if value="event.param3" comment="Cutscene was aborted by the player">
+                          <debug_text text="'Prelude Cutscene was aborted prematurely'"/>
+                          <signal_cue_instantly cue="Prelude_Approach_Cutscene_Aborted"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="3s"/>
+                      <actions>
+
+                        <!-- Move Expedition through open system -->
+                        <find_gate name="$Gate" space="$WatchfulGazeSector" destination="$HereticsEndSector" required="true" />
+                        <get_safe_pos result="$sectorpos" sector="$Gate.sector" space="$Gate.sector" object="$Gate" z="4.5km" y="-3km" radius="$AllianceHubShip.size" direction="quadrant.front" directionobject="$Gate" allowyaxis="false"/>
+                        <debug_text text="'adding movement order to %s in %s, %sm away.'.[$sectorpos, $Gate.sector, $AllianceHubShip.distanceto.[$Gate.sector, $sectorpos]]" chance="0"/>
+                        <cancel_all_orders object="$AllianceHubShip"/>
+                        <create_order object="$AllianceHubShip" id="'MoveGeneric'" name="$order" immediate="true">
+                          <param name="destination" value="$Gate.sector"/>
+                          <param name="rotation" value="$Gate.rotation"/>
+                          <param name="position" value="$sectorpos"/>
+                          <param name="precise" value="false"/>
+                          <param name="noboost" value="true"/>
+                        </create_order>
+                        <create_order id="'Wait'" object="$AllianceHubShip"/>
+
+                        <!-- Bring the Mission Specialist close to the gate nacelle (again, if the custcene ran) -->
+                        <cancel_all_orders object="$MissionSpecialistShip"/>
+                        <create_order object="$MissionSpecialistShip" id="'MoveGeneric'">
+                          <param name="destination" value="$BHSGate"/>
+                          <param name="position" value="position.[-2100m,200m,450m]"/>
+                          <!--<param name="lookat" value="$BHSGate.position"/>-->
+                          <param name="precise" value="true"/>
+                        </create_order>
+                        <create_order object="$MissionSpecialistShip" id="'Wait'"/>
+
+                        <do_if value="player.module == 'x4ep1_gamestart_boron1'">
+                          <!-- If the player is playing the Boron story, continue right away -->
+                          <signal_cue cue="md.Story_Boron.Ch1_Exploration"/>
+                          <signal_cue cue="Prelude_Completed_Delay"/>
+                        </do_if>
+                        <do_elseif value="not md.Story_Boron.Start.$Ch0_Accepted?">
+                          <!-- Signal the story to offer the player the Ch1 mission -->
+
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                        $script = [
+                                                                                  2s,
+                                                                                  table [$actor = '$ExpeditionLeaderActor', $speak = 30253037],
+                                                                                  1s
+                                                                                  ],
+                                                                        $callbackcue = Prelude_Completed_Delay
+                                                                      ]" />
+                          <signal_cue cue="md.Story_Boron.Ch1_MissionOffer"/>
+                        </do_elseif>
+                        <do_else>
+                          <signal_cue cue="Prelude_Completed_Delay"/>
+                        </do_else>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Completed_Delay">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="120s"/>
+                      <actions>
+                        <signal_cue cue="Prelude_Completed"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Completed">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                          <event_cue_completed cue="md.Story_Boron.Ch1_SectorExploration"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <do_if value="Prelude_Completed_Delay.state != cuestate.complete">
+                          <cancel_cue cue="Prelude_Completed_Delay"/>
+                        </do_if>
+                      </actions>
+                      <delay exact="5s"/>
+                      <actions>
+                        <set_value name="$FleetAdmiralShip.pilot.$noattackresponse" exact="false"/>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                        $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                        $script = [
+                                                                                  table [$actor = '$TeladiTraderActor', $allow_comm_chatter = true, $speak = 30253003, $monitor = false, $comment = 'An unowned system? And no one to trade with?'],
+                                                                                  table [$actor = '$TeladiTraderActor', $allow_comm_chatter = true, $speak = 30253004, $monitor = false, $comment = 'How very unfortunate. We shall turn towards more promising business ventures.']
+                                                                                  ]
+                                                                      ]" />
+                        
+                        <!-- Turn trader vulnerable again -->
+                        <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                          <param name="Object" value="$TeladiTradeShip"/>
+                          <param name="RequesterCue" value="namespace"/>
+                          <param name="DebugChance" value="$DebugChance"/>
+                        </run_actions>
+
+                        <cancel_all_orders object="$TeladiTradeShip"/>
+                        <create_order id="'MoveDie'" object="$TeladiTradeShip">
+                          <param name="mintime" value="60s" comment="stay alive for specified time, after it docks"/>
+                        </create_order>
+                        <do_for_each in="$TeladiShipEscortGroup" name="$ship">
+                          <cancel_all_orders object="$ship"/>
+                          <create_order id="'MoveDie'" object="$ship">
+                            <param name="mintime" value="60s" comment="stay alive for specified time, after it docks"/>
+                          </create_order>
+                        </do_for_each>
+                      </actions>
+                      <delay exact="30s"/>
+                      <actions>
+                        <cancel_cue cue="Prelude_Boron_Miniscene"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Boron traders have heard about the connection to the Community of Planets opening, and desperately fly into Watchful Gaze to procure wares-->
+        <cue name="Prelude_Boron_Traders_Miniscene">
+          <actions>
+            <debug_text text="'Setup Boron Miniscene'" chance="$DebugChance"/>
+            <find_sector name="$BarrenShoresSector" macro="macro.cluster_602_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'"/>
+            <find_sector name="$WatchfulGazeSector" macro="macro.cluster_601_sector001_macro" space="player.galaxy" extension="'ego_dlc_boron'"/>
+
+            <find_gate name="$BoronDLCGates" multiple="true" space="$BarrenShoresSector"/>
+            <debug_text text="'gates = ' + $BoronDLCGates" chance="$DebugChance"/>
+            <do_for_each name="$g" in="$BoronDLCGates" >
+              <do_if value=" $g.exit.exists and $g.exit.sector == $WatchfulGazeSector">
+                <set_value name="$BarrenShoreEntryGate" exact="$g.exit"/>
+                <set_value name="$BarrenShoreExitGate" exact="$g"/>
+              </do_if>
+            </do_for_each>
+            <set_value name="$TradeCutscene_MissionActors" exact="table[]"/>
+            <remove_value name="$BoronDLCGates"/>
+          </actions>
+          <cues>
+
+            <cue name="Prelude_TradeBoron_ActorSetup">
+              <actions>
+                <!-- TODO: Actually make her a Boron when the assets are in-->
+                <create_cue_actor name="$BoronTraderActor" cue="namespace" macro="character_story_boron_trader_macro">
+                  <page exact="10202"/>
+                  <owner exact="faction.boron"/>
+                  <skills>
+                    <skill type="management"  exact="9"/>
+                    <skill type="morale"      exact="11"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="8"/>
+                    <skill type="boarding"    exact="5"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$BoronTraderActor" missionactor="false" customhandler="true" subtitlename="true"/>
+
+                <!-- NPC Usecase Setup -->
+                <set_value name="$TradeCutscene_MissionActors.$BoronTraderActor" exact="table[
+                                              $entity = $BoronTraderActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $forceonplayer = true
+                                              ]
+                                            ]"/>
+              </actions>
+            </cue>
+
+            <cue name="Prelude_TradeBoron_Setup" version="2">
+              <conditions>
+                <event_cue_completed cue="Prelude_TradeBoron_ActorSetup"/>
+              </conditions>
+              <actions>
+                <get_ship_definition reference="$BoronTradeShipDef" size="class.ship_l" faction="faction.boron" tags="tag.container"/>
+
+                <create_ship name="$TradeShip1" capturable="false" sector="$BarrenShoresSector" commandeerable="false" macro="macro.ship_bor_l_trans_container_01_a_macro">
+                  <owner exact="faction.boron" overridenpc="true"/>
+                  <loadout>
+                    <quantity exact="0.6" comment="fill mostly">
+                      <variation exact="0"/>
+                    </quantity>
+                    <quality exact="0.2"/>
+                  </loadout>
+                  <pilot group="boron.pilot"/>
+                  <orientation orientation="look_at" refobject="$BarrenShoreExitGate"/>
+                  <safepos object="$BarrenShoreExitGate" z="4.5km" x="-3km" y="0.8km"/>
+                </create_ship>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$TradeShip1"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="ReachedThresholdSignalCue" value="null"/>
+                  <param name="IncludeEngines" value="true"/>
+                  <param name="IncludeTurrets" value="true"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_min_shield object="$TradeShip1" exact="20"/>
+                <create_order object="$TradeShip1" id="'Wait'" default="true"/>
+
+                <create_ship name="$TradeShip2" capturable="false" sector="$BarrenShoresSector" commandeerable="false" macro="macro.ship_bor_l_trans_container_01_a_macro">
+                  <owner exact="faction.boron" overridenpc="true"/>
+                  <loadout>
+                    <quantity exact="0.6" comment="fill mostly">
+                      <variation exact="0"/>
+                    </quantity>
+                    <quality exact="0.2"/>
+                  </loadout>
+                  <pilot actor="$BoronTraderActor"/>
+                  <orientation orientation="look_at" refobject="$BarrenShoreExitGate"/>
+                  <safepos object="$BarrenShoreExitGate" z="2km" y="-1.3km" x="-1.3km"/>
+                </create_ship>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$TradeShip2"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="MinHull" value="100"/>
+                  <param name="ReachedThresholdSignalCue" value="null"/>
+                  <param name="IncludeEngines" value="true"/>
+                  <param name="IncludeTurrets" value="true"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+                <set_object_min_shield object="$TradeShip2" exact="20"/>
+                <create_order object="$TradeShip2" id="'Wait'" default="true"/>
+
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="$TradeShip1.isoperational">
+                  <set_object_capturable object="$TradeShip1" capturable="false"/>
+                </do_if>
+                <do_if value="$TradeShip2.isoperational">
+                  <set_object_capturable object="$TradeShip2" capturable="false"/>
+                </do_if>
+              </patch>
+            </cue>
+
+            <cue name="Prelude_Boron_Approach_TradeGate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget"    value="$BarrenShoreEntryGate"/>
+              <param name="ApproachDistance"  value="25km"/>
+              <param name="SuccessSignalCue"  value="Prelude_TradeBoron_Cutscene"/>
+            </cue>
+
+            <cue name="Prelude_TradeBoron_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+
+                <precache_hint target="$TradeShip1"/>
+                <precache_hint target="$TradeShip2"/>
+                <!-- Personalise the line depending on what ship the player is on -->
+                <do_if value="player.ship.makerraces.indexof.{race.teladi} or player.ship.makerraces.indexof.{race.paranid} or player.ship.makerraces.indexof.{race.argon}">
+                  <set_value name="$ModularLine" exact="30253002" comment="A Commonwealth ship!"/>
+                </do_if>
+                <do_elseif value="player.ship.makerraces.indexof.{race.terran}">
+                  <set_value name="$ModularLine" exact="30253003" comment="A Terran-made ship!"/>
+                </do_elseif>
+                <do_elseif value="player.ship.makerraces.indexof.{race.boron}">
+                  <set_value name="$ModularLine" exact="30253004" comment="An alien at the helm of a Boron vessel!"/>
+                </do_elseif>
+
+                <!-- Fallback line -->
+                <do_if value="not $ModularLine?">
+                  <set_value name="$ModularLine" exact="30253005" comment="Someone from beyond our realm!"/>
+                </do_if>
+              </actions>
+              <delay exact="1.5s"/>
+              <actions>
+                <debug_text text="'cutscene'" chance="$DebugChance"/>
+
+                <append_to_list name="md.$MissionDND" exact="Prelude_TradeBoron_Cutscene"/>
+
+                <force_player_speed speed="0"/>
+                <stop_player_autopilot/>
+                <create_order id="'MoveWait'" immediate="true" object="player.ship" name="$WaitOrder">
+                  <param name="destination" value="[player.ship.zone, player.ship.position]"/>
+                  <param name="timeout" value="5min"/>
+                  <param name="debugchance" value="$DeepDebugChance"/>
+                </create_order>
+
+                <set_value name="this.$CutsceneKey" exact="'Story_Boron_Prelude2'"/>
+                <play_cutscene result="this.$CutsceneID" key="this.$CutsceneKey" abortable="true">
+                  <param name="target_gate" object="$BarrenShoreEntryGate"/>
+                  <param name="target_ship1" object="$TradeShip1"/>
+                  <param name="target_ship2" object="$TradeShip2"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Approach_TradeCutscene_Started">
+                  <conditions>
+                    <event_cutscene_started cutscene="Prelude_TradeBoron_Cutscene.$CutsceneID"/>
+                  </conditions>
+                  <delay exact="3s"/>
+                  <actions>
+                    <!-- First move the traders through the gate, then send them into basegame space for trading -->
+                    <warp object="$TradeShip1" zone="$BarrenShoreEntryGate.zone">
+                      <position z="($TradeShip1.size)*2.2" object="$BarrenShoreEntryGate" />
+                      <orientation orientation="look_away" refobject="$BarrenShoreEntryGate" comment="requires create_ship using zone='$BarrenShoreEntryGate.zone' "/>
+                    </warp>
+                    <add_effect effect="'jump_gateeffect'" object="$BarrenShoreEntryGate"/>
+                  </actions>
+                  <delay exact="0.2s"/>
+                  <actions>
+                    <play_sound sound="'gate_flythrough'" object="$TradeShip1" />
+
+                    <add_effect object="$TradeShip1.zone" effect="'jump_jumpin_capship'">
+                      <position value="$TradeShip1.position"/>
+                      <rotation value="$TradeShip1.rotation"/>
+                    </add_effect>
+                    <add_effect object="$TradeShip1" effect="'warpteleport'"/>
+
+                    <get_safe_pos result="$sectorpos" sector="$BarrenShoreEntryGate.sector" space="$BarrenShoreEntryGate.sector" object="$BarrenShoreEntryGate" z="3km" radius="$TradeShip1.size" direction="quadrant.front" directionobject="$BarrenShoreEntryGate" allowyaxis="false"/>
+                    <debug_text text="'adding movement order to %s in %s, %sm away.'.[$sectorpos, $BarrenShoreEntryGate.sector, $TradeShip1.distanceto.[$BarrenShoreEntryGate.sector, $sectorpos]]" chance="0"/>
+                    <cancel_all_orders object="$TradeShip1"/>
+                    <!--<create_order object="$TradeShip1" id="'MoveGeneric'" name="$order" immediate="true">
+                      <param name="destination" value="$BarrenShoreEntryGate.sector"/>
+                      <param name="position" value="$sectorpos"/>
+                      <param name="precise" value="true"/>
+                      <param name="noboost" value="true"/>
+                    </create_order>-->
+                    <create_order id="'Wait'" object="$TradeShip1"/>
+                  </actions>
+                  <delay exact="2.5s"/>
+                  <actions>
+                    <warp object="$TradeShip2" zone="$BarrenShoreEntryGate.zone">
+                      <position z="$TradeShip2.size" y="-0.8km" x="1.2km" object="$BarrenShoreEntryGate" />
+                      <rotation value="$TradeShip1.rotation"/>
+                    </warp>
+                    <add_effect effect="'jump_gateeffect'" object="$BarrenShoreEntryGate"/>
+
+                    <do_if value="Prelude_Approach_TradeCutscene_Ended.state == cuestate.waiting">
+                      <!-- Trader comms player to set up shortages -->
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $TradeCutscene_MissionActors, $debugchance = $DeepDebugChance,
+                                                                              $script = [
+                                                                                      1.2s,
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253001, $comment = 'Goodness!' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = $ModularLine, ],
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253006, $comment = 'Surely this indicates our reports are correct.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253007, $comment = 'The once dormant gate has indeed resumed its function, and brought our Province into alignment with our erstwhile allies.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253008, $comment = 'You must realise what this means! All the resources of the Commonwealth are now within reach!' ],
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253009, $comment = 'At long last, a chance to end the shortages!' ],
+                                                                                      3.5s,
+                                                                                      table[ $actor = '$BoronTraderActor', $speak = 30253010, $comment = 'Pick up the pace!' ],
+                                                                                      2s
+                                                                              ],
+                                                                              $callbackcue = PreludeTrader_DialogueFinished,
+                                                                              $abortcallbackcue = PreludeTrader_DialogueFinished
+                                                                            ]" />
+                    </do_if>
+                  </actions>
+                  <delay exact="0.2s"/>
+                  <actions>
+                    <play_sound sound="'gate_flythrough'" object="$TradeShip2" />
+                    <add_effect object="$TradeShip2.zone" effect="'jump_jumpin_capship'">
+                      <position value="$TradeShip2.position"/>
+                      <rotation value="$TradeShip2.rotation"/>
+                    </add_effect>
+                    <add_effect object="$TradeShip2" effect="'warpteleport'"/>
+
+                    <get_safe_pos result="$sectorpos" sector="$BarrenShoreEntryGate.sector" space="$BarrenShoreEntryGate.sector" object="$BarrenShoreEntryGate" z="3km" radius="$TradeShip2.size" direction="quadrant.front" directionobject="$BarrenShoreEntryGate" allowyaxis="false"/>
+                    <debug_text text="'adding movement order to %s in %s, %sm away.'.[$sectorpos, $BarrenShoreEntryGate.sector, $TradeShip2.distanceto.[$BarrenShoreEntryGate.sector, $sectorpos]]" chance="0"/>
+                    <cancel_all_orders object="$TradeShip2"/>
+                    <create_order id="'Wait'" object="$TradeShip2"/>
+                  </actions>
+                  <delay exact="4s"/>
+                  <actions>
+                    <cancel_all_orders object="$TradeShip1"/>
+                    <create_order id="'MoveGeneric'" name="$MoveOrder" object="$TradeShip1">
+                      <param name="destination" value="$HereticsEndSector"/>
+                      <param name="position" value="$HereticsEndSector.position"/>
+                      <param name="debugchance" value="$DebugChance"/>
+                    </create_order>
+                  </actions>
+                  <delay exact="8s"/>
+                  <actions>
+                    <cancel_all_orders object="$TradeShip2"/>
+                    <create_order id="'MoveGeneric'" name="$MoveOrder" object="$TradeShip2">
+                      <param name="destination" value="$HereticsEndSector"/>
+                      <param name="position" value="$HereticsEndSector.position"/>
+                      <param name="debugchance" value="$DebugChance"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="PreludeTrader_Sequence2_Dialogue">
+                  <conditions>
+                    <event_speak_finished actor="$BoronTraderActor" line="30253006"/>
+                  </conditions>
+                  <actions>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence1Done'"/>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence2Start'"/>
+                  </actions>
+                </cue>
+                
+                <cue name="PreludeTrader_Sequence3_Dialogue">
+                  <conditions>
+                    <event_speak_finished actor="$BoronTraderActor" line="30253008"/>
+                  </conditions>
+                  <actions>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence2Done'"/>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence3Start'"/>
+                  </actions>
+                </cue>
+
+                <cue name="PreludeTrader_DialogueFinished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="2s"/>
+                  <actions>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence3Done'"/>
+                    <stop_cutscene cutscene="parent.$CutsceneID"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Approach_TradeCutscene_Ended">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Boron Cutscene ended'" chance="$DebugChance"/>
+                    <remove_from_list name="md.$MissionDND" exact="Prelude_TradeBoron_Cutscene"/>
+
+                    <!-- Create orders -->
+                    <do_for_each name="$ship" in="[$TradeShip1, $TradeShip2]">
+                      <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                        <param name="Object" value="$ship"/>
+                        <param name="RequesterCue" value="namespace"/>
+                        <param name="DebugChance" value="$DebugChance"/>
+                      </run_actions>
+                      <create_order id="'MoveDie'" object="$ship"/>
+                    </do_for_each>
+                    <signal_cue_instantly cue="PreludeTrader_BoronConversationHandler"/>
+                    <cancel_cue cue="Prelude_Boron_Traders_Miniscene"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="PreludeTrader_BoronConversationHandler">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+
+            <cue name="BoronTrader_ConversationStarted" instantiate="true">
+              <conditions>
+                <event_conversation_started actor="$BoronTraderActor"/>
+              </conditions>
+              <actions>
+                <add_npc_line speaker="$BoronTraderActor" hidechoices="true">
+                  <text line="30253011" comment="While I would love to take a moment's pause and confabulate, my dear new friend, I must make haste!"/>
+                  <text line="30253012" delay="0.5s" comment="The Provinces are in dire need of relief."/>
+                </add_npc_line>
+              </actions>
+            </cue>
+
+            <cue name="BoronTradeShipDestroyed">
+              <conditions>
+                <event_object_destroyed object="$TradeShip2"/>
+              </conditions>
+              <actions>
+                <!-- The Boron Trade actors have left the stage, no need to keep the conversation listener active -->
+                <cancel_cue cue="parent"/>
+              </actions>
+            </cue>
+            
+          </cues>
+        </cue>
+        
+      </cues>
+    </cue>
+  </cues>
+
+</mdscript>

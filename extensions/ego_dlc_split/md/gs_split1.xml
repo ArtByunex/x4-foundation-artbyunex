@@ -1,0 +1,880 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_Split1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="x4ep1_gamestart_split1" version="3">
+      <conditions>
+        <event_cue_completed cue="md.Setup_Gamestarts.X4ep1_Gamestart_Split_Shared" />
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0" comment="keep ai-scripts from complaining"/>
+        <set_value name="$DebugChance" exact="0"/>
+      </actions>
+      <patch sinceversion="2">
+        <!--DockedConversation_Finished_delay1 can be complete or cancelled, depending on if the long-term goal was achieved-->
+        <do_if value="@$PickupShip.isoperational and @$PilotNarrator.isclass.npc and (DockedConversation_Finished_delay1.state == cuestate.complete or DockedConversation_Finished_delay1.state == cuestate.cancelled)">
+          <debug_text text="'Dismissing gamestart pilot ' + $PilotNarrator + ' and adding as service crew'" filter="savegame"/>
+          <dismiss_control_entity object="$PickupShip" actor="$PilotNarrator"/>
+          <create_npc_template object="$PickupShip" entity="$PilotNarrator" role="entityrole.service"/>
+          <do_if value="not $PilotNarrator.exists">
+            <debug_text text="'Killing gamestart pilot ' + $PilotNarrator" filter="savegame"/>
+            <destroy_object object="$PilotNarrator"/>
+          </do_if>
+        </do_if>
+      </patch>
+      <patch sinceversion="3">
+        <do_if value="Start.hasmission and (LongtermGoal.state == cuestate.waiting)">
+          <update_mission cue="Start" group="missiongroup.gs_split1"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="Setup" comment="siliar to GS_Split2.Setup, but not entirely" version="2">
+          <actions>
+
+            <find_sector name="$FiresOfSector" macro="macro.cluster_421_sector001_macro"/>
+            <find_sector name="$PatriarchHome" macro="macro.cluster_405_sector001_macro"/>
+            <find_station name="$PatriarchStations" space="$PatriarchHome" multiple="true" owner="faction.split">
+              <match_any>
+                <match shipyard="true"/>
+                <match wharf="true"/>
+              </match_any>
+            </find_station>
+            <do_if value="$PatriarchStations.count == 0" comment="fallback to any split station in specified sector">
+              <find_station name="$PatriarchStations" space="$PatriarchHome" multiple="true" owner="faction.split"/>
+            </do_if>
+            <do_if value="$PatriarchStations.count == 0">
+              <debug_text text="'No suitable split-station found to patrol!'" filter="error"/>
+            </do_if>
+
+            <find_sector name="$HallOfJudgementSector" macro="macro.cluster_409_sector001_macro"/>
+            <find_sector name="$FreeFamiliesCentralSector" macro="macro.cluster_410_sector001_macro"/>
+
+            <set_spacesuit_oxygen object="player.ship" percent="12"/>
+
+            <!-- friendly narrator for cutscenes -->
+            <create_cue_actor name="$Narrator" cue="namespace" macro="character_rescue_split_gamestart1_macro">
+              <page exact="10406"/>
+              <owner exact="faction.freesplit"/>
+              <skills>
+                <skill type="management"  exact="9"/>
+                <skill type="morale"      exact="15"/>
+                <skill type="piloting"    exact="9"/>
+                <skill type="engineering" exact="15"/>
+                <skill type="boarding"    exact="0"/>
+              </skills>
+            </create_cue_actor>
+            <set_entity_traits entity="$Narrator" missionactor="true"/>
+
+            <!-- enemy commander narrator -->
+            <create_cue_actor name="$NarratorCommander" cue="namespace" macro="character_commander_split_gamestart2_macro">
+              <page exact="10405" comment="SM3"/>
+              <owner exact="faction.split"/>
+              <skills>
+                <skill type="management"  exact="9"/>
+                <skill type="morale"      exact="15"/>
+                <skill type="piloting"    exact="15"/>
+                <skill type="engineering" exact="9"/>
+                <skill type="boarding"    exact="6"/>
+              </skills>
+            </create_cue_actor>
+            <set_entity_traits entity="$NarratorCommander" missionactor="true"/>
+
+            <!-- create victorious enemy, leaving battlefield -->
+
+            <!-- Original region connection position
+            <create_position name="$Battlefield" object="$FiresOfSector" x="295000" y="-5000" z="313000" comment="C421S01_Region002_connection (dlc4_clusters.xml)"/>-->
+            <create_position name="$Battlefield" object="$FiresOfSector" x="42000" y="-5000" z="120000" comment="C421S01_Region002_connection (dlc4_clusters.xml)"/>
+
+            <create_group groupname="$VictoryFleet"/>
+
+            <create_ship name="$EnemyFlagship" macro="macro.ship_spl_l_destroyer_01_a_macro" sector="$FiresOfSector" commandeerable="false" capturable="false">
+              <owner exact="faction.split" overridenpc="true" />
+              <pilot actor="$NarratorCommander"/>
+              <people ref="split_elite_military_crew"/>
+              <loadout>
+                <level exact="1.0"/>
+                <variation exact="0"/>
+              </loadout>
+              <!-- Original absolute position
+              <position x="289255" y="-1040" z="303612"/>-->
+              <position x="$Battlefield.x - 5745" y="$Battlefield.y + 3960" z="$Battlefield.z - 9388"/>
+              <rotation yaw="-113deg" pitch="0.0deg" roll="0.11deg"/>
+            </create_ship>
+
+            <create_order object="$EnemyFlagship" id="'Patrol'" default="true">
+              <param name="space" value="$FreeFamiliesCentralSector"/>
+            </create_order>
+
+            <!--create_order object="$VictoryShip" id="'MoveWait'" name="$order" default="true">
+                  <param name="destination" value="[$FiresOfSector, position.[0,0,0]]"/>
+                  <param name="withdraw" value="false"/>
+                </create_order-->
+            <!--create_order object="$VictoryShip" id="'Patrol'" default="true">
+                  <param name="space" value="$PatriarchStations.random.zone"/>
+                </create_order-->
+
+            <add_to_group groupname="$VictoryFleet" object="$EnemyFlagship"/>
+
+            <!-- Original absolute positions
+            <set_value name="$EnemyFleetSetup"   exact="[
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[275668, 1040,  318708],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[291139,   40,  307615],   rotation.[ -127deg, 0.0deg,   0.40deg]] ]
+                   ]" />-->
+
+            <set_value name="$EnemyFleetSetup"   exact="[
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y + 6960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y +  960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y + 1960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y + 2960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y + 4960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_heavyfighter_01_a_macro,  [$FiresOfSector, position.[($Battlefield.x -  5745), ($Battlefield.y + 5960), ($Battlefield.z - 9388)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[($Battlefield.x - 19332), ($Battlefield.y + 6040), ($Battlefield.z - 5708)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x - 19332), ($Battlefield.y + 4040), ($Battlefield.z - 5708)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x - 19332), ($Battlefield.y + 5040), ($Battlefield.z - 5708)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x - 19332), ($Battlefield.y + 7040), ($Battlefield.z - 5708)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x - 19332), ($Battlefield.y + 8040), ($Battlefield.z - 5708)],   rotation.[ -113deg, 0.0deg,   0.11deg]] ],
+                   
+                   [ macro.ship_spl_m_corvette_01_a_macro,      [$FiresOfSector, position.[($Battlefield.x -  3861), ($Battlefield.y + 5040), ($Battlefield.z - 5385)],   rotation.[ -127deg, 0.0deg,   0.40deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x -  3861), ($Battlefield.y + 3040), ($Battlefield.z - 5385)],   rotation.[ -127deg, 0.0deg,   0.40deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x -  3861), ($Battlefield.y + 4040), ($Battlefield.z - 5385)],   rotation.[ -127deg, 0.0deg,   0.40deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x -  3861), ($Battlefield.y + 6040), ($Battlefield.z - 5385)],   rotation.[ -127deg, 0.0deg,   0.40deg]] ],
+                   [ macro.ship_spl_s_fighter_02_a_macro,       [$FiresOfSector, position.[($Battlefield.x -  3861), ($Battlefield.y + 7040), ($Battlefield.z - 5385)],   rotation.[ -127deg, 0.0deg,   0.40deg]] ]
+                   ]" />
+
+            <do_all exact="$EnemyFleetSetup.count" counter="$f">
+              <create_ship name="$VictoryShip" macro="$EnemyFleetSetup.{$f}.{1}" sector="$FiresOfSector" commandeerable="false" capturable="false">
+                <owner exact="faction.split" overridenpc="true" />
+                <pilot>
+                  <select faction="faction.split" tags="tag.fighterpilot"/>
+                </pilot>
+                <people ref="split_elite_military_crew"/>
+                <loadout>
+                  <level exact="1.0"/>
+                  <variation exact="0"/>
+                </loadout>
+                <position x  ="$EnemyFleetSetup.{$f}.{2}.{2}.x"   y    ="$EnemyFleetSetup.{$f}.{2}.{2}.y"     z   ="$EnemyFleetSetup.{$f}.{2}.{2}.z"/>
+                <rotation yaw="$EnemyFleetSetup.{$f}.{2}.{3}.yaw" pitch="$EnemyFleetSetup.{$f}.{2}.{3}.pitch" roll="$EnemyFleetSetup.{$f}.{2}.{3}.roll"/>
+              </create_ship>
+
+              <add_to_group groupname="$VictoryFleet" object="$VictoryShip"/>
+
+              <create_order id="'AssignCommander'" object="$VictoryShip" immediate="true">
+                <param name="commander" value="$EnemyFlagship"/>
+                <param name="assignment" value="assignment.defence"/>
+                <param name="cancelorders" value="false"/>
+                <param name="debugchance" value="$debugchance"/>
+              </create_order>
+
+              <!--start_script object="$VictoryShip.pilot" name="'orders.base'"/-->
+              <!--create_order object="$VictoryShip" id="'MoveWait'" name="$order" default="true">
+                <param name="destination" value="[$FiresOfSector, position.[0,0,0]]"/>
+                <param name="withdraw" value="true"/>
+              </create_order-->
+
+              <set_object_shield object="$VictoryShip" min="0" max="100"/>
+              <set_object_hull object="$VictoryShip" min="10" max="100" profile="increasing"/>
+            </do_all>
+
+            <!-- create exploding ship -->
+
+            <create_ship name="$ExplodingShip" macro="ship_spl_l_destroyer_01_a_macro" sector="$FiresOfSector" commandeerable="false">
+              <owner exact="faction.freesplit" overridenpc="true" />
+              <pilot>
+                <select faction="faction.freesplit" tags="tag.traderpilot"/>
+              </pilot>
+              <loadout>
+                <quantity exact="1.0" comment="fill completely">
+                  <variation exact="0"/>
+                </quantity>
+                <quality exact="0.6"/>
+              </loadout>
+              <!-- Original absolute position
+              <position x="295886" z="313667.5"/>-->
+              <position x="$Battlefield.x + 886" y="$Battlefield.y + 5000" z="$Battlefield.z + 667"/>
+              <rotation yaw="-28.33151deg" pitch="2.15724deg" roll="0.15055deg"/>
+            </create_ship>
+
+            <set_object_shield object="$ExplodingShip" exact="0"/>
+            <set_object_hull object="$ExplodingShip" exact="5"/>
+            <get_safe_pos result="$ExplodingPos" sector="$ExplodingShip.sector" space="$ExplodingShip.sector" object="$ExplodingShip" z="15km" radius="$ExplodingShip.size" direction="quadrant.front" directionobject="$ExplodingShip" allowyaxis="false"/>
+
+            <create_order object="$ExplodingShip" id="'MoveWait'" name="$order" immediate="true">
+              <param name="destination" value="[$ExplodingShip.sector, $ExplodingPos]"/>
+              <param name="precise" value="true"/>
+            </create_order>
+
+            <create_loadout result="$JaguarLoadout">
+              <macros>
+                <engine macro="engine_spl_s_travel_01_mk2_macro" path="../con_engine_01"/>
+                <weapon macro="weapon_spl_s_gatling_01_mk1_macro" path="../con_weapon_01"/>
+                <shield macro="shield_spl_s_standard_01_mk1_macro" path="../con_shield_01"/>
+              </macros>
+              <ammunition>
+                <ammunition macro="env_deco_nav_beacon_t1_macro" exact="3"/>
+                <ammunition macro="eq_arg_satellite_01_macro" exact="3"/>
+              </ammunition>
+              <software>
+                <software ware="software_flightassistmk1"/>
+                <software ware="software_scannerlongrangemk2"/>
+                <software ware="software_scannerobjectmk1"/>
+              </software>
+              <virtualmacros>
+                <thruster macro="thruster_gen_s_allround_01_mk2_macro"/>
+              </virtualmacros>
+            </create_loadout>
+
+            <!-- create friendly ship -->
+            <create_ship name="$PickupShip" macro="ship_spl_s_scout_01_a_macro" sector="$FiresOfSector">
+              <owner exact="faction.freesplit" overridenpc="true"/>
+              <pilot macro="character_rescue_split_gamestart1_macro">
+                <select faction="faction.freesplit" tags="tag.pilot"/>
+                <page exact="10406"/>
+                <skills>
+                  <skill type="piloting" exact="12"/>
+                  <skill type="morale" exact="12"/>
+                  <skill type="engineering" exact="6"/>
+                  <skill type="management" exact="3"/>
+                  <skill type="boarding" exact="4"/>
+                </skills>
+              </pilot>
+              <loadout loadout="$JaguarLoadout"/>
+              <!-- Original absolute position
+              <position x="272763.563" z="157692.406"/>-->
+              <position x="$Battlefield.x - 22237" y="$Battlefield.y + 5000" z="$Battlefield.z - 155308"/>
+              <rotation yaw="0.deg" pitch="0deg" roll="0deg"/>
+            </create_ship>
+
+            <set_object_min_hull object="$PickupShip" exact="75" comment="invulnerable"/>
+            <set_object_radar_visible object="$PickupShip" visible="false"/>
+
+            <create_order object="$PickupShip" id="'MoveToObject'" name="$order" immediate="true">
+              <param name="destination" value="player.ship"/>
+            </create_order>
+
+            <!-- set part of the map to known -->
+            <set_value name="$InitialMap" exact="[
+              macro.cluster_407_sector001_macro,          
+              macro.cluster_409_sector001_macro, 
+              macro.cluster_421_sector001_macro]"/>
+
+            <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+              <param name="InitialMap" value="$InitialMap"/>
+            </run_actions>
+            
+            <find_sector name="$EquipmentDockSector" macro="macro.cluster_407_sector001_macro"/>
+            <find_station name="$UncoveredEquipmentDock" equipmentdock="true" space="$EquipmentDockSector" active="true" multiple="false" required="true"/>
+            <do_if value="$UncoveredEquipmentDock?">
+              <set_known object="$UncoveredEquipmentDock" known="true"/>
+            </do_if>
+
+            <signal_cue cue="StartMission"/>
+          </actions>
+          <patch sinceversion="2">
+            <find_sector name="$FreeFamiliesCentralSector" macro="macro.cluster_410_sector001_macro"/>
+            <do_if value="$EnemyFlagship.exists">
+              <cancel_all_orders object="$EnemyFlagship"/>
+              <create_order object="$EnemyFlagship" id="'Patrol'" default="true">
+                <param name="space" value="$FreeFamiliesCentralSector"/>
+              </create_order>
+            </do_if>
+          </patch>
+        </cue>
+
+        <cue name="StartMission">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <play_music music="'music_dlc_split_gamestart_1'" comment="243s"/>
+            <append_to_list name="md.$MissionDND" exact="StartMission"/>
+
+            <create_mission cue="Start" type="missiontype.plot" name="{30280,1000}" description="{30280,1001}" difficulty="level.easy" faction="faction.freesplit" abortable="false" group="missiongroup.gs_split1">
+              <briefing>
+                <objective step="1" action="objective.custom"       customaction="{30280,1010}"/>
+                <objective step="2" action="objective.dockat"       text="{30280,1011}"/>
+              </briefing>
+            </create_mission>
+            <set_objective cue="Start" step="1" action="objective.custom" customaction="{30280,1010}"/>
+          </actions>
+          <cues>
+            <cue name="BriefingStarted" instantiate="true">
+              <conditions>
+                <event_briefing_started cue="StartMission" />
+              </conditions>
+              <actions>
+                <debug_text text="'Briefing started'" chance="$DebugChance" />
+              </actions>
+              <cues>
+                <cue name="BriefingStopped">
+                  <conditions>
+                    <event_briefing_cancelled cue="StartMission" />
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="BriefingStarted"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="ExplodeShip">
+              <delay exact="11s"/>
+              <actions>
+                <destroy_object object="$ExplodingShip" explosion="true"/>
+              </actions>
+            </cue>
+
+            <cue name="SurrenderSpeech">
+              <delay exact="3s"/>
+              <actions>
+                <play_cutscene key="'ShowPilot'" targetmonitor="true" missioncue="Start" caption="{1015,180}" result="this.$CutsceneID">
+                  <param name="npcref" object="$NarratorCommander" />
+                </play_cutscene>
+              </actions>
+              <cues>
+                <cue name="SurrenderSpeech_Speak">
+                  <conditions>
+                    <event_cue_completed cue="parent"/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <speak actor="$NarratorCommander" priority="100">
+                      <text page="10405" line="30281010" comment="...and in his wisdom, the Patriarch of all Split graciously offers to accept your capitulation."/>
+                      <text page="10405" line="30281011" comment="Surrender now and your executions will be honourable and swift."/>
+                    </speak>
+                  </actions>
+                </cue>
+                <cue name="SurrenderSpeech_Finished">
+                  <conditions>
+                    <event_speak_finished actor="$NarratorCommander" line="30281010"/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <stop_cutscene cutscene="parent.$CutsceneID"/>
+                  </actions>
+                </cue>
+              </cues>
+
+            </cue>
+
+            <!--cue name="VictoryFleetDeathTimer">
+              <delay exact="120s"/>
+              <actions>
+                <do_all exact="$VictoryFleet.count" counter="$f">
+                  <destroy_object object="$VictoryFleet.{$f}" explosion="false"/>
+                </do_all>
+              </actions>
+            </cue-->
+
+            <!--cue name="VictoryFleetPatrol">
+              <delay exact="120s"/>
+              <actions>
+                <do_if value="$PatriarchStations.count">
+                  <create_order object="$VictoryFleet.{1}" id="'Patrol'" default="true">
+                    <param name="space" value="$PatriarchStations.random.zone"/>
+                    <param name="includeroute" value="false"/>
+                  </create_order>
+                </do_if>
+                <do_else>
+                  <debug_text text="'No suitable split-station found to patrol!'" filter="error"/>
+                </do_else>
+              </actions>
+            </cue-->
+
+            <cue name="ContactPlayer" checkinterval="2s">
+              <conditions>
+                <check_value value="player.entity.distanceto.{$PickupShip} lt 100km"/>
+              </conditions>
+              <actions>
+              </actions>
+              <cues>
+                <cue name="SearchFarConversation_Start">
+                  <delay exact="1s"/>
+                  <actions>
+                    <play_cutscene key="'ShowPilot'" targetmonitor="true" missioncue="Start" caption="{1015,185}" result="this.$CutsceneID">
+                      <param name="npcref" object="$Narrator" />
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="SearchFarConversation_Speak">
+                      <conditions>
+                        <event_cue_completed cue="parent"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <speak actor="$Narrator" priority="100">
+                          <text line="30280001" comment="Too much static!"/>
+                          <text line="30280002" comment="Scanners are useless!" delay="2s"/>
+                          <text line="30280003" comment="Can't lose more pilots; keep looking!" delay="2s"/>
+                        </speak>
+                      </actions>
+                    </cue>
+                    <cue name="SearchFarConversation_Finished">
+                      <conditions>
+                        <event_speak_finished actor="$Narrator" line="30280001"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <stop_cutscene cutscene="parent.$CutsceneID"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="SearchPlayer" checkinterval="2s">
+              <conditions>
+                <check_value value="player.entity and (player.entity.distanceto.{$PickupShip} lt 10km)"/>
+              </conditions>
+              <actions>
+              </actions>
+              <cues>
+                <cue name="SearchConversation_Start">
+                  <delay exact="1s"/>
+                  <actions>
+                    <play_cutscene key="'ShowPilot'" targetmonitor="true" missioncue="Start" caption="{1015,185}" result="this.$CutsceneID">
+                      <param name="npcref" object="$Narrator" />
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="SearchConversation_Speak">
+                      <conditions>
+                        <event_cue_completed cue="parent"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <speak actor="$Narrator" priority="100">
+                          <text line="30280010" comment="Split warriors, we will find you."/>
+                          <text line="30280012" comment="Survive or dishonour your family!"/>
+                          <text line="30280011" comment="Calm your battle rage to conserve oxygen." delay="1s"/>
+                        </speak>
+                      </actions>
+                    </cue>
+                    <cue name="SearchConversation_Finished">
+                      <conditions>
+                        <event_speak_finished actor="$Narrator" line="30280010"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <stop_cutscene cutscene="parent.$CutsceneID"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="ApproachPlayer" checkinterval="2s">
+              <conditions>
+                <check_value value="player.entity and (player.entity.distanceto.{$PickupShip} lt 3km)"/>
+              </conditions>
+              <cues>
+                <cue name="FoundConversation_Start">
+                  <delay exact="2s"/>
+                  <actions>
+                    <play_cutscene key="'ShowPilot'" targetmonitor="true" missioncue="Start" caption="{10002,23}" result="this.$CutsceneID">
+                      <param name="npcref" object="$Narrator" />
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+                    <cue name="FoundConversation_Speak">
+                      <delay exact="1s"/>
+                      <actions>
+                        <speak actor="$Narrator" priority="100">
+                          <text line="30280020" comment="Pilot detected!" delay="1s"/>
+                          <text line="30280021" comment="Almost there." delay="1s"/>
+                        </speak>
+                      </actions>
+                    </cue>
+                    <cue name="FoundConversation_Finished">
+                      <conditions>
+                        <event_speak_finished actor="$Narrator" line="30280020"/>
+                      </conditions>
+                      <actions>
+                        <stop_cutscene cutscene="parent.$CutsceneID"/>
+
+                        <set_object_min_hull object="$PickupShip" exact="0" comment="vulnerable"/>
+                        <set_object_radar_visible object="$PickupShip" visible="true"/>
+
+                        <set_objective cue="Start" step="2" action="objective.dockat" text="{30280,1011}" object="$PickupShip"/>
+                      </actions>
+                      <cues>
+
+                        <cue name="GrantDocking_Delay">
+                          <delay exact="3s"/>
+                          <actions>
+                            <request_docking allowplayeronly="true" ship="player.ship" container="$PickupShip" queuedresult="$PickupShipDockingQueued" grantedresult="$PickupShipDockingGranted"/>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="PlayerDocked">
+              <conditions>
+                <event_player_teleport_successful/>
+                <check_value value="player.entity.hascontext.{$PickupShip}"/>
+              </conditions>
+              <actions>
+                <set_value name="$PilotNarrator" exact="$PickupShip.pilot"/>
+              </actions>
+              <cues>
+                <cue name="DockedConversation_Start">
+                  <delay exact="1s"/>
+                  <actions>
+                    <create_position name="$NarratorPos" x="-0.65m" y="0.5m" z="-1.1m"/>
+                    <create_rotation name="$NarratorRot" yaw="135deg" />
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $PilotNarrator,
+                                                                                                      table[
+                                                                                                      $requestercue = namespace,
+                                                                                                      $location = $PickupShip,
+                                                                                                      $priority = 100,
+                                                                                                      $rotation = $NarratorRot,
+                                                                                                      $position = $NarratorPos,
+                                                                                                      $debugchance = $DebugChance,
+                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+
+                    <!--<play_cutscene key="'ShowPilot'" targetmonitor="true" caption="{1015,185}" result="this.$CutsceneID">
+                      <param name="npcref" object="$Narrator" />
+                    </play_cutscene>-->
+                  </actions>
+                  <cues>
+                    <cue name="DockedConversation_Speak">
+                      <conditions>
+                        <event_cue_completed cue="parent"/>
+                      </conditions>
+                      <delay exact="4s"/>
+                      <actions>
+                        <!--TODO @Owen @Martin why doesn't this work
+                        <set_actor_lookat actor="$PilotNarrator" component="player.entity"/>-->
+                        <speak actor="$PilotNarrator" priority="100" >
+                          <text line="30280030" comment="You survived, good! You are strong!"/>
+                          <text line="30280031" comment="They left us for dead." delay="1s"/>
+                          <text line="30280032" comment="We make them pay for this arrogance!"/>
+                          <text line="30280033" comment="Take this ship and wreak vengeance!" delay="1s"/>
+                        </speak>
+                      </actions>
+                    </cue>
+                    <cue name="DockedConversation_Finished">
+                      <conditions>
+                        <event_speak_finished actor="$PilotNarrator" line="30280030"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <!--<stop_cutscene cutscene="parent.$CutsceneID"/>-->
+                        <remove_mission cue="Start" type="completed"/>
+                      </actions>
+                      <cues>
+                        <cue name="DockedConversation_Finished_delay1">
+                          <delay exact="1s"/>
+                          <actions>
+                            <!--Dismiss the pilot and add them as a service crew-->
+                            <dismiss_control_entity object="$PickupShip" actor="$PilotNarrator"/>
+                            <create_npc_template object="$PickupShip" entity="$PilotNarrator" role="entityrole.service"/>
+                            <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $PilotNarrator,
+                                                                                                      table[
+                                                                                                      $requestercue = namespace,
+                                                                                                      $location = 'disconnect',
+                                                                                                      $priority = 100,
+                                                                                                      $rotation = $NarratorRot,
+                                                                                                      $position = $NarratorPos,
+                                                                                                      $debugchance = $DebugChance,
+                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+                          </actions>
+                        </cue>
+                        <cue name="DockedConversation_Finished_delay2">
+                          <delay exact="3s"/>
+                          <actions>
+                            <set_owner object="$PickupShip" faction="faction.player" overridenpc="true"/>
+                            <remove_from_list name="md.$MissionDND" exact="StartMission"/>
+                            <signal_cue cue="LongtermGoal"/>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="PlayerDocked_KillPilotActor">
+                  <conditions>
+                    <event_object_changed_attention object="$PilotNarrator" check="false"/>
+                    <check_value value="event.param == attention.unknown"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Destroy the pilot'" chance="$DebugChance"/>
+                    <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['remove_request', $PilotNarrator, namespace]"/>
+                    <destroy_object object="$PilotNarrator"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+
+          </cues>
+        </cue>
+
+        <cue name="LongtermGoal">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <delay exact="5s"/>
+          <actions>
+            <create_mission cue="Start" type="missiontype.fight" name="{30280,2001}" description="{30280,2002} + '\n\n' + {30004,1511}" difficulty="level.impossible" faction="faction.freesplit" rewardtext="{30280,2030}" abortable="false" activate="false">
+              <briefing>
+                <objective step="1" action="objective.destroy" text="{30280,2010}" group="$VictoryFleet"/>
+                <objective step="2" action="objective.kill" text="{30280,2011}" object="$NarratorCommander"/>
+              </briefing>
+            </create_mission>
+            <set_objective_from_briefing cue="Start" step="1"/>
+          </actions>
+          <cues>
+
+            <cue name="TravelDriveHint">
+              <cues>
+                <cue name="TravelDriveHintShow">
+                  <delay exact="10s"/>
+                  <actions>
+                    <show_help line="4302" log="true" position="13" force="true" width="250" duration="10s" comment="Every ship engine can accelerate beyond its normal top speed using TRAVEL MODE." allowclose="false"/>
+                    <show_help line="4301" log="true" position="13" force="true" width="250" duration="10s" comment="Press $INPUT_ACTION_TOGGLE_TRAVEL_MODE$ or activate TRAVEL MODE from the SHIP MENU \($INPUT_ACTION_OPEN_COCKPIT_MENU$\)." allowclose="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="TravelDriveHintRemove">
+                  <conditions>
+                    <event_player_changed_activity activity="activity.travel"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="TravelDriveHintShow"/>
+                    <remove_help line="4301"/>
+                    <remove_help line="4302"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Vengeance" version="3">
+              <conditions>
+                <event_cue_completed cue="LongtermGoal"/>
+              </conditions>
+              <actions>
+                <set_value name="$KilledByOther" exact="0"/>
+                <set_value name="$KilledByPlayer" exact="0"/>
+                <set_value name="$KilledCommanderByOther" exact="false"/>
+              </actions>
+              <patch sinceversion="2">
+                <!-- In case destroy fleet mission is active. -->
+                <do_if value="Vengeance_Kill_Commander.state == cuestate.waiting">
+                  <!-- Loop over all ships and remove them from $VictoryFleet if they've been captured. -->
+                  <do_for_each in="$VictoryFleet" name="$CurrentShip" reverse="true">
+                    <do_if value="$CurrentShip.owner != faction.split">
+                      <remove_from_group group="$VictoryFleet" object="$CurrentShip"/>
+                    </do_if>
+                    <do_else>
+                      <set_object_capturable object="$CurrentShip" capturable="false"/>
+                    </do_else>
+                  </do_for_each>
+                  <set_objective cue="Start" step="1" action="objective.destroy" text="{30280,2010}" group="$VictoryFleet"/>
+                  <!-- If all ships are gone or captured, the mission is complete. -->
+                  <do_if value="not $VictoryFleet.count">
+                    <signal_cue cue="Vengeance_Kill_Commander"/>
+                  </do_if>
+                </do_if>
+              </patch>
+              <patch sinceversion="3">
+                <set_value name="$KilledByOther" exact="0"/>
+                <set_value name="$KilledByPlayer" exact="$EnemyFleetSetup.count - $VictoryFleet.count" comment="assume killed by player"/>
+                <set_value name="$KilledCommanderByOther" exact="false"/>
+              </patch>
+              <cues>
+
+                <cue name="Vengeance_Debug_KillFlagship" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <destroy_object object="$VictoryFleet.{1}"/>
+                  </actions>
+                </cue>
+
+                <cue name="Vengeance_TargetDestroyed" instantiate="true">
+                  <conditions>
+                    <event_object_destroyed group="$VictoryFleet"/>
+                  </conditions>
+                  <actions>
+
+                    <do_if value="event.param and event.param.owner != faction.player">
+                      <set_value name="$KilledByOther" operation="add"/>
+                    </do_if>
+                    <do_else>
+                      <set_value name="$KilledByPlayer" operation="add"/>
+                    </do_else>
+
+                    <do_if value="$VictoryFleet.count == 1">
+                      <signal_cue cue="Vengeance_Kill_Commander"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Vengeance_Kill_Commander">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="not $NarratorCommander.exists">
+                      <signal_cue cue="Vengeance_Congratulations"/>
+                    </do_if>
+                    <do_else>
+                      <set_objective_from_briefing cue="Start" step="2"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+
+                    <cue name="Vengeance_Kill_Commander_Success">
+                      <conditions>
+                        <event_object_destroyed object="$NarratorCommander"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="event.param and event.param.owner != faction.player">
+                          <set_value name="$KilledCommanderByOther" exact="true"/>
+                        </do_if>
+                        <signal_cue cue="Vengeance_Congratulations"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Vengeance_Congratulations" version="2">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_cue_actor name="$NarratorRoyal" cue="Vengeance_Congratulations" macro="character_split_ff_royalty_gamestart_macro">
+                      <page exact="10451"/>
+                      <owner exact="faction.freesplit"/>
+                      <skills>
+                        <skill type="management"  exact="9"/>
+                        <skill type="morale"      exact="15"/>
+                        <skill type="piloting"    exact="9"/>
+                        <skill type="engineering" exact="15"/>
+                        <skill type="boarding"    exact="0"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_entity_traits entity="$NarratorRoyal" missionactor="true"/>
+
+                    <do_if value="$KilledByPlayer gt ($EnemyFleetSetup.count / 2)">
+                      <speak actor="$NarratorRoyal" priority="100">
+                        <text line="30280001" comment="Impressive work."/>
+                        <text line="30280002" comment="Split has restored honour and proven great strength."/>
+                        <text line="30280003" comment="Free Families will not forget."/>
+                      </speak>
+                      <add_faction_relation faction="faction.player" otherfaction="faction.freesplit" value="0.032" reason="relationchangereason.missioncompleted" />
+                    </do_if>
+                    <do_else>
+                      <speak actor="$NarratorRoyal" priority="100">
+                        <text line="30280003" comment="Free Families will not forget."/>
+                      </speak>
+                    </do_else>
+                  </actions>
+                  <patch sinceversion="2" state="complete">
+                    <add_faction_relation faction="faction.player" otherfaction="faction.freesplit" value="0.032" reason="relationchangereason.missioncompleted" />
+                  </patch>
+                  <cues>
+                    <cue name="Vengeance_Congratulations_Achievement" version="2">
+                      <conditions>
+                        <event_speak_finished actor="$NarratorRoyal" line="30280001"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <unlock_achievement name="SV_PLOT_GS1" comment="Righteous Fury" />
+                        <add_inventory entity="player.entity" ware="ware.inv_head_of_split"/>
+                        <show_notification text="{1015,90} + '\n' + ware.inv_head_of_split.name" sound="notification_achievement" comment="Reward received"/>
+                        <signal_cue cue="Vengeance_Finished"/>
+                      </actions>
+                      <patch sinceversion="2" state="waiting">
+                        <remove_mission cue="Start" type="completed"/>
+                        <signal_cue cue="CleanupMission" />
+                      </patch>
+                    </cue>
+                    
+                    <cue name="Vengeance_Congratulations_No_Achievement">
+                      <conditions>
+                        <event_speak_finished actor="$NarratorRoyal" line="30280003"/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <signal_cue cue="Vengeance_Finished" />
+                      </actions>
+                    </cue>
+
+                    <cue name="Vengeance_Finished">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <remove_mission cue="Start" type="completed"/>
+                        <signal_cue cue="CleanupMission" />
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!--cue name="DestroyXxx_Ref" ref="md.RML_Destroy_Xxx.DestroyEntities">
+                  <param name="EndSignalCue" value="MissionEnded"/>
+                  <param name="MissionCue" value="Start"/>
+                  <param name="StartStep" value="1" comment="Briefing step to start the mission on"/>
+                  <param name="UpdateBriefing" value="true" comment="Update the briefing objective step when the objective is updated"/>
+                  <param name="Targets_Param" value="$VictoryFleet" />
+                  <param name="DebugChance" value="$DebugChance"/>
+                </cue>
+
+                <cue name="MissionEnded">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'RML-Feedback: ' + MissionEnded.$EndFeedbackValue" chance="$DebugChance"/>
+
+                    <do_if value="MissionEnded.$EndFeedbackValue" max="0" comment="failure">
+                      <remove_mission cue="Start" type="failed"/>
+                      <signal_cue cue="CleanupMission" />
+                    </do_if>
+                    <do_else comment="success">
+                      <remove_mission cue="Start" type="completed"/>
+                    </do_else>
+                    <signal_cue cue="CleanupMission" />
+                  </actions>
+                </cue-->
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+
+
+        <cue name="CleanupMission">
+          <conditions>
+            <event_cue_signalled />
+          </conditions>
+          <actions>
+            <debug_text text="'Cleanup'" chance="$DebugChance" />
+            <cancel_cue cue="Start"/>
+          </actions>
+        </cue>
+
+
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!--A camera focusing on a NPC in a scene, looking at their head.
+  Key frames: Two, 5s between them-->
+  
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="NPC_Keyframed_Shot">
+    <params>
+      <param name="duration" number="true"/>
+      <param name="anchor" object="true" />
+      <param name="anchor_x_1" number="true"/>
+      <param name="anchor_x_2" number="true"/>
+      <param name="anchor_y_1" number="true"/>
+      <param name="anchor_y_2" number="true"/>
+      <param name="anchor_z_1" number="true"/>
+      <param name="anchor_z_2" number="true"/>
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scene" zone="@auto:anchor" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="LookatSequence" start="0">
+        <shot name="LookatShot" environment="scene" duration="param:duration">
+          <camera>
+            <lookdirection>
+              <reference object="anchor" head="true"/>
+            </lookdirection>
+            <!--TODO @Owen roll keyframes do not work in this shot-->
+            <roll>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value exact="90"/>
+                </keyframe>
+                <keyframe timestamp="5000">
+                  <value exact="-90"/>
+                </keyframe>
+              </keyframes>
+            </roll>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="anchor" x="anchor_x_1" y="anchor_y_1" z="anchor_z_1"/>
+                </keyframe>
+                <keyframe timestamp="5000">
+                  <reference object="anchor" x="anchor_x_2" y="anchor_y_2" z="anchor_z_2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

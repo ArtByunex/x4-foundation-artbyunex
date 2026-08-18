@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!--
+    Scenario_Transport_Refugees:
+    disable default comms with non-player-owned npcs
+    <cue name="DefaultComm" instantiate="true" namespace="this">
+      <conditions>
+  -->
+  <add sel="//cue[@name=&quot;DefaultComm&quot;]/conditions">
+    <check_any>
+      <check_value value="(typeof event.object == datatype.component) and event.object.isplayerowned" />
+      <check_value value="(typeof event.object == datatype.list) and event.object.{1}.isplayerowned" />
+      <check_all>
+        <check_value value="player.module != 'scenario_transport_refugees'" />
+        <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+        <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+      </check_all>
+    </check_any>
+  </add>
+</diff>

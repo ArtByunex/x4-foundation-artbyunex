@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <!-- Hyperion GS -->
+  <add sel="/gamestarts/groups">
+    <group group="11" name="{1021, 71}" />
+  </add>
+
+  <replace sel="/gamestarts/gamestart[@id='x4ep1_gamestart_hyperion']">
+    <gamestart id="x4ep1_gamestart_hyperion" name="{1021,1800}" description="{1021,1801}" image="gamestart_mini_01" group="11">
+      <info>
+        <item name="@playerimage" value="briefing_olmancketslat_01"/>
+        <item name="{1021,8}"   value="{1021,1802}" />
+        <item name="{1021,13}"  value="{1021,1813}" />
+        <item name="{1021,9}"   value="{1021,56}" />
+        <item />
+        <item />
+        <item name="{1021,1}"   value="{1021,1803}" />
+        <item />
+        <item name="{1021,2}"   value="{1021,1804}" />
+        <item name="{1021,3}"   value="{1021,1805}" />
+        <item name="{1021,5}"   value="{1021,41}" />
+      </info>
+      <cutscene ref="gamestart_mini_01" voice="gamestart_hyperion_selected" />
+      <intro ref="gamestart3" voice="gamestart_hyperion_started" length="62.0" fadeout="2.0" />
+      <type name="{1021,94}" description="{1021,95}" />
+      <location galaxy="xu_ep2_universe_macro" zone="zone001_cluster_30_sector001_macro">
+        <position x="-92.5" y="30.7" z="21" />
+        <rotation yaw="300" pitch="0" roll="0" />
+      </location>
+      <player macro="character_player_hyperion_macro" money="10000" name="{30254,102}">
+        <ship macro="ship_par_l_expeditionary_01_a_macro">
+          <loadout ref="story_hyperion_reward_special"/>
+          <modification paint="paintmod_0185"/>
+          <people people="paranid_veteran_military_crew"/>
+          <!-- mods added in gs_hyperion.xml to be consistent with story_hyperion.xml story mods -->
+          <!--<modification>
+            <equipment>
+              <weapon ware="mod_weapon_damage_02_mk3"/>
+              <weapon ware="mod_weapon_surfaceelement_01_mk3"/>
+              <engine ware="mod_engine_rotationthrust_01_mk3"/>
+              <ship   ware="mod_ship_mass_01_mk3"/>
+              <shield ware="mod_shield_capacity_01_mk3"/>
+            </equipment>
+          </modification>-->
+        </ship>
+        <inventory>
+          <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
+          <ware ware="software_scannerobjectmk3" amount="1" />
+        </inventory>
+        <blueprints>
+          <ware ware="clothingmod_0001" />
+          <ware ware="clothingmod_0002" />
+          <ware ware="module_arg_dock_m_01_lowtech" />
+          <ware ware="module_par_pier_l_01" />
+          <ware ware="module_par_stor_container_s_01" />
+          <ware ware="module_par_conn_base_01" />
+          <ware ware="module_par_conn_cross_01" />
+          <ware ware="module_par_conn_vertical_01" />
+          <ware ware="module_gen_prod_energycells_01" />
+          <ware ware="module_par_prod_sojabeans_01" />
+          <ware ware="paintmod_0006"/>
+          <ware ware="paintmod_0048"/>
+          <ware ware="paintmod_0049"/>
+          <ware ware="paintmod_0050"/>
+          <ware ware="paintmod_0097"/>
+          <ware ware="paintmod_0098"/>
+          <ware ware="paintmod_0099"/>
+          <ware ware="paintmod_0100"/>
+        </blueprints>
+        <research>
+          <ware ware="research_radioreceiver" />
+          <ware ware="research_sensorbooster" />
+          <ware ware="research_tradeinterface" />
+        </research>
+        <encyclopedia>
+          <entry type="warebasket" ref="research_gamestart_common"/>
+        </encyclopedia>
+        <theme paint="painttheme_player_01" />
+      </player>
+      <universe>
+        <!-- Godrealm gamestart = friendly with Godrealm, unfriendly with Holy Order -->
+        <factions>
+          <relations>
+            <relation faction="paranid" otherfaction="player" relation="0.0032"/>
+            <relation faction="holyorder" otherfaction="player" relation="-0.032"/>
+          </relations>
+        </factions>
+      </universe>
+    </gamestart>
+  </replace>
+
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/custom/item[@value='player']">
+    <extension list="character_npc_player_mini_customgamestart_paranid_macro"/>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/custom/item[@value='player']">
+    <extension list="character_npc_player_mini_customgamestart_paranid_macro" />
+  </add>
+
+  <!--====== Hyperion story situation ======-->
+    
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_hyperion_hop" group="hyperion_situation" index="1" name="{1021,13601}" description="{1021,13602}">
+      <states>
+        <state ref="story_hyperion_hop"/>
+      </states>
+    </story>
+
+    <story ref="story_hyperion_par" group="hyperion_situation" index="2" name="{1021,13611}" description="{1021,13612}">
+      <states>
+        <state ref="story_hyperion_par"/>
+      </states>
+    </story>
+  </add>
+
+  <add sel="/gamestarts/gamestart[@id='custom_creative']/budget/story[@ref='story_paranid_esc_3']" pos="after">
+    <story ref="story_hyperion_hop" group="hyperion_situation" index="1" name="{1021,13601}" description="{1021,13602}">
+      <states>
+        <state ref="story_hyperion_hop"/>
+      </states>
+    </story>
+
+    <story ref="story_hyperion_par" group="hyperion_situation" index="2" name="{1021,13611}" description="{1021,13612}">
+      <states>
+        <state ref="story_hyperion_par"/>
+      </states>
+    </story>
+  </add>
+
+  <!-- Sector Knowledge -->
+  <add sel="/gamestarts/gamestart[@id='custom_budgeted']/budget/known/parameters/space">
+    <sector sector="cluster_730_sector001_macro" factor="1.4"/>
+  </add>
+</diff>

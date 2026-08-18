@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_001_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="holyorder" nameoverride=""/>
+      <plan ref="scenario_transport_refugees_disabled_station"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_2923" ref="stations">
+        <offset>
+          <position x="22371.43" y="-1500" z="16450.295"/>
+          <rotation yaw="-135"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_001_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="asteroids_86634" ref="asteroids">
+        <offset>
+          <position x="15202.345" y="2592.929" z="11762.898"/>
+          <rotation yaw="-14.42088" pitch="-45.40497" roll="164.47394"/>
+        </offset>
+        <macro connection="connectionfor_env_asteroid_special_01_macro" ref="asteroid_special_lm_01_macro">
+          <properties>
+            <identification owner="player" description="{20001,802}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_71369" ref="stations">
+        <offset>
+          <position x="-17501.729" z="8978.419"/>
+        </offset>
+        <macro connection="space" ref="station_xen_defence_base_01_macro">
+          <properties>
+            <identification owner="xenon"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_003_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="holyorder" nameoverride="{20103,4501}"/>
+      <plan ref="scenario_transport_refugees_hospital"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_63533" ref="stations">
+        <offset>
+          <position x="-5896.657" y="-1500" z="9328.969"/>
+          <rotation yaw="-18.88825"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_003_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="gates_140169" ref="gates">
+        <offset>
+          <position x="6827.906" z="6237.62"/>
+          <rotation yaw="-120"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_anc_gate_anim_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_70996" ref="stations">
+        <offset>
+          <position x="-27478.986" z="22302.262"/>
+        </offset>
+        <macro connection="space" ref="station_xen_defence_base_01_macro">
+          <properties>
+            <identification owner="xenon"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7630011}" description="{20004,7630012}"/>
+    </properties>
+    <connections>
+      <connection name="zones_64421" ref="zones">
+        <offset>
+          <position x="-64000" z="-128000"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_59438" ref="zones">
+        <offset>
+          <position x="128000" z="-128000"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_59141" ref="zones">
+        <offset>
+          <position x="128000"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_59056" ref="zones">
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_cluster_25_sector_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_cluster_25_sector_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_transport_refugees_region_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_cluster_25_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_region_005_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="p1_wreckfield_xenon_paranid_cluster25"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_engineer_cluster_001_region_006_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_transport_refugees_region_002"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_engineer_cluster_001_region_007_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_transport_refugees_region_002b"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_transport_refugees_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7630001}" description="{20003,7630002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_25_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_transport_refugees_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c25s02_region002_connection" ref="regions">
+        <offset>
+          <position y="-25000" z="-37855016"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c25s02_region001_connection" ref="regions">
+        <offset>
+          <position z="-37855016"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="c25s01_region002_connection" ref="regions">
+        <offset>
+          <position y="-25000"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="c25s01_region001_connection" ref="regions">
+        <macro ref="timelines_map_transport_refugees_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="c25s01_region003_connection" ref="regions">
+        <offset>
+          <position x="114664.414" y="-17548.018" z="-26006.488"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_region_005_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_69687" ref="regions">
+        <offset>
+          <position x="-43600.984" y="-8413.348" z="-113756.508"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_engineer_cluster_001_region_006_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_69688" ref="regions">
+        <offset>
+          <position x="-43600.984" y="-13413.348" z="-113756.508"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_engineer_cluster_001_region_007_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_25"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_transport_refugees_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="cluster_25_connection" ref="clusters">
+        <offset>
+          <position x="-30000000" z="-51960000"/>
+        </offset>
+        <macro ref="timelines_map_transport_refugees_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

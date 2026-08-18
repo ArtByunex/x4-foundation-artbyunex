@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="ShowCharacterInEnvironment">
+    <params>
+      <param name="npcref" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:npcref" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="ShowCharacterSequence" start="0">
+        <shot name="ShowCharacter" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <position>
+              <reference object="npcref" x="0" y="-0.3" z="1.4" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="npcref" x="0" y="0" z="0" head="true"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

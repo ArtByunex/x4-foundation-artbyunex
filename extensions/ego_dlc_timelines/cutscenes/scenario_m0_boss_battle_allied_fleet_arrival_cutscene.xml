@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_m0_boss_battle_allied_fleet_arrival_cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_gate" zone="@auto:target_gate" />
+    <environment_implicit name="scenezone_m0" zone="@auto:target_m0_mothership" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_m0_mothership"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="AtGateArrival" environment="scenezone_gate" duration="onevent:TriggerSequence01Done">
+          <camera_orbit reference="target_gate" time="50000" elevation="-200" cycle="none" x="-3000" >
+            <begin distance="5300" angle="140"/>
+            <end distance="5900" angle="230" elevation="200" time="22000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="Show_m0" environment="scenezone_gate" duration="7000">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_m0_mothership" x="-6.005737" y="235.428452" z="2535.611084"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_m0_mothership" x="-0.243301" y="350.580963" z="326.372070"/>
+                </keyframe>
+                <keyframe timestamp="6000" interpolation="linear">
+                  <reference object="target_m0_mothership" x="-3.450867" y="286.48629" z="1556.048950"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+
+        <shot name="TowardsM0_Shot3" environment="scenezone_gate" duration="6000">
+          <camera>
+            <position>
+              <reference object="target_gate" x="1600.6577" y="-227.16838" z="2303.50927"/>
+            </position>
+            <lookdirection>
+              <reference object="target_m0_mothership" x="0" y="0" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>

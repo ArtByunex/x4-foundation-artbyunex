@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/characters">
+    <!--<character id="TEMP_manager_boron_random" group="boron.manager">
+      <category tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" faction="[split, freesplit, faction.player]" race="boron"/>
+      <owner list="[split, freesplit]"/>
+    </character>-->
+
+    <character id="trader_boron_random" group="boron.trader">
+      <category tags="[crew, pilot, aipilot, traderpilot, masstraffic]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" min="5" max="6"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="fighter_boron_random" group="boron.pilot">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="piloting" min="4" max="15"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="5" max="6"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="manager_boron_random" group="boron.manager">
+      <category tags="[crew, officer, manager]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="management" min="5" max="9"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" min="2" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="factionrepresentative_boron" group="boron.factionrepresentative.male">
+      <category tags="[factionrepresentative]" faction="boron" race="boron"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10201" comment="Boron NPC 1 / Boron Rep / Misc Plot Characters"/>
+      <owner exact="boron"/>
+    </character>
+    <character id="factiondiplomat_boron" group="boron.factiondiplomat.male">
+      <category tags="[factiondiplomat]" faction="boron" race="boron"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10259" comment="Mission Boron NPC 9 / Boron diplomat"/>
+      <owner exact="boron"/>
+    </character>
+    <character id="agent_boron" group="boron.agent">
+      <category tags="[agent]" faction="boron" race="boron"/>
+      <skills>
+        <skill type="management" min="10" max="15"/>
+        <skill type="morale" max="15"/>
+
+        <skill type="boarding" min="6" max="15"/>
+        <skill type="engineering" min="5" max="15"/>
+        <skill type="piloting" min="11" max="15"/>
+      </skills>
+      <page exact="10260" comment="Mission Boron NPC 10 / Boron Agent"/>
+      <owner exact="boron"/>
+    </character>
+
+    <!-- additional character definitions with correct factions set since we can't use xml patching to insert data into an attribute, only replace which is not good enough when multiple extensions may be involved -->
+    <!-- regular -->
+    <character id="service_boron_random" group="boron.service">
+      <category tags="[crew, service, regular, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="engineering" min="2" max="4"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="piloting" min="1" max="3"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="2"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="marine_boron_random" group="boron.marine">
+      <category tags="[crew, marine, regular, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="boarding" min="2" max="4" profile="increasing"/>
+        <skill type="morale" min="2" max="4"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="piloting" min="1" max="3"/>
+        <skill type="management" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="fighter_boron_regular_random" group="boron.pilot">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, regular, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="piloting" min="5" max="7"/>
+        <skill type="morale" exact="7"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="manager_boron_regular_random" group="boron.manager">
+      <category tags="[crew, officer, manager, regular, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="management" min="5" max="6"/>
+        <skill type="morale" max="5"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="boarding" min="2" max="3"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <!-- passenger -->
+    <character id="passenger_boron_random" group="boron.passenger">
+      <category tags="[crew, passenger]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="boarding" exact="0"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" max="6"/>
+        <skill type="morale" max="12"/>
+        <skill type="piloting" max="3"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="prisoner_boron_random" group="boron.prisoner">
+      <category tags="[crew, prisoner]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="boarding" min="1" max="4"/>
+        <skill type="engineering" min="1" max="2"/>
+        <skill type="management" max="2"/>
+        <skill type="morale" min="1" max="2"/>
+        <skill type="piloting" min="1" max="3"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+
+    <!-- Rookies -->
+    <character id="service_boron_random_rookie" group="boron.service">
+      <category tags="[crew, service, rookie, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="engineering" min="1" max="2"/>
+        <skill type="morale" min="1" max="4"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" max="1"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="marine_boron_random_rookie" group="boron.marine">
+      <category tags="[crew, marine, rookie, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="boarding" min="1" max="2" profile="increasing"/>
+        <skill type="morale" min="1" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="piloting" max="2"/>
+        <skill type="management" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="fighter_boron_random_rookie" group="boron.pilot">
+      <category tags="[crew, officer, pilot, aipilot, fighterpilot, commander, masstraffic, watchdog, rookie, recruitable]" faction="[boron, faction.player]" race="boron"/>
+      <skills>
+        <skill type="piloting" min="1" max="5"/>
+        <skill type="morale" min="4" max="5"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="3"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+
+    <!-- Veteran -->
+    <character id="service_boron_random_veteran" group="boron.service">
+      <category tags="[crew, service, veteran, recruitable]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="engineering" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="piloting" min="2" max="4"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" min="1" max="3" profile="increasing"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="marine_boron_random_veteran" group="boron.marine">
+      <category tags="[crew, marine, veteran, recruitable]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="boarding" min="6" max="9"/>
+        <skill type="morale" min="6" max="9"/>
+        <skill type="engineering" max="2"/>
+        <skill type="piloting" min="4" max="6"/>
+        <skill type="management" max="1"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+
+    <!-- Elite -->
+    <character id="service_boron_random_elite" group="boron.service">
+      <category tags="[crew, service, elite]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="engineering" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="piloting" min="3" max="6"/>
+        <skill type="management" max="2"/>
+        <skill type="boarding" min="2" max="4"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="marine_boron_random_elite" group="boron.marine">
+      <category tags="[crew, marine, elite]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="boarding" min="10" max="12"/>
+        <skill type="morale" min="10" max="12"/>
+        <skill type="engineering" min="1" max="3"/>
+        <skill type="piloting" min="5" max="6"/>
+        <skill type="management" min="1" max="2"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="fighter_boron_random_elite" group="boron.pilot">
+      <category tags="[elitepilot]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="piloting" exact="12"/>
+        <skill type="morale" exact="12"/>
+        <skill type="engineering" min="3" max="6"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="3" max="6"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+    <character id="platform_trader_boron_random" group="boron.trader">
+      <category tags="[trader, licencetrader]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <character id="ship_trader_boron_random" group="boron.shiptrader">
+      <category tags="[trader, shiptrader]" faction="[boron]" race="boron" />
+      <skills>
+        <skill type="management" min="9" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[boron]"/>
+      <stock ref="'default_trader'" />
+    </character>
+    <character id="shadyguy_boron_random" group="boron.shadyguy">
+      <category tags="[shadyguy]" faction="[boron]" race="boron" />
+      <skills>
+        <skill type="piloting" min="5" max="12"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" exact="0"/>
+        <skill type="management" min="1" max="6"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner list="[boron]" />
+      <stock ref="'default_shadyguy'" />
+    </character>
+
+    <!-- Boron Non-Faction Characters (for use in multiple clusters) -->
+    <character id="boron_civilian" group="boron.trader">
+      <category faction="civilian" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="boron" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="5" max="13"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="civilian"/>
+    </character>
+    <character id="boron_smuggler" group="boron.trader">
+      <category faction="smuggler" tags="[npc, crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="boron" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="7" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="smuggler"/>
+    </character>
+    <character id="boron_criminal" group="boron.trader">
+      <category faction="criminal" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="boron" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="6" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="criminal"/>
+    </character>
+    <character id="boron_ownerless" group="boron.pilot">
+      <category faction="ownerless" tags="[crew, officer, trader, commander, fighterpilot, manager, marine, masstraffic, watchdog, pilot, traderpilot]" race="boron" comment="fullyqualified"/>
+      <skills>
+        <skill type="piloting" min="7" max="14"/>
+        <skill type="morale" max="12"/>
+
+        <skill type="engineering" max="2"/>
+        <skill type="management" max="1"/>
+        <skill type="boarding" exact="0"/>
+      </skills>
+      <owner exact="ownerless"/>
+    </character>
+    
+    <!-- Casually clothed platform NPCs -->
+    <character id="boron_casual" group="boron.civilian">
+      <category tags="[casual]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="morale" max="1"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="2"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+
+    <character id="boron_deco_swim" macro="character_boron_decoration_03_macro">
+      <category tags="[decoration, swim]" faction="[boron]" race="boron"/>
+      <skills>
+        <skill type="morale" max="1"/>
+
+        <skill type="piloting" max="3"/>
+        <skill type="engineering" exact="0"/>
+        <skill type="management" exact="0"/>
+        <skill type="boarding" min="1" max="2"/>
+      </skills>
+      <owner list="[boron]"/>
+    </character>
+
+  </add>
+
+</diff>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_orbit_and_zoom_1" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PresetDemoSequence2" start="0">
+
+        <shot name="OrbitAndZoom" environment="scenezone" duration="8000">
+          <camera_orbit reference="target_object" time="8000">
+            <begin angle="10" distance="250%" elevation="30%"/>
+            <end angle="-70" distance="75%" elevation="-10%"/>
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

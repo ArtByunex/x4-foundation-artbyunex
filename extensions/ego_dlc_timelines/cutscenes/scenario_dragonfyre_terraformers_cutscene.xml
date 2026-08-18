@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_dragonfyre_terraformers_cutscene"/>
+
+  <environments>
+    <environment_implicit name="zone_bridge" zone="@auto:bridge" />
+    <environment_implicit name="zone_fighter" zone="@auto:fighter" />
+    <object_group name="target_group">
+      <reference object="bridge" />
+      <reference object="fighter" />
+      <reference object="terraformer" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!--CUT TO GUNNE and KELLY on the bridge.-->
+      <sequence name="ShowBridge" start="0">
+        <shot name="ShowKelly" duration="onevent:ShowFighter1" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="1.5" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="8.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <!--SMASH TO a fighter pilot desperately flying towards the fleet, yelling on comms.-->
+      <sequence name="ShowFighter1" start="onevent:ShowFighter1">
+        <shot name="ShowFighter1_Start" duration="1" environment="zone_fighter">
+          <camera>
+            <position>
+              <reference object="fighter" x="-50" y="10" z="300" />
+            </position>
+            <lookdirection>
+              <reference object="fighter" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowFighter1_End" duration="onevent:ShowBridge1" environment="zone_fighter">
+          <takeover_position interpolation="linear" duration="20000"/>
+          <camera>
+            <position>
+              <reference object="fighter" x="-50" y="20" z="100" />
+            </position>
+            <lookdirection>
+              <reference object="fighter" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <!--CUT TO bridge.-->
+      <sequence name="ShowBridge1" start="onevent:ShowBridge1">
+        <shot name="ShowGunne1" duration="onevent:ShowFighter2" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="-4.15" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="6.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <!--CUT TO fighter ship.-->
+      <!--His ship explodes. Several Terraformer fighters speed past the wreck towards the camera. They are followed by a MASSIVE Terraformer fleet. Too many to stand any chance against.-->
+      <sequence name="ShowFighter2" start="onevent:ShowFighter2">
+        <shot name="ShowFighter2_Start" duration="1" environment="zone_fighter">
+          <camera>
+            <position>
+              <reference object="fighter" x="-10" y="10" z="-50" />
+            </position>
+            <lookdirection>
+              <reference object="fighter" z="10" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowFighter2_End" duration="onevent:ShowTerraformers" environment="zone_fighter">
+          <takeover_position interpolation="linear" duration="20000"/>
+          <camera>
+            <position>
+              <reference object="fighter" x="-10" y="10" z="-500" />
+            </position>
+            <lookdirection>
+              <reference object="fighter" z="10" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="ShowTerraformers" start="onevent:ShowTerraformers">
+        <shot name="ShowTerraformers_Start" duration="1" environment="zone_fighter">
+          <camera>
+            <position>
+              <reference object="terraformer" x="-50" y="-100" z="25000" />
+            </position>
+            <lookdirection>
+              <reference object="terraformer" z="-100000"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowTerraformers_End" duration="onevent:ShowBridge2" environment="zone_fighter">
+          <takeover_position interpolation="linear" duration="20000"/>
+          <camera>
+            <position>
+              <reference object="terraformer" x="-50" y="-100" z="-15000" />
+            </position>
+            <lookdirection>
+              <reference object="terraformer" z="-100000"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <!--CUT TO bridge.-->
+      <sequence name="ShowBridge2" start="onevent:ShowBridge2">
+        <shot name="ShowGunne2" duration="onevent:ShowBridge3" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="-4.15" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="6.0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="ShowBridge2_Kelly" start="onevent:ShowBridge3">
+        <shot name="ShowKelly2" duration="onevent:stopscene" environment="zone_bridge">
+          <camera>
+            <position>
+              <reference object="bridge" x="1.5" y="-3.7" z="9.0" />
+            </position>
+            <lookdirection>
+              <reference object="bridge" x="0" y="-3.7" z="8.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

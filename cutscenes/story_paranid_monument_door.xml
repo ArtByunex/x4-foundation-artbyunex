@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_Paranid_Monument_Door" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:door" />
+    <object_group name="target_group">
+      <reference object="door" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Door1Seq" start="0">
+        <shot name="Door1Shot" environment="scenezone" duration="6000">
+          <camera_orbit reference="door" orient_to="object">
+            <begin angle="40" distance="15" elevation="40%" />
+            <end angle="95" distance="40" elevation="10%" />
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+
+    </actions>
+  </presentation>
+
+</cutscene>

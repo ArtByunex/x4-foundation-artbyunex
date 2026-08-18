@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_khaak_boss_battle_firing_cutscene">
+    <params>
+      <param name="orbitdist" number="true"/>
+      <param name="orbitelevation" number="true" />
+      <param name="fire_camerapos_x" number="true"/>
+      <param name="fire_camerapos_y" number="true"/>
+      <param name="fire_camerapos_z" number="true"/>
+    </params>
+  </director>
+    
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+    <object_group name="target_group">
+      <reference object="targetobject" />
+      <reference object="fighter1" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="OrbitSequence" start="0">
+        <shot name="OrbitShot" environment="scenezone" duration="onevent:TriggerFighterShot">
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="none" >
+            <begin angle="180">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </begin>
+            <end angle="360" time="40000">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      <sequence name="FighterSequence" start="onevent:TriggerFighterShot">
+        <shot name="FighterShot" environment="scenezone" duration="onevent:TriggerFireShot">
+          <camera>
+            <position>
+              <betweenobjects>
+                <point1>
+                  <reference object="fighter1" />
+                </point1>
+                <point2>
+                  <reference object="targetobject" />
+                </point2>
+                <distance>
+                  <value exact="500" />
+                </distance>
+              </betweenobjects>
+            </position>
+            <lookdirection>
+              <reference object="fighter1" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="FireSequence" start="onevent:TriggerFireShot">
+        <shot name="FireShot" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <position>
+              <value var="fire_camerapos_x" comment="World X coordinate" />
+              <value var="fire_camerapos_y" comment="World Y coordinate" />
+              <value var="fire_camerapos_z" comment="World Z coordinate" />
+            </position>
+            <lookdirection>
+              <reference object="targetobject" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

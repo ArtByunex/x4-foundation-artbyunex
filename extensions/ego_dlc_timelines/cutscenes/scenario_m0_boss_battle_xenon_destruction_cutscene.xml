@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_m0_boss_battle_xenon_destruction_cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_m0_mothership" />
+    <object_group name="target_group">
+      <reference object="target_playership" />
+      <reference object="target_fleetship" />
+      <reference object="target_m0_mothership"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="m0_PanAlong" environment="scenezone" duration="12500">
+          <camera_orbit reference="target_m0_mothership" time="50000" elevation="-200" cycle="none" >
+            <begin distance="5300" angle="90"/>
+            <end distance="5900" angle="250" elevation="200" time="22000"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="Show_m0_exploding" environment="scenezone" duration="24000">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_m0_mothership" x="-737.894287" y="-137.722549" z="4994.291504"/>
+                </keyframe>
+                <keyframe timestamp="12500" interpolation="linear">
+                  <reference object="target_m0_mothership" x="414.084045" y="866.167053" z="1947.1007"/>
+                </keyframe>
+                <keyframe timestamp="22500" interpolation="linear">
+                  <reference object="target_m0_mothership" x="604.275879" y="223.585190" z="-2368.917725"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="target_m0_mothership" x="-893.173096" y="-168.846817" z="5461.887695"/>
+                </keyframe>
+                <keyframe timestamp="14000" interpolation="linear">
+                  <reference object="target_m0_mothership" x="440.998291" y="1110.190063" z="3222.493164"/>
+                </keyframe>
+                <keyframe timestamp="23000" interpolation="linear">
+                  <reference object="target_m0_mothership" x="813.807617" y="324.63137" z="-2141.99194"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

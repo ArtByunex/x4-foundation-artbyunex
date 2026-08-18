@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Scenario_Recruitment_1_Cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_kaori" />
+    <object_group name="target_group">
+      <reference object="target_guard" />
+      <reference object="target_kaori" />
+      <reference object="target_room" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="PanAwayShot01" environment="scenezone" duration="14000">
+          <camera_orbit reference="target_kaori" orient_to="ecliptic" y="0.7">
+            <begin angle="-65">
+              <distance>
+                <value exact="2.4"/>
+              </distance>
+            </begin>
+            <end angle="-95" time="13000">
+              <distance>
+                <value exact="2.2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+        <shot name="ShowPrisonfromGuardPoV" environment="scenezone"  duration="onevent:TriggerSequence01Done">
+          <camera>
+            <position>
+              <reference object="target_room" x="3.45" y="1.41" z="-0.44"/>
+            </position>
+            <lookdirection>
+              <reference object="target_room" x="2.27" y="1.42" z="-2.04" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="LookingAtKaori" environment="scenezone"  duration="5000">
+          <camera>
+            <position>
+              <reference object="target_room" x="-0.83" y="1.54" z="-3.26"/>
+            </position>
+            <lookdirection>
+              <reference object="target_room" x="-0.45" y="1.53" z="-4.26" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="PanAwayShot02" environment="scenezone" duration="onevent:TriggerSequence02Done">
+          <camera_orbit reference="target_kaori" orient_to="ecliptic" y="0.8">
+            <begin angle="-70">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </begin>
+            <end angle="-101.5" time="10500">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="ShowTotalRoom" environment="scenezone"  duration="onevent:TriggerSequence03Done">
+          <camera>
+            <position>
+              <reference object="target_room" x="-4.37" y="2.42" z="-1.1"/>
+            </position>
+            <lookdirection>
+              <reference object="target_room" x="1.1" y="1.15" z="-4.46" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

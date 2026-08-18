@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Cutscene_pan_behind_param">
+    <params>
+      <param name="duration" number="true" default="15.0" comment="default was 5000ms, when using params specified in seconds!"/>
+      <param name="distance" number="true" default="201.23" />
+      <param name="elevation" number="true" default="20.333" />
+      <param name="panstart"  number="true" default="50.111" />
+      <param name="panend"    number="true" default="50.222" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_object" />
+    <object_group name="target_group">
+      <reference object="target_object" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- This is a sequence of shots that demonstrate preset shortcut cameras. -->
+      <sequence name="PanOverSequence" start="0">
+
+        <shot name="PanOverParameterized" environment="scenezone" duration="param:duration">
+          <camera_panover_param reference="target_object" showing="back" pan_direction="leftwards" interpolation="linear" orient_to="ecliptic">
+            <distance>
+              <value var="distance" scaleref="target_object" percentage="100"/>
+            </distance>
+            <elevation>
+              <value var="elevation" scaleref="target_object" percentage="100"/>
+            </elevation>
+            <panstart>
+              <value var="panstart"/>
+            </panstart>
+            <panend>
+              <value var="panend"/>
+            </panend>
+          </camera_panover_param>
+        </shot>
+
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

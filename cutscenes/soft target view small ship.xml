@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+	Soft Target View Small Ship.xml
+	Cutscene by Apoch
+	   
+	Simple event monitor cutscene for displaying a small ship from the player's perspective.
+	   
+	Assumes that a reference object "targetobject" is provided when the scene is started.
+	
+	Playback duration is fully dynamic; the object will be displayed until a specific
+	event ("stopscene") is triggered from control code either in the engine itself or
+	via a controlling MD script.
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="SoftTargetDisplayScene_ViewSmallShip">
+    <params>
+      <param name="targetobject" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="SoftTargetDisplaySequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <!--shot name="SoftTargetDisplayShot" environment="scenezone" duration="2000"-->
+
+        <!-- Manual camera placement: locate the camera along the line of sight between
+					     the player ship and the target object, 300% of the target object's radius
+					     away from the center of the target object itself, zooming the camera such
+					     that the target takes up roughly 85% of the view area. -->
+        <!--camera_lookat position_reference="@playership" lookat_reference="targetobject">
+            <begin fillspace="50" distance="250" />
+            <end fillspace="80" distance="250" />
+          </camera_lookat>
+        </shot-->
+        <shot name="SoftTargetDisplayShot2" environment="scenezone" duration="onevent:stopscene">
+
+          <!-- Manual camera placement: locate the camera along the line of sight between
+					     the player ship and the target object, 300% of the target object's radius
+					     away from the center of the target object itself, zooming the camera such
+					     that the target takes up roughly 85% of the view area. -->
+          <camera_lookat position_reference="@playership" lookat_reference="targetobject">
+            <begin fillspace="80" distance="250" />
+            <!--end fillspace="80" distance="250" /-->
+          </camera_lookat>
+
+          <!--camera>
+						<position>
+							<betweenobjects>
+								<point1>
+									<reference object="targetobject" />
+								</point1>
+								<point2>
+									<reference object="@playership" />
+								</point2>
+								<distance>
+                  <lock>
+                    <value percentage="300" scaleref="targetobject" />
+                  </lock>
+								</distance>
+							</betweenobjects>
+						</position>
+						
+						<lookdirection>
+							<reference object="targetobject" />
+						</lookdirection>
+						
+						<zoom>
+							<lock>
+								<autozoom reference="targetobject" fillspace="65" />
+							</lock>
+						</zoom>
+					</camera-->
+
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

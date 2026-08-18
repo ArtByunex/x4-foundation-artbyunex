@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	show_npc_face.xml
+	Simple event monitor cutscene for displaying a Teladi NPC face/head in detailed view.
+	Assumes that a reference object "npcref" is provided when the scene is started.
+	Playback duration is fully dynamic; the object will be displayed until a specific
+	event ("stopscene") is triggered from control code either in the engine itself or
+	via a controlling MD script.
+  The offsets for position and lookdirection can be copy/pasted from the cutscenemanager IMGUI menu.
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="ShowNPCFaceTeladi">
+    <params>
+      <param name="npcref" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:npcref" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="ShowNPCFaceSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <shot name="ShowNPCFaceShot" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <position>
+              <reference object="npcref" head="1" x="0" y="0.05" z="0.7" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="npcref" head="1" x="0" y="0.05" z="-0.3" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.000000"/>
+            </roll>
+            <zoom>
+              <value exact="1.3"/>
+            </zoom>
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="npcref" head="1" x="0.1" y="0" z="0.7" comment="copied from player camera"/>
+            </position>
+          </light>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+
+ 

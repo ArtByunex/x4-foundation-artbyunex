@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+  
+  <!-- Parameterized fly-from-to cutscene
+    Cutscene plays for the specific duration (parameter). If one of the target objects uses a gate or warps to a different sector, the camera will move weirdly.
+    To handle this case, use an event-trigger with value "abort", so it will play Sequence 2.
+    The Flyfromto camera 
+    - phase 1 = orbit1, from t=0 to t=firsttime, in which it orbits the source-object. 
+    - phase 2 = flyto,  from t=firsttime to t=afterpantime, when that time expires it will start moving towards the 2nd target (this can result in a "jump" in rotation, avoided by using time_firstobject="1" (so 1 ms))
+    - phase 3 = orbit2, from t=afterpantime to t=time, canera has arrived at the target-object and will do an orbit around the target, for the remainder of the duration
+   -->
+  <director key="Cutscene_flyfromto">
+    <params>
+      <!-- 
+        Don't parameterize the duration when starting this cutscene. CameraFlyFromTo::GetFromXML() uses GetNodeDuration to dynamically calculate the duration at load time. This value is then directly used in initializing keyframes timings. 
+        When starting this cutscene and modifying the duration, 'deep down' those containers still use the duration as calculated at loadtime, where other spots will be aware of the new duration. 
+        e.g. when increasing the time above the default duration, the shot will take the new duration as specified, but all keyframe-containers already stop at the default value the angles won't be updated anymore between the default-duration from the xml and the overriden duration from start_cutscene.
+      -->
+      <param name="duration" number="true" default="15" comment="in seconds"/>
+      <param name="distance" number="true" default="500"/>
+      <param name="flytodistance" number="true" default="500"/>
+      <param name="orbit1_yaw_start" number="true" default="0"/>
+      <param name="orbit1_yaw_end" number="true" default="6"/>
+      <param name="orbit1_elevation" number="true" default="15"/>
+      <param name="orbit2_yaw_start" number="true" default="170"/>
+      <param name="orbit2_yaw_end" number="true" default="164"/>
+      <param name="orbit2_pitch" number="true" default="30"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:abortfocus" />
+    <object_group name="target_group">
+      <reference object="source" />
+      <reference object="target" />
+      <reference object="abortfocus" comment="Abort which is guaranteed to remain in the zone (e.g. a gate), on which we focus if 'abort' is called" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1_flyfromto" start="0">
+        <!-- keyframe duration = time_firstobject + time_fly, shot-duration needs to match that + a few seconds extra (to avoid a keyframe error) -->
+        <!-- duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes -->
+        <!-- Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+        <shot name="Shot_flyfromto" environment="scenezone" duration="param:duration">
+          <camera_flyfromto reference="source" distance="param:distance" flyto_reference="target" flyto_distance="param:flytodistance" interpolation="smooth" time_firstobject="5000" time_fly="9000" cycle="none"
+                            orbit1_yaw_start="param:orbit1_yaw_start" orbit1_yaw_end="param:orbit1_yaw_end" orbit1_elevation="param:orbit1_elevation" 
+                            orbit2_yaw_start="param:orbit2_yaw_start" orbit2_yaw_end="param:orbit2_yaw_end" orbit2_pitch="param:orbit2_pitch"/>
+        </shot>
+      </sequence>
+      
+      <!-- 
+      If the target object jumps out of the current sector, the camera will try to move the coordinates the target in the other sector is, but in this sector (resulting in weird movement).
+      To avoid this, the script which started the cutscene can triger the 'abort' event to look at something safe 
+      -->
+      <sequence name="Sequence2_abort" start="onevent:abort">
+        <shot name="Shot_abort" environment="scenezone" duration="param:duration">
+          <camera>
+            <position>
+              <reference object="abortfocus" x="0" y="300" z="-6000"/>
+            </position>
+            <lookdirection>
+              <reference object="abortfocus"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<diff>
+
+  <add sel="/jobs">
+
+    <!-- Hyperion Jobs:
+  - start deactivated
+  - player chooses through story who gets the blueprints/jobs activated (HOP, PAR, TRI)
+  - if TRI is formed after job activation, they take with them the HOP/PAR Hyperion blueprints/jobs
+    -->
+
+    <job id="paranid_expeditionary_patrol_l_sector" name="{20204,3301}" comment="patrol, few" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster"/>
+        </order>
+      </orders>
+      <category faction="paranid" tags="[factionlogic, military, expeditionary]" size="ship_l"/>
+      <quota galaxy="2" maxgalaxy="2" cluster="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="paranid" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="paranid" tags="[military, expeditionary]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="paranid" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="paranid_fighter_escort_s_patrol"/>
+      </subordinates>
+    </job>
+
+    <job id="holyorder_expeditionary_patrol_l_sector" name="{20204,3301}" comment="patrol, few" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster"/>
+        </order>
+      </orders>
+      <category faction="holyorder" tags="[factionlogic, military, expeditionary]" size="ship_l"/>
+      <quota galaxy="2" maxgalaxy="2" cluster="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="holyorder" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="holyorder" tags="[military, expeditionary]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="holyorder" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="holyorder_fighter_escort_s_patrol"/>
+      </subordinates>
+    </job>
+
+    <job id="trinity_expeditionary_patrol_l_sector" name="{20204,3301}" comment="patrol, few" startactive="false">
+      <modifiers commandeerable="true"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.cluster"/>
+        </order>
+      </orders>
+      <category faction="trinity" tags="[factionlogic, military, expeditionary]" size="ship_l"/>
+      <quota galaxy="4" maxgalaxy="4" cluster="1"/>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="trinity" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="trinity" tags="[military, expeditionary]" size="ship_l"/>
+        <loadout>
+          <quantity exact="1.0"/>
+          <quality exact="0.99">
+            <variation exact="0.6"/>
+          </quality>
+        </loadout>
+        <owner exact="trinity" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="trinity_fighter_escort_s_patrol"/>
+      </subordinates>
+    </job>
+
+  </add>
+</diff>

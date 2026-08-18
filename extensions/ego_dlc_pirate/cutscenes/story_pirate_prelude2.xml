@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Tourists in Vegas -->
+  <director key="Story_Pirate_Prelude2" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_station" />
+    <object_group name="target_group">
+      <reference object="target_station" />
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <!--shot name="StaticStationShot1" environment="scenezone" duration="11000">
+          <camera>
+            <position>
+              <reference object="target_station" x="-1045.529785" y="1758.079834" z="2069.359131" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_station" x="-1044.707520" y="1757.853271" z="2068.837158" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.414453"/>
+            </roll>
+          </camera>
+        </shot-->
+
+        <shot name="FollowShip" environment="scenezone" duration="9000">
+          <camera_follow reference="target_ship" orient_to="ecliptic">
+            <begin distance="500" pitch="0" yaw="110" />
+            <end distance="150" pitch="30" yaw="190" time="10000" />
+          </camera_follow>
+        </shot>
+
+        <shot name="StaticCameraShot" environment="scenezone" duration="11000">
+          <camera>
+            <position>
+              <reference object="target_ship" x="-26.712997" y="50.323322" z="-114.427750" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_station" x="0" y="0" z="0" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.011666"/>
+            </roll>          
+          </camera>
+        </shot>
+
+
+        <!-- Casino Overview -->
+        <shot name="StaticStationShot2" environment="scenezone" duration="8000">
+          <camera>
+            <position>
+              <reference object="target_station" x="767.853333" y="2700.672119" z="6766.707031" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_station" x="767.753906" y="2700.260742" z="6765.801270" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="-0.008436"/>
+            </roll>
+          </camera>
+        </shot>
+        
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

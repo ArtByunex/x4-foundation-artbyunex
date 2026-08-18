@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Transport_Refugees_Escort" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Jo'Paul Mamuyac"/>
+    <!--
+      userdata saved by this scenario:
+        userdata.scenario_transport_refugees_escort_start
+        userdata.scenario_transport_refugees_escort_died
+        userdata.scenario_transport_refugees_escort_first_kill
+        userdata.scenario_transport_refugees_escort_last_kill
+        userdata.scenario_transport_refugees_escort_kills
+        userdata.scenario_transport_refugees_escort_score
+      because the scores from The Mechanic and The Safeguard scenarios are used in The Ferryman scenario, all userdata listed above are obfuscated.
+      note that these userdata are NOT the userdata used by the general Timelines scoring system. e.g. *_best_(duration|rating|score) and *_last_(duration|rating|score)
+      userdata saves are in UpdateUserData, which calls SaveToUserData to both (1) obfuscate the values and (2) actually save them.
+    -->
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_transport_refugees_escort">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$DebugChance2"       exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--Disable certain notification types-->
+        <set_notification_type_enabled type="notification.npc_under_attack" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_out_of_ammo" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_await_orders" enabled="false"/>
+        <set_notification_type_enabled type="notification.npc_order_not_complete" enabled="false"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <include_actions ref="md.Scenario_Transport_Refugees.Start_SetModes" />
+        <set_value name="$Mode" exact="$Mode_Escort" />
+        <include_actions ref="md.Scenario_Transport_Refugees.Start_IncludeLibrary" />
+        <!-- init specific to $Mode_Escort -->
+        <set_value name="$MissionDescription" exact="{30615,302}" />
+        <set_value name="$Ship_Rescue" exact="null" />
+        <set_value name="$Ship_Escort" exact="player.ship" />
+        <set_value name="$Ship_Other" exact="null" />
+        <set_value name="$Count_LaserTowers" exact="0" />
+        <set_value name="$Count_Mines" exact="0" />
+        <set_value name="$Count_Satellites" exact="0" />
+        <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+          <param name="MissionCue" value="$MissionCue" />
+          <param name="Event" value="'init'" />
+        </run_actions>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Transport_Refugees.InitDisabledStation_IncludeLibrary" />
+                <include_actions ref="md.Scenario_Transport_Refugees.InitHospital_IncludeLibrary" />
+                <include_actions ref="Setup_PlayerFleet" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_PlayerFleet">
+              <actions>
+                <create_group groupname="$PlayerFleet"/>
+                <do_if value="$Ship_Escort">
+                  <add_to_group groupname="$PlayerFleet" object="$Ship_Escort" />
+                  <add_to_group groupname="$Weapons" list="$Ship_Escort.weapons.operational.list"/>
+                </do_if>
+
+                <!--spawn player-owned ships-->
+                <find_ship_by_true_owner name="$Ship_Rescue" faction="faction.player" space="player.sector" comment="added via god entry">
+                  <match macro="macro.ship_arg_m_trans_container_01_a_macro" />
+                </find_ship_by_true_owner>
+                <add_to_group groupname="$PlayerFleet" object="$Ship_Rescue" />
+                <set_value name="$MissionCue.$Actor_Rescuer" exact="$Ship_Rescue.assignedaipilot" />
+                <do_if value="$IsAddTravelThrustMod">
+                  <add_equipment_mods object="$Ship_Rescue">
+                    <engine ware="ware.mod_engine_travelthrust_transport_refugees"/>
+                  </add_equipment_mods>
+                </do_if>
+                <run_actions ref="md.Scenario_Transport_Refugees.AddEngineer">
+                  <param name="MissionCue" value="$MissionCue" />
+                  <param name="Ship" value="$Ship_Rescue" />
+                </run_actions>
+                <set_value name="$Ship_Other" exact="$Ship_Rescue" />
+
+                <do_for_each in="$PlayerFleet" name="$ship">
+                  <debug_text text="$ship + ' ' + $ship.knownname" chance="$DebugChance" />
+                  <debug_text text="'    $ship.macro: ' + $ship.macro" chance="$DebugChance" />
+                  <do_for_each name="$Item" in="$ship.loadout.wares.list">
+                    <debug_text text="'    $Item: ' + $Item + ' ' + @$Item.id + ' ' + (typeof $Item)" chance="$DebugChance" />
+                  </do_for_each>
+                </do_for_each>
+
+                <do_if value="not $PlayerFleet.count">
+                  <debug_text text="'PlayerFleet ship does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+
+                <debug_text text="'$Actor_Rescuer: ' + $Actor_Rescuer + ' ' + @$Actor_Rescuer.knownname" chance="$DebugChance" />
+                <debug_text text="'$Actor_Engineer: ' + $Actor_Engineer + ' ' + @$Actor_Engineer.knownname" chance="$DebugChance" />
+                <debug_text text="'$Actor_Escort: ' + $Actor_Escort + ' ' + @$Actor_Escort.knownname" chance="$DebugChance" />
+              </actions>
+            </library>
+
+            <cue name="Debug">
+              <cues>
+                <cue name="Debug_GetWeaponGroups">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'activeweapongroup.primary: ' + player.occupiedship.activeweapongroup.primary" />
+                    <debug_text text="'activeweapongroup.secondary: ' + player.occupiedship.activeweapongroup.secondary" />
+                    <do_for_each in="player.occupiedship.weapons.all.list" name="$Weapon">
+                      <debug_text text="'Weapon: ' + $Weapon.knownname + ' in group ' + $Weapon.grouptag"/>
+                    </do_for_each>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+
+                <cue name="Debug_GetWeaponModes">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <do_for_each in="player.occupiedship.turrets.all.list" name="$Turret">
+                      <debug_text text="'Turret: ' + $Turret.knownname + ' mode ' + $Turret.mode"/>
+                    </do_for_each>
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+
+                <cue name="Debug_GetIsShowHints">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <include_actions ref="GetIsShowHints" />
+                    <reset_cue cue="this" />
+                  </actions>
+                </cue>
+
+                <cue name="Debug_GetXenonSandMs">
+                  <conditions>
+                    <event_cue_signalled />
+                  </conditions>
+                  <actions>
+                    <do_all counter="$Count" exact="10">
+                      <set_value name="$Faction_Enemy" exact="faction.xenon" />
+                      <get_ship_definition reference="$ShipDefinition" size="[class.ship_s, class.ship_m]" faction="$Faction_Enemy" tags="tag.military" />
+                      <run_actions ref="md.Scenario_Transport_Refugees.CreateShip" result="$Ship">
+                        <param name="Group"          value="$MissionCue.$Raiders" />
+                        <param name="Owner"          value="$Faction_Enemy" />
+                        <param name="PilotFaction"   value="$Faction_Enemy" />
+                        <param name="ShipDefinition" value="$ShipDefinition" />
+                        <param name="Sector"         value="$MissionCue.$Station_Disabled.sector" />
+                        <param name="Pos"            value="$Pos" />
+                        <param name="Commander"      value="null" />
+                        <param name="Assignment"     value="null" />
+                        <param name="LoadoutLevel"   value="0.5" />
+                        <param name="DebugChance"    value="100" />
+                      </run_actions>
+                      <debug_text text="'$Ship.macro: ' + $Ship.macro" />
+                      <reset_cue cue="this" />
+                    </do_all>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario" version="2">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <include_actions ref="InitMission_IncludeLibrary" />
+            <include_actions ref="md.Scenario_Transport_Refugees.StartMission_IncludeLibrary" />
+          </actions>
+          <patch sinceversion="2">
+            <debug_text text="'patch sinceversion 2'" chance="$MissionCue.$DebugChance" />
+            <set_value name="PickUpRefugees.$StationDestructionCue" exact="StationDestruction" />
+          </patch>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+            <!-- cues specific to $Mode_Escort -->
+            <library name="InitMission_IncludeLibrary">
+              <actions>
+                <set_value name="$MissionCue.$ObjectiveStep_ProtectRescuer" exact="1" />
+                <set_value name="$MissionCue.$ObjectiveStep_Deploy" exact="2" />
+                <set_value name="$MissionCue.$ObjectiveStep_Destroy" exact="3" />
+                <set_value name="$MissionCue.$Text_LaserTowers" exact="{1001,1333}" />
+                <set_value name="$MissionCue.$Text_Mines" exact="{1001,1326}" />
+                <set_value name="$MissionCue.$Text_Enemies" exact="{1001,9604}" />
+                <create_mission cue="$MissionCue" type="missiontype.fight" name="{30615,301}" description="$MissionDescription" faction="$Station_Disabled.owner" difficulty="$Difficulty">
+                  <briefing>
+                    <objective step="$MissionCue.$ObjectiveStep_ProtectRescuer" action="objective.protect" object="$MissionCue.$Ship_Rescue" />
+                    <objective step="$MissionCue.$ObjectiveStep_Deploy" action="objective.deploy" text="$MissionCue.$Text_LaserTowers" />
+                    <objective step="$MissionCue.$ObjectiveStep_Destroy" action="objective.destroy" text="$MissionCue.$Text_Enemies" />
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_ProtectRescuer" />
+                <set_value name="$MissionCue.$ObjectiveStep_Current" exact="$MissionCue.$ObjectiveStep_ProtectRescuer" />
+              </actions>
+            </library>
+            <library name="UpdateMission" purpose="run_actions">
+              <params>
+                <param name="MissionCue" />
+                <param name="ObjectiveCue" default="null" />
+                <param name="DebugChance" default="0" />
+              </params>
+              <actions>
+                <do_if value="
+                  $MissionCue.hasmission and
+                  (
+                    (not $MissionCue.$IsRealMissionTimerStarted) or
+                    (
+                      $MissionCue.$Station_Disabled.isoperational and
+                      (not $MissionCue.$IsStationDestroyed_Actual)
+                    )
+                  )">
+                  <debug_text text="'$ObjectiveCue: ' + $ObjectiveCue" chance="$MissionCue.$DebugChance2" />
+                  <do_if value="@$ObjectiveCue.exists">
+                    <set_value name="$ObjectiveCueName" exact="$ObjectiveCue.name" />
+                  </do_if>
+                  <do_else>
+                    <set_value name="$ObjectiveCueName" exact="$MissionCue.$ObjectiveCue_LastName" />
+                  </do_else>
+                  <do_if value="not $MissionCue.hasmission" comment="purposely empty">
+                  </do_if>
+                  <do_elseif value="$ObjectiveCueName == 'DeployLaserTowers'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_Deploy" action="objective.deploy" text="$MissionCue.$Text_LaserTowers" object="$MissionCue.$Station_Disabled.sector" offset="Raiders.$Pos_ProtectOrder" radius="$MissionCue.$Ship_Escort.maxradarrange * 0.25" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_Deploy" />
+                    <set_value name="$MissionCue.$ObjectiveStep_Current" exact="$MissionCue.$ObjectiveStep_Deploy" />
+                  </do_elseif>
+                  <do_elseif value="$ObjectiveCueName == 'PatrolBlockade'">
+                    <update_mission cue="$MissionCue">
+                      <briefing>
+                        <objective step="$MissionCue.$ObjectiveStep_Destroy" action="objective.destroy" text="$MissionCue.$Text_Enemies" object="$MissionCue.$Station_Disabled.sector" offset="Raiders.$Pos_ProtectOrder" radius="$MissionCue.$Ship_Escort.maxradarrange * 0.25" />
+                      </briefing>
+                    </update_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="$MissionCue.$ObjectiveStep_Destroy" />
+                    <set_value name="$MissionCue.$ObjectiveStep_Current" exact="$MissionCue.$ObjectiveStep_Destroy" />
+                  </do_elseif>
+                  <set_value name="$MissionCue.$ObjectiveCue_LastName" exact="$ObjectiveCueName" />
+                  <debug_text text="'$MissionCue.$ObjectiveCue_LastName (updated): ' + $MissionCue.$ObjectiveCue_LastName" chance="$MissionCue.$DebugChance" />
+                </do_if>
+              </actions>
+            </library>
+            <library name="GetIsShowHints">
+              <actions>
+                <set_value name="$IsShowHints_Turrets" exact="not player.occupiedship.maxcombatrange.{weaponmode.autoassist}.all" />
+                <set_value name="$IsShowHints_PlasmaGun" exact="(not player.occupiedship.dps.primary) or (not player.occupiedship.dps.secondary)" />
+                <do_if value="not $IsShowHints_TargetOnlyPs?">
+                  <set_value name="$IsShowHints_TargetOnlyPs" exact="true" />
+                </do_if>
+                <do_if value="not $IsShowHints_WrecksAsCover?">
+                  <set_value name="$IsShowHints_WrecksAsCover" exact="true" />
+                </do_if>
+                <debug_text text="'$IsShowHints_Turrets: ' + $IsShowHints_Turrets" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$IsShowHints_PlasmaGun: ' + $IsShowHints_PlasmaGun" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$IsShowHints_TargetOnlyPs: ' + $IsShowHints_TargetOnlyPs" chance="$MissionCue.$DebugChance" />
+                <debug_text text="'$IsShowHints_WrecksAsCover: ' + $IsShowHints_WrecksAsCover" chance="$MissionCue.$DebugChance" />
+              </actions>
+            </library>
+            <cue name="ShowHints">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <do_if value="
+                  @userdata.scenario_transport_refugees_escort_times_finished gt 2 and
+                  @userdata.scenario_transport_refugees_escort_best_rating lt 3
+                " comment="more than 2 attemps and best rating less than 3">
+                  <include_actions ref="GetIsShowHints" />
+                  <set_value name="$Time_NextHint" exact="player.age" />
+                </do_if>
+                <do_else>
+                  <reset_cue cue="this" />
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="ShowHints_Interval" checktime="player.age + 5s" checkinterval="5s" instantiate="true">
+                  <conditions>
+                    <check_value value="not player.isinfullscreenmenu" />
+                    <check_value value="not player.isinfullscreencutscene" />
+                    <check_value value="player.age gt $Time_NextHint" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <debug_text text="'player.age: ' + player.age + ' $Time_NextHint: ' + $Time_NextHint" chance="$MissionCue.$DebugChance" />
+                    <remove_help all="true" />
+                    <include_actions ref="GetIsShowHints" />
+                    <do_if value="$IsShowHints_Turrets or $IsShowHints_PlasmaGun or $IsShowHints_TargetOnlyPs or $IsShowHints_WrecksAsCover">
+                      <set_value name="$Time_NextHint" exact="player.age + 10s" />
+                      <do_if value="$IsShowHints_Turrets">
+                        <show_help custom="{30615,801}" />
+                      </do_if>
+                      <do_elseif value="$IsShowHints_PlasmaGun">
+                        <show_help custom="{30615,802}" />
+                      </do_elseif>
+                      <do_elseif value="$IsShowHints_TargetOnlyPs">
+                        <set_value name="$IsShowHints_TargetOnlyPs" exact="false" />
+                        <show_help custom="{30615,803}" />
+                      </do_elseif>
+                      <do_elseif value="$IsShowHints_WrecksAsCover">
+                        <set_value name="$IsShowHints_WrecksAsCover" exact="false" />
+                        <show_help custom="{30615,804}" />
+                      </do_elseif>
+                    </do_if>
+                    <do_else>
+                      <cancel_cue cue="this.static" />
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+            <cue name="ActivateFirstObjective">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                  <param name="MissionCue" value="$MissionCue" />
+                  <param name="Event" value="'start'" />
+                </run_actions>
+                <signal_cue cue="DeployLaserTowers" />
+                <signal_cue cue="ShowHints" />
+              </actions>
+            </cue>
+            <cue name="DeployLaserTowers" namespace="this">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled />
+                  <event_object_destroyed group="parent.namespace.$MissionCue.$Raiders" />
+                </check_any>
+                <check_value value="parent.namespace.$MissionCue.$Ship_Escort.isoperational" />
+                <check_value value="parent.namespace.$MissionCue.$Ship_Escort.ammostorage.{deployablecategory.lasertower}.count"/>
+                <check_value value="parent.namespace.$MissionCue.$ObjectiveStep_Current != parent.namespace.$MissionCue.$ObjectiveStep_Deploy" />
+              </conditions>
+              <actions>
+                <set_value name="$MissionCue" exact="parent.namespace.$MissionCue" />
+                <set_value name="$IsOk" exact="false" />
+                <do_if value="event.name == 'event_cue_signalled'">
+                  <set_value name="$IsOk" exact="true" />
+                </do_if>
+                <do_elseif value="event.name == 'event_object_destroyed'">
+                  <find_gravidar_contact name="$Contacts" object="$MissionCue.$Ship_Escort" ishostileto="$MissionCue.$Ship_Escort" multiple="true" sortbydistanceto="$MissionCue.$Ship_Escort"/>
+                  <debug_text text="'$Contacts: ' + $Contacts" chance="$MissionCue.$DebugChance" />
+                  <set_value name="$IsOk" exact="(not $Contacts.count) or $Contacts.{1}.distanceto.{$MissionCue.$Ship_Escort} le $MissionCue.$Ship_Escort.maxradarrange * 0.25" />
+                </do_elseif>
+                <do_if value="$IsOk">
+                  <run_actions ref="UpdateMission">
+                    <param name="MissionCue" value="$MissionCue" />
+                    <param name="ObjectiveCue" value="DeployLaserTowers" />
+                  </run_actions>
+                  <include_actions ref="md.Scenario_Transport_Refugees.SetRescueShipToApproachDisabledStation" />
+                </do_if>
+                <reset_cue cue="this" />
+              </actions>
+            </cue>
+            <cue name="PatrolBlockade" namespace="this">
+              <conditions>
+                <event_gravidar_has_scanned object="parent.namespace.$MissionCue.$Ship_Escort" />
+                <count_gravidar_contacts result="$Contact" object="event.object" ishostileto="event.object" multiple="false"/>
+                <check_value value="$Contact" />
+                <check_value value="parent.namespace.$MissionCue.$ObjectiveStep_Current != parent.namespace.$MissionCue.$ObjectiveStep_Destroy" />
+              </conditions>
+              <actions>
+                <set_value name="$MissionCue" exact="parent.namespace.$MissionCue" />
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                <do_if value="(not $MissionCue.$MissionTime_Start) or (not @$MissionCue.$IsRealMissionTimerStarted)">
+                  <signal_cue_instantly cue="UpdateMissionTimer" param="table[$IsStartNowIfNotStarted = true, $IsReset = true]"
+                    comment="mission timer is started when the scenario starts BUT timers for scoring starts at these times:
+                    (1) rescue scenario: when the player first undocks from the disabled station,
+                    (2) engineer scenario: when the player first spacewalks,
+                    (3) escort scenario: when the player's ships first detects the blockade OR, in case the escort doesn't patrol the blockade, when the AI engineer enters the station.
+                    mission timer is started when the scenario starts IN CASE the player doesn't do any of the above.
+                    $IsReset is called so that MissionTime_Start is set to any of the 3 conditions above.
+                    this reset can only happen once."/>
+                </do_if>
+                <run_actions ref="UpdateMission">
+                  <param name="MissionCue" value="$MissionCue" />
+                  <param name="ObjectiveCue" value="PatrolBlockade" />
+                </run_actions>
+                <!-- <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                  <param name="MissionCue" value="$MissionCue" />
+                  <param name="Event" value="'start'" />
+                </run_actions> -->
+                <do_if value="not @$MissionCue.$IsPatrolBlockadeCutscene">
+                  <set_value name="$MissionCue.$IsPatrolBlockadeCutscene" exact="true" />
+                </do_if>
+                <reset_cue cue="this" />
+              </actions>
+            </cue>
+            <cue name="DeployableDeployed" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_launched_lasertower object="$MissionCue.$Ship_Escort" />
+                  <event_object_launched_mine object="$MissionCue.$Ship_Escort" />
+                  <event_object_launched_satellite object="$MissionCue.$Ship_Escort" />
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$Deployable" exact="event.param" />
+                <do_if value="$Deployable.macro.deployablecategory == deployablecategory.lasertower">
+                  <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                    <param name="MissionCue" value="$MissionCue" />
+                    <param name="Event" value="'lasertower'" />
+                  </run_actions>
+                </do_if>
+                <do_elseif value="$Deployable.macro.deployablecategory == deployablecategory.mine">
+                  <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                    <param name="MissionCue" value="$MissionCue" />
+                    <param name="Event" value="'mine'" />
+                  </run_actions>
+                </do_elseif>
+                <do_elseif value="$Deployable.macro.deployablecategory == deployablecategory.satellite">
+                  <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                    <param name="MissionCue" value="$MissionCue" />
+                    <param name="Event" value="'satellite'" />
+                  </run_actions>
+                </do_elseif>
+              </actions>
+            </cue>
+            <!-- cues common in all modes except $Mode_Escort -->
+            <cue name="UserDataEvents_Escort" ref="md.Scenario_Transport_Refugees.UserDataEvents_Escort_CueLibrary">
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="RaidersCue" value="Raiders" />
+            </cue>
+            <cue name="UserDataEvents_Engineer" ref="md.Scenario_Transport_Refugees.UserDataEvents_Engineer_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+            </cue>
+            <!-- cues common in all modes -->
+            <cue name="MissionEnd" ref="md.Scenario_Transport_Refugees.MissionEnd_CueLibrary">
+              <param name="ResultWindowCue" value="ResultWindow" />
+              <param name="CutscenesCue" value="Cutscenes" />
+            </cue>
+            <cue name="UpdateMissionTimer" ref="md.Scenario_Transport_Refugees.UpdateMissionTimer_CueLibrary" />
+            <cue name="Cutscenes" ref="md.Scenario_Transport_Refugees.Cutscenes_CueLibrary">
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+            </cue>
+            <cue name="VideoComms" ref="md.Scenario_Transport_Refugees.VideoComms_CueLibrary" />
+            <cue name="StationDestruction" ref="md.Scenario_Transport_Refugees.StationDestruction_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+            </cue>
+            <cue name="PickUpRefugees" ref="md.Scenario_Transport_Refugees.PickUpRefugees_CueLibrary">
+              <param name="MissionEndCue"                value="MissionEnd" />
+              <param name="UpdateMissionRunActions"      value="UpdateMission" />
+              <param name="UpdateMissionTimerCue"        value="UpdateMissionTimer" />
+              <param name="StationDestructionCue"        value="StationDestruction" />
+              <param name="UserDataEvents_EscortCue"     value="UserDataEvents_Escort" />
+              <param name="UserDataEvents_EngineerCue"   value="UserDataEvents_Engineer" />
+              <param name="CutscenesCue"                 value="Cutscenes" />
+              <param name="VideoCommsCue"                value="VideoComms" />
+              <param name="RaidersCue"                   value="Raiders" />
+              <!-- <param name="ModeEscort_PatrolBlockadeCue" value="PatrolBlockade" /> -->
+            </cue>
+            <cue name="Raiders" ref="md.Scenario_Transport_Refugees.Raiders_CueLibrary">
+              <param name="UpdateMissionRunActions" value="UpdateMission" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="MissionEndCue" value="MissionEnd" />
+              <!-- <param name="ModeEscort_PatrolBlockadeCue" value="PatrolBlockade" /> -->
+              <param name="StationDestructionCue" value="StationDestruction" />
+            </cue>
+            <cue name="ShipRescueDestruction" ref="md.Scenario_Transport_Refugees.ShipRescueDestruction_CueLibrary">
+              <param name="CutscenesCue" value="Cutscenes" />
+              <param name="VideoCommsCue" value="VideoComms" />
+            </cue>
+            <cue name="RandomExplosions" ref="md.Scenario_Transport_Refugees.RandomExplosions_CueLibrary" />
+            <!-- disabled as spacesuit AI flight is poor near asteroid veins -->
+            <!-- <cue name="RandomNPCEngineers" ref="md.Scenario_Transport_Refugees.RandomNPCEngineers_CueLibrary" /> -->
+            <cue name="Start_Scenario_RunOnce">
+              <actions>
+                <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+              </actions>
+            </cue>
+            <cue name="MaydayStart" ref="md.Scenario_Transport_Refugees.MaydayStart_CueLibrary">
+              <param name="UpdateMissionTimerCue" value="UpdateMissionTimer" />
+              <param name="VideoCommsCue" value="VideoComms" />
+              <param name="QuickStartCue" value="QuickStart" />
+            </cue>
+            <cue name="QuickStart" ref="md.Scenario_Transport_Refugees.QuickStart_CueLibrary">
+              <param name="PickUpRefugeesCue" value="PickUpRefugees" />
+              <param name="RaidersCue" value="Raiders" />
+              <param name="QuickStart_CompleteCue" value="QuickStart_Escort" />
+            </cue>
+            <cue name="QuickStart_Escort">
+              <conditions>
+                <event_cue_signalled />
+              </conditions>
+              <cues>
+                <cue name="QuickStart_Escort_Interval" checkinterval="0.5s" instantiate="true">
+                  <conditions>
+                    <check_value value="@$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}.exists" />
+                    <debug_text text="'$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}: ' + @$MissionCue.$PickUpRefugeesCueByShip.{$MissionCue.$Ship_Rescue}" debugchance="$MissionCue.$DebugChance" />
+                  </conditions>
+                  <actions>
+                    <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+                    <get_safe_pos result="$Pos" zone="$MissionCue.$Station_Disabled.zone" object="$MissionCue.$Ship_Rescue" x="$MissionCue.$Ship_Rescue.width" y="$MissionCue.$Ship_Rescue.height * -1" z="$MissionCue.$Ship_Rescue.length * -1" radius="$MissionCue.$Ship_Escort.size" />
+                    <create_position name="$Pos_LookAt" space="$MissionCue.$Station_Disabled.zone" object="$MissionCue.$Station_Disabled.sector" value="Raiders.$Pos_ProtectOrder" />
+                    <create_orientation name="$Rot" orientation="look_at" refposition="$Pos_LookAt">
+                      <position value="$Pos" />
+                    </create_orientation>
+                    <warp object="$MissionCue.$Ship_Escort" zone="$MissionCue.$Station_Disabled.zone">
+                      <position value="$Pos" />
+                      <rotation value="$Rot" />
+                    </warp>
+                    <do_if value="ActivateFirstObjective.state == cuestate.waiting">
+                      <signal_cue cue="ActivateFirstObjective" />
+                    </do_if>
+                    <do_elseif value="DeployLaserTowers.state == cuestate.waiting">
+                      <signal_cue cue="DeployLaserTowers" />
+                    </do_elseif>
+                    <do_else>
+                      <run_actions ref="UpdateMission">
+                        <param name="MissionCue" value="$MissionCue" />
+                        <param name="ObjectiveCue" value="DeployLaserTowers" />
+                      </run_actions>
+                    </do_else>
+                    <cancel_cue cue="QuickStart_Escort" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <event_cue_signalled comment="only accept signals to end mission to allow the station destruction cutscene to play" />
+          </conditions>
+          <actions>
+            <debug_text text="'event.name: ' + event.name" chance="$MissionCue.$DebugChance" />
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="(not @player.container.isoperational) and (not player.entity.hascontext.{$MissionCue.$Station_Disabled})" comment="always accept that the player never dies UNLESS the station or ship they are in is destroyed or they have no object context - unless the player is at the disabled station. when at the disabled station, the station destruction's cutscene will play anyway." />
+            <debug_text text="'$ResultData.$PlayerDied: ' + $ResultData.$PlayerDied" chance="$MissionCue.$DebugChance" />
+            <set_value name="$ResultData.$CustomStats" exact="table[]"/>
+            <set_value name="$MaxScore" exact="10000" />
+            <!-- kills -->
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills" exact="$MissionCue.$Scenario_Transport_Refugees_escort_kills" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_KillScore_01_Raiders" exact="$MissionCue.$Count_RaidersSpawned" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_KillScore_99_Final" exact="$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills / ($ResultData.$CustomStats.$Score_Step1_KillScore_01_Raiders)f * $MaxScore"
+                      comment="Score_Step1_KillScore_99_Final is player's total score based on number of kills * maxscore.
+                      and Score_Step2_Efficiency_99_Final = THAT score * efficiency factor = the players TOTAL score.
+                      because stats need to be addends, make Score_Step1_KillScore_99_Addend = first score component = kill score * half max score.
+                      therefore Score_Step2_Efficiency_99_Addend = Score_Step2_Efficiency_99_Final - Score_Step1_KillScore_99_Addend." />
+            <set_value name="$ResultData.$CustomStats.$Score_Step1_KillScore_99_Addend" exact="$ResultData.$CustomStats.$Score_Step1_KillScore_99_Final * 0.5" />
+            <add_scenario_stat id="'kills'" name="{30615,311}"
+              description="{30615,312}"
+              uivalue="$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills"
+              score="$ResultData.$CustomStats.$Score_Step1_KillScore_99_Addend"
+              maxscore="$MaxScore * 0.5" />
+            <!-- efficiency -->
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_01_KillTime" exact="$MissionCue.$Scenario_Transport_Refugees_escort_last_kill - $MissionCue.$Scenario_Transport_Refugees_escort_first_kill" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimePerKill_Optimal" exact="($MissionCue.$Time_PerKill_Optimal)f - 1" comment="gamify: difficulty = subtract 1s from optimal" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerKill" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_01_KillTime / ($ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills)f" />
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerKill" exact="0" />
+            </do_else>
+            <do_if value="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerKill">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimePerKill_Optimal / ($ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerKill)f" />
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" exact="0" />
+            </do_else>
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_05_Waves" exact="$MissionCue.$Count_RaiderWaves" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_06_WavesOptimal" exact="$MissionCue.$Count_RaiderWavesMax" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step2_Efficiency_06_WavesOptimal">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_07_WavesFactor" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_05_Waves / ($ResultData.$CustomStats.$Score_Step2_Efficiency_06_WavesOptimal)f" />
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_07_WavesFactor" exact="0" />
+            </do_else>
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_07_WavesFactor * $ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" />
+            <debug_text text="'$ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor: ' + $ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor" chance="$MissionCue.$DebugChance" />
+            <debug_text text="'$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills: ' + $ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills" chance="$MissionCue.$DebugChance" />
+            <do_if value="
+              $ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor gt 1.5 and
+              $ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills lt 4"
+              comment="too high kill-rate with too few kills to get an effective kill rate. 4 is arbitrary but is half the raiders of wave 1.
+              if efficiency gt 1.5, cap time factor to 1.5 - i.e. kill rate is capped at 66% optimal kill rate.
+              this allows a kill-rate higher than 66% optimal but only when efficiency is less than 150% or with more kills.
+              this effectively, but indirectly, caps efficiency at 150%.
+              this method looks more natural because as time progress in the mission, high kill-rates becomes less likely because raider spawns at 1minute interval - more than the expected 22s kill rate.
+              and capping efficiency directly at 1.5 (i.e. 150%) will be unfair because there will only be a low number of kills.
+              an unreasonable score can result when a low number of kills occur at a very high kill rate before player-death.
+              e.g. 2 kills within 5s and player-death soon after the 2 kills result in a very high kill rate/efficiency">
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" exact="1.5" />
+              <debug_text text="'$ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor (cap time factor to 1.5): ' + $ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" chance="$MissionCue.$DebugChance" />
+              <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_07_WavesFactor * $ResultData.$CustomStats.$Score_Step2_Efficiency_04_TimeFactor" />
+              <debug_text text="'$ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor (post capping of time factor to 1.5): ' + $ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor" chance="$MissionCue.$DebugChance" />
+            </do_if>
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final" exact="$MaxScore * $ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor" />
+            <set_value name="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final - $ResultData.$CustomStats.$Score_Step1_KillScore_99_Addend" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend gt 0">
+              <set_value name="$StatName" exact="{30615,313}" />
+            </do_if>
+            <do_else>
+              <set_value name="$StatName" exact="{30615,315}" />
+            </do_else>
+            <substitute_text text="$StatDescription" source="readtext.{30615}.{314}">
+              <replace string="'$TIME_TO_BEAT$'"      with="$ResultData.$CustomStats.$Score_Step2_Efficiency_03_TimePerKill_Optimal"/>
+              <replace string="'$TIME_UNIT_MINUTES$'" with="{1001,100}"/>
+              <replace string="'$NUM_WAVES_TO_BEAT$'" with="$ResultData.$CustomStats.$Score_Step2_Efficiency_06_WavesOptimal"/>
+              <replace string="'$TIME_PLAYER$'"       with="$ResultData.$CustomStats.$Score_Step2_Efficiency_02_TimePerKill"/>
+              <replace string="'$TIME_UNIT_MINUTES$'" with="{1001,100}"/>
+              <replace string="'$NUM_WAVES_PLAYER$'"  with="$ResultData.$CustomStats.$Score_Step2_Efficiency_05_Waves"/>
+            </substitute_text>
+            <add_scenario_stat id="'efficiency'" name="$StatName"
+              description="$StatDescription"
+              uivalue="'%s%%'.[($ResultData.$CustomStats.$Score_Step2_Efficiency_08_EfficiencyFactor * 100 * 100)i / 100.0]"
+              score="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Addend"
+              maxscore="$MaxScore * 0.5" />
+            <!-- final score -->
+            <set_value name="$ResultData.$Score" exact="$ResultData.$CustomStats.$Score_Step2_Efficiency_99_Final" />
+            <set_value name="$MissionCue.$Scenario_Transport_Refugees_escort_score" exact="$ResultData.$Score" />
+            <run_actions ref="md.Scenario_Transport_Refugees.LoadFromUserData" result="$Values">
+              <param name="Keys" value="[
+                'scenario_transport_refugees_escort_kills',
+                'scenario_transport_refugees_escort_score',
+              ]" />
+              <param name="Difficulty" value="$MissionCue.$Difficulty" />
+              <param name="DebugChance" value="$MissionCue.$DebugChance" />
+            </run_actions>
+            <set_value name="$LastKills" exact="$Values.{1}" />
+            <set_value name="$LastScore" exact="$Values.{2}" />
+            <do_if value="$ResultData.$CustomStats.$Score_Step1_KillScore_00_Kills ge $LastKills or $MissionCue.$Scenario_Transport_Refugees_escort_score ge $LastScore"
+              comment="test for kills AND test for score. during tests to acquire $Time_PerKill_Optimal, scoring method (i.e. $Time_PerKill_Optimal) changes.
+              but fundamentally (i.e. once best $Time_PerKill_Optimal is identified, i.e. post-tests, i.e. live), better kills results in better scores.">
+              <run_actions ref="md.Scenario_Transport_Refugees.UpdateUserData">
+                <param name="MissionCue" value="$MissionCue" />
+                <param name="Event" value="'save'" />
+                <param name="LastScore" value="$LastScore" />
+              </run_actions>
+            </do_if>
+            <do_for_each name="$CustomStat_Name" valuename="$CustomStat_Value" in="$ResultData.$CustomStats">
+              <debug_text text="'$CustomStat_Name: ' + $CustomStat_Name + ' $CustomStat_Value: ' + $CustomStat_Value" chance="$DebugChance" />
+            </do_for_each>
+            <debug_text text="'$ResultData.$Score: ' + $ResultData.$Score" chance="$DebugChance" />
+            <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$ResultData.$Score}"/>
+            <set_value name="$IsCustomOutroMusic" exact="
+              $Rating lt 1 and
+              (
+                (not $MissionCue.$Station_Disabled.isoperational) or
+                $MissionCue.$IsStationDestroyed_Actual
+              )" comment="custom outro music if rating lt 1 AND station has already been destroyed.
+              i.e. do not play failure outro music after station has been destroyed because that cutscene plays the same outro music.
+              i.e. play the failure outro music IF rating is lt 1 AND station is still active. i.e. the player died with rating of lt 1." />
+              <debug_text text="'$IsCustomOutroMusic: ' + $IsCustomOutroMusic" chance="$DebugChance" />
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+              <param name="CustomOutroMusic" value="$IsCustomOutroMusic" />
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>
+<!--
+  calculate Time_PerKill_Optimal:
+  Time_PerKill_Optimal = average of all Score_Step2_Efficiency_02_TimePerKill
+  (19.7484 + 25.6739 + 20.8157 + 24.9847 + 17.4053 + 21.4228 + 24.5933 + 23.9048 + 20.9048 + 21.2054 + 17.1816) / 11 = 21.621881818181818181818181818182
+  ignoring the very good kill rate of 17.1816:
+  (19.7484 + 25.6739 + 20.8157 + 24.9847 + 17.4053 + 21.4228 + 24.5933 + 23.9048 + 20.9048 + 21.2054) / 10 = 22.06591
+  keeping 23s as Time_PerKill_Optimal as the good kill rates are from my MANY playtests.
+-->
+<!--
+  9 jun 16:04, 15 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 15
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 20
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 3750
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 7500
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 257.724
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 17.1816
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.28044
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.714286
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.914598
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 5395.982
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 9145.982
+-->
+<!--
+  24 may 16:45, 17 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 17
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 25
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 3400
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 6800
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 360.491
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 21.2054
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.03747
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.857143
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.889263
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 2646.992
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 6046.992
+-->
+<!--
+  18 may 00:29, 27 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 27
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 27
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 5000
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 10000
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 564.43
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 20.9048
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.05239
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 1
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 1.05239
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 5523.894
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 10523.894
+-->
+<!-- 18 apr 13:00, 20 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 20
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 20
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 5000
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 10000
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 394.968
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 19.7484
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.11401
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.833333
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.928345
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 4283.449
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 9283.449
+-->
+<!-- 17 apr 17:25, 5 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 16
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 1562.5
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 3125
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 128.369
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 25.6739
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 0.856903
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 4
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.666667
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.571269
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 222.714
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 1785.214
+-->
+<!-- 15 apr 20:00, 8 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 8
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 16
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 2500
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 5000
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 166.525
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 20.8157
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.0569
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 4
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.666667
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.704598
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 1022.99
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 3522.99
+-->
+<!-- 15 apr 17:45, 16 kills
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 16
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 22.5
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 3555.556
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 7111.111
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 399.756
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 24.9847
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 0.880538
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 4
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.8
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.704431
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 1453.728
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 5009.284
+-->
+<!--
+  12 Apr 12:06: 11 kills with Mult_RaiderCountPerWave = 0.5625 - i.e. medium difficulty
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 21.9375
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 2507.123
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 5014.245
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 191.458
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 17.4053
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 22.307
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 1.28162
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 3
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.768971
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 1348.687
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 3855.809
+  12 Apr, BEFORE 12:06
+  result: average time per kill = (21.4228 + 24.5933 + 23.9048) / 3 = 23.30696 (i.e. $MissionCue.$Time_PerKill_Optimal)
+  12 Apr: 7 kills with Mult_RaiderCountPerWave = 0.625 - i.e. medium difficulty
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 7
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 24.375
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 1435.897
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 2871.795
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 149.96
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 21.4228
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 19
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 0.886904
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 3
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.532143
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: 92.3069
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 1528.204
+  12 Apr: 3 kills with Mult_RaiderCountPerWave = 0.625 - i.e. medium difficulty
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 3
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 24.375
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 615.385
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 1230.769
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 73.7799
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 24.5933
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 19
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 0.772569
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 3
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.463541
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: -44.8724
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 570.512
+  12 Apr: 11 kills with Mult_RaiderCountPerWave = 0.625 - i.e. medium difficulty
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_00_Kills $CustomStat_Value: 11
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_01_Raiders $CustomStat_Value: 24.375
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Addend $CustomStat_Value: 2256.41
+ResultWindow: $CustomStat_Name: $Score_Step1_KillScore_99_Final $CustomStat_Value: 4512.82
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_01_KillTime $CustomStat_Value: 262.953
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_02_TimePerKill $CustomStat_Value: 23.9048
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_03_TimePerKill_Optimal $CustomStat_Value: 19
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_04_TimeFactor $CustomStat_Value: 0.79482
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_05_Waves $CustomStat_Value: 3
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_06_WavesOptimal $CustomStat_Value: 5
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_07_WavesFactor $CustomStat_Value: 0.6
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_08_EfficiencyFactor $CustomStat_Value: 0.476892
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Addend $CustomStat_Value: -104.282
+ResultWindow: $CustomStat_Name: $Score_Step2_Efficiency_99_Final $CustomStat_Value: 2152.128
+-->

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Story Criminal Briefing Cutscene -->
+  <director key="story_criminal_ch6_briefing">
+    <params>
+      <param name="target_maestro" object="true" />
+      <param name="target_axiom" object="true" />
+      <param name="target_ace" object="true" />
+      <param name="target_player" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_maestro" />
+    <object_group name="target_group">
+      <reference object="target_maestro" />
+      <reference object="target_axiom" />
+      <reference object="target_ace" />
+      <reference object="target_player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+
+          <camera_orbit reference="target_maestro" orient_to="ecliptic" cycle="none" z="-0.8" y="0.3" delay="1">
+            <begin angle="90">
+              <distance>
+                <value exact="5.5"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </begin>
+            <end angle="360" time="250000">
+              <distance>
+                <value exact="4.9"/>
+              </distance>
+              <elevation>
+                <value exact="0.4"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="target_maestro"  z="-2" head="true" x="1.4"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player" head="true" z="1"/>
+            </lookdirection>
+          </camera>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera>
+            <position>
+              <reference object="target_maestro"  z="1.2" head="true"/>
+            </position>
+            <lookdirection>
+              <reference object="target_maestro" head="true"/>
+            </lookdirection>
+          </camera>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="PanInCameraShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+
+          <camera_orbit reference="target_ace" orient_to="ecliptic" cycle="none" y="0.25" x="-0.3">
+            <begin distance="2.2" angle="50" elevation="0.4" />
+            <end distance="1.8" angle="05" time="16000" elevation="-0.1"/>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="PanOutCameraShot5" environment="scenezone" duration="onevent:TriggerSequence5Done">
+
+          <camera_orbit reference="target_axiom" orient_to="ecliptic" cycle="none" y="0.3" x="-0.5">
+            <begin distance="2.6" angle="70" elevation="0.3" />
+            <end distance="3.2" angle="30" time="8000" elevation="0.3"/>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence6" start="onevent:TriggerSequence6Start">
+        <shot name="StaticCameraShot6" environment="scenezone" duration="onevent:TriggerSequence6Done">
+          <camera>
+            <position>
+              <reference object="target_player"  z="-1.6" head="true" x="-0.6"/>
+            </position>
+            <lookdirection>
+              <reference object="target_maestro" head="true" z="1"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Mini_01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false" version="3">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="player.galaxy.macro == macro.xu_ep2_universe_macro"  comment="only in main-galaxy" >
+          <!-- Neighbouring to Hyperion Sector-->
+          <find_sector name="$Cluster720Sector1" macro="macro.cluster_720_sector001_macro" required="true"/>
+          <find_sector name="$Cluster730Sector1" macro="macro.cluster_730_sector001_macro" required="true" comment="Hyperion Sector"/>
+        </do_if>
+
+        <!--Add new location for Kha'ak base station spawning-->
+        <!--<find_sector groupname="md.Khaak_Activity.Manager.$PotentialHiveStationSectors" macro="macro.cluster_419_sector001_macro" comment="Open Market"/>-->
+
+        <!-- Set vars for use in other dlcs -->
+        <set_value exact="macro.ship_par_l_expeditionary_01_a_macro"         name="$ShipMacroHyperion"/>
+        <set_value exact="ware.paintmod_0185"                                name="$PaintCastAsunder"/>
+
+        <set_value name="$mods_Hyperion_Original" exact="[ware.mod_engine_rotationthrust_01_mk3,
+                                                          ware.mod_shield_capacity_02_mk3,
+                                                          ware.mod_ship_mass_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_damage_01_mk3,
+                                                          ware.mod_weapon_speed_01_mk3,
+                                                          ware.mod_weapon_speed_01_mk3,
+                                                          ware.mod_weapon_speed_01_mk3,
+                                                          ware.mod_weapon_speed_01_mk3]"/>
+        <set_value name="$mods_Daughter_Original" exact="[ware.mod_engine_boostthrust_02_mk1,
+                                                          ware.mod_shield_rechargerate_01_mk3,
+                                                          ware.mod_ship_radarcloak_01_mk3,
+                                                          ware.mod_weapon_speed_01_mk1,
+                                                          ware.mod_weapon_speed_01_mk1,
+                                                          ware.mod_weapon_speed_01_mk1]"/>
+
+        <!-- Some actions can steal blueprints. This blacklist will be temporarily filled with blueprint wares that we don't want the player to allow access to -->
+        <do_if value="not md.Setup_DLC_Mini_01.Hyperion_Activation.$BlueprintStealingAllowed?">
+          <append_list_elements name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                other="[ware.ship_par_l_expeditionary_01_a,
+                                      ware.weapon_par_l_expeditionary_01_mk1]" create="true"/>
+        </do_if>
+      </actions>
+      <patches>
+        <patch sinceversion="2">
+          <set_value exact="ware.paintmod_0185" name="$PaintCastAsunder"/>
+        </patch>
+        <patch sinceversion="3">
+          <!-- Some actions can steal blueprints. This blacklist will be temporarily filled with blueprint wares that we don't want the player to allow access to -->
+          <do_if value="not md.Setup_DLC_Mini_01.Hyperion_Activation.$BlueprintStealingAllowed?">
+            <append_list_elements name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                  other="[ware.ship_par_l_expeditionary_01_a,
+                                      ware.weapon_par_l_expeditionary_01_mk1]" create="true"/>
+          </do_if>
+        </patch>
+      </patches>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <cue name="Mini_01_States" namespace="this" mapeditor="false">
+      <conditions>
+        <event_universe_generated />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy" />
+      </conditions>
+      <actions>
+        <find_cluster groupname="$Clusters" name="$Cluster_ThirdRedemption" macro="macro.cluster_730_macro" required="true"/>
+        <find_sector groupname="$Sectors" name="$ThirdRedemption" macro="macro.cluster_730_sector001_macro" space="player.galaxy" extension="'ego_dlc_mini_01'" required="true"/>
+        <find_station name="$CommunicationFacility" godstationentry="'landmark_abandoned_communications_facility_730_01'" space="player.galaxy" required="true"/>
+        <set_object_docking_enabled object="$CommunicationFacility" enabled="false" />
+        <do_if value="$ThirdRedemption.isknown" comment="In case players start the game owning the sector for example in CGS.">
+          <set_space_jobs_allowed space="$ThirdRedemption" allow="true"/>
+          <remove_space_location_tag tag="tag.noaggressivespawn" space="$ThirdRedemption"/>
+          <cancel_cue cue="this"/>
+        </do_if>
+        <!-- Prevent Faction Logic -->
+        <do_else>
+          <set_space_faction_logic_allowed space="$ThirdRedemption" allow="false" />
+          <append_list_elements name="md.Encounters.Manager.$IgnoredSectors" other="[$ThirdRedemption]" comment="no Khaak/Xenon"/>
+        </do_else>
+      </actions>
+      <cues>
+        <cue name="Third_Redemption_Unlock_FactionLogic">
+          <conditions>
+            <event_object_known_to_player object="$ThirdRedemption"/>
+          </conditions>
+          <delay exact="60min"/>
+          <actions>
+            <set_space_faction_logic_allowed space="$ThirdRedemption" allow="true"/>
+            <set_space_jobs_allowed space="$ThirdRedemption" allow="true"/>
+            <remove_space_location_tag tag="tag.noaggressivespawn" space="$ThirdRedemption"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="Hyperion_Activation">
+      <cues>
+        <cue name="Activate_Hyperion_Faction_HolyOrder">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="Activate_Hyperion_For_Faction" param="faction.holyorder"/>
+          </actions>
+        </cue>
+
+        <cue name="Activate_Hyperion_Faction_Paranid_GS" onfail="cancel">
+          <conditions>
+            <check_value value="player.module == 'x4ep1_gamestart_hyperion'"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="Activate_Hyperion_Faction_Paranid"/>
+          </actions>
+        </cue>
+
+        <cue name="Activate_Hyperion_Faction_Paranid">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="Activate_Hyperion_For_Faction" param="faction.paranid"/>
+          </actions>
+        </cue>
+
+        <cue name="Activate_Hyperion_Faction_Trinity">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="Activate_Hyperion_For_Faction" param="faction.trinity"/>
+          </actions>
+        </cue>
+
+        <cue name="Activate_Hyperion_For_Faction" version="2">
+          <conditions>
+            <event_cue_signalled/>
+            <!-- todo: get_ware_definition $EquipmentTable (new Hyperion guns etc.) -->
+          </conditions>
+          <actions>
+            <set_value name="$HyperionFaction" exact="event.param"/>
+            <do_if value="faction.trinity.isactive">
+              <set_value name="$HyperionFaction" exact="faction.trinity"/>
+            </do_if>
+
+            <!-- Licence -->
+            <add_licence faction="faction.player" licencefaction="$HyperionFaction" type="hyperion_access"/>
+
+            <set_value name="md.Setup_DLC_Mini_01.Hyperion_Activation.$BlueprintStealingAllowed" exact="$HyperionFaction"/>
+            <do_if value="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist?">
+              <remove_from_list name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                list="[ware.ship_par_l_expeditionary_01_a,
+                                     ware.weapon_par_l_expeditionary_01_mk1]"/>
+            </do_if>
+
+            <!-- Jobs -->
+            <do_if value="$HyperionFaction == faction.holyorder">
+              <set_job_active activate="true" job="'holyorder_expeditionary_patrol_l_sector'" />
+              <signal_cue cue="Activate_Hyperion_Faction_Trinity_Delayed"/>
+            </do_if>
+            <do_elseif value="$HyperionFaction == faction.paranid">
+              <set_job_active activate="true" job="'paranid_expeditionary_patrol_l_sector'" />
+              <signal_cue cue="Activate_Hyperion_Faction_Trinity_Delayed"/>
+            </do_elseif>
+            <do_elseif value="$HyperionFaction == faction.trinity">
+              <set_job_active activate="true"   job="'trinity_expeditionary_patrol_l_sector'" />
+              <!-- transition from other faction case -->
+              <do_if value="cuestate.complete == Activate_Hyperion_Faction_HolyOrder.state">
+                <set_job_active activate="false"  job="'holyorder_expeditionary_patrol_l_sector'" successor="'trinity_expeditionary_patrol_l_sector'" />
+              </do_if>
+              <do_if value="cuestate.complete == Activate_Hyperion_Faction_Paranid.state">
+                <set_job_active activate="false"  job="'paranid_expeditionary_patrol_l_sector'"   successor="'trinity_expeditionary_patrol_l_sector'" />
+              </do_if>
+            </do_elseif>
+          </actions>
+          <patches>
+            <patch sinceversion="2">
+              <set_value name="md.Setup_DLC_Mini_01.Hyperion_Activation.$BlueprintStealingAllowed" exact="$HyperionFaction"/>
+              <do_if value="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist?">
+                <remove_from_list name="md.Diplomacy.Start.$Diplomacy_StoryBlueprint_Blacklist"
+                                  list="[ware.ship_par_l_expeditionary_01_a,
+                                     ware.weapon_par_l_expeditionary_01_mk1]"/>
+              </do_if>
+            </patch>
+          </patches>
+        </cue>
+
+        <cue name="Activate_Hyperion_Faction_Trinity_Delayed">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Activate_Hyperion_Trinity_Check" onfail="cancel">
+              <conditions>
+                <check_value value="faction.trinity.isactive"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Activate_Hyperion_Trinity_Event"/>
+              </actions>
+            </cue>
+
+            <cue name="Activate_Hyperion_Trinity_Event">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                  <event_faction_activated faction="faction.trinity"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!-- Licence -->
+                <add_licence faction="faction.player" licencefaction="faction.trinity" type="hyperion_access"/>
+
+                <!-- Jobs -->
+                <set_job_active activate="true"   job="'trinity_expeditionary_patrol_l_sector'" />
+                <!-- transition from other faction case -->
+                <do_if value="cuestate.complete == Activate_Hyperion_Faction_HolyOrder.state">
+                  <set_job_active activate="false"  job="'holyorder_expeditionary_patrol_l_sector'" successor="'trinity_expeditionary_patrol_l_sector'" />
+                </do_if>
+                <do_if value="cuestate.complete == Activate_Hyperion_Faction_Paranid.state">
+                  <set_job_active activate="false"  job="'paranid_expeditionary_patrol_l_sector'"   successor="'trinity_expeditionary_patrol_l_sector'" />
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Debug_Activate_Trinity_Faction">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_faction_active faction="faction.trinity" active="true"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Research_Erlking" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this" version="2">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+        <find_sector name="$Windfall3Sector" macro="macro.Cluster_502_Sector001_macro" extension="'ego_dlc_pirate'" comment="Windfall III"/>
+        <find_ship name="$Erlking" macro="macro.ship_pir_xl_battleship_01_a_macro" space="player.galaxy"/>
+        <assert value="$Erlking" text="'No Erlking found in the universe'"/>
+        <create_group groupname="$Player_Erlking_Group"/>
+        <set_value name="$Player_Erlking_Builds" exact="[]"/>
+
+        <set_value name="$CharacterCutsceneTable" exact="table[]"/>
+        <create_cue_actor name="$BettyActor" cue="namespace">
+          <select race="race.drone"/>
+          <owner exact="faction.civilian"/>
+          <page exact="10002"/>
+          <name name="'{30224,101}'"/>
+        </create_cue_actor>
+        <set_value name="$CharacterCutsceneTable.{$BettyActor}" exact="table[ $key = 'ShowComputerBetty']"/>
+
+        <create_cue_actor name="$WarningNPC" cue="this" group="loanshark.manager.male">
+          <page exact="10186" comment="VIG Leader voice (Erlking Ship Warning Interaction)"/>
+          <owner exact="faction.loanshark"/>
+          <skills>
+            <skill type="management"  exact="6"/>
+            <skill type="morale"      exact="13"/>
+            <skill type="piloting"    exact="5"/>
+            <skill type="engineering" exact="1"/>
+            <skill type="boarding"    exact="7"/>
+          </skills>
+        </create_cue_actor>
+        <set_value name="$CharacterCutsceneTable.{$WarningNPC}" exact="table[$key = 'ShowNPCFace']"/>
+
+        <set_value name="$ApproachCount" exact="0"/>
+        <set_value name="$LastPlayerAttack" exact="0"/>
+        <set_value name="$LastResearchDescriptionTime" exact="0"/>
+        <set_value name="$CompletedFirstRecovery" exact="false"/>
+      </actions>
+      <cues>
+        <library name="CheckBoso">
+          <actions>
+            <do_if value="md.X4Ep1_Mentor_Subscriptions.Start.$BoronMet?" comment="only if we already met with Boso">
+              <do_if value="not $Boso?">
+                <set_value name="$Boso" exact="@md.$PersistentCharacters.$BosoTa"/>
+                <do_if value="$Boso">
+                  <set_value name="$CharacterCutsceneTable.{$Boso}" exact="table[$key = 'ShowCharacterBoron']"/>
+                </do_if>
+              </do_if>
+            </do_if>
+          </actions>
+        </library>
+
+        <library name="CheckDal">
+          <actions>
+            <do_if value="md.$PersistentCharacters.$Dal? and md.$PersistentCharacters.$Dal.$Stay">
+              <do_if value="not $Dal?">
+                <set_value name="$Dal" exact="@md.$PersistentCharacters.$DalBusta"/>
+                <do_if value="$Dal">
+                  <set_value name="$CharacterCutsceneTable.{$Dal}" exact="table[$key = 'ShowNPCFace']"/>
+                </do_if>
+              </do_if>
+            </do_if>
+          </actions>
+        </library>
+
+        <library name="ScrapyardHostile">
+          <actions>
+            <find_station name="$closestdefencestation" godstationentry="'Story_ScrapyardStation'" space="$Windfall3Sector" required="false"/>
+            <do_if value="not $closestdefencestation.exists" comment="fallback">
+              <find_station_by_true_owner name="$closestdefencestation" faction="faction.loanshark" defencestation="true" space="$Erlking.sector" sortbydistanceto="$Erlking"/>
+            </do_if>
+            <find_ship_by_true_owner name="$locplayerships" faction="faction.player" space="$Windfall3Sector" multiple="true">
+              <match class="class.ship_xs" negate="true"/>
+            </find_ship_by_true_owner>
+
+            <do_if value="$locplayerships.count">
+              <set_value name="$loctarget" exact="$locplayerships.random"/>
+            </do_if>
+            <do_if value="player.occupiedship and $locplayerships.indexof.{player.occupiedship}">
+              <set_value name="$loctarget" exact="player.occupiedship"/>
+            </do_if>
+            <remove_value name="$locplayerships"/>
+
+            <do_if value="$loctarget? and $loctarget.canbeattacked">
+              <do_if value="$closestdefencestation.isoperational">
+                <set_relation_boost object="$closestdefencestation" otherobject="$loctarget" value="$closestdefencestation.owner.relation.kill.min" decay="1" delay="10min"/>
+              </do_if>
+              <debug_text text="'signalling local patrols to attack %s %s %s'.[@$loctarget.idcode, @$loctarget.knownname, $loctarget]"/>
+              <!-- event.param2 == victim, event.param3 == attacker -->
+              <signal_objects object="player.galaxy" param="'ship_in_distress'" param2="$Erlking" param3="$loctarget"/>
+              <do_if value="$Erlking.sector">
+                <signal_objects object="$Erlking.sector" param="'ship_in_distress'" param2="$Erlking" param3="$loctarget"/>
+              </do_if>
+            </do_if>
+            <remove_value name="$loctarget"/>
+          </actions>
+        </library>
+
+        <cue name="Player_Hostility_Handler" onfail="cancel">
+          <conditions>
+            <!-- hostility stops once the erlking is destroyed or captured -->
+            <check_value value="$Erlking.exists"/>
+            <check_value value="$Erlking.trueowner == faction.loanshark"/>
+            <check_value value="$Erlking.sector == $Windfall3Sector"/>
+          </conditions>
+          <actions>
+            <!--<find_station name="$scrapyard" godstationentry="'Story_ScrapyardStation'" space="$Windfall3Sector"/>-->
+            <do_if value="$ApproachCount ge 5">
+              <!-- once player annoyed vig, any playerowned ship near scrapyard triggers hostility -->
+              <do_for_each name="$PlayerOwnedShip" in="global.$PlayerShipsGroup">
+                <do_if value="$PlayerOwnedShip.distanceto.{$Erlking} lt 50km">
+                  <debug_text text="'VIG Scrapyard Annoyed'" chance="0"/>
+                  <include_actions ref="ScrapyardHostile"/>
+                  <break/>
+                </do_if>
+              </do_for_each>
+            </do_if>
+          </actions>
+          <delay exact="5min"/>
+          <actions>
+            <reset_cue cue="Player_Hostility_Handler"/>
+          </actions>
+        </cue>
+
+        <cue name="Player_Approach_Handler" onfail="cancel" version="2">
+          <conditions>
+            <!-- hostility stops once the erlking is destroyed or captured -->
+            <check_value value="$Erlking.exists"/>
+            <check_value value="$Erlking.trueowner == faction.loanshark"/>
+            <check_value value="$Erlking.sector == $Windfall3Sector"/>
+          </conditions>
+          <patch sinceversion="2">
+            <do_if value="($Erlking.exists) and (($Erlking.trueowner != faction.loanshark) or ($Erlking.sector != $Windfall3Sector))">
+              <cancel_cue cue="Player_Next_Approach"/>
+            </do_if>
+          </patch>
+          <cues>
+            
+            <cue name="Player_Boarding_Erlking">
+              <conditions>
+                <event_boarding_triggered faction="faction.player" target="$Erlking"/>
+              </conditions>
+              <actions>
+                <!-- If player-faction boards, instantly be hostile (even if the player isn't nearby) -->
+                <include_actions ref="ScrapyardHostile"/>
+                <cancel_cue cue="Player_Next_Approach"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Claimed_Erlking">
+              <conditions>
+                <event_object_changed_owner object="$Erlking"/>
+                <check_value value="event.param2 == faction.loanshark"/>
+              </conditions>
+              <actions>
+                <include_actions ref="ScrapyardHostile"/>
+                <cancel_cue cue="Player_Next_Approach"/>
+              </actions>
+              <cues>
+                <cue name="Player_Claimed_Erlking_ReputationDrop" namespace="this">
+                  <delay exact="3s"/>
+                  <actions>
+                    <set_value name="$Faction" exact="faction.loanshark"/>
+                    <set_value name="$Level"   exact="faction.player.relation.{$Faction.relationto.{faction.player}}.uivalue"/>
+                    <set_value name="$DropLevels" exact="5"/>
+                    <run_actions ref="md.LIB_Generic.CalculateReputationDrop" result="$ReputationDrop">
+                      <param name="Level" value="$Level"/>
+                      <param name="DropLevels" value="$DropLevels"/>
+                    </run_actions>
+                    <add_faction_relation faction="faction.player" otherfaction="$Faction" value="-$ReputationDrop" reason="relationchangereason.boardedobject"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- First time goes through with ApproachCount = 0, so Player_Approach_Ref becomes active-->
+            <cue name="Player_Next_Approach">
+              <actions>
+                <set_value name="$ApproachCount" operation="add"/>
+                <set_value name="$CooldownTime" exact="30s" comment="default"/>
+                <set_value name="$ApproachDist" exact="15km" comment="default"/>
+
+                <do_if value="$ApproachCount == 1">
+                  <set_value name="$ApproachDist" exact="30km"/>
+                  <set_value name="$CooldownTime" exact="5s"/>
+                  <set_value name="$ApproachSignalCue" exact="Player_Approach_BattleshipXL_Far_Message"/>
+                </do_if>
+                <do_elseif value="$ApproachCount == 2">
+                  <set_value name="$ApproachSignalCue" exact="Player_Approach_BattleshipXL_Warning_1"/>
+                </do_elseif>
+                <do_elseif value="$ApproachCount == 3">
+                  <set_value name="$ApproachSignalCue" exact="Player_Approach_BattleshipXL_Warning_2"/>
+                </do_elseif>
+                <do_elseif value="$ApproachCount == 4">
+                  <set_value name="$CooldownTime" exact="2s"/>
+                  <set_value name="$ApproachSignalCue" exact="Player_Approach_BattleshipXL_Warning_3"/>
+                </do_elseif>
+                <do_elseif value="$ApproachCount ge 5">
+                  <include_actions ref="ScrapyardHostile"/>
+                  <cancel_cue cue="this"/>
+                </do_elseif>
+              </actions>
+              <cues>
+                <cue name="Player_Approach_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                  <param name="ApproachTarget"    value="$Erlking"/>
+                  <param name="ApproachDistance"  value="$ApproachDist"/>
+                  <param name="SuccessSignalCue"  value="Player_ApproachSignal_StoryCheck"/>
+                </cue>
+
+                <cue name="Player_ApproachSignal_StoryCheck">
+                  <!-- Prevent messages from playing during the Twin Story Scrapyard situation -->
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="md.Story_Thefan.Start.$Ch3_2_ScrapyardFlag?">
+                      <reset_cue cue="Player_Approach_Ref"/>
+                      <reset_cue cue="this"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="$ApproachSignalCue"/>
+                    </do_else>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Next_Approach_Reset">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="$CooldownTime"/>
+              <actions>
+                <reset_cue cue="Player_Next_Approach"/>
+                <reset_cue cue="Player_Next_Approach_Reset"/>
+              </actions>
+            </cue>
+
+            <cue name="Player_Approach_BattleshipXL_Far_Message">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$Erlking"/>
+                  <param name="RequesterCue" value="md.Setup_DLC_Pirate.SetupBattleshipXL"/>
+                  <param name="CheckObjectPresence" value="false"/>
+                  <param name="DebugChance" value="$DebugChance"/>
+                </run_actions>
+
+                <include_actions ref="CheckBoso"/>
+                <include_actions ref="CheckDal"/>
+                <do_if value="$Boso? and $Dal?">
+                  <set_value name="$Dialog_Actors" exact="[$BettyActor, $Boso, $Dal, $Dal]"/>
+                  <set_value name="$Dialog_CutsceneKeys" exact="[$CharacterCutsceneTable.{$BettyActor}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Dal}, $CharacterCutsceneTable.{$Dal}]"/>
+                  <set_value name="$Dialog_Lines" exact="[
+                                                          [[519]],
+                                                          [[30222201]],
+                                                          [[30222201]],
+                                                          [[30222202, 1s]]
+                                                          ]"/>
+                  <!--{10002,519}, {10201,30222201}, {10111,30222201}, {10111,30222202}-->
+                  <set_value name="$Dialog_EndSignalCues" exact="[null, null, null, Player_Next_Approach_Reset]"/>
+                </do_if>
+                <do_elseif value="$Boso?">
+                  <set_value name="$Dialog_Actors" exact="[$BettyActor, $Boso, $Boso, $Boso, $Boso]"/>
+                  <set_value name="$Dialog_CutsceneKeys" exact="[$CharacterCutsceneTable.{$BettyActor}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}]"/>
+                  <set_value name="$Dialog_Lines" exact="[
+                                                          [[519]],
+                                                          [[30222201]],
+                                                          [[30222202]],
+                                                          [[30222203]],
+                                                          [[30222204, 1s]],
+                                                          ]"/>
+                  <!--{10002,519}, {10201,30222201}, {10201,30222202}, {10201,30222203}, {10201,30222204}-->
+                  <set_value name="$Dialog_EndSignalCues" exact="[null, null, null, null, Player_Next_Approach_Reset]"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="$Dialog_Actors" exact="[$BettyActor]"/>
+                  <set_value name="$Dialog_CutsceneKeys" exact="[$CharacterCutsceneTable.{$BettyActor}]"/>
+                  <set_value name="$Dialog_Lines" exact="[
+                                                          [[519]],
+                                                          ]"/>
+                  <!--{10002,519}-->
+                  <set_value name="$Dialog_EndSignalCues" exact="[Player_Next_Approach_Reset]"/>
+                </do_else>
+              </actions>
+              <cues>
+                <cue name="Player_Approach_BattleshipXL_Far_Message_Ref" ref="md.LIB_Dialog.Speak_Actors">
+                  <param name="Actor"             value="$Dialog_Actors"/>
+                  <param name="CutsceneKey"       value="$Dialog_CutsceneKeys"/>
+                  <param name="Lines"             value="$Dialog_Lines"/>
+                  <param name="EndSignalCue"      value="$Dialog_EndSignalCues"/>
+                  <param name="IsInMission"       value="false"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Approach_BattleshipXL_Warning_1">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Player_Approach_BattleshipXL_Warning_1_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$WarningNPC"/>
+                  <param name="WaitForFullscreen" value="false"/>
+                  <param name="Cutscene"          value="false"/>
+                  <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$WarningNPC}"/>
+                  <param name="Lines"             value="[[30289101], [30289102]]" comment="{10186,30289101} {10186,30289102}"/>
+                  <param name="IsInMission"       value="false"/>
+                  <param name="EndSignalCue"      value="Player_Next_Approach_Reset"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Approach_BattleshipXL_Warning_2">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Player_Approach_BattleshipXL_Warning_2_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$WarningNPC"/>
+                  <param name="WaitForFullscreen" value="false"/>
+                  <param name="Cutscene"          value="false"/>
+                  <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$WarningNPC}"/>
+                  <param name="Lines"             value="[[30289001], [30289002], [30289003]]" comment="{10186,30289001} {10186,30289002}, {10186,30289003}"/>
+                  <param name="IsInMission"       value="false"/>
+                  <param name="EndSignalCue"      value="Player_Next_Approach_Reset"/>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Player_Approach_BattleshipXL_Warning_3">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="Player_Approach_BattleshipXL_Warning_3_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                  <param name="Actor"             value="$WarningNPC"/>
+                  <param name="WaitForFullscreen" value="false"/>
+                  <param name="Cutscene"          value="false"/>
+                  <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$WarningNPC}"/>
+                  <param name="Lines"             value="[[30289004], [30289005]]" comment="{10186,30289004} {10186,30289005}"/>
+                  <param name="IsInMission"       value="false"/>
+                  <param name="EndSignalCue"      value="Player_Next_Approach_Reset"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Ship_Attacked_By_Player" instantiate="true">
+          <conditions>
+            <event_object_attacked object="$Erlking"/>
+            <check_value value="@event.param.isplayerowned"/>
+          </conditions>
+          <actions>
+            <set_value name="$LastPlayerAttack" exact="player.age"/>
+          </actions>
+        </cue>
+
+        <cue name="Ship_Destroyed">
+          <conditions>
+            <event_object_destroyed object="$Erlking"/>
+          </conditions>
+          <actions>
+            <set_value name="$PlayerKill" exact="@event.param.isplayerowned or ($LastPlayerAttack and $LastPlayerAttack + 15min gt player.age)"/>
+          </actions>
+        </cue>
+
+        <cue name="Boarding_Started">
+          <conditions>
+            <event_boarding_operation_created/>
+            <check_value value="event.param.boardee == $Erlking"/>
+          </conditions>
+        </cue>
+
+        <cue name="Boarding_Successful">
+          <conditions>
+            <event_object_signalled object="player.entity" param="'boarded_object'" param2="$Erlking"/>
+          </conditions>
+          <actions>
+            <unlock_achievement name="TOA_ERLKING_1"/>
+            <set_userdata storystate="'story_erlking_possession'" value="1"/>
+            <add_blueprints wares="ware.ship_pir_xl_battleship_01_a"/>
+            <include_actions ref="CheckBoso"/>
+            <include_actions ref="CheckDal"/>
+            <do_if value="$Boso and $Dal">
+              <set_value name="$Dialog_Actors" exact="[$Boso, $Boso, $Boso, $Boso, $Dal, $Dal]"/>
+              <set_value name="$Dialog_CutsceneKeys" exact="[$CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Dal}, $CharacterCutsceneTable.{$Dal}]"/>
+              <set_value name="$Dialog_Lines" exact="[
+                                                          [[30222220]],
+                                                          [[30222221]],
+                                                          [[30222222]],
+                                                          [[30222223]],
+                                                          [[30222203]],
+                                                          [[30222204]]
+                                                          ]"/>
+              <!--{10201,30222220}, {10201,30222221}, {10201,30222222}, {10201,30222223}, {10111,30222203}, {10111,30222204}-->
+              <set_value name="$Dialog_EndSignalCues" exact="[null, null, null, Player_Next_Approach_Reset]"/>
+            </do_if>
+            <do_elseif value="$Boso">
+              <set_value name="$Dialog_Actors" exact="[$BettyActor, $Boso, $Boso, $Boso, $Boso]"/>
+              <set_value name="$Dialog_CutsceneKeys" exact="[$CharacterCutsceneTable.{$BettyActor}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}, $CharacterCutsceneTable.{$Boso}]"/>
+              <set_value name="$Dialog_Lines" exact="[
+                                                          [[519]],
+                                                          [[30222201]],
+                                                          [[30222202]],
+                                                          [[30222203]],
+                                                          [[30222204, 1s]],
+                                                          ]"/>
+              <!--{10002,519}, {10201,30222201}, {10201,30222202}, {10201,30222203}, {10201,30222204}-->
+              <set_value name="$Dialog_EndSignalCues" exact="[null, null, null, null, Player_Next_Approach_Reset]"/>
+            </do_elseif>
+            <do_else>
+              <!--Do nothing-->
+            </do_else>
+          </actions>
+        </cue>
+
+        <cue name="Check_Research_Unlocked" onfail="cancel">
+          <conditions>
+            <cue_is_complete cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+          </conditions>
+        </cue>
+
+        <cue name="Research_Unlocked">
+          <conditions>
+            <check_any>
+              <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+              <event_cue_completed cue="Check_Research_Unlocked"/>
+            </check_any>
+          </conditions>
+          <!--Delay to allow any further initialisation of the HQ and mentors-->
+          <delay exact="1s"/>
+          <actions>
+            <!--Store the staus of the Erlking at the time that Boso arrives and research unlocks-->
+            <set_value name="$Boarding_Successful_State" exact="Boarding_Successful.state"/>
+            <set_value name="$Ship_Destroyed_State" exact="Ship_Destroyed.state"/>
+            <do_if value="$Erlking.isoperational and $Erlking.isplayerowned">
+              <add_to_group groupname="$Player_Erlking_Group" object="$Erlking"/>
+            </do_if>
+            <set_value name="$AlreadyHadErlking" exact="$Player_Erlking_Group.count gt 0"/>
+            <include_actions ref="CheckBoso"/>
+            <include_actions ref="CheckDal"/>
+          </actions>
+          <cues>
+            <cue name="Research_Unlocked_Wait">
+              <conditions>
+                <event_cue_completed cue="Research_Unlocked"/>
+              </conditions>
+              <cues>
+
+                <cue name="Boso_Arrives_Erlking_Remark" onfail="cancel">
+                  <conditions>
+                    <check_value value="$AlreadyHadErlking"/>
+                  </conditions>
+                  <delay exact="30s"/>
+                  <actions>
+                    <do_if value="(player.age ge (md.$LastMentorSpeak + 10min)) and (player.age ge (parent.time + 7min))">
+                      <set_value name="this.$LastSpeakGreenLight"/>
+                    </do_if>
+                    <do_else>
+                      <reset_cue cue="this" comment="try again"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Boso_Arrives_Erlking_Remark_Wait">
+                      <conditions>
+                        <event_cue_completed cue="Boso_Arrives_Erlking_Remark"/>
+                        <check_value value="$Player_Erlking_Group.count"/>
+                        <check_value value="parent.$LastSpeakGreenLight?"/>
+                      </conditions>
+                      <cues>
+                        <cue name="Boso_Arrives_Erlking_Remark_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="Actor"             value="$Boso"/>
+                          <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                          <param name="DelayInitial"      value="1s"/>
+                          <param name="Lines"             value="[[30222229], [30222230], [30222224]]" comment="{10201,30222229}, {10201,30222230}, {10201,30222224}"/>
+                          <param name="IsInMission"       value="false"/>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Find_Player_Erlking" checkinterval="1min">
+                  <conditions>
+                    <check_value value="$Player_Erlking_Group.count == 0"/>
+                  </conditions>
+                  <actions>
+                    <find_ship_by_true_owner groupname="$Player_Erlking_Group" faction="faction.player" macro="macro.ship_pir_xl_battleship_01_a_macro" space="player.galaxy" multiple="true"/>
+                    <assert value="$Player_Erlking_Group.count le 1" text="'Player has more Erlking ships than they should. Count: ' + $Player_Erlking_Group.count"/>
+                    <do_if value="$Player_Erlking_Group.count">
+                      <set_userdata storystate="'story_erlking_possession'" value="1"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <library name="ClearInvalidBuilds">
+                  <actions>
+                    <do_for_each name="$Build" in="$Player_Erlking_Builds" reverse="true">
+                      <do_if value="not $Build.exists or $Build.iscancelled">
+                        <remove_from_list name="$Player_Erlking_Builds" exact="$Build"/>
+                      </do_if>
+                    </do_for_each>
+                  </actions>
+                </library>
+
+                <cue name="Player_Erlking_Build_Added" instantiate="true">
+                  <conditions>
+                    <event_player_build_added/>
+                    <check_value value="event.param.isshipbuild"/>
+                    <check_value value="@event.param.buildobject.macro.ismacro.{macro.ship_pir_xl_battleship_01_a_macro} or @event.param.macro.ismacro.{macro.ship_pir_xl_battleship_01_a_macro}"/>
+                  </conditions>
+                  <actions>
+                    <include_actions ref="ClearInvalidBuilds"/>
+                    <append_to_list name="$Player_Erlking_Builds" exact="event.param"/>
+                    <debug_text text="'Erlking build added ' + event.param" chance="$DebugChance"/>
+                    <remove_encyclopedia_entry type="researchables" item="'research_erlking_core'"/>
+                    <remove_research ware="ware.research_erlking_core"/>
+                  </actions>
+                </cue>
+
+                <cue name="Player_Erlking_Build_Cancelled" instantiate="true">
+                  <conditions>
+                    <event_player_build_cancelled/>
+                    <check_value value="$Player_Erlking_Builds.indexof.{event.param}"/>
+                  </conditions>
+                  <actions>
+                    <remove_from_list name="$Player_Erlking_Builds" exact="event.param"/>
+                    <include_actions ref="ClearInvalidBuilds"/>
+                    <debug_text text="'Erlking build cancelled ' + event.param" chance="$DebugChance"/>
+                    <do_if value="$Player_Erlking_Builds.count == 0">
+                      <add_encyclopedia_entry type="researchables" item="'research_erlking_core'"/>
+                      <add_research ware="ware.research_erlking_core"/>
+                    </do_if>
+                  </actions>
+                </cue>
+                <cue name="Player_Erlking_Build_Finished" instantiate="true">
+                  <conditions>
+                    <event_player_build_finished/>
+                    <check_value value="$Player_Erlking_Builds.indexof.{event.param3}"/>
+                  </conditions>
+                  <actions>
+                    <remove_from_list name="$Player_Erlking_Builds" exact="event.param3"/>
+                    <include_actions ref="ClearInvalidBuilds"/>
+                    <debug_text text="'Erlking build finished ' + event.param3" chance="$DebugChance"/>
+                    <assert value="event.param3.buildobject.macro.ismacro.{macro.ship_pir_xl_battleship_01_a_macro}" text="'Tracked build ' + event.param3 + ' was not for a Erlking [Owen]'"/>
+                    <do_if value="event.param3.buildobject.macro.ismacro.{macro.ship_pir_xl_battleship_01_a_macro}">
+                      <add_to_group groupname="$Player_Erlking_Group" object="event.param3.buildobject"/>
+                      <set_value name="$AlreadyHadErlking" exact="true"/>
+                      <reset_cue cue="Unhide_Research_Ticker"/>
+                      <reset_cue cue="Unhide_Research"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Upgrade_Blueprint_Added" instantiate="true">
+                  <conditions>
+                    <event_player_blueprint_added/>
+                    <check_value value="player.age gt @$NextBlueprintSpeakTime"/>
+                    <check_any>
+                      <check_value value="event.param2 == ware.weapon_pir_xl_battleship_01_mk1"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$NextBlueprintSpeakTime" exact="player.age + 30s"/>
+                  </actions>
+                  <cues>
+                    <cue name="Upgrade_Blueprint_Added_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$Boso"/>
+                      <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                      <param name="DelayInitial"      value="1s"/>
+                      <param name="Lines"             value="[[ [30222238, 30222239, 30222240].random ]]" comment="{10201,30222238} {10201,30222239} {10201,30222240}"/>
+                      <param name="IsInMission"       value="false"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Unhide_Research_Ticker" checkinterval="1min">
+                  <conditions>
+                    <check_value value="player.age gt Research_Unlocked.time + 5min and $ApproachCount gt 0 and not $Erlking.isoperational and $Player_Erlking_Builds.count == 0 and $Player_Erlking_Group.count == 0"/>
+                    <check_value value="player.age ge (md.$LastMentorSpeak + 10min)" comment="don't start after big story things"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Unhide_Research" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Unhide_Research">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <check_all>
+                        <event_cue_completed cue="Ship_Destroyed"/>
+                        <check_value value="$PlayerKill"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Unhide_Research_Ticker"/>
+                    <add_encyclopedia_entry type="researchables" item="'research_erlking_core'"/>
+                    <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+
+                    <set_value name="$Dialog_Delay" exact="5s"/>
+                    <do_if value="event.name == 'event_cue_completed' and event.object == Ship_Destroyed">
+                      <set_value name="$Dialog_Delay" exact="15s"/>
+                      <do_if value="$PlayerKill">
+                        <set_value name="$Dialog_Lines" exact="[[30222226], [30222227]]" comment="{10201,30222226}, {10201,30222227}"/>
+                      </do_if>
+                      <do_else>
+                        <set_value name="$Dialog_Lines" exact="[[30222244], [30222227]]" comment="{10201,30222244}, {10201,30222227}"/>
+                      </do_else>
+                    </do_if>
+                    <do_elseif value="$AlreadyHadErlking">
+                      <set_value name="$Dialog_Lines" exact="[[30222226], [30222227]]" comment="{10201,30222226}, {10201,30222227}"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$Dialog_Lines" exact="[[30222229], [30222231], [30222227]]" comment="{10201,30222229}, {10201,30222231}, {10201,30222232}"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Ship_Destroyed_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                      <param name="Actor"             value="$Boso"/>
+                      <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                      <param name="DelayInitial"      value="$Dialog_Delay"/>
+                      <param name="Lines"             value="$Dialog_Lines"/>
+                      <param name="IsInMission"       value="false"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Research_Entry_Selected" instantiate="true">
+                  <conditions>
+                    <event_object_signalled object="player.entity" param="'research_selected_no_speak'"/>
+                    <check_value value="player.age gt $LastResearchDescriptionTime + 30s"/>
+                    <check_any>
+                      <check_value value="event.param2 == ware.research_erlking_core"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+                    <speak actor="$Boso" line="30222227" priority="85" recipient="player.entity" comment="{10201,30222227}"/>
+                  </actions>
+                </cue>
+
+                <cue name="Research_Finished" instantiate="true">
+                  <conditions>
+                    <event_player_research_unlocked ware="ware.research_erlking_core"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="player.blueprints.{ware.ship_pir_xl_battleship_01_a}.any.exists">
+                      <do_if value="$CompletedFirstRecovery">
+                        <set_value name="this.$Dialog_Lines" exact="[[30222235]]" comment="{10201,30222235}"/>
+                      </do_if>
+                      <do_else>
+                        <set_value name="this.$Dialog_Lines" exact="[[30222235], [30222237]]" comment="{10201,30222235} {10201,30222237}"/>
+                      </do_else>
+                    </do_if>
+                    <do_else>
+                      <add_blueprints wares="ware.ship_pir_xl_battleship_01_a"/>
+                      <set_value name="this.$Dialog_Lines" exact="[[30222234,30222236,30222237]]" comment="{10201,30222234} {10201,30222236} {10201,30222237}"/>
+                    </do_else>
+                    <set_value name="$CompletedFirstRecovery" exact="true"/>
+                  </actions>
+                  <cues>
+                    <cue name="Research_Finished_LastMentorSpeak" checkinterval="10s">
+                      <conditions>
+                        <check_value value="player.age ge (md.$LastMentorSpeak + 10min)"/>
+                      </conditions>
+                      <cues>
+                        <cue name="Research_Finished_Speak_Ref_v2" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="Actor"             value="$Boso"/>
+                          <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                          <param name="DelayInitial"      value="2s"/>
+                          <param name="Lines"             value="parent.parent.$Dialog_Lines"/>
+                          <param name="IsInMission"       value="false"/>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="Patch_Userdata" instantiate="true">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <do_if value="@Start.$Player_Erlking_Group.count">
+          <set_userdata storystate="'story_erlking_possession'" value="1"/>
+        </do_if>
+        <do_if value="@Start.$ErlkingUpgraded">
+          <set_userdata storystate="'story_erlking_upgrade'" value="1"/>
+        </do_if>
+      </actions>
+    </cue>
+
+    <cue name="Erlking_Fully_Upgraded" instantiate="true" namespace="this">
+      <conditions>
+        <check_any>
+          <check_all>
+            <event_player_build_finished_components/>
+            <check_value value="event.param3.exists and event.param3.buildobject.macro.ismacro.{macro.ship_pir_xl_battleship_01_a_macro}"/>
+          </check_all>
+          <event_cue_signalled cue="md.Setup.Start"/>
+        </check_any>
+      </conditions>
+      <actions>
+        <do_if value="event.name == 'event_player_build_finished_components'">
+          <set_value name="$Ships" exact="[event.param3.buildobject]"/>
+        </do_if>
+        <do_else>
+          <find_ship_by_true_owner name="$Ships" faction="faction.player" macro="macro.ship_pir_xl_battleship_01_a_macro" space="player.galaxy" multiple="true"/>
+        </do_else>
+        <do_for_each name="$Ship" in="$Ships">
+          <check_object result="$Result" object="$Ship">
+            <match_content macro="macro.engine_pir_xl_battleship_01_allround_01_mk1_macro"/>
+            <match_content macro="macro.shield_pir_xl_battleship_01_standard_01_mk1_macro"/>
+            <match_content macro="macro.weapon_pir_xl_battleship_01_mk1_macro"/>
+          </check_object>
+          <do_if value="$Result">
+            <set_value name="Start.$ErlkingUpgraded" exact="true"/>
+            <signal_cue_instantly cue="md.X4Ep1_Mentor_Subscriptions.Add_Player_Office_Trophy" param="tag.trophy_gen_erlking"/>
+            <unlock_achievement name="TOA_ERLKING_2"/>
+            <set_userdata storystate="'story_erlking_upgrade'" value="1"/>
+            <debug_text text="'Erkling fully upgraded'"/>
+            <cancel_cue cue="static"/>
+          </do_if>
+        </do_for_each>
+      </actions>
+    </cue>
+
+  </cues>
+</mdscript>

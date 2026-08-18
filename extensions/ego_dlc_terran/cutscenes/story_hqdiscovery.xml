@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_hqdiscovery" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_hq" />
+    <object_group name="target_group">
+      <reference object="target_hq" />
+      <reference object="target_ship" />
+      <reference object="target_wreck" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="HqWarpSequence1" start="0">
+
+
+        <shot name="HqWarpShot1" environment="scenezone" duration="5000">
+          <camera>
+            <position>
+              <reference object="target_hq" x="-923.218750" y="1986.604126" z="-6728.187500" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_hq" x="-923.085999" y="1986.229004" z="-6727.270020" comment="copied from player camera"/>
+            </lookdirection>
+            <roll>
+              <value exact="0.002988"/>
+            </roll>
+          </camera>
+        </shot>
+
+        <shot name="HqWarpShot2" environment="scenezone" duration="11000">
+          <takeover_position/>
+          <camera_orbit reference="target_hq" orient_to="object">
+            <begin angle="25" distance="12000" elevation="60" />
+            <end angle="100" distance="5000" elevation="-10" />
+          </camera_orbit>
+        </shot>
+        
+        <!--shot name="OrbitOnGate" environment="scenezone" duration="5000">
+          <camera_orbit reference="target_gate" orient_to="object">
+            <begin angle="25" distance="12000" elevation="40" />
+            <end angle="100" distance="2000" elevation="10" />
+          </camera_orbit>
+        </shot-->
+
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

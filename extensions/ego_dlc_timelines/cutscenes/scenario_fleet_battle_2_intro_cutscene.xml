@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_fleet_battle_2_intro_cutscene" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_outpost" zone="@auto:outpost" />
+    <environment_implicit name="scenezone_cpu" zone="@auto:cpu"/>
+    <object_group name="target_group_A">
+      <reference object="outpost"/>
+    </object_group>
+    <object_group name="target_group_B">
+      <reference object="cpu" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="FB2_IntroSequence" start="0">
+        <shot name="Shot_Outpost" environment="scenezone_outpost" duration="19000">
+          <camera_orbit reference="outpost" time="7000" elevation="50%">
+            <begin distance="16000" angle="180"/>
+            <end distance="7000" angle="90"/>
+          </camera_orbit>
+        </shot>
+        <shot name="Shot_CpuOrbit" environment="scenezone_cpu" duration="12000">
+          <camera_orbit reference="cpu" time="12000" elevation="30%" interpolation="smooth" orient_to="object">
+            <begin distance="180%" angle="330" elevation="30%"/>
+            <end distance="80%" angle="480" elevation="0%"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+</cutscene>

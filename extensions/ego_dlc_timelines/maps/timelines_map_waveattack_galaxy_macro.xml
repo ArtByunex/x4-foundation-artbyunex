@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_waveattack_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="gates_292682" ref="gates">
+        <offset>
+          <position x="2946.28" z="36091.93"/>
+          <rotation yaw="119.99998"/>
+        </offset>
+        <macro connection="destination" ref="props_gates_anc_gate_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_sector_001_zone_002_station_001_macro">
+    <component ref="station_gen_factory_base_01" connection="space"/>
+    <properties>
+      <identification owner="holyorder" nameoverride="{20102,2021}"/>
+      <plan ref="scenario_waveattack_station"/>
+    </properties>
+    <connections>
+      <connection name="controlroom" ref="controlroom">
+        <macro connection="connection01" ref="control_room_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="stations_119045" ref="stations">
+        <offset>
+          <position x="-19486.27" y="1000" z="-20160.352"/>
+          <rotation yaw="-144.99997"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_cluster_001_sector_001_zone_002_station_001_macro" connection="space"/>
+      </connection>
+      <connection name="objects_64128" ref="objects">
+        <offset>
+          <position x="-16229.815" z="7999.169"/>
+          <rotation yaw="71.32658" pitch="9.4263" roll="25.85503"/>
+        </offset>
+        <macro connection="space" ref="landmarks_gen_old_ringstation_pos_macro">
+          <properties>
+            <identification/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7660011}" description="{20004,7660011}"/>
+    </properties>
+    <connections>
+      <connection name="zones_387285" ref="zones">
+        <offset>
+          <position x="14795.4" z="-205518.281"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_58649" ref="zones">
+        <macro ref="timelines_map_waveattack_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_cluster_35_sector_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="scenario_wave_attack_1_region_001"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_waveattack_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7660001}" description="{20003,7660002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_35_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_waveattack_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c35s01_region001_connection" ref="regions">
+        <offset>
+          <position x="88177.891" z="-89525.539"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c35s01_region002_connection" ref="regions">
+        <offset>
+          <position x="-19486.27" y="-12500" z="-20160.352"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_35"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_waveattack_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="cluster_35_connection" ref="clusters">
+        <offset>
+          <position z="-69280000"/>
+        </offset>
+        <macro ref="timelines_map_waveattack_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

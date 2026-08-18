@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Scavenger operation near gate -->
+  <director key="Story_Gamestart2_Intro" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_prisonroom" />
+    <object_group name="target_group">
+      <reference object="target_prisonroom" />
+      <reference object="target_npc" />
+      <reference object="target_npc" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        
+        <!--shot name="PanOver" environment="scenezone" duration="1600" >
+          <camera_panover reference="target_prisonroom" showing="front" orient_to="object" pan_direction="leftwards" panstart="8" panend="-15" interpolation="linear">
+            <begin distance="10" elevation="-1.0" />
+            <end distance="8" elevation="-2"/>
+          </camera_panover>
+        </shot-->
+
+        <shot name="StaticCameraShot1" environment="scenezone" duration="10000">
+          <camera>
+            <position>
+              <reference object="target_prisonroom" x="3.382143" y="1.630684" z="-4.442291" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_prisonroom" x="3.203505" y="1.607487" z="-5.425932" comment="copied from player camera"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>

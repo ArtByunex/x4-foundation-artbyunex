@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+
+  <add sel="//library[@name='DeliverFleet']/patch[@sinceversion='4']">
+    <do_if value="md.$SplitFactions.indexof.{$Faction}" comment="remove unused macro from mission specs">
+      <do_all exact="$Fleet.count" counter="$i">
+        <do_if value="$Fleet.{$i}.$macro == macro.ship_spl_xl_carrier_01_a_macro">
+          <do_if value="$Fleet.{$i}.$ammo?">
+            <set_value name="$Fleet.{$i}.$ammo" exact="table[{macro.countermeasure_flares_01_macro} = 10]" comment="remove the non-existent macro table from the list of ammo"/>
+          </do_if>
+          <do_if value="$Fleet.{$i}.$equipment?">
+            <set_value name="$Fleet.{$i}.$equipment" exact="[macro.engine_spl_xl_allround_01_mk1_macro, macro.shield_spl_xl_standard_01_mk1_macro, macro.thruster_gen_xl_allround_01_mk2_macro, macro.turret_spl_l_beam_01_mk1_macro]" comment="remove the non-existent macro from the list of equipment"/>
+          </do_if>
+        </do_if>
+      </do_all>
+      <run_actions ref="md.GM_GetExactFleet.ConstructFleetRequirementsText" result="$FleetText">
+        <param name="Fleet" value="$Fleet"/>
+      </run_actions>
+      <substitute_text text="$description" source="readtext.{30215}.{120002}">
+        <replace string="'$SECTOR$'"    with="$TargetSector.knownname"/>
+        <replace string="'$FLEET$'"     with="$FleetText"/>
+      </substitute_text>
+      <update_mission cue="$MissionCue" description="$description"/>
+    </do_if>
+  </add>
+  <add sel="//library[@name='DeliverFleet']/patch[@sinceversion='5']">
+    <do_if value="md.$SplitFactions.indexof.{$Faction}" comment="remove unused macro from mission specs">
+      <do_all exact="$Fleet.count" counter="$i">
+        <do_if value ="$Fleet.{$i}.$macro == macro.ship_spl_xl_battleship_01_a_macro">
+          <set_value name="$Fleet.{$i}.$macro" exact="macro.ship_spl_xl_carrier_01_a_macro" comment="replace non-existent macro"/>
+        </do_if>
+      </do_all>
+      <run_actions ref="md.GM_GetExactFleet.ConstructFleetRequirementsText" result="$FleetText">
+        <param name="Fleet" value="$Fleet"/>
+      </run_actions>
+      <substitute_text text="$description" source="readtext.{30215}.{120002}">
+        <replace string="'$SECTOR$'"    with="$TargetSector.knownname"/>
+        <replace string="'$FLEET$'"     with="$FleetText"/>
+      </substitute_text>
+      <update_mission cue="$MissionCue" description="$description"/>
+    </do_if>
+  </add>
+  <add sel="//library[@name='DeliverFleet']/patch[@sinceversion='6']">
+    <do_if value="md.$SplitFactions.indexof.{$Faction}" comment="remove unused macro from mission specs">
+      <do_all exact="$Fleet.count" counter="$i">
+        <do_if value="$Fleet.{$i}.$macro == macro.ship_spl_xl_carrier_01_a_macro">
+          <do_if value="$Fleet.{$i}.$equipment?" comment="exchange turret_spl_m_gatling_01_mk1_macro for turret_spl_m_gatling_02_mk1_macro">
+            <set_value name="$Fleet.{$i}.$equipment" exact="[macro.engine_spl_xl_allround_01_mk1_macro, macro.shield_spl_xl_standard_01_mk1_macro, macro.thruster_gen_xl_allround_01_mk2_macro, macro.turret_spl_l_beam_01_mk1_macro,  macro.turret_spl_m_gatling_02_mk1_macro,]" comment="remove the non-existent macro from the list of equipment"/>
+          </do_if>
+        </do_if>
+      </do_all>
+      <run_actions ref="md.GM_GetExactFleet.ConstructFleetRequirementsText" result="$FleetText">
+        <param name="Fleet" value="$Fleet"/>
+      </run_actions>
+      <substitute_text text="$description" source="readtext.{30215}.{120002}">
+        <replace string="'$SECTOR$'"    with="$TargetSector.knownname"/>
+        <replace string="'$FLEET$'"     with="$FleetText"/>
+      </substitute_text>
+      <update_mission cue="$MissionCue" description="$description"/>
+    </do_if>
+  </add>
+
+</diff>

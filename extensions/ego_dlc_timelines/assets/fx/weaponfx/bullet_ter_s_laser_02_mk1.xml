@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2023-11-07 14:22:05-->
+<components>
+  <component name="bullet_ter_s_laser_02_mk1" class="bullet">
+    <source geometry="extensions\ego_dlc_timelines\assets\fx\weaponfx\bullet_ter_s_laser_02_mk1_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_laser_01" tags="laser ">
+        <offset>
+          <quaternion qx="-2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForpart_bullet" tags="animation part textureanimation ">
+        <offset>
+          <quaternion qx="-2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+        <animations>
+          <animation name="loop_random" start="1" end="21" />
+        </animations>
+        <parts>
+          <part name="part_bullet">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_gatling_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="2.013408" y="2.013408" z="34.14092" />
+              <center x="-2.384e-07" y="1.9073e-06" z="14.65588" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="2">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="21" value="-1" />
+                </uv_property>
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="21" value="0" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+    <properties>
+      <bullet maxhits="1" ricochet="0" restitution="1" scale="0" attach="0" />
+      <damage repair="0" />
+    </properties>
+  </component>
+</components>

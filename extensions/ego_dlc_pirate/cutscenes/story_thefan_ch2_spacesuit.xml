@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Show the Ship, put the engines in frame to play engine explosions -->
+  <director key="Story_Thefan_Ch2_Spacesuit" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_ship" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="FollowSpacesuit" environment="scenezone" duration="20000">
+          <camera_orbit reference="target_ship" orient_to="object">
+            <begin angle="90" distance="30" elevation="10" />
+            <end angle="90" distance="25" elevation="-5" />
+          </camera_orbit>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

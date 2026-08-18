@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues">
+
+    <cue name="X4ep1_Gamestart_Hyperion" module="x4ep1_gamestart_hyperion">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <!-- setup -->
+      </actions>
+      <cues></cues>
+    </cue>
+
+    <cue name="TS14_Shiptest" module="test_hyperion_impression">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+        <check_value value="player.debug" comment="only in debug builds"/>
+      </conditions>
+      <actions>
+        <find_sector name="$HyperionSectors" multiple="true" extension="'ego_dlc_mini_01'"/>
+        <do_if value="not $HyperionSectors.count">
+          <debug_text text="'dlc not found'"/>
+          <cancel_cue cue="this"/>
+        </do_if>
+      </actions>
+      <delay exact="1s"/>
+      <actions>
+        <add_research ware="ware.research_teleportation"/>
+        <add_research ware="ware.research_teleportation_range_03"/>
+
+        <create_ship name="$ship_generic" macro="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion" sector="player.sector" capturable="false" sellable="true">
+          <owner exact="faction.player"/>
+          <loadout ref="story_hyperion_reward_generic"/>
+          <!-- Paint mod: Blade's Edge -->
+          <!--<paint ware="ware.paintmod_0137"/>-->
+          <pilot actor="null"/>
+          <orientation orientation="look_at" refobject="player.ship"/>
+          <safepos object="player.ship"/>
+        </create_ship>
+        <set_object_name object="$ship_generic" name="'Cheap Unmodded'"/>
+
+        <create_ship name="$ship_special" macro="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion" sector="player.sector" capturable="false" sellable="true">
+          <owner exact="faction.player"/>
+          <loadout ref="story_hyperion_reward_special"/>
+          <!-- Paint mod: Blade's Edge -->
+          <!--<paint ware="ware.paintmod_0137"/>-->
+          <pilot actor="null"/>
+          <orientation orientation="look_at" refobject="player.ship"/>
+          <safepos object="player.ship"/>
+        </create_ship>
+        <set_object_name object="$ship_special" name="'Special Unmodded'"/>
+
+        <create_ship name="$ship_modded" macro="md.Setup_DLC_Mini_01.Setup.$ShipMacroHyperion" sector="player.sector" capturable="false" sellable="true">
+          <owner exact="faction.player"/>
+          <loadout ref="story_hyperion_reward_special"/>
+          <equipmentmods>
+            <mods list="md.Setup_DLC_Mini_01.Setup.$mods_Hyperion_Original"/>
+          </equipmentmods>
+          <!-- Paint mod: Blade's Edge -->
+          <!--<paint ware="ware.paintmod_0137"/>-->
+          <pilot actor="null"/>
+          <orientation orientation="look_at" refobject="player.ship"/>
+          <safepos object="player.ship"/>
+        </create_ship>
+        <set_object_name object="$ship_modded" name="'Special Modded'"/>
+
+        <add_to_group groupname="$testships" object="$ship_modded"/>
+        <add_to_group groupname="$testships" object="$ship_special"/>
+        <add_to_group groupname="$testships" object="$ship_generic"/>
+        <create_mission cue="this" name="'test ships'" faction="faction.civilian" type="missiontype.think"/>
+        <set_objective cue="this" action="objective.investigate" group="$testships" updatebriefing="true" step="1"/>
+      </actions>
+      <cues>
+
+        <cue name="Ch1_3_Hyperion_ScanEffect_Activate">
+          <conditions>
+            <event_cue_completed cue="parent"/>
+          </conditions>
+          <cues>
+            <cue name="Ch1_3_Hyperion_ScanEffect" instantiate="true">
+              <conditions>
+                <event_long_range_scan_ping object="$ship_modded"/>
+              </conditions>
+              <actions>
+                <debug_text text="'Triggered Hyperion LRS Ping'"/>
+                <add_effect object="player.zone" effect="'scfx_result_good_01'" comment="golden ping">
+                  <position object="$ship_modded"/>
+                </add_effect>
+                <add_effect object="player.zone" effect="'scfx_wave_02'" comment="long range scan effect">
+                  <position object="$ship_modded"/>
+                </add_effect>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+  </add>
+
+  <replace sel="//cue[@name='Test_Squadron']//set_value[@name='$shipfaction']/@exact">faction.paranid</replace>
+  <replace sel="//cue[@name='Test_Squadron']//set_value[@name='$loadoutlevel']/@exact">0.3</replace>
+  <add sel="//cue[@name='Test_Squadron']//get_ship_definition[@tags='$leadertags']" pos="after">
+    <set_value name="$shipmacro" exact="macro.ship_par_l_expeditionary_01_a_macro"/>
+  </add>
+</diff>

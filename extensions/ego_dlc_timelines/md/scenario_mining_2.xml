@@ -1,0 +1,850 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Mining_2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Lennart Funk"/>
+  </documentation>
+  <cues>
+
+    <!-- Xenon scouts are interfering with the mining operations in Getsu Fune.
+         You're one of the miners. Mine as much ore as you can within the time limit. -->
+    <cue name="Start" namespace="this" module="scenario_mining_2">
+      <conditions>
+        <event_game_started/>
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <set_value name="$DebugChance"         exact="100"/>
+        <set_value name="$DeepDebugChance"     exact="0"/>
+        <set_value name="$MissionCue"          exact="namespace"/>
+
+        <set_value name="$Page"                exact="30613"/>
+        <set_value name="$Difficulty"          exact="level.easy"/>
+        <set_value name="$MissionFaction"      exact="faction.civilian"/>
+        <find_sector name="$MissionSector"     macro="macro.timelines_map_mining_1_cluster_001_sector_001_macro"/>
+        <set_value name="$ResultData" exact="table[]"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Custom Scenario-Related variables -->
+        <set_value name="$ValidWaresList" exact="[ware.ore]"/>
+
+        <set_value name="$MissionDuration"                exact="5min"/>
+        <set_value name="$DurationUntilAttack"            exact="2min"/>
+
+        <set_value name="$PlayerAttacked" exact="false"/>
+        <set_owner object="$MissionSector" faction="faction.ownerless"/>
+
+        <!-- Disable generic missions -->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+        <!-- Create Resource Areas -->
+        <create_resource_area yieldname="'sphere_medium_ice_low_average'" sector="$MissionSector">
+          <position x="-45000" y="100" z="120000" />
+        </create_resource_area>
+        <create_resource_area yieldname="'sphere_large_silicon_low_average'" sector="$MissionSector">
+          <position x="-45000" y="100" z="120000" />
+        </create_resource_area>
+        <create_resource_area yieldname="'sphere_large_ore_medium_average'" sector="$MissionSector">
+          <position x="-45000" y="100" z="120000" />
+        </create_resource_area>
+      </actions>
+      <cues>
+
+        <cue name="DEBUG_Print_Player_Position" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <create_position name="this.$pos" object="player.ship" space="player.sector"/>
+            <debug_text text="this.$pos"/>
+          </actions>
+        </cue>
+
+        <cue name="DEBUG_Print_Target_Position" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <create_position name="this.$pos" object="player.target" space="player.sector"/>
+            <debug_text text="this.$pos"/>
+          </actions>
+        </cue>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Player_Property" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Actors" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Stations" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_NPC_Ships" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Abandoned_Ships" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Positions" chance="if $HasError then 0 else 100"/>
+                <run_actions ref="md.LIB_Scenario.Setup_Faction_ParanidEmpire" chance="if $HasError then 0 else 100"/>
+
+                <set_value name="$HasError" exact="0"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <signal_cue cue="CleanUp"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <set_emergency_eject_active active="false"/>
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Player_Property">
+              <actions>
+                <find_ship_by_true_owner name="$PlayerShip" faction="faction.player" space="$MissionSector"/>
+                <!--<create_ship name="$PlayerShip" zone="player.zone" comment="#TemplateExample">
+                  <select faction="$EnemyOwner" size="class.ship_s"/>
+                  <owner exact="$EnemyOwner" overridenpc="true"/>
+                  <safepos x="1km" z="10km"/>
+                </create_ship>-->
+
+                <do_if value="not $PlayerShip.exists">
+                  <debug_text text="'$PlayerShip not found'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Stations">
+              <actions>
+                <!-- BOR and SPL blew each other up and left the sector. New Ore refinery hasn't been built yet. -->
+                <set_value name="$RemovedStationEntries" exact="[ 'scenario_mining_1to4_ore_refinery_002' ]"/>
+                <set_value name="$WreckedStationEntries" exact="[ 'scenario_mining_1to4_bor_equipment',
+                                                                  'scenario_mining_1to4_spl_equipment' ]"/>
+
+                <do_for_each in="$RemovedStationEntries" name="$CurrentEntry">
+                  <find_station name="$Station" godstationentry="$CurrentEntry" space="$MissionSector"/>
+                  <do_if value="$Station">
+                    <destroy_object object="$Station" explosion="false"/>
+                  </do_if>
+                </do_for_each>
+
+                <do_for_each in="$WreckedStationEntries" name="$CurrentEntry">
+                  <find_station name="$Station" godstationentry="$CurrentEntry" space="$MissionSector"/>
+                  <do_if value="$Station">
+                    <set_allow_drop object="$Station" allow="false"/>
+                    <destroy_object object="$Station" explosion="true"/>
+                  </do_if>
+                </do_for_each>
+
+                <find_station name="$OreRefinery" godstationentry="'scenario_mining_1to4_ore_refinery_001'" space="$MissionSector"/>
+
+                <remove_units object="$OreRefinery" category="unitcategory.defence" mk="1" exact="$OreRefinery.units.{unitcategory.defence}.count"/>
+
+                <do_if value="not $OreRefinery.exists">
+                  <debug_text text="'Refinery does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+
+            <library name="Setup_Actors">
+              <actions>
+                <create_cue_actor name="$MinerActor" cue="$MissionCue" macro="character_timelines_scenario_mining_seasoned_miner_macro">
+                  <page exact="10136"/>
+                  <owner exact="faction.civilian"/>
+                </create_cue_actor>
+                <set_entity_traits entity="$MinerActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$MinerActor" icon="'pilot'"/>
+
+                <!-- NPC Usecase Setup. Klaus' recommendations:
+                         - use $recipient = 'player' in the usecase when we really want to show a monitor cutscene, instead of a general $forceonplayer in the monitor settings
+                         - don't use $ignoredistance, unless we want a monitor cutscene even if the player is in the same room as the NPC -->
+                <set_value name="$MissionActors.$MinerActor" exact="table[
+                                              $entity = $MinerActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+              </actions>
+              <delay exact="0.5s"/>
+              <actions>
+                <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=$MissionCue, $actor=$MinerActor]"/>
+              </actions>
+            </library>
+
+            <library name="Setup_NPC_Ships">
+              <actions>
+                <set_value name="$FleetComposition" exact="[
+                                  [ macro.ship_arg_m_miner_solid_01_a_macro, 217, faction.argon, 'argon_elite_freighter_crew' ],
+
+                                  [ macro.ship_arg_s_miner_solid_01_a_macro, 221, faction.argon, 'argon_elite_freighter_crew' ],
+                                  [ macro.ship_arg_s_miner_solid_01_a_macro, 211, faction.argon, 'argon_elite_freighter_crew' ],
+
+                                  [ macro.ship_par_m_miner_solid_01_a_macro, 229, faction.paranid, 'paranid_elite_freighter_crew' ],
+
+                                  [ macro.ship_par_s_miner_solid_01_a_macro, 206, faction.paranid, 'paranid_elite_freighter_crew' ],
+                                  [ macro.ship_par_s_miner_solid_01_a_macro, 207, faction.paranid, 'paranid_elite_freighter_crew' ],
+
+                                  [ macro.ship_tel_m_miner_solid_01_a_macro, 230, faction.teladi, 'teladi_elite_freighter_crew' ],
+
+                                  [ macro.ship_tel_s_miner_solid_01_a_macro, 212, faction.teladi, 'teladi_elite_freighter_crew' ],
+                                  [ macro.ship_tel_s_miner_solid_01_a_macro, 213, faction.teladi, 'teladi_elite_freighter_crew' ]
+                                  ]" />
+
+                <do_all exact="$FleetComposition.count" counter="$m">
+                  <create_ship groupname="$NPC_Miners" name="$CurrentShip" macro="$FleetComposition.{$m}.{1}" missioncue="$MissionCue" sector="$MissionSector">
+                    <owner exact="$FleetComposition.{$m}.{3}" overridenpc="true"/>
+                    <pilot>
+                      <select faction="$FleetComposition.{$m}.{3}" tags="tag.traderpilot"/>
+                    </pilot>
+                    <people ref="$FleetComposition.{$m}.{4}"/>
+                    <loadout>
+                      <level exact="1.0"/>
+                    </loadout>
+                    <safepos object="$OreRefinery" min="15km" max="50km"/>
+                  </create_ship>
+                  <set_object_name object="$CurrentShip" page="$Page" line="$FleetComposition.{$m}.{2}"/>
+                  <create_order object="$CurrentShip" id="'MiningRoutine_Expert'" default="true">
+                    <param name="warebasket" value="$ValidWaresList"/>
+                    <param name="range" value="$MissionSector"/>
+                    <!--<param name="debugchance" value="100"/>
+                      <param name="debugchance2" value="100"/>-->
+                  </create_order>
+                  <do_if value="$CurrentShip.docksize == tag.dock_m">
+                    <add_to_group groupname="$NPC_MediumMiners" object="$CurrentShip"/>
+                  </do_if>
+                </do_all>
+              </actions>
+            </library>
+
+            <library name="Setup_Abandoned_Ships">
+              <actions>
+                <!--<create_position name="$AbandonedMinerPosition" space="$MissionSector" object="$OreRefinery" x="25km" z="5km"/>
+
+                <create_ship name="$AbandonedMiner" macro="macro.ship_arg_m_miner_solid_01_a_macro" sector="$MissionSector">
+                  <owner exact="faction.ownerless" overridenpc="true" />
+                  <loadout>
+                    <level exact="1.0"/>
+                  </loadout>
+                  <safepos value="$AbandonedMinerPosition"/>
+                  <rotation yaw="45deg" pitch="-15deg" roll="25deg"/>
+                </create_ship>
+
+                <add_to_group groupname="global.$IgnoredAbandonedShips" object="$AbandonedMiner"/>-->
+              </actions>
+            </library>
+
+            <library name="Setup_Positions">
+              <actions>
+                <!-- For this scenario, it makes sense if the attackers only approach from the "North" Gate, which is to the West of the Refinery. -->
+                <find_gate name="$EntryGate" multiple="false" sortbydistanceto="$OreRefinery" space="player.cluster"/>
+                <create_position name="$GatePosition" object="$EntryGate" space="$MissionSector"/>
+              </actions>
+            </library>
+
+          </cues>
+        </cue>
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+
+            <!-- This sets the Cause of Death result screen stat when the player is killed. -->
+            <cue name="Track_Cause_Of_Death_Ref" ref="md.LIB_Scenario.Track_Cause_Of_Death">
+              <param name="SpecifyWeapon" value="true"/>
+            </cue>
+
+            <!-- TODO: Cutscene that shows the refineries and the Wharf, and zooms in on the player ship. -->
+            <cue name="Intro_Cutscene">
+              <actions>
+                <play_cutscene result="this.$CutsceneID" key="'OrbitParameterized'">
+                  <param name="targetobject" object="$PlayerShip"/>
+                  <param name="orbitdist" number="$PlayerShip.size * 3"/>
+                  <param name="orbitelevation" number="10"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="Intro_Cutscene_Fade">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="Intro_Cutscene_Stopped.state == cuestate.waiting"/>
+                  </conditions>
+                  <actions>
+                    <fade_screen fadein="1s" fadeout="1s" realtime="true"/>
+                  </actions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <stop_cutscene cutscene="parent.$CutsceneID"/>
+                  </actions>
+                </cue>
+
+                <cue name="Intro_Cutscene_Stopped">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Intro_Cutscene_Fade"/>
+                    <muffle_sound strength="0" duration="0s"/>
+                    <blur_screen strength="0" duration="0s"/>
+                    <signal_cue cue="Intro_Dialog" check="false"/>
+                    <signal_cue cue="Ch1_Mining"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Intro_Dialog_Delay">
+              <delay exact="5s"/>
+              <actions>
+                <signal_cue cue="Intro_Dialog" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="Intro_Dialog">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130201, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130202, $recipient = 'player' ],
+                                                                                          ],
+                                                                                $callbackcue = Intro_Cutscene_Fade,
+                                                                                ]"/>
+              </actions>
+            </cue>
+
+            <cue name="Ch1_Mining">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'Starting Chapter 1'" chance="$DebugChance"/>
+
+                <set_value name="$ResourcesCollected" exact="0"/>
+                <set_value name="$MissionStartTimeCue" exact="this"/>
+                <set_value name="$TutorialDialogComplete" exact="false"/>
+                <!-- Disable tutorial dialog if player has demonstrated that they know what they're doing. -->
+                <do_if value="@userdata.scenario_mining_2_best_rating ge 1">
+                  <set_value name="$TutorialDialogComplete" exact="true"/>
+                </do_if>
+                <create_group groupname="$GravidarAsteroids"/>
+
+                <create_mission cue="$MissionCue" abortable="true"
+                                name="{30613,2001}" description="{30613,2003}"
+                                difficulty="$Difficulty" type="missiontype.collect" faction="$MissionFaction" 
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}">
+                </create_mission>
+                <set_value name="$MissionStep" exact="1"/>
+                <include_actions ref="md.Scenario_Mining_LIB.Update_Objective"/>
+              </actions>
+              <cues>
+
+                <cue name="Ch1_Tutorial_Dialog" onfail="cancel">
+                  <conditions>
+                    <check_value value="not $TutorialDialogComplete"/>
+                  </conditions>
+                  <cues>
+
+                    <cue name="Ch1_Tutorial_Dialog_Lift_Off">
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130203, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130204, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Tutorial_Dialog_Scan_Mode">
+                      <conditions>
+                        <event_object_undocked group="global.$PlayerOccupiedShipGroup"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130205, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130206, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <!-- The player can skip this by destroying an asteroid without having activated Scan Mode. We're adding extra checks so it doesn't play after the player has already progressed. -->
+                    <cue name="Ch1_Tutorial_Dialog_Harvest_Resources" checkinterval="1s">
+                      <conditions>
+                        <check_value value="player.ship"/>
+                        <count_objects result="$NearbyAsteroid" space="player.sector" class="class.asteroid">
+                          <match_distance max="5km" object="player.ship"/>
+                          <match_any_wares wares="$ValidWaresList.{1}"/>
+                        </count_objects>
+                        <check_value value="player.activity == activity.scan"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Container_Magnet.state == cuestate.waiting"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Fly_Back.state == cuestate.waiting"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130207, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130208, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <!-- The player can skip this by collecting Ore without destroying an asteroid. We're adding extra checks so it doesn't play after the player has already progressed. -->
+                    <!--<cue name="Ch1_Tutorial_Dialog_Asteroid_Destroyed">
+                      <conditions>
+                        <event_object_destroyed group="$GravidarAsteroids" killer="player.ship"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Harvest_Resources.state == cuestate.complete"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Fly_Back.state == cuestate.waiting"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130209, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>-->
+
+                    <!-- The player can skip this by collecting Ore without using the container magnet. We're adding extra checks so it doesn't play after the player has already progressed. -->
+                    <cue name="Ch1_Tutorial_Dialog_Container_Magnet">
+                      <conditions>
+                        <event_object_dropped_objects group="$GravidarAsteroids"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Harvest_Resources.state == cuestate.complete"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Fly_Back.state == cuestate.waiting"/>
+                      </conditions>
+                      <delay exact="0.1s" comment="When the asteroid gets destroyed, the drop event happens before the destroyed event, so we need to wait a frame before we can check if the asteroid still exists."/>
+                      <actions>
+                        <do_if value="event.object.exists">
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130210, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                        </do_if>
+                        <do_else>
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130209, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130210, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                        </do_else>
+                      </actions>
+                    </cue>
+
+                    <!-- The threads coverge here. This will always happen. -->
+                    <cue name="Ch1_Tutorial_Dialog_Fly_Back">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130211, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130212, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130213, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Tutorial_Dialog_Landing" checkinterval="1s">
+                      <conditions>
+                        <check_value value="@player.ship.distanceto.{$OreRefinery} le 2km"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Fly_Back.state == cuestate.complete"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130214, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130215, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Tutorial_Dialog_Trading">
+                      <conditions>
+                        <event_object_docked group="global.$PlayerOccupiedShipGroup" dock="$OreRefinery"/>
+                        <check_value value="Ch1_Tutorial_Dialog_Fly_Back.state == cuestate.complete"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130216, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Ch1_Tutorial_Dialog_Complete">
+                      <conditions>
+                        <event_trade_started buyer="$OreRefinery"/>
+                        <check_value value="event.param.seller.isplayerowned"/>
+                      </conditions>
+                      <actions>
+                        <do_if value="Ch1_Enemy_Attack.state == cuestate.waiting">
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130217, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130218, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                        </do_if>
+                        <do_else>
+                          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130217, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                        </do_else>
+
+                        <set_value name="$TutorialDialogComplete" exact="true"/>
+                        <cancel_cue cue="Ch1_Tutorial_Dialog"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Ch1_Timer">
+                  <delay exact="$DurationUntilAttack"/>
+                  <actions>
+                    <signal_cue cue="Ch1_Enemy_Attack"/>
+                  </actions>
+                  <delay exact="$MissionDuration - $DurationUntilAttack"/>
+                  <actions>
+                    <signal_cue_instantly cue="Ch1_Finished" param="'timeout'"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Enemy_Attack">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- Spawn enemies to attack the medium NPC miners. The miners will probably survive, this is just a warning. -->
+                    <do_for_each in="$NPC_MediumMiners" name="$CurrentTarget" counter="$i">
+                      <run_actions ref="md.LIB_Generic.Spawn_Attack_Wave" result="$AttackWave">
+                        <param name="AttackTarget"          value="$CurrentTarget"/>
+                        <param name="Faction"               value="faction.xenon"/>
+                        <param name="MissionCue"            value="$MissionCue"/>
+                        <param name="Sector"                value="$MissionSector"/>
+                        <param name="Composition"           value="[ [ macro.ship_xen_s_fighter_01_a_macro, 1 ],
+                                                                     [ macro.ship_xen_s_fighter_02_a_macro, 2 ] ]"/>
+                        <param name="SpawnPosition"         value="$GatePosition"/>
+                        <param name="AllowOtherTargets"     value="false"/>
+                        <param name="Assignment"            value="assignment.attack"/>
+                      </run_actions>
+                    </do_for_each>
+                  </actions>
+                  <delay exact="30s"/>
+                  <actions>
+                    <!-- Spawn more enemies to attack the station, to add some spectacle to the ending. -->
+                    <do_all exact="5">
+                      <run_actions ref="md.LIB_Generic.Spawn_Attack_Wave" result="$AttackWave">
+                        <param name="AttackTarget"          value="$OreRefinery"/>
+                        <param name="Faction"               value="faction.xenon"/>
+                        <param name="MissionCue"            value="$MissionCue"/>
+                        <param name="Sector"                value="$MissionSector"/>
+                        <param name="Composition"           value="[ [ macro.ship_xen_m_fighter_01_a_macro, 1 ],
+                                                                     [ macro.ship_xen_s_fighter_01_a_macro, 4 ] ]"/>
+                        <param name="SpawnPosition"         value="$GatePosition"/>
+                        <param name="AllowOtherTargets"     value="false"/>
+                        <param name="Assignment"            value="assignment.attack"/>
+                      </run_actions>
+                    </do_all>
+
+                    <do_if value="$TutorialDialogComplete">
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130219, $recipient = 'player' ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130220, $recipient = 'player' ],
+                                                                                          ]
+                                                                                ]"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <!-- We keep an updated group of nearby asteroids. -->
+                <cue name="Ch1_Register_New_Asteroids" instantiate="true">
+                  <conditions>
+                    <event_gravidar_has_scanned group="global.$PlayerOccupiedShipGroup"/>
+                  </conditions>
+                  <actions>
+                    <find_gravidar_contact groupname="$GravidarAsteroids" object="event.object" class="class.asteroid" multiple="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Register_Ore_Collection" instantiate="true">
+                  <conditions>
+                    <event_player_owned_collected_resource comment="Also works if the player picks something up"/>
+                    <check_value value="$ValidWaresList.indexof.{event.param}"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ResourcesCollected" exact="event.param2" operation="add"/>
+
+                    <include_actions ref="md.Scenario_Mining_LIB.Update_Objective"/>
+                    <signal_cue cue="Ch1_Tutorial_Dialog_Fly_Back" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Register_Ore_Drop" instantiate="true">
+                  <conditions>
+                    <event_player_owned_dropped_objects/>
+                  </conditions>
+                  <actions>
+                    <run_actions ref="md.Scenario_Mining_LIB.On_Player_Ware_Drop" result="$DroppedAmount">
+                      <param name="DropList" value="event.param2"/>
+                      <param name="ValidWaresList" value="$ValidWaresList"/>
+                    </run_actions>
+                    <do_if value="$DroppedAmount">
+                      <debug_text text="'Player owned dropped ' + $DroppedAmount + ' units of cargo'" chance="$DebugChance"/>
+                      <set_value name="$ResourcesCollected" operation="subtract" exact="$DroppedAmount"/>
+                      <include_actions ref="md.Scenario_Mining_LIB.Update_Objective"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Ch1_Register_Player_Attack">
+                  <conditions>
+                    <event_object_attacked group="global.$PlayerContainerGroup"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$PlayerAttacked"/>
+                    <include_actions ref="md.Scenario_Mining_LIB.Update_Objective"/>
+                  </actions>
+                </cue>
+
+                <!-- This creates the variable $HighestAsteroidYield in $MissionCue. -->
+                <cue name="Ch1_Track_Highest_Asteroid_Yield_Ref" ref="md.Scenario_Mining_LIB.Track_Highest_Asteroid_Yield">
+                  <param name="ValidWaresList" value="$ValidWaresList"/>
+                  <param name="MissionCue"     value="$MissionCue"/>
+                </cue>
+
+                <!-- This creates the variable $MiningNodesDestroyed in $MissionCue. -->
+                <cue name="Ch1_Track_Mining_Nodes_Destroyed_Ref" ref="md.Scenario_Mining_LIB.Track_Mining_Nodes_Destroyed">
+                  <param name="MissionCue"     value="$MissionCue"/>
+                </cue>
+
+                <!-- This creates the variable $FastestRunTime in $MissionCue, unless no run is finished before the mission ends.-->
+                <cue name="Ch1_Track_Fastest_Run_Ref" ref="md.Scenario_Mining_LIB.Track_Fastest_Run">
+                  <param name="MissionCue"     value="$MissionCue"/>
+                </cue>
+
+                <cue name="Ch1_Drain_Ore_Refinery_Ref" ref="md.Scenario_Mining_LIB.Drain_Station">
+                  <param name="Station" value="$OreRefinery"/>
+                  <param name="Ware"    value="ware.ore"/>
+                </cue>
+
+                <cue name="Ch1_Remove_Ore_Refinery_Defence_Drones_Ref" ref="md.Scenario_Mining_LIB.Remove_Station_Defence_Drones">
+                  <param name="Station" value="$OreRefinery"/>
+                </cue>
+
+                <cue name="Ch1_Finished">
+                  <conditions>
+                    <check_any>
+                      <event_object_destroyed object="player.entity"/>
+                      <event_cue_signalled/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!-- Adjust these to tweak the bonus scores. -->
+                    <set_value name="$PointsPerMiningNode" exact="10"/>
+                    <set_value name="$TargetTime" exact="120s"/>
+                    <set_value name="$PointsPerSecond" exact="2"/>
+                    <set_value name="$AsteroidYieldPerPoint" exact="20"/>
+
+                    <do_if value="event.name == 'event_object_destroyed'">
+                      <do_for_each in="$ValidWaresList" name="$CurrentWare">
+                        <set_value name="$ResourcesCollected" exact="player.ship.cargo.{$CurrentWare}.count" operation="subtract"/>
+                      </do_for_each>
+                    </do_if>
+
+                    <set_value name="$ResourcesCollectedScore" exact="$ResourcesCollected"/>
+                    <set_value name="$MiningNodesDestroyedScore" exact="$MiningNodesDestroyed * $PointsPerMiningNode"/>
+                    <set_value name="$FastestRunScore" exact="if $FastestRunTime? then [($TargetTime - ($FastestRunTime)s)i * $PointsPerSecond, 0].max else 0"/>
+                    <do_if value="not $FastestRunTime?">
+                      <set_value name="$FastestRunTime" exact="0s"/>
+                    </do_if>
+                    <set_value name="$HighestAsteroidYieldScore" exact="$HighestAsteroidYield / $AsteroidYieldPerPoint"/>
+
+                    <substitute_text text="$MiningNodesDestroyedDescription" source="{30613,2105}">
+                      <replace string="'$NUMBER$'" with="10"/>
+                    </substitute_text>
+                    <substitute_text text="$FastestRunDescription" source="{30613,2110}">
+                      <replace string="'$NUMBER$'" with="$PointsPerSecond"/>
+                      <replace string="'$TIME$'" with="$TargetTime.formatted.{'%m:%S'}"/>
+                    </substitute_text>
+                    <substitute_text text="$HighestAsteroidYieldDescription" source="{30613,2109}">
+                      <replace string="'$NUMBER$'" with="$AsteroidYieldPerPoint"/>
+                    </substitute_text>
+
+                    <add_scenario_stat id="'resources_collected'" name="{30613,2102}" uivalue="$ResourcesCollected" description="{30613,2103}" score="$ResourcesCollectedScore" maxscore="1040"/>
+                    <add_scenario_stat id="'mining_nodes_destroyed'" name="{30613,2104}" uivalue="$MiningNodesDestroyed" description="$MiningNodesDestroyedDescription" score="$MiningNodesDestroyedScore" maxscore="$PointsPerMiningNode * 5"/>
+                    <add_scenario_stat id="'fastest_run'" name="{30613,2106}" uivalue="$FastestRunTime.formatted.{'%m:%S'}" description="$FastestRunDescription" score="$FastestRunScore" maxscore="160"/>
+                    <add_scenario_stat id="'highest_asteroid_yield'" name="{30613,2108}" uivalue="$HighestAsteroidYield" description="$HighestAsteroidYieldDescription" score="$HighestAsteroidYieldScore" maxscore="250"/>
+
+                    <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed'"/>
+                    <set_value name="$ResultData.$Score" exact="$ResourcesCollectedScore + $MiningNodesDestroyedScore + $FastestRunScore + $HighestAsteroidYieldScore"/>
+
+                    <do_if value="$ResultData.$Score ge player.allmodules.{player.module}.score.{1}">
+                      <remove_mission cue="$MissionCue" type="completed"/>
+                    </do_if>
+                    <do_else>
+                      <remove_mission cue="$MissionCue" type="failed"/>
+                    </do_else>
+
+                    <do_if value="event.name != 'event_object_destroyed'">
+                      <do_if value="$ResultData.$Score ge player.allmodules.{player.module}.score.{4}">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130225, $recipient = 'player', $monitor = false ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130226, $recipient = 'player', $monitor = false ],
+                                                                                          ],
+                                                                                $callbackcue = ResultWindow,
+                                                                                $abortcallbackcue = ResultWindow
+                                                                                ]"/>
+                      </do_if>
+                      <do_elseif value="$ResultData.$Score ge player.allmodules.{player.module}.score.{1}">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130223, $recipient = 'player', $monitor = false ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130224, $recipient = 'player', $monitor = false ],
+                                                                                          ],
+                                                                                $callbackcue = ResultWindow,
+                                                                                $abortcallbackcue = ResultWindow
+                                                                                ]"/>
+                      </do_elseif>
+                      <do_else>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $nofullscreenmenu = false, $debugchance = $DeepDebugChance,
+                                                                                $script = [
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130221, $recipient = 'player', $monitor = false ],
+                                                                                          table[ $actor = '$MinerActor', $speak = 306130222, $recipient = 'player', $monitor = false ],
+                                                                                          ],
+                                                                                $callbackcue = ResultWindow,
+                                                                                $abortcallbackcue = ResultWindow
+                                                                                ]"/>
+                      </do_else>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="ResultWindow"/>
+                    </do_else>
+
+                    <cancel_cue cue="Ch1_Mining"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!--These cues handle the briefing presentations e.g. Holomap or cutscene render targets (depending on the mission)-->
+            <cue name="BriefingStarted">
+              <conditions>
+                <check_any>
+                  <event_briefing_started cue="$MissionCue"/>
+                  <event_briefing_submission_selected cue="$MissionCue"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <set_value name="$RenderTarget" exact="event.param.{1}"/>
+
+                <debug_text text="'Briefing started'" chance="$DebugChance"/>
+              </actions>
+              <cues>
+
+                <cue name="DisplayCutscene" onfail="cancel">
+                  <conditions>
+                    <check_value value="$OreRefinery.isoperational"/>
+                  </conditions>
+                  <actions>
+                    <play_cutscene result="$BriefingCutscene" key="'OrbitParameterized'" rendertarget="$RenderTarget">
+                      <param name="targetobject" object="$OreRefinery"/>
+                      <param name="orbitdist" number="$OreRefinery.size * 2"/>
+                      <param name="orbitelevation" number="0.0"/>
+                    </play_cutscene>
+                  </actions>
+                </cue>
+
+                <cue name="BriefingStopped">
+                  <conditions>
+                    <check_any>
+                      <event_briefing_cancelled cue="$MissionCue"/>
+                      <event_briefing_submission_unselected cue="$MissionCue"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <do_if value="$BriefingCutscene?">
+                      <remove_overlay_text force="true"/>
+                      <stop_cutscene cutscene="$BriefingCutscene"/>
+                      <remove_value name="$BriefingCutscene"/>
+                    </do_if>
+
+                    <debug_text text="'Briefing cancelled'" chance="$DebugChance"/>
+                    <reset_cue cue="BriefingStarted"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

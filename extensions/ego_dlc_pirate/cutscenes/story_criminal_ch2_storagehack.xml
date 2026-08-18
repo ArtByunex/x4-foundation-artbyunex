@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Tourists in Vegas -->
+  <director key="Story_criminal_ch2_storagehack" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_container" />
+    <object_group name="target_group">
+      <reference object="target_container" />
+      <reference object="target_raiderhubship" />
+      <reference object="target_station" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="PresetDemoSequence" start="0">
+
+        <shot name="StaticCameraShot_Containers" environment="scenezone" duration="8000">
+          <camera>
+            <position>
+              <reference object="target_container" x="-26.712997" y="50.323322" z="-114.427750" />
+            </position>
+            <lookdirection>
+              <reference object="target_container" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+
+		<shot name="StaticCameraShot_Raider" environment="scenezone" duration="10000">
+          <camera>
+            <position>
+              <!--reference object="target_raiderhubship" x="206.712997" y="180.323322" z="114.427750"/-->
+			  <!--reference object="target_raiderhubship" x="16.142519" y="23.856039" z="633.720520" comment="copied from player camera"/-->
+			  <!--reference object="target_raiderhubship" x="2.562409" y="52.680855" z="757.213196" comment="copied from player camera"/-->
+			  <reference object="target_raiderhubship" x="10.783107" y="27.536602" z="842.431885" comment="copied from player camera"/>
+            </position>
+            <lookdirection>
+              <reference object="target_container" x="0" y="0" z="0" comment="copied from player camera"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

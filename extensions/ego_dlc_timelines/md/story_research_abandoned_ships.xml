@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Research_Abandoned_Ships" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance" exact="0"/>
+        <set_value name="$AnyShipClaimed" exact="0"/>
+        <!-- Notifications in md.Scenario_Hub - Reward_Notifications; If sectors here change also update in Reward_Notifications -->
+        <find_sector name="$HereticsEnd"      macro="macro.cluster_31_sector001_macro"/>
+        <find_sector name="$GetsuFune"        macro="macro.cluster_48_sector001_macro"/>
+        <find_sector name="$MistsOfArtemis"   macro="macro.cluster_715_sector001_macro"/>
+        <find_sector name="$FreedomsReach"    macro="macro.cluster_714_sector001_macro"/>
+        <find_sector name="$MooKyesRevenge"   macro="macro.cluster_710_sector001_macro"/>
+        <find_sector name="$NopileosFortune"  macro="macro.cluster_04_sector001_macro"/>
+        <find_sector name="$TharkasCascadeXV" macro="macro.cluster_32_sector001_macro"/>
+        <find_sector name="$AntigoneMemorial" macro="macro.cluster_28_sector001_macro"/>
+        <find_sector name="$CEODoubt"         macro="macro.cluster_713_sector001_macro"/>
+      </actions>
+      <cues>
+        <cue name="Gamestarted">
+          <!-- Used to trigger cues below for new games -->
+        </cue>
+
+        <cue name="Cutlass_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_protect_object_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$HereticsEnd" x="-170000m" y="10000m" z="-280000m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$Cutlass">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_ter_s_fighter_04_a_macro"/>
+              <param name="Sector" value="Start.$HereticsEnd"/>
+              <param name="Loadout" value="0.5"/>
+              <param name="Paintmod" value="ware.paintmod_0130"/>
+              <param name="Faction" value="faction.terran"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$Cutlass" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="Cutlass_Claimed">
+              <conditions>
+                <event_object_changed_owner object="$Cutlass" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$Cutlass.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$Cutlass"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0130" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <cues>
+                <cue name="Cutlass_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_ter_s_fighter_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_ter_s_fighter_01"/>
+                  <param name="Blueprints" value="[ware.ship_ter_s_fighter_04_a,
+                                                   ware.shield_ter_s_virtual_01_mk1,
+                                                   ware.engine_ter_s_virtual_01_mk1,
+                                                   ware.weapon_ter_s_laser_02_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Odachi_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_dragonfyre_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$GetsuFune" x="60000m" y="-32000m" z="275000m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$Odachi">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_ter_m_corvette_02_a_macro"/>
+              <param name="Sector" value="Start.$GetsuFune"/>
+              <param name="Loadout" value="0.7"/>
+              <param name="Paintmod" value="ware.paintmod_0161"/>
+              <param name="Faction" value="faction.terran"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$Odachi" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="Odachi_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$Odachi" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$Odachi.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$Odachi"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0161" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="Odachi_Claimed.state == cuestate.complete and ware.research_ship_ter_m_corvette_01.research.unlocked">
+                  <add_blueprints wares="[ware.shield_ter_m_virtual_01_mk2, ware.shield_ter_m_virtual_01_mk3]"/>
+                </do_if>
+              </patch>
+              <cues>
+                <cue name="Odachi_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_ter_m_corvette_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_ter_m_corvette_01"/>
+                  <param name="Blueprints" value="[ware.ship_ter_m_corvette_02_a,
+                                                   ware.shield_ter_m_virtual_01_mk1,
+                                                   ware.shield_ter_m_virtual_01_mk2,
+                                                   ware.shield_ter_m_virtual_01_mk3,
+                                                   ware.engine_ter_m_virtual_01_mk1,
+                                                   ware.weapon_ter_m_laser_02_mk1,
+                                                   ware.turret_ter_m_laser_03_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Sapporo_Setup" namespace="this" version="2">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_dragonfyre_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$MistsOfArtemis" x="-75797m" y="1571m" z="-178854m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$Sapporo">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_ter_l_flagship_01_a_macro"/>
+              <param name="Sector" value="Start.$MistsOfArtemis"/>
+              <param name="CustomLoadout" value="'timelines_sandbox_ter_l'"/>
+              <param name="Paintmod" value="ware.paintmod_0184"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$Sapporo" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <patch sinceversion="2">
+            <get_loadout result="$SapporoLoadout" macro="macro.ship_ter_l_flagship_01_a_macro" loadout="'timelines_sandbox_ter_l'"/>
+            <apply_loadout object="$Sapporo" loadout="$SapporoLoadout"/>
+            <do_for_each in="$Sapporo.weapons.all.list" name="$Weapon">
+              <do_if value="$Weapon.macro == macro.weapon_ter_l_flagship_01_mk1_macro">
+                <remove_weapon_from_weapongroup weapon="$Weapon" weapongroup="0" primary="true"/>
+                <add_weapon_to_weapongroup weapon="$Weapon" weapongroup="0" primary="false"/>
+              </do_if>
+            </do_for_each>
+          </patch>
+          <cues>
+            <cue name="Sapporo_Aproach">
+              <conditions>
+                <event_object_entered_live_view object="$Sapporo"/>
+              </conditions>
+              <actions>
+                <create_ship name="$KhaakRavager" macro="macro.ship_kha_l_destroyer_01_a_macro" sector="Start.$MistsOfArtemis">
+                  <owner exact="faction.khaak"/>
+                  <pilot>
+                    <select faction="faction.khaak" tags="tag.aipilot"/>
+                  </pilot>
+                  <drop ref="ship_large_khaak"/>
+                  <safepos object="$Sapporo" max="5km"/>
+                </create_ship>
+                <create_order id="'ProtectPosition'" object="$KhaakRavager" default="true">
+                  <param name="destination" value="[Start.$MistsOfArtemis, $Sapporo.position]"/>
+                </create_order>
+              </actions>
+            </cue>
+            <cue name="Sapporo_Claimed" version="6">
+              <conditions>
+                <event_object_changed_owner object="$Sapporo" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$Sapporo.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$Sapporo"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0184" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="Sapporo_Reasearch.state == cuestate.complete and ware.research_ship_ter_l_flagship_01.research.unlocked">
+                  <add_blueprints wares="[ware.weapon_ter_l_flagship_01_mk1, ware.missile_flagship_heavy_mk1]"/>
+                </do_if>
+              </patch>
+              <patch sinceversion="3">
+                <do_if value="Sapporo_Reasearch.state == cuestate.complete and ware.research_ship_ter_l_flagship_01.research.unlocked">
+                  <add_blueprints wares="[ware.missile_flagship_light_mk1]"/>
+                </do_if>
+              </patch>
+              <patch sinceversion="4">
+                <get_loadout result="$SapporoLoadout" macro="macro.ship_ter_l_flagship_01_a_macro" loadout="'timelines_sandbox_ter_l'"/>
+                <apply_loadout object="$Sapporo" loadout="$SapporoLoadout"/>
+                <do_for_each in="$Sapporo.weapons.all.list" name="$Weapon">
+                  <do_if value="$Weapon.macro == macro.weapon_ter_l_flagship_01_mk1_macro">
+                    <remove_weapon_from_weapongroup weapon="$Weapon" weapongroup="0" primary="true"/>
+                    <add_weapon_to_weapongroup weapon="$Weapon" weapongroup="0" primary="false"/>
+                  </do_if>
+                </do_for_each>
+              </patch>
+              <patch sinceversion="5">
+                <do_if value="Sapporo_Claimed.state == cuestate.complete and ware.research_ship_ter_l_flagship_01.research.unlocked">
+                  <add_blueprints wares="[ware.weapon_ter_l_flagship_01_mk1, ware.missile_flagship_heavy_mk1, ware.missile_flagship_light_mk1]"/>
+                </do_if>
+              </patch>
+              <patch sinceversion="6">
+                <do_if value="Sapporo_Claimed.state == cuestate.complete">
+                  <set_value name="Sapporo_Reasearch.$Blueprints" exact="[ware.ship_ter_l_flagship_01_a,
+                                                                          ware.shield_ter_l_standard_02_mk1,
+                                                                          ware.shield_ter_l_standard_02_mk2,
+                                                                          ware.shield_ter_l_standard_02_mk3,
+                                                                          ware.shield_ter_m_standard_04_mk1,
+                                                                          ware.shield_ter_m_standard_04_mk2,
+                                                                          ware.shield_ter_m_standard_04_mk3,
+                                                                          ware.engine_ter_l_allround_02_mk1,
+                                                                          ware.turret_ter_m_laser_04_mk1,
+                                                                          ware.weapon_ter_l_flagship_01_mk1,
+                                                                          ware.missile_flagship_heavy_mk1,
+                                                                          ware.missile_flagship_light_mk1]"/>
+                </do_if>
+              </patch>
+              <cues>
+                <cue name="Sapporo_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_ter_l_flagship_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_ter_l_flagship_01"/>
+                  <param name="Blueprints" value="[ware.ship_ter_l_flagship_01_a,
+                                                   ware.shield_ter_l_standard_02_mk1,
+                                                   ware.shield_ter_l_standard_02_mk2,
+                                                   ware.shield_ter_l_standard_02_mk3,
+                                                   ware.shield_ter_m_standard_04_mk1,
+                                                   ware.shield_ter_m_standard_04_mk2,
+                                                   ware.shield_ter_m_standard_04_mk3,
+                                                   ware.engine_ter_l_allround_02_mk1,
+                                                   ware.turret_ter_m_laser_04_mk1,
+                                                   ware.weapon_ter_l_flagship_01_mk1,
+                                                   ware.missile_flagship_heavy_mk1,
+                                                   ware.missile_flagship_light_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Elite_Sport_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_race_1_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$CEODoubt" x="65000m" y="5000m" z="175000m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$EliteSport">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_arg_s_racer_01_a_macro"/>
+              <param name="Sector" value="Start.$CEODoubt"/>
+              <param name="CustomLoadout" value="'scenario_race_elite'"/>
+              <param name="Paintmod" value="ware.paintmod_0188"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$EliteSport" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="Elite_Sport_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$EliteSport" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <set_userdata name="'limited_blueprint_ship_arg_s_racer_01_a'" value="1" signed="true"/>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$EliteSport.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$EliteSport"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0188" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0188" exact="5" />
+              </patch>
+              <cues>
+                <cue name="Elite_Sport_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_arg_s_racing_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_arg_s_racing_01"/>
+                  <param name="Blueprints" value="[ware.ship_arg_s_racer_01_a,
+                                                   ware.engine_arg_s_racer_01_mk1,
+                                                   ware.shield_arg_s_racer_01_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Kestrel_Sport_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_race_3_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$FreedomsReach" x="-376443" y="0" z="-111843" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$KestrelSport">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_tel_s_racer_01_a_macro"/>
+              <param name="Sector" value="Start.$FreedomsReach"/>
+              <param name="CustomLoadout" value="'scenario_race_kestrel'"/>
+              <param name="Paintmod" value="ware.paintmod_0144"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$KestrelSport" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="Kestrel_Sport_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$KestrelSport" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <set_userdata name="'limited_blueprint_ship_tel_s_racer_01_a'" value="1" signed="true"/>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$KestrelSport.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$KestrelSport"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0144" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0144" exact="5" />
+              </patch>
+              <cues>
+                <cue name="Kestrel_Sport_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_tel_s_racing_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_tel_s_racing_01"/>
+                  <param name="Blueprints" value="[ware.ship_tel_s_racer_01_a,
+                                                   ware.engine_tel_s_racer_01_mk1,
+                                                   ware.shield_tel_s_racer_01_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="Theseus_Sport_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_race_2_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <set_value name="$LastResearchDescriptionTime" exact="0"/>
+            <get_safe_pos sector="Start.$MooKyesRevenge" x="378925m" y="1111m" z="-20853m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$TheseusSport">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_par_s_racer_01_a_macro"/>
+              <param name="Sector" value="Start.$MooKyesRevenge"/>
+              <param name="CustomLoadout" value="'scenario_race_theseus'"/>
+              <param name="Paintmod" value="ware.paintmod_0172"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$TheseusSport" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="Theseus_Sport_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$TheseusSport" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <set_userdata name="'limited_blueprint_ship_par_s_racer_01_a'" value="1" signed="true"/>
+                <substitute_text text="$EmailText" source="{30005,14210}">
+                  <replace string="'$RESEARCH$'" with="$TheseusSport.name"/>
+                </substitute_text>
+                <write_incoming_message title="{30005,14200}" text="$EmailText" source="{30301,101}" highpriority="true"/>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$TheseusSport"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0172" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0172" exact="5" />
+              </patch>
+              <cues>
+                <cue name="Theseus_Sport_Reasearch" ref="Research_Unlock">
+                  <param name="ShipClaimed" value="$ShipClaimed"/>
+                  <param name="ResearchItem" value="'research_ship_par_s_racing_01'"/>
+                  <param name="ResearchWare" value="ware.research_ship_par_s_racing_01"/>
+                  <param name="Blueprints" value="[ware.ship_par_s_racer_01_a,
+                                                   ware.engine_par_s_racer_01_mk1,
+                                                   ware.shield_par_s_racer_01_mk1]"/>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="XenonF_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_escort_1_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <get_safe_pos sector="Start.$NopileosFortune" x="-60000m" y="-15000m" z="115000m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$XenonF">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_xen_s_heavyfighter_01_a_macro"/>
+              <param name="Sector" value="Start.$NopileosFortune"/>
+              <param name="Faction" value="faction.xenon"/>
+              <param name="Paintmod" value="ware.paintmod_0153"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$XenonF" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="XenonF_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$XenonF" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$XenonF"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0153" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0153" exact="5" />
+              </patch>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="XenonB_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_waveattack_antigone_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <get_safe_pos sector="Start.$AntigoneMemorial" x="-160000m" y="42000m" z="175000m" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$XenonB">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_xen_m_corvette_01_a_macro"/>
+              <param name="Sector" value="Start.$AntigoneMemorial"/>
+              <param name="Faction" value="faction.xenon"/>
+              <param name="Paintmod" value="ware.paintmod_0158"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$XenonB" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="XenonB_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$XenonB" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$XenonB"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0158" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0158" exact="5" />
+              </patch>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="XenonH_Setup" namespace="this">
+          <conditions>
+            <check_any>
+              <event_cue_signalled cue="md.Setup.Start"/>
+              <event_cue_completed cue="Gamestarted"/>
+            </check_any>
+            <check_any>
+              <check_value value="@userdata.scenario_tharkas_cascade_best_rating" min="1"/>
+              <check_value value="gamestart.storystate.story_timelines_quettanaut"/>
+              <check_value value="gamestart.storystate.story_timelines_grandmother"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ShipClaimed" exact="0"/>
+            <get_safe_pos sector="Start.$TharkasCascadeXV" x="-105000m" y="0m" z="-78000" result="$Position"/>
+            <run_actions ref="Create_Abandoned_Ship" result="$XenonH">
+              <param name="Cue" value="namespace"/>
+              <param name="Macro" value="macro.ship_xen_l_terraformer_01_a_macro"/>
+              <param name="Sector" value="Start.$TharkasCascadeXV"/>
+              <param name="Faction" value="faction.xenon"/>
+              <param name="Paintmod" value="ware.paintmod_0150"/>
+              <param name="Position" value="$Position"/>
+              <param name="DebugChance" value="Start.$DebugChance"/>
+            </run_actions>
+            <add_to_group groupname="global.$IgnoredAbandonedShips" object="$XenonH" comment="prevent i.e. Yaki from claiming the ship"/>
+          </actions>
+          <cues>
+            <cue name="XenonH_Claimed" version="2">
+              <conditions>
+                <event_object_changed_owner object="$XenonH" owner="faction.player"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.LIB_Generic.RequestObjectVulnerability">
+                  <param name="Object" value="$XenonH"/>
+                  <param name="RequesterCue" value="namespace"/>
+                  <param name="DebugChance" value="Start.$DebugChance"/>
+                </run_actions>
+                <add_inventory entity="player.entity" ware="ware.paintmod_0150" exact="5" />
+                <set_value name="$ShipClaimed" exact="1"/>
+                <set_value name="Start.$AnyShipClaimed" operation="add" exact="1"/>
+              </actions>
+              <patch sinceversion="2" state="complete">
+                <add_inventory entity="player.entity" ware="ware.paintmod_0150" exact="5" />
+              </patch>
+            </cue>
+          </cues>
+        </cue>
+
+        <!-- Libraries -->
+        <library name="Create_Abandoned_Ship" purpose="run_actions">
+          <params>
+            <param name="Cue"/>
+            <param name="Macro"/>
+            <param name="Sector"/>
+            <param name="CustomLoadout" default="null"/>
+            <param name="Loadout" default="null"/>
+            <param name="Paintmod"/>
+            <param name="Faction" default="null"/>
+            <param name="Position"/>
+            <param name="DebugChance"/>
+          </params>
+          <actions>
+            <do_if value="$CustomLoadout == null">
+              <create_ship name="$Ship" macro="$Macro" sector="$Sector">
+                <owner exact="faction.ownerless"/>
+                <loadout>
+                  <level faction="$Faction" exact="$Loadout"/>
+                </loadout>
+                <paint ware="$Paintmod"/>
+                <pilot actor="null" />
+                <safepos value="$Position"/>
+                <rotation yaw="[-90deg,90deg].randominrange" roll="[-8deg,8deg].randominrange" />
+              </create_ship>
+            </do_if>
+            <do_else>
+              <create_ship name="$Ship" macro="$Macro" sector="$Sector">
+                <owner exact="faction.ownerless"/>
+                <loadout ref="$CustomLoadout"/>
+                <paint ware="$Paintmod"/>
+                <pilot actor="null" />
+                <safepos value="$Position"/>
+                <rotation yaw="[-90deg,90deg].randominrange" roll="[-8deg,8deg].randominrange" />
+              </create_ship>
+            </do_else>
+            <set_value name="$Hull" min="33" max="66"/>
+            <set_object_hull object="$Ship" exact="$Hull"/>
+            <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+              <param name="Object" value="$Ship"/>
+              <param name="RequesterCue" value="$Cue"/>
+              <param name="MinHull" value="$Hull"/>
+              <param name="AllowCapturable" value="true"/>
+              <param name="DebugChance" value="$DebugChance"/>
+            </run_actions>
+            <return value="$Ship"/>
+          </actions>
+        </library>
+
+        <library name="Research_Unlock">
+          <params>
+            <param name="ShipClaimed"/>
+            <param name="ResearchItem"/>
+            <param name="ResearchWare"/>
+            <param name="Blueprints"/>
+          </params>
+          <cues>
+            <cue name="Check_Research_Unlocked" onfail="cancel">
+              <conditions>
+                <cue_is_complete cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+              </conditions>
+            </cue>
+
+            <cue name="Research_Unlocked">
+              <conditions>
+                <check_any>
+                  <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.UnlockResearch"/>
+                  <event_cue_completed cue="Check_Research_Unlocked"/>
+                </check_any>
+              </conditions>
+              <!--Delay to allow any further initialisation of the HQ and mentors-->
+              <delay exact="1s"/>
+              <actions>
+                <set_value name="$CharacterCutsceneTable" exact="table[]"/>
+                <do_if value="md.X4Ep1_Mentor_Subscriptions.Start.$BoronMet?" comment="only if we already met with Boso">
+                  <do_if value="not $Boso?">
+                    <set_value name="$Boso" exact="@md.$PersistentCharacters.$BosoTa"/>
+                    <do_if value="$Boso">
+                      <set_value name="$CharacterCutsceneTable.{$Boso}" exact="table[$key = 'ShowCharacterBoron']"/>
+                    </do_if>
+                  </do_if>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="Research_Unlocked_Wait">
+                  <conditions>
+                    <event_cue_completed cue="Research_Unlocked"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Unhide_Research" checkinterval="1min">
+                      <conditions>
+                        <check_value value="$ShipClaimed ge 1"/>
+                      </conditions>
+                      <actions>
+                        <add_encyclopedia_entry type="researchables" item="$ResearchItem"/>
+                        <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Research_Entry_Selected" instantiate="true">
+                      <conditions>
+                        <event_object_signalled object="player.entity" param="'research_selected_no_speak'"/>
+                        <check_value value="player.age gt $LastResearchDescriptionTime + 30s"/>
+                        <check_any>
+                          <check_value value="event.param2 == $ResearchWare"/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <set_value name="$LastResearchDescriptionTime" exact="player.age"/>
+                        <speak actor="$Boso" line="30201162" priority="85" recipient="player.entity" comment="{10201,30201162}"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Research_Finished" instantiate="true">
+                      <conditions>
+                        <event_player_research_unlocked ware="$ResearchWare"/>
+                      </conditions>
+                      <actions>
+                        <set_value name="this.$Dialog_Lines" exact="[[30201174]]" comment="{10201,30201174}"/>
+                        <add_blueprints wares="$Blueprints"/>
+                      </actions>
+                      <cues>
+                        <cue name="Research_Finished_LastMentorSpeak" checkinterval="10s">
+                          <conditions>
+                            <check_value value="player.age ge (md.$LastMentorSpeak + 10min)"/>
+                          </conditions>
+                          <cues>
+                            <cue name="Research_Finished_Speak_Ref_v2" ref="md.LIB_Dialog.Speak_Actor">
+                              <param name="Actor"             value="$Boso"/>
+                              <param name="CutsceneKey"       value="$CharacterCutsceneTable.{$Boso}"/>
+                              <param name="DelayInitial"      value="2s"/>
+                              <param name="Lines"             value="parent.parent.$Dialog_Lines"/>
+                              <param name="IsInMission"       value="false"/>
+                            </cue>
+                          </cues>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </library>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Cutscene showing the pursuing MIN ship coming through the anomaly behind the player and Ace. -->
+  <director key="Story_Criminal_Ch3_Anomaly" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:MINShip" />
+    <object_group name="target_group">
+      <reference object="PlayerShip" />
+      <reference object="MINShip" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <!--<shot name="ShowMINShip" environment="scenezone" duration="onevent:Trigger_ShowMINPilot" failsafe="15000">
+          <camera_orbit reference="MINShip" orient_to="object">
+            <begin angle="60" distance="650" elevation="70" />
+            <end angle="140" distance="300" elevation="60" />
+          </camera_orbit>
+        </shot>-->
+
+        <shot name="ShowMINShip" environment="scenezone" duration="onevent:Trigger_ShowMINPilot">
+          <camera>
+            <position>
+              <reference object="PlayerShip" x="0" y="15" z="70" />
+            </position>
+            <lookdirection>
+              <reference object="MINShip" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:Trigger_ShowMINPilot">
+        <shot name="ShowMINPilot" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <position>
+              <reference object="MINShip" x="3" y="2" z="15" />
+            </position>
+            <lookdirection>
+              <reference object="MINShip" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

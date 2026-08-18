@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Race_LIB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <!-- -->
+
+    <library name="Setup_Racing_Data" purpose="include_actions" namespace="this">
+      <actions>
+        <set_value name="$OpponentData" exact="[table[$shipmacro=macro.ship_tel_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_kestrel',
+                                                    $shipfaction=faction.teladi,
+                                                    $shippaintmod=ware.paintmod_0058,
+                                                    $pilotrating=11,
+                                                    $pilotmacro=macro.character_timelines_racer_1_macro],
+
+                                              table[$shipmacro=macro.ship_arg_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_elite',
+                                                    $shipfaction=faction.argon,
+                                                    $shippaintmod=ware.paintmod_0109,
+                                                    $pilotrating=12,
+                                                    $pilotmacro=macro.character_timelines_racer_2_macro],
+
+                                              table[$shipmacro=macro.ship_par_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_theseus',
+                                                    $shipfaction=faction.paranid,
+                                                    $shippaintmod=ware.paintmod_0077,
+                                                    $pilotrating=13,
+                                                    $pilotmacro=macro.character_timelines_racer_3_macro],
+
+                                              table[$shipmacro=macro.ship_tel_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_kestrel',
+                                                    $shipfaction=faction.teladi,
+                                                    $shippaintmod=ware.paintmod_0152,
+                                                    $pilotrating=14,
+                                                    $pilotmacro=macro.character_timelines_racer_4_macro],
+
+                                              table[$shipmacro=macro.ship_arg_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_elite',
+                                                    $shipfaction=faction.argon,
+                                                    $shippaintmod=ware.paintmod_0109,
+                                                    $pilotrating=15,
+                                                    $pilotmacro=macro.character_timelines_racer_5_macro],
+
+                                              table[$shipmacro=macro.ship_par_s_racer_01_a_macro,
+                                                    $shiploadout='scenario_race_theseus',
+                                                    $shipfaction=faction.paranid,
+                                                    $shippaintmod=ware.paintmod_0128,
+                                                    $pilotrating=16,
+                                                    $pilotmacro=macro.character_timelines_racer_6_macro]]" />
+
+        <set_value name="$PlayerData" exact="[table[$shipmacro = macro.ship_tel_s_racer_01_a_macro,
+                                                      $npcmacro = macro.character_timelines_racer_npc_1_macro,
+                                                      $loadout = 'scenario_race_kestrel',
+                                                      $paintmod = ware.paintmod_0107],
+
+                                              table[$shipmacro = macro.ship_arg_s_racer_01_a_macro,
+                                                      $npcmacro = macro.character_timelines_racer_npc_3_macro,
+                                                      $loadout = 'scenario_race_elite',
+                                                      $paintmod = ware.paintmod_0110],
+
+                                              table[$shipmacro = macro.ship_par_s_racer_01_a_macro,
+                                                      $npcmacro = macro.character_timelines_racer_npc_2_macro,
+                                                      $loadout = 'scenario_race_theseus',
+                                                      $paintmod = ware.paintmod_0128],
+
+                                              table[$shipmacro = macro.ship_gen_s_racer_01_a_macro,
+                                                      $npcmacro = macro.character_timelines_racer_npc_4_macro,
+                                                      $loadout = 'scenario_race_dart',
+                                                      $paintmod = ware.paintmod_0001]]" />
+
+        <set_value name="$AnnouncerBanter" exact="[306200108, 306200109, 306200110]"/>
+
+        <set_value name="$Race_Data" exact="md.Scenario_Race_LIB.Setup_Racing_Data"/>
+
+
+        <create_list name="$Checkpoints"/>
+        <create_list name="$RacingGrid"/>
+        <create_group groupname="$Race_Data.$Opponents"  comment="Racing opponents"/>
+        <set_value name="$Race_Data.$NumOpponents" exact="0"/>
+        <set_value name="$Race_Data.$LapTimes" exact="[]"/>
+
+        <set_value name="$RaceTime"           exact="0"/>
+        <set_value name="$Race_Data.$FinishedOpponents"  exact="0"/>
+
+        <set_value name="$Race_Data.$CurrentCheckpoint"         exact="0"/>
+
+        <!--
+             Some default settings for the races - these can be overridden per race
+        -->
+        <set_value name="$Race_Data.$NumLaps" exact="3"/>
+
+        <set_value name="$Race_MissionName" exact="{30620,51}"/>
+        <set_value name="$Race_MissionDescription" exact="{30620,55}" />
+        <set_value name="$Race_MissionRewardText" exact="{30620,57}" />
+        <set_value name="$Race_MissionIcon" exact="'briefing_mission_director_01'" />
+        <set_value name="$Race_MissionIconCaption" exact="{30293,102}" />
+
+        <set_value name="$Race_Data.$MaxTime"             exact="600" />
+        <set_value name="$Race_Data.$MaxTimeScore"        exact="100"/>
+        <set_value name="$Race_Data.$MaxLapTime"          exact="180" />
+        <set_value name="$Race_Data.$MaxLapTimeScore"     exact="100" />
+        <set_value name="$Race_Data.$FirstScore"          exact="10000"/>
+        <set_value name="$Race_Data.$SecondScore"         exact="5000"/>
+        <set_value name="$Race_Data.$ThirdScore"          exact="2500"/>
+
+        <!-- storing the lap twice, as, during the transition from one lap to another, the logic is expecting
+             a different value from the UI - this is primarily for calculating your position. -->
+        <set_value name="$Race_Data.$MissionLap"          exact="0"/> <!-- lap for logic -->
+        <set_value name="$Race_Data.$UILap"               exact="0"/> <!-- lap for UI -->
+        <set_value name="$Race_Data.$CheckpointLookahead" exact="2"/>
+
+        <set_value name="$Race_Data.$RaceInProgress"      exact="false"/>
+      </actions>
+    </library>
+
+    <library name="Setup_Character_Announcer" purpose="run_actions">
+      <actions>
+        <create_cue_actor name="$AnnouncerActor" cue="namespace" macro="character_timelines_race_announcer_macro">
+          <page exact="10140"/>
+          <owner exact="faction.civilian"/>
+          <skills>
+            <skill type="management"  exact="14"/>
+            <skill type="morale"      exact="15"/>
+            <skill type="piloting"    exact="7"/>
+            <skill type="engineering" exact="5"/>
+            <skill type="boarding"    exact="11"/>
+          </skills>
+        </create_cue_actor>
+        <set_entity_traits    entity="$AnnouncerActor" missionactor="true" customhandler="true" subtitlename="true"/>
+        <set_entity_overrides entity="$AnnouncerActor" title="'{30620,131}'" icon="'factionrepresentative'"/>
+        <set_value name="md.$PersistentCharacters.$RaceAnnouncerActor" exact="$AnnouncerActor"/>
+
+        <return value="$AnnouncerActor"/>
+      </actions>
+    </library>
+
+    <library name="Setup_Player" namespace="this">
+      <actions>
+        <set_emergency_eject_active active="false"/>
+        <!-- Place the Player, then check for Player existence -->
+
+        <do_if value="not player.exists">
+          <debug_text text="'Player does not exist'" filter="error"/>
+          <set_value name="$HasError" exact="true"/>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="Setup_Checkpoints" namespace="this">
+      <actions>
+        <find_object name="$Checkpoints" space="player.sector" class="class.checkpoint" multiple="true" />
+        <set_value name="$Race_Data.$Checkpoints" exact="$Checkpoints"/>
+        <set_value name="$Race_Data.$CheckpointLeniency" exact="$CheckpointLeniency"/>
+        <sort_list list="$Checkpoints" sortbyvalue="loop.element.sequence" />
+      </actions>
+    </library>
+
+    <library name="Setup_Level" namespace="this">
+      <actions>
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+      </actions>
+    </library>
+
+    <library name="Setup_Ships" namespace="this">
+      <actions>
+        <create_group groupname="$PlayerShipGroup"/>
+        <find_object name="$RacingGrid" space="player.sector" class="class.navbeacon" multiple="true" />
+
+        <do_all exact="$RacingGrid.count" counter="$i">
+          <do_if value="$RacingGrid.{$i}.macro.ismacro.{macro.env_deco_nav_beacon_t2_macro}">
+            <create_cue_actor name="$OpponentActor" cue="namespace" macro="$OpponentData.{$i}.$pilotmacro">
+              <owner exact="$OpponentData.{$i}.$shipfaction"/>
+              <skills>
+                <skill type="management"  exact="9"/>
+                <skill type="morale"      exact="6"/>
+                <skill type="piloting"    exact="$OpponentData.{$i}.$pilotrating"/>
+                <skill type="engineering" exact="4"/>
+                <skill type="boarding"    exact="2"/>
+              </skills>
+            </create_cue_actor>
+            <create_ship name="$ship" macro="$OpponentData.{$i}.$shipmacro" sector="player.sector">
+              <owner exact="$OpponentData.{$i}.$shipfaction"/>
+              <loadout loadout="$OpponentData.{$i}.$shiploadout"/>
+              <pilot actor="$OpponentActor"/>
+              <paint ware="$OpponentData.{$i}.$shippaintmod"/>
+              <position value="$RacingGrid.{$i}.position"/>
+              <rotation value="$RacingGrid.{$i}.rotation"/>
+            </create_ship>
+            <create_order id="'Wait'" object="$ship" default="true"/>
+            <add_to_group object="$ship" groupname="$Race_Data.$Opponents"/>
+            <set_value name="$Race_Data.$NumOpponents" operation="add"/>
+            <set_object_name object="$ship" name="$OpponentActor.rawname"/>
+          </do_if>
+          <do_elseif value="$RacingGrid.{$i}.macro.ismacro.{macro.env_deco_nav_beacon_t1_macro}">
+
+            <do_if value="player.entity.race == race.teladi">
+              <set_value name="$playerrace" exact="1" />
+            </do_if>
+            <do_elseif value="player.entity.race == race.argon">
+              <set_value name="$playerrace" exact="2" />
+            </do_elseif>
+            <do_elseif value="player.entity.race == race.paranid">
+              <set_value name="$playerrace" exact="3" />
+            </do_elseif>
+            <do_elseif value="player.entity.race == race.split">
+              <set_value name="$playerrace" exact="4" />
+            </do_elseif>
+
+            <set_value name="$playerstartpos" exact="$RacingGrid.{$i}.position" />
+
+            <create_ship name="$playership" macro="$PlayerData.{$playerrace}.$shipmacro" sector="player.sector">
+              <owner exact="faction.player"/>
+              <loadout loadout="$PlayerData.{$playerrace}.$loadout"/>
+              <paint ware="$PlayerData.{$playerrace}.$paintmod"/>
+              <position value="$RacingGrid.{$i}.position"/>
+              <rotation value="$RacingGrid.{$i}.rotation"/>
+            </create_ship>
+            <teleport_player object="$playership" force="true" instant="true"/>
+            <add_to_group groupname="$PlayerShipGroup" object="$playership"/>
+            <lock_getup/>
+            <set_value name="$Race_Data.$playerpaintmod" exact="$PlayerData.{$playerrace}.$paintmod"/>
+            <set_value name="$Race_Data.$playerclone" exact="$PlayerData.{$playerrace}.$npcmacro"/>
+          </do_elseif>
+          <lock_all_flight_input/>
+          <destroy_object object="$RacingGrid.{$i}"/>
+        </do_all>
+      </actions>
+    </library>
+
+    <library name="Setup_Mission" namespace="this">
+      <actions>
+        <set_value name="$MissionStep" exact="1"/>
+
+        <do_if value="player.allmodules.{player.module}.isscenario">
+          <set_value name="$MitsunoScenario"/>
+          <do_all exact="player.scenarios.chapters.count" counter="$chapter">
+            <do_for_each in="player.scenarios.chapters.{$chapter}" name="$module">
+              <do_if value="$module == player.module">
+                <remove_value name="$MitsunoScenario"/>
+                <break/>
+              </do_if>
+            </do_for_each>
+            <do_if value="not $MitsunoScenario?">
+              <break/>
+            </do_if>
+          </do_all>
+        </do_if>
+
+        <do_if value="$MitsunoScenario?">
+          <!-- Create Mitsuno Scenario -->
+          <create_mission cue="$MissionCue" comment="Win the race" abortable="true"
+                          name="$Race_MissionName" description="$Race_MissionDescription"
+                          rewardtext="$Race_MissionRewardText"
+                          difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+            <briefing>
+            </briefing>
+          </create_mission>
+        </do_if>
+        <do_else>
+          <!-- Create normal Nodus Scenario -->
+          <create_mission cue="$MissionCue" comment="Win the race" abortable="true"
+                          name="$Race_MissionName" description="$Race_MissionDescription"
+                          rewardtext="$Race_MissionRewardText"
+                          icon="$Race_MissionIcon" iconcaption="$Race_MissionIconCaption"
+                          difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+            <briefing>
+            </briefing>
+          </create_mission>
+        </do_else>
+
+        <do_all exact="$Checkpoints.count" counter="$checkpointid">
+          <do_if value="$checkpointid gt $Race_Data.$CheckpointLookahead + 1">
+            <trigger_animation object="$Checkpoints.{$checkpointid}" trigger="deactivate"/>
+          </do_if>
+        </do_all>
+      </actions>
+    </library>
+
+    <library name="Start_Race" namespace="this">
+      <actions>
+        <set_value name="$Race_Data.$RaceInProgress" exact="true"/>
+        <debug_text text="event.param" chance="$DebugChance"/>
+        <do_if value="event.param.$id == 'race_started'">
+          <unlock_all_flight_input/>
+          <set_value name="$Race_Data.$RaceInProgress" exact="true"/>
+          <set_value name="$Race_Data.$MissionLap"     exact="1"/>
+          <set_value name="$Race_Data.$UILap"          exact="1"/>
+          <set_value name="$Race_Data.$StartTime"      exact="player.age"/>
+          <set_value name="$Race_Data.$LapStart"       exact="player.age"/>
+          <stop_music/>
+
+          <set_value name="$random" min="1" max="1000"/>
+          <do_if value="$random gt 5">
+            <play_music music="'music_soundtrack_timelines_race'" loop="true"/>
+          </do_if>
+          <do_else>
+            <play_music music="'music_soundtrack_timelines_race_alt'" loop="true"/>
+          </do_else>
+
+          <do_for_each name="$locship" in="$Race_Data.$Opponents">
+            <set_value name="$locship.pilot.$CheckpointCount" exact="0"/>
+            <do_all exact="$Race_Data.$NumLaps">
+              <create_order object="$locship" id="'MoveRaceCheckpoints'">
+                <param name="checkpoints" value="$Checkpoints" />
+                <param name="checkpointleniency" value="$CheckpointLeniency"/>
+              </create_order>
+            </do_all>
+          </do_for_each>
+        </do_if>
+        <do_elseif value="event.param.$id == 'lap_finished'">
+          <set_value name="$MissionStep" exact="($MissionStep + 1)" />
+          <set_value name="$LapTime" exact="(player.age - $Race_Data.$LapStart)" />
+          <set_value name="$Race_Data.$LapStart" exact="player.age" />
+          <show_help custom="'Lap Time: ' + $LapTime.formatted.{'%m:%.3S'}" silent="true" timeout="true" force="true" position="1" duration="2s"/>
+          <set_value name="$Race_Data.$BestLapTime" exact="if $Race_Data.$BestLapTime? then [$Race_Data.$BestLapTime, $LapTime].min else $LapTime"/>
+          <set_value name="$Race_Data.$UILap" operation="add"/>
+          <append_to_list name="$Race_Data.$LapTimes" exact="$LapTime" />
+        </do_elseif>
+        <do_elseif value="event.param.$id == 'checkpoint'">
+          <set_value name="$Race_Data.$CurrentCheckpoint" exact="event.param.$checkpoint"/>
+          <trigger_animation object="$Checkpoints.{$Race_Data.$CurrentCheckpoint}" trigger="deactivate"/>
+          <do_all exact="$Race_Data.$CheckpointLookahead" counter="$checkpointoffset">
+            <set_value name="$Race_Data.$MissionLap" exact="event.param.$lap"/>
+            <set_value name="$checkpointid" exact="(event.param.$checkpoint + $checkpointoffset) % $Checkpoints.count"/>
+            <do_if value="$checkpointid != 0"> <!-- this is the finishing line checkpoint and does not have an animation to trigger -->
+              <trigger_animation object="$Checkpoints.{$checkpointid}" trigger="activate"/>
+            </do_if>
+          </do_all>
+        </do_elseif>
+
+        <do_elseif value="event.param.$id == 'race_countdown'">
+          <!--
+              0103 - 3
+              0104 - 2
+              0105 - 1
+              0106 - GO
+          -->
+          <set_value name="$countdown_textid" exact="[306200106, 306200105, 306200104, 306200103]"/>
+          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                     $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                     $script = [
+table[ $actor = '$AnnouncerActor', $speak = $countdown_textid.{event.param.$countdown + 1}, $recipient = 'player', $monitor=false, $voiceover = true, $skipafter = 1s]
+                                                                     ]
+                                                                     ]" />
+        </do_elseif>
+      </actions>
+    </library>
+
+    <library name="Update_Position" namespace="this">
+      <actions>
+        <do_if value="$Race_Data.$MissionLap">
+          <set_value name="$Position" exact="1"/>
+          <set_value name="$PlayerLocation" exact="(($Race_Data.$MissionLap - 1) * $Checkpoints.count) + $Race_Data.$CurrentCheckpoint"/>
+          <set_value name="$TotalCheckpoints" exact="$Race_Data.$NumLaps * $Checkpoints.count"/>
+          <set_value name="$NextCheckpointID" exact="$Race_Data.$CurrentCheckpoint + 1"/>
+          <do_if value="$NextCheckpointID gt $Checkpoints.count">
+            <set_value name="$NextCheckpointID" exact="1"/>
+          </do_if>
+          <set_value name="$NextCheckpoint" exact="$Checkpoints.{$NextCheckpointID}"/>
+          <set_value name="$DistanceToNextCheckpoint" exact="player.entity.distanceto.{$NextCheckpoint}"/>
+          <do_for_each name="$Opponent" in="$Race_Data.$Opponents">
+            <do_if value="$Opponent.pilot.$CheckpointCount gt $PlayerLocation">
+              <set_value name="$Position" operation="add"/>
+            </do_if>
+            <do_elseif value="$Opponent.pilot.$CheckpointCount == $PlayerLocation">
+              <do_if value="$Opponent.distanceto.{$NextCheckpoint} lt $DistanceToNextCheckpoint">
+                <set_value name="$Position" operation="add"/>
+              </do_if>
+            </do_elseif>
+          </do_for_each>
+
+          <set_value name="$textcolour_primary" exact="'text_normal'"/>
+          <set_value name="$textcolour_secondary" exact="'overlay_scenario_stat_text'"/>
+
+          <set_value name="$flashduration" exact="0s"/>
+          <set_value name="$flashcolour" exact="$textcolour_primary"/>
+          <do_if value="$Race_Data.$Position?">
+            <do_if value="$Race_Data.$Position gt $Position">
+              <play_sound sound="'ui_racing_position_gain'" object="player.ship"/>
+              <set_value name="$flashduration" exact="3s"/>
+              <set_value name="$flashcolour" exact="$textcolour_secondary"/>
+            </do_if>
+            <do_elseif value="$Race_Data.$Position lt $Position">
+              <play_sound sound="'ui_racing_position_loss'" object="player.ship"/>
+              <set_value name="$flashduration" exact="3s"/>
+              <set_value name="$flashcolour" exact="'overlay_scenario_stat_flash'"/>
+            </do_elseif>
+          </do_if>
+
+          <set_value name="$Race_Data.$Position" exact="$Position"/>
+
+          <do_if value="$Race_Data.$UILap gt 1">
+            <set_value name="$laptimes" exact="[
+                                               [{30620,205}, (player.age - $Race_Data.$StartTime).formatted.{'%M:%.3S'}, 12],
+                                               [{30620,206}, (player.age - $Race_Data.$LapStart).formatted.{'%M:%.3S'}, 12],
+                                               [{30620,207}, $Race_Data.$BestLapTime.formatted.{'%M:%.3S'}, 12],
+                                               ]"/>
+          </do_if>
+          <do_else>
+            <set_value name="$laptimes" exact="[
+                                               [{30620,205}, (player.age - $Race_Data.$StartTime).formatted.{'%M:%.3S'}, 12],
+                                               ['', '', 12],
+                                               ['', '', 12],
+                                               ]"/>
+          </do_else>
+
+          <set_value name="$UIPrimaryFontSize" exact="25"/>
+          <set_value name="$UISecondaryFontSize" exact="50"/>
+
+          <do_if value="$Race_Data.$RaceInProgress and not player.isinfullscreenmenu">
+            <show_overlay_text relwidth="1.0" reloffsetx="0.0" reloffsety="0.05" fromtop="true" >
+              <row>
+                <col idx="1"
+                     text="{30620,204}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="$UIPrimaryFontSize"
+                     halign="right"
+                     valign="bottom"
+                     colspan="2" />
+                <col idx="3"
+                     text="'' + $Race_Data.$UILap"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_primary"
+                     fontsize="$UISecondaryFontSize"
+                     halign="right"
+                     valign="bottom"
+                     offsety="-10" />
+                <col idx="4"
+                     text="'/' + $Race_Data.$NumLaps"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="$UIPrimaryFontSize"
+                     halign="left"
+                     valign="bottom" />
+
+                <col idx="9"
+                     text="{30620,203}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="$UIPrimaryFontSize"
+                     halign="right"
+                     valign="bottom"
+                     colspan="2" />
+                <col idx="11"
+                     text="'' + $Position"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_primary"
+                     fontsize="$UISecondaryFontSize"
+                     halign="right"
+                     valign="bottom"
+                     offsety="-10"
+                     flashduration="$flashduration"
+                     flashcolor="$flashcolour" />
+                <col idx="12"
+                     text="'/' + ($Race_Data.$NumOpponents + 1)"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="$UIPrimaryFontSize"
+                     halign="left"
+                     valign="bottom" />
+              </row>
+              <row fromtop="true">
+                <col idx="1"
+                     text="$laptimes.{1}.{1}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="12"
+                     halign="right"
+                     valign="bottom"
+                     colspan="2" />
+                <col idx="3"
+                     text="$laptimes.{1}.{2}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_primary"
+                     fontsize="$laptimes.{1}.{3}"
+                     halign="left"
+                     valign="bottom"
+                     colspan="2" />
+              </row>
+              <row fromtop="true">
+                <col idx="1"
+                     text="$laptimes.{2}.{1}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="12"
+                     halign="right"
+                     valign="bottom"
+                     colspan="2" />
+                <col idx="3"
+                     text="$laptimes.{2}.{2}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_primary"
+                     fontsize="$laptimes.{2}.{3}"
+                     halign="left"
+                     valign="bottom"
+                     colspan="2" />
+              </row>
+              <row fromtop="true">
+                <col idx="1"
+                     text="$laptimes.{3}.{1}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="12"
+                     halign="right"
+                     valign="bottom"
+                     colspan="2" />
+                <col idx="3"
+                     text="$laptimes.{3}.{2}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_primary"
+                     fontsize="$laptimes.{3}.{3}"
+                     halign="left"
+                     valign="bottom"
+                     colspan="2" />
+              </row>
+            </show_overlay_text>
+          </do_if>
+          <do_else>
+            <remove_overlay_text force="true"/>
+          </do_else>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="Update_Banter" namespace="this">
+      <actions>
+        <do_if value="$AnnouncerBanter.count and $MissionActors and @$AnnouncerActor">
+          <set_value name="$banter_textid" exact="$AnnouncerBanter.{1}"/>
+          <remove_from_list name="$AnnouncerBanter" exact="$banter_textid"/>
+
+          <!-- make the music quieter so we can hear the announcer -->
+          <set_music_volume volume="0.65"/>
+          <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                     $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                     $script = [
+                                                                     table[ $actor = '$AnnouncerActor', $speak = $banter_textid, $recipient = 'player', $monitor=false, $voiceover = true]
+                                                                     ],
+                                                                     $callbackcue = RaceBanterComplete,
+                                                                     $abortcallbackcue = RaceBanterComplete
+
+                                                                     ]" />
+          <!-- We shouldn't hear this again, but in case the player
+               just sits around indefinitely, we'll put it on the back
+               of the queue -->
+          <append_to_list name="$AnnouncerBanter" exact="$banter_textid"/>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="End_Race" namespace="this">
+      <params>
+        <param name="Race_Data"/>
+        <param name="MissionActors"/>
+        <param name="AnnouncerActor"/>
+        <param name="FinalWords"/>
+      </params>
+      <actions>
+        <remove_overlay_text force="true"/>
+        <set_value name="$Race_Data.$RaceInProgress" exact="false"/>
+        <set_value name="$ResultData" exact="table[]"/>
+        <do_if value="$Race_Data.$MissionLap lt $Race_Data.$NumLaps">
+          <!-- Player ship destroyed -->
+          <set_value name="$Position" exact="6"/>
+          <set_value name="$Score_Time" exact="0"/>
+          <do_if value="@$Race_Data.$BestLapTime">
+            <set_value name="$Best_LapTime" exact="$Race_Data.$BestLapTime.formatted.{'%m:%.3S'}" />
+            <set_value name="$Score_LapTime" exact="$Race_Data.$MaxLapTime - ($BestLapTime)f"/>
+          </do_if>
+          <do_else>
+            <set_value name="$Best_LapTime" exact="0" />
+            <set_value name="$Score_LapTime" exact="0"/>
+          </do_else>
+          <set_value name="$Score_Position" exact="0"/>
+          <set_value name="$Race_Time" exact="0" />
+          <set_value name="$Total_Score" exact="0" />
+          <set_value name="$ResultData.$PlayerDied" exact="true"/>
+        </do_if>
+
+        <do_else>
+          <!-- Race completed -->
+          <set_value name="$LapTime" exact="(player.age - $Race_Data.$LapStart)" />
+          <set_value name="$Race_Data.$BestLapTime" exact="if $Race_Data.$BestLapTime? then [$Race_Data.$BestLapTime, $LapTime].min else $LapTime"/>
+
+          <do_for_each name="$Opponent" in="$Race_Data.$Opponents">
+            <do_if value="$Opponent.orders.count le 0">
+              <set_value name="$Race_Data.$FinishedOpponents" exact="($Race_Data.$FinishedOpponents + 1)" />
+            </do_if>
+          </do_for_each>
+          <set_value name="$Position" exact="($Race_Data.$FinishedOpponents + 1)" />
+          <set_value name="$Score_Time" exact="[($Race_Data.$MaxTime - (player.age - $Race_Data.$StartTime)f) * ($Race_Data.$MaxTimeScore)f, 0].max"/>
+          <set_value name="$Score_LapTime" exact="[($Race_Data.$MaxLapTime - ($Race_Data.$BestLapTime)f) * ($Race_Data.$MaxLapTimeScore)f, 0].max"/>
+          <set_value name="$Race_Time" exact="(player.age - $Race_Data.$StartTime).formatted.{'%m:%.3S'}" />
+
+          <set_value name="$Score_Position" exact="0"/>
+          <do_if value="$Position == 1">
+            <set_value name="$Score_Position" exact="$Race_Data.$FirstScore"/>
+          </do_if>
+          <do_elseif value="$Position == 2">
+            <set_value name="$Score_Position" exact="$Race_Data.$SecondScore"/>
+          </do_elseif>
+          <do_elseif value="$Position == 3">
+            <set_value name="$Score_Position" exact="$Race_Data.$ThirdScore"/>
+          </do_elseif>
+          <set_value name="$Best_LapTime" exact="$Race_Data.$BestLapTime.formatted.{'%m:%.3S'}" />
+          <set_value name="$Total_Score" exact="$Score_Time + $Score_LapTime + $Score_Position" />
+        </do_else>
+
+        <set_value name="$ResultData.$Score" exact="$Total_Score"/>
+        <substitute_text text="$timebonushinttext" source="{30620,60}">
+          <replace string="'$SCORE$'" with="$Race_Data.$MaxTimeScore"/>
+          <replace string="'$TIME$'" with="$Race_Data.$MaxTime / 60" />
+          <!-- What if this is not in whole minutes? -->
+        </substitute_text>
+        <substitute_text text="$laptimebonushinttext" source="{30620,58}">
+          <replace string="'$SCORE$'" with="$Race_Data.$MaxLapTimeScore"/>
+          <replace string="'$TIME$'" with="$Race_Data.$MaxLapTime" />
+        </substitute_text>
+        <substitute_text text="$positionbonushinttext" source="{30620,59}">
+          <replace string="'$FIRST$'" with="$Race_Data.$FirstScore"/>
+          <replace string="'$SECOND$'" with="$Race_Data.$SecondScore" />
+          <replace string="'$THIRD$'" with="$Race_Data.$ThirdScore" />
+        </substitute_text>
+
+        <create_cue_actor name="$OutroActor" cue="namespace" macro="$Race_Data.$playerclone">
+          <owner exact="faction.player"/>
+        </create_cue_actor>
+
+        <!--
+            If we just leave the player ship flying around, it will often smash into the nearest hard surface
+            causing the outro camera to be very unhappy. Instead we move the player ship 20km above the race
+            and create an AI clone, which can do a 'victory lap' for a few seconds. After it's complete, we
+            replace it with the player ship again, because the results screen will revert back to first person
+            view, so we need the ship to be 'correct' again.
+        -->
+        <set_value name="$position" exact="player.ship.position"/>
+        <set_value name="$velocity" exact="player.ship.velocity"/>
+        <set_value name="$rotation" exact="player.ship.rotation"/>
+        <warp object="player.ship" sector="player.sector">
+          <safepos x="player.ship.position.x" y="player.ship.position.y + 20km" z="player.ship.position.z"/>
+        </warp>
+
+        <create_ship name="$OutroShip" macro="player.ship.macro" sector="player.sector">
+          <owner exact="faction.player"/>
+          <loadout loadout="player.ship.loadout"/>
+          <paint ware="$Race_Data.$playerpaintmod"/>
+          <pilot actor="$OutroActor"/>
+          <position value="$position"/>
+          <rotation value="$rotation"/>
+        </create_ship>
+        <set_object_velocity object="$OutroShip">
+          <linear value="$velocity"/>
+          <angular value="vector.[0m, 0m, 0m]"/>
+        </set_object_velocity>
+
+        <create_order object="$OutroShip" id="'MoveRaceCheckpoints'">
+          <param name="checkpoints" value="$Race_Data.$Checkpoints" />
+          <param name="checkpointleniency" value="$Race_Data.$CheckpointLeniency"/>
+        </create_order>
+
+        <play_cutscene cinematicmode="true" result="$Race_OutroCutscene" key="'scenario_race_outro_cutscene'">
+          <param name="anchor" object="player.zone" />
+          <param name="orbit_1" object="$OutroShip"/>
+        </play_cutscene>
+
+        <stop_music/>
+        <play_music music="'music_soundtrack_timelines_scenario_result'" loop="true"/>
+
+        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                       $caller = this,
+                                                                       $preset = '$plot',
+                                                                       $actors = $MissionActors,
+                                                                       $debugchance = 0,
+                                                                       $script = [
+                                                                           table[
+                                                                               $actor = '$AnnouncerActor',
+                                                                               $speak = $FinalWords.{$Position},
+                                                                               $recipient = 'player',
+                                                                               $monitor=false,
+                                                                               $voiceover = true
+                                                                           ],
+                                                                       ],
+                                                                       $abortonsignalledcue = Outro_Stopped,
+                                                                   ]" />
+      </actions>
+      <cues>
+        <cue name="Outro_Stopped">
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_cutscene_stopped key="'scenario_race_outro_cutscene'"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$position" exact="$OutroShip.position"/>
+            <set_value name="$velocity" exact="$OutroShip.velocity"/>
+            <set_value name="$rotation" exact="$OutroShip.rotation"/>
+            <destroy_object object="$OutroShip"/>
+            <warp object="player.ship" sector="player.sector">
+              <position value="$position"/>
+              <rotation value="$rotation"/>
+            </warp>
+            <set_object_velocity object="player.ship">
+              <linear value="$velocity"/>
+              <angular value="vector.[0m, 0m, 0m]"/>
+            </set_object_velocity>
+
+            <add_scenario_stat id="'time'"
+                               name="{30620,52}"
+                               uivalue="$Race_Time"
+                               description="$timebonushinttext"
+                               score="$Score_Time"
+                               maxscore="($Race_Data.$MaxTime/2f) * ($Race_Data.$MaxTimeScore)f"/>
+
+            <add_scenario_stat id="'laptime'"
+                               name="{30620,53}"
+                               uivalue="$Best_LapTime"
+                               description="$laptimebonushinttext"
+                               score="$Score_LapTime"
+                               maxscore="($Race_Data.$MaxLapTime/2f) * ($Race_Data.$MaxLapTimeScore)f"/>
+
+            <add_scenario_stat id="'position'"
+                               name="{30620,54}"
+                               uivalue="$Position"
+                               description="$positionbonushinttext"
+                               score="$Score_Position"
+                               maxscore="$Race_Data.$FirstScore"/>
+
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </library>
+  </cues>
+</mdscript>

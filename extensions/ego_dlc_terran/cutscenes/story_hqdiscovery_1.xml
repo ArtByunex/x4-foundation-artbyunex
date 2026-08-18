@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Split gate cutscene -->
+  <director key="Story_hqdiscovery_1">
+    <params>
+      <!--Moving capship-->
+      <param name="capship" object="true" />
+
+      <!--Destination gate-->
+      <param name="gate" object="true" />
+
+      <!--Camera position-->
+      <param name="x" number="true"/>
+      <param name="y" number="true"/>
+      <param name="z" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="capshipscene" zone="@auto:capship" />
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="FlyToGate" start="0">
+        <shot name="FlyToGateShot" environment="capshipscene" duration="12000">
+          <camera>
+            <position>
+              <value var="x" comment="Capship zone X coordinate" />
+              <value var="y" comment="Capship zone Y coordinate" />
+              <value var="z" comment="Capship zone Z coordinate" />
+            </position>
+            <lookdirection>
+              <angles>
+                <pitch>
+                  <value exact="0"/>
+                </pitch>
+                <yaw>
+                  <value exact="92"/>
+                </yaw>
+                <distance>
+                  <value exact="70000"/>
+                </distance>
+              </angles>
+              <!--TODO @Owen @Martin this sometimes doesn't look at the gate if the ship is in a different zone-->
+              <!--<reference object="gate"/>-->
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

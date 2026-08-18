@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+  <!-- Split DLC war-subscription, use xml-patch-code to inject into base-game -->
+  <!--replace sel="/mdscript/cues/cue[@name='Start']//comment()[. = ' DLC_SPLIT_WAR1_SETUP ']">
+    <cue name="SPLIT_VS_ARG_REF" version="2" ref="md.X4Ep1_War_Split.SPLIT_VS_ARG_LIB"/>
+  </replace-->
+
+  <!-- Ideas (discussed with Klaus): 
+    - Change the comment-to-replace to an actual cue which is waiting for event_cue_signalled (so it won't complete) and replace the entire cue using patchcode
+    - or look for the parent cue and insert as a child (exact order of subcues is irrelevant, it just has to be a subcue)
+    - TODO: In the Subscription-text-variations, add the if textpage xxx conditions (but without code), and add the content in the DLC
+    -->
+
+  <!--<replace sel="/mdscript/cues//cue[@name='xxx']">
+    <cue name="yyy" namespace="this" version="2" ref="md.X4Ep1_War_Split.zzz"/>
+  </insert>-->
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Large_Supply__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 100000">
+      <!--Food supplies for workforce-->
+      <!--TODO @Owen check if there are enough stations in need of these resources-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Large_Supply__Food"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 100100">
+      <!--Construction supplies for ship construction-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Large_Supply__Ship_Construction_Tech"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Get_Exact_Crew__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 110000" comment="pilot variation">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_GetExactCrew.Get_Exact_Crew_Pilots"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 110100" comment="engineers for station variation">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_GetExactCrew.Get_Exact_Crew_Engineers"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Get_Exact_Fleet__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 120000 or $TextOffset == 120100" comment="build a fleet">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <do_any>
+        <set_value name="$Fleet" exact="[
+                          table[
+                            $macro = macro.ship_spl_xl_carrier_01_a_macro,
+                            $amount = 1,
+                            $equipment = 'generate_loadout'
+                          ],
+                          table[
+                            $macro = macro.ship_spl_l_destroyer_01_a_macro,
+                            $amount = 1,
+                            $equipment = 'generate_loadout'
+                          ],
+                          table[
+                            $macro = macro.ship_spl_m_frigate_01_a_macro,
+                            $amount = 3,
+                            $equipment = 'generate_loadout'
+                          ]
+                         ]"/>
+        <set_value name="$Fleet" exact="[
+                          table[
+                            $shiptype = shiptype.destroyer,
+                            $amount = 1,
+                          ],
+                          table[
+                            $shiptype = shiptype.heavyfighter,
+                            $amount = 10,
+                          ]
+                         ]"/>
+        <set_value name="$Fleet" exact="[
+                          table[
+                            $shiptype = shiptype.corvette,
+                            $amount = 3,
+                          ]
+                         ]"/>
+        <set_value name="$Fleet" exact="[
+                          table[
+                            $shiptype = shiptype.heavyfighter,
+                            $amount = 3,
+                          ],
+                          table[
+                            $shiptype = shiptype.fighter,
+                            $amount = 6,
+                          ]
+                         ]"/>
+      </do_any>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Achieve_Coverage__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 102000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Achieve_Coverage__Host_Space"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 102100">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Achieve_Coverage__Enemy_Space"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Build_Station__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 105000" comment="Build defence outpost">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Build_Station__Allied_Space"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 105100" comment="Build defence outpost">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Build_Station__Enemy_Border_Area"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Supply_Factory__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 130000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_SupplyFactory.ConfigureDifficulty" comment="input: $MissionLevel; output: $MissionLevel, $SupplyStorageMinPercent, $MissionDuration"/>
+      <do_if value="not $FollowUp">
+        <include_actions ref="md.GM_SupplyFactory.SupplyFactory_FriendlyFactory" comment="input: $Faction, output: $TargetStation"/>
+        <do_if value="$TargetStation">
+          <set_value name="$Valid" exact="2" comment="Valid mission variables"/>
+        </do_if>
+      </do_if>
+      <do_else>
+        <set_value name="$Valid" exact="2" comment="Valid mission variables"/>
+      </do_else>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='DeployInPlace__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 101000">
+      <!--Deploy laser towers around an allied object-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="DeployInPlace__LaserTowers_Around_Allied_Object"/>
+    </do_if>
+
+    <do_elseif value="$TextOffset == 101100 or $TextOffset == 101200">
+      <!--Create mine field around enemy entry point. Different variants for whether the area is in $Faction owned space or not-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$OwnEntryPointID" exact="101200"/>
+      <set_value name="$AlliedEntryPointID" exact="101100"/>
+      <include_actions ref="DeployInPlace__Mine_Allied_Entry_Point"/>
+    </do_elseif>
+
+    <do_elseif value="$TextOffset == 101300">
+      <!--Deploy laser towers in resource regions-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="DeployInPlace__LaserTowers_In_Resource_Regions"/>
+    </do_elseif>
+
+    <do_elseif value="$TextOffset == 101400">
+      <!--Deploy satellite in enemy territory-->
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="DeployInPlace__Satellite_In_Enemy_Space"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='DestroyRarelyOnSight__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 140000" comment="undermine enemy variation">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <do_any>
+        <do_all weight="20">
+          <set_value name="$TargetSpec" exact="table[$macro = macro.ship_arg_l_destroyer_02_a_macro]"/>
+          <set_value name="$TargetCount" exact="1"/>
+          <set_value name="$Difficulty" exact="level.hard"/>
+        </do_all>
+        <do_all weight="40">
+          <set_value name="$TargetSpec" exact="table[$macro = [macro.ship_arg_s_fighter_01_a_macro, macro.ship_arg_s_heavyfighter_02_a_macro].random]"/>
+          <set_value name="$TargetCount" exact="[3,5,8].random"/>
+        </do_all>
+        <do_all weight="40">
+          <set_value name="$TargetSpec" exact="table[$macro = macro.ship_arg_m_frigate_01_a_macro]"/>
+          <set_value name="$TargetCount" exact="[2,3,4].random"/>
+          <set_value name="$MissionLevel" exact="2" operation="add"/>
+        </do_all>
+      </do_any>
+      <set_value name="$MissionLevel" exact="$TargetCount - 1" operation="add"/>
+      <set_value name="$TargetFaction" exact="faction.argon"/>
+      <set_value name="$Valid" exact="2" comment="Valid mission variables"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='DestroyStation__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+    <set_value name="$TargetFaction" exact="faction.argon"/>
+
+    <do_if value="$TextOffset == 170000" comment="Destroy station variation">
+      <create_group groupname="$Targets"/>
+      <find_station_by_true_owner name="$EnemyStations" space="$TargetSector" faction="$TargetFaction" defencestation="true" multiple="true" sortbydistanceto="player.entity"/>
+      <do_if value="not $EnemyStations.count">
+        <find_station_by_true_owner name="$EnemyStations" space="$TargetSector" faction="$TargetFaction" multiple="true" sortbydistanceto="player.entity"/>
+      </do_if>
+      <do_if value="$EnemyStations.count">
+        <sort_list list="$EnemyStations" sortbyvalue="loop.element.distanceto.[$TargetSector, $Definition.$ThreadData.$WarFront.$HostEntryPoint.destination.position]"/>
+        <do_any>
+          <add_to_group groupname="$Targets" object="$EnemyStations.{1}" weight="70"/>
+          <add_to_group groupname="$Targets" object="$EnemyStations.random" weight="30"/>
+        </do_any>
+      </do_if>
+      <set_value name="$Difficulty" exact="level.veryhard"/>
+      <set_value name="$MissionLevel" exact="5"/>
+      <do_if value="$Targets.count">
+        <set_value name="$Valid" exact="2" comment="Valid mission variables"/>
+      </do_if>
+    </do_if>
+
+    <do_if value="$TextOffset == 180000" comment="Destroy station turret variation">
+      <find_station_by_true_owner name="$TargetStation" space="$TargetSector" faction="$TargetFaction">
+        <match_content class="class.turret" state="componentstate.operational" min="20" />
+      </find_station_by_true_owner>
+      <do_if value="$TargetStation">
+        <set_value name="$TurretAmount" exact="$TargetStation.turrets.operational.count"/>
+        <set_value name="$Difficulty" exact="level.hard"/>
+        <set_value name="$MissionLevel" exact="1"/>
+        <set_value name="$TargetClass" exact="[class.turret]"/>
+        <do_if value="$TurretAmount ge 20 and $TurretAmount le 30">
+          <set_value name="$Limit" exact="15"/>
+        </do_if>
+        <do_elseif value="$TurretAmount gt 30 and $TurretAmount le 50">
+          <set_value name="$Limit" exact="25"/>
+          <set_value name="$Missionlevel" operation="add" exact="3"/>
+        </do_elseif>
+        <do_elseif value="$TurretAmount gt 50">
+          <do_any>
+            <set_value name="$Limit" exact="30"/>
+            <set_value name="$Limit" exact="40"/>
+          </do_any>
+          <set_value name="$Missionlevel" operation="add" exact="6"/>
+        </do_elseif>
+
+        <set_value name="$ExplosionRange" exact="0m" comment="ignore"/>
+
+        <do_if value="$TargetStation.exists">
+          <find_object_component groupname="$Targets" object="$TargetStation" class="$TargetClass" multiple="true"/>
+          <shuffle_group group="$Targets"/>
+          <do_all exact="$Targets.count" counter="$i" reverse="true">
+            <remove_from_group group="$Targets" object="$Targets.{$i}"/>
+            <do_if value="$Targets.count le $Limit">
+              <break/>
+            </do_if>
+          </do_all>
+        </do_if>
+
+        <do_if value="$Targets">
+          <set_value name="$Valid" exact="2" comment="Valid mission variables"/>
+        </do_if>
+      </do_if>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='BoardShip__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 108000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="BoardShip__Standard_FindMilitaryTarget" comment="returns $Valid = 2, if a ship was found"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Scan__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 150000" comment="GM_Scan1 (specified ship)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_Scan.Scan__High_Security_Enemy_Ship"/>
+      <set_value name="$ScanType" exact="1" />
+      <set_value name="$MissionLevel" exact="2" operation="add" comment="Ships can be annoying to scan."/>
+    </do_if>
+    <do_elseif value="$TextOffset == 150100" comment="GM_Scan2 (specified station)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_Scan.Scan__High_Security_Enemy_Station"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150200" comment="GM_Scan3 (specified module)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_Scan.Scan__High_Security_Enemy_Module"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150300">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$TextVsWares" exact="table[
+              { 150300 } = [ ware.spaceweed ],
+              { 150700 } = [ ware.silicon, ware.microchips, ware.smartchips, ware.siliconwafers ],
+            ]"/>
+      <do_if value="false" comment="150300 and 150700 are ARG specifically">
+        <!-- when adding more text-variations which are not specifically about Argon Federation ships, set the EnemyFaction to null here -->
+      </do_if>
+      <set_value name="$TargetWare" exact="$TextVsWares.{$TextOffset}.random"/>
+      <set_value name="$MissionLevel" exact="3" operation="add" comment="This might take a while."/>
+      <set_value name="$ScanType" exact="1"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150400" comment="GM_Scan5 (deepscan ships for specified item)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$TargetItem" exact="ware.inv_decryptionmodule"/>
+      <set_value name="$MissionLevel" exact="6" operation="add" comment="This would take a very long time."/>
+      <set_value name="$ScanType" exact="1"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150500" comment="GM_Scan6 (deepscan ships for specified person)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_Scan.Scan__Random_NPC"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150600" comment="GM_Scan7 (ship with idcode)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="md.GM_Scan.Scan__Enemy_Ship_ID_Code"/>
+    </do_elseif>
+    <do_elseif value="$TextOffset == 150700 or $TextOffset == 150800 or $TextOffset == 150900" comment="GM_Scan4 (deepscan ships for specified ware)">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$TextVsWares" exact="table[
+              { 150700 } = [ ware.hullparts ],
+              { 150800 } = [ ware.ore ],
+              { 150900 } = [ ware.water ],              
+            ]"/>
+      <do_if value="($TextOffset == 150800) or ($TextOffset == 150900)" comment="150700 is ARG specifically, 150800 and 150900 is ANY">
+        <set_value name="$EnemyFaction" exact="null" comment="ANY ship, not the subscription enemy faction"/>
+      </do_if>
+      <set_value name="$TargetWare" exact="$TextVsWares.{$TextOffset}.random"/>
+      <set_value name="$MissionLevel" exact="3" operation="add" comment="This might take a while."/>
+      <set_value name="$ScanType" exact="1"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Passenger_Transport__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 104000 or $TextOffset == 104100" comment="Transport specialist on Argon to front">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Passenger_Transport__To_Frontline"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Sabotage__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 14000" comment="sabotage station">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$TargetClass" exact="[class.turret]"/>
+      <include_actions ref="md.GM_Sabotage.Sabotage__Standard_Station_Lib"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 14100" comment="sabotage ship">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$TargetClass" exact="[class.engine, class.shieldgenerator]"/>
+      <include_actions ref="md.GM_Sabotage.Sabotage__Standard_Ship_Lib"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Destroy_Objects__Clear_Explosives']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <!-- Clear Mines -->
+    <do_if value="$TextOffset == 160000 or $TextOffset == 160100">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$ExplosiveOwner" exact="faction.argon"/>
+    </do_if>
+    <!-- Clear Lasertowers -->
+    <do_if value="$TextOffset == 161000 or $TextOffset == 161100" comment="">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <set_value name="$ExplosiveOwner" exact="faction.argon"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Find_Resources__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 106000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Find_Resources__Allied_Space_1"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 106100">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Find_Resources__Enemy_Space_1"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='RepairObject__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 103000 or $TextOffset == 103100">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="RepairObject__Allied_Job_Ship"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Assassinate__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 107000 or $TextOffset == 107100">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Assassinate__Enemy_S_M_Ship"/>
+    </do_if>
+    <do_elseif value="$TextOffset == 107200">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Assassinate__NonAlly_S_M_Ship"/>
+    </do_elseif>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='Support_Invasion__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 109000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="Support_Invasion__Get_Invasion"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='KillShip__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 190000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="KillShip__Standard_Lib"/>
+    </do_if>
+  </add>
+
+  <!-- ##################################################################################################-->
+
+  <add sel="/mdscript/cues//cue[@name='DestroyFleet__Standard']/actions/do_all[@exact='$TextOffsets.count']/do_elseif[@value='$Page == 30215']">
+    <do_if value="$TextOffset == 200000">
+      <set_value name="$Valid" exact="1" comment="Valid text offset"/>
+      <include_actions ref="DestroyFleet__Standard_Lib"/>
+    </do_if>
+  </add>
+
+</diff>

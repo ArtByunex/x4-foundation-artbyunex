@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Boron_Epilogue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Start" namespace="this" version="4" mapeditor="false">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}" comment="only in main-galaxy"/>
+        <set_value name="$DebugChance" exact="0"/>
+      </conditions>
+      <cues>
+
+        <cue name="Setup">
+          <cues>
+            <cue name="Setup_StoryState" onfail="cancel">
+              <conditions>
+                <check_value value="gamestart.storystate.story_queendom_returned"/>
+              </conditions>
+              <cues>
+                <cue name="Setup_StoryStateWait">
+                  <conditions>
+                    <event_cue_completed cue="md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="md.Setup_DLC_Boron.Boron_Gates_Open_RemainingSystems"/>
+                    <cancel_cue cue="Start"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Setup_Characters">
+              <cues>
+                <cue name="Setup_GateOpeningAnnouncer">
+                  <actions>
+                    <!-- Boron News Anchor -  -->
+                    <set_value name="$MissionActors" exact="table[]"/>
+                    <create_cue_actor name="$BoronNewsAnchorActor" cue="namespace" macro="character_story_boron_news_anchor_macro">
+                      <page exact="10258"/>
+                      <owner exact="faction.boron"/>
+                      <skills>
+                        <skill type="management"  exact="8"/>
+                        <skill type="morale"      exact="14"/>
+                        <skill type="piloting"    exact="11"/>
+                        <skill type="engineering" exact="8"/>
+                        <skill type="boarding"    exact="2"/>
+                      </skills>
+                    </create_cue_actor>
+                    <set_entity_traits    entity="$BoronNewsAnchorActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                    <set_entity_overrides entity="$BoronNewsAnchorActor" title="'{30253,152}'" icon="'manager'"/>
+
+                    <!-- NPC Usecase Setup -->
+                    <set_value name="$MissionActors.$BoronNewsAnchorActor" exact="table[
+                                              $entity = $BoronNewsAnchorActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                    <set_value name="md.$PersistentCharacters.$BoronNewsAnchorActor" exact="$BoronNewsAnchorActor"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="GateOpening_TriggerHandling">
+          <conditions>
+            <event_cue_completed cue="Setup"/>
+          </conditions>
+          <cues>
+
+            <cue name="KingdomEndGateOpened_OnFailCheck" onfail="cancel">
+              <conditions>
+                <check_value value="md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd.state == cuestate.complete"/>
+                <check_value value="OpenRemainingKEGates.state == cuestate.waiting"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="OpenRemainingKEGates"/>
+              </actions>
+            </cue>
+
+            <cue name="KingdomEndGateOpened_Trigger">
+              <conditions>
+                <event_cue_completed cue="md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd"/>
+                <check_value value="OpenRemainingKEGates.state == cuestate.waiting"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="OpenRemainingKEGates"/>
+              </actions>
+            </cue>
+
+            <cue name="OpenRemainingKEGates">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="[110min,130min].randominrange"/>
+              <actions>
+                <!-- Signal back to Setup_DLC_Boron -->
+                <signal_cue cue="md.Setup_DLC_Boron.Boron_Gates_Open_RemainingSystems"/>
+              
+                <!-- Write an email text -->
+                <write_incoming_message source="{30253,11103}" highpriority="false"
+                                        title="{30253,11101}"
+                                        text="{30253,11102}"/>
+              </actions>
+              <cues>
+            
+                <!-- After the gate opened, have a news anchor speak for a few lines -->
+                <cue name="OpenRemainingKEGates_NewsAnchorSpeak" checkinterval="30s">
+                  <conditions>
+                    <check_value value="md.Setup_DLC_Boron.Boron_Gates_Open_RemainingSystems.state == cuestate.complete"/>
+                    <check_value value="not player.isinfullscreenmenu"/>
+                    <check_value value="not player.isinconversation"/>
+                    <check_value value="not player.isscreenshotmode"/>
+                    <check_value value="not md.$MissionDND.count"/>
+                    <check_value value="player.age ge (md.$LastMentorSpeak + 3min)"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plot', $actors = $MissionActors, $debugchance = 0, $priority = 90,
+                                                                              $script = [
+                                                                                        table[ $actor = '$BoronNewsAnchorActor', $speak = 302530101, $recipient = 'player', $comment = 'Nishala Currents - News Splash.', $broadcast = true, $monitor = false ],
+                                                                                        table[ $actor = '$BoronNewsAnchorActor', $speak = 302530102, $recipient = 'player', $comment = 'From the depths of our sacred waters, may peace flow like gentle currents. I, Lar Lyganeus, bring word by our beloved Queens grace.', $broadcast = true, $monitor = false ],
+                                                                                        table[ $actor = '$BoronNewsAnchorActor', $speak = 302530103, $recipient = 'player', $comment = 'With excited serenity, we announce the awakening of two dormant gates - one in Ocean of Fantasy, the other in Atreus Clouds.', $broadcast = true, $monitor = false ],
+                                                                                        table[ $actor = '$BoronNewsAnchorActor', $speak = 302530104, $recipient = 'player', $comment = 'Their stirring may be linked to computronium samples from the Ancients presence cloud, or may perhaps be a gift from the Sohnen.', $broadcast = true, $monitor = false ],
+                                                                                        table[ $actor = '$BoronNewsAnchorActor', $speak = 302530105, $recipient = 'player', $comment = 'The gates now stand in harmonious alignment, ready for new trade currents, and our beautiful Queen has dispatched an exploratory mission to test these waters.', $broadcast = true, $monitor = false ],
+                                                                                        ]
+                                                                                      ]" />
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

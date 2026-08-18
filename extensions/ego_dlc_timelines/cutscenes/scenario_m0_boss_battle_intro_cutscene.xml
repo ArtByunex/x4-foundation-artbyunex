@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_m0_boss_battle_intro_cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_gate1" zone="@auto:target_gate_player" />
+    <environment_implicit name="scenezone_gate2" zone="@auto:target_gate_active" />
+    <environment_implicit name="scenezone_m0" zone="@auto:target_m0_mothership" />
+    <object_group name="target_group">
+      <reference object="target_gate_active" />
+      <reference object="target_gate_player" />
+      <reference object="target_player_ship"/>
+      <reference object="target_xenon_guard"/>
+      <reference object="target_m0_mothership"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+
+        <shot name="AtGateArrival" environment="scenezone_gate1" duration="13000">
+          <camera_orbit reference="target_gate_player" time="13000" elevation="50%" cycle="none" >
+            <begin distance="5300" angle="125"/>
+            <end distance="650" angle="90" time="12000"/>
+          </camera_orbit>
+        </shot>
+
+        <!-- TODO: Adjusted with actual asset -->
+        <shot name="DetailofPlayerShip" environment="scenezone_gate1" duration="7000">
+          <camera>
+            <position>
+              <reference object="target_player_ship" x="-4.23" y="-0.216" z="16.778"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_ship" x="0" y="0.1" z="5.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+        
+        <!-- TODO: Adjusted with actual asset -->
+        <shot name="M0_Wide" environment="scenezone_m0" duration="12000">
+          <camera_orbit reference="target_m0_mothership" time="15000" elevation="50%" cycle="none" orient_to="object">
+            <begin distance="4200" angle="-122"/>
+            <end distance="5970" angle="-86" elevation="-80" time="11000"/>
+          </camera_orbit>
+        </shot>
+
+        <!-- TODO: Adjusted with actual asset -->
+        <shot name="M0_Details" environment="scenezone_m0" duration="10000">
+          <camera>
+            <position>
+              <reference object="target_m0_mothership" x="-2440" y="8" z="-3080"/>
+            </position>
+            <lookdirection>
+              <reference object="target_m0_mothership" x="0" y="8" z="-1100" />
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="FlyFromGateToGuards" environment="scenezone_gate2" duration="15000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_gate_active" distance="210" flyto_reference="target_xenon_guard" flyto_distance="100" interpolation="smooth" time_firstobject="3000" time_fly="6000" cycle="none" orient_to="object"
+                            orbit1_yaw_start="-70" orbit1_yaw_end="-89" orbit1_elevation="-10"
+                            orbit2_yaw_start="170" orbit2_yaw_end="-10" orbit2_pitch="12"/>
+
+        </shot>
+        
+        <!-- TODO: Adjusted with actual asset -->
+        <shot name="PlayerShip" environment="scenezone_gate1" duration="6000">
+          <camera>
+            <position>
+              <reference object="target_player_ship" x="0" y="8.47" z="-30.7"/>
+            </position>
+            <lookdirection>
+              <reference object="target_player_ship" x="0" y="3.73" z="18.8" />
+            </lookdirection>
+          </camera>
+        </shot>
+      
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- "Torus first approach" cutscene -->
+  <director key="Story_Terraforming_Torus_1" />
+
+  <!-- Environment in which the scene will take place. -->
+ <environments>
+    <environment_implicit name="scenezone" zone="@auto:torus" />
+    <object_group name="target_group">
+      <reference object="torus" />
+      <reference object="target1" />
+      <reference object="target2" />
+      <reference object="target3" />
+      <reference object="target4" />
+    </object_group>
+  </environments>
+
+ <presentation>
+    <actions>
+      <sequence name="TestSequence" start="0">
+
+        <shot name="Shot1" environment="scenezone" duration="5000">
+          <camera_orbit reference="target1">
+            <begin angle="90" distance="28000" elevation="20000" />
+            <end angle="5" distance="14000" elevation="3000" />
+          </camera_orbit>
+        </shot>
+
+
+        <shot name="Shot1b" environment="scenezone" duration="2000">
+          <camera_orbit reference="target1">
+            <begin angle="5" distance="14000" elevation="3000" />
+            <end angle="-10" distance="13000" elevation="2500" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="Shot2" environment="scenezone" duration="5000">
+          <camera_orbit reference="target1" >
+            <begin angle="30" distance="8000" elevation="2200" />
+            <end angle="10" distance="5000" elevation="800" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="Shot2b" environment="scenezone" duration="5000">
+          <camera_orbit reference="target1" >
+            <begin angle="10" distance="5000" elevation="800" />
+            <end angle="-10" distance="4000" elevation="700" />
+          </camera_orbit>
+        </shot>
+
+        <!-- closing in on door.. feels a bit out of place -->
+        <!--shot name="Shot3" environment="scenezone" duration="5000">
+          <camera_orbit reference="target2" >
+            <begin angle="25" distance="4000" elevation="700" />
+            <end angle="90" distance="1000" elevation="0" />
+          </camera_orbit>
+        </shot>
+        <shot name="Shot3b" environment="scenezone" duration="1000">
+          <camera_orbit reference="target2" >
+            <begin angle="90" distance="1000" elevation="0" />
+            <end angle="100" distance="500" elevation="-10" />
+          </camera_orbit>
+        </shot-->
+
+        <shot name="Shot3" environment="scenezone" duration="5000">
+          <camera_orbit reference="target2" >
+            <begin angle="25" distance="4000" elevation="700" />
+            <end angle="160" distance="3000" elevation="0" />
+          </camera_orbit>
+        </shot>
+        <shot name="Shot3b" environment="scenezone" duration="1000">
+          <camera_orbit reference="target2" >
+            <begin angle="160" distance="3000" elevation="0" />
+            <end angle="170" distance="2500" elevation="-100" />
+          </camera_orbit>
+        </shot>
+
+        <!-- correct entry, removed - too much of the same -->
+        <!--shot name="Shot4" environment="scenezone" duration="5000">
+          <camera_orbit reference="target3">
+            <begin angle="40" distance="2000" elevation="1000" />
+            <end angle="100" distance="2000" elevation="1700" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="Shot4b" environment="scenezone" duration="1000">
+          <camera_orbit reference="target3">
+            <begin angle="100" distance="2000" elevation="1700" />
+            <end angle="105" distance="2000" elevation="1700" />
+          </camera_orbit>
+        </shot-->
+
+        <shot name="Shot5" environment="scenezone" duration="7000">
+          <camera_orbit reference="target4">
+            <begin angle="170" distance="3000" elevation="1000" />
+            <end angle="260" distance="35000" elevation="4000" />
+          </camera_orbit>
+        </shot>
+
+        <shot name="Shot5b" environment="scenezone" duration="4000">
+          <camera_orbit reference="target4" interpolation="smooth">
+            <begin angle="260" distance="35000" elevation="4000" />
+            <end angle="265" distance="35400" elevation="4100" />
+          </camera_orbit>
+        </shot>
+       
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

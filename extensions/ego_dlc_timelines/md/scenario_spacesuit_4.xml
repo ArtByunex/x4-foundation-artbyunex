@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Spacesuit_4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+
+    <cue name="Start" namespace="this" module="scenario_spacesuit_4">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$MissionActors"     exact="table[]"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text chance="$DebugChance" text="'Initialising Scenario:' + $Page"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+        <set_external_view_allowed allow="false"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <set_value name="$PlayerSpawnZone" exact="player.zone"/>
+        <set_value name="$PlayerSpawnPos" exact="player.ship.relativeposition.{$PlayerSpawnZone}"/>
+
+        <set_value name="$TimeBonusPerSecond" exact="1"/>
+        <set_value name="$UndetectedBonus" exact="500"/>
+        <set_value name="$ScorePerBomb" exact="100"/>
+
+        <find_object name="$Level" macro="macro.landmarks_gen_spacesuit_level_01_countersabotage_01_macro" space="player.sector" required="true"/>
+
+        <find_object_component object="$Level" groupname="$Cameras" macro="macro.scs_gen_prop_detector_01_macro" multiple="true" recursive="true"/>
+        <find_object_component object="$Level" groupname="$Microphones" macro="macro.scs_gen_prop_detector_02_32_32_4_macro" multiple="true" recursive="true" append="true"/>
+        <find_object_component object="$Level" groupname="$Microphones" macro="macro.scs_gen_prop_detector_02_16_16_32_macro" multiple="true" recursive="true" append="true"/>
+        <find_object_component object="$Level" groupname="$Microphones" macro="macro.scs_gen_prop_detector_02_16_16_16_macro" multiple="true" recursive="true" append="true"/>
+        <find_object groupname="$Bombs" macro="macro.bomb_player_limpet_mine_02_mk1_macro" space="player.sector" multiple="true" recursive="true"/>
+        <find_object_component object="$Level" groupname="$OxygenStations" macro="macro.scs_gen_prop_oxygenrecharger_01_macro" multiple="true" recursive="true"/>
+
+        <set_value name="$TotalNumBombs" exact="$Bombs.count"/>
+        <debug_text chance="$DebugChance" text="'Bombs found: ' + $TotalNumBombs"/>
+        <debug_text chance="$DebugChance" text="'Max score from bombs: ' + $TotalNumBombs * $ScorePerBomb"/>
+
+        <set_value name="$DefusedBombs" exact="0"/>
+        <set_value name="$Suspicion" exact="0"/>
+        <set_value name="$NextDetectionTime" exact="0"/>
+
+        <find_object name="$barrel" macro="macro.scs_gen_prop_barrel_01_macro" space="player.sector" recursive="true"/>
+        <detach_object object="$barrel" keeprotating="true"/>
+        <set_object_min_hull object="$barrel" exact="100"/>
+        <set_object_velocity object="$barrel">
+          <angular x="0.1" y="0.1" z="0.1"/>
+        </set_object_velocity>
+        <do_for_each name="$bomb" in="$Bombs">
+          <set_known object="$bomb" known="true"/>
+          <do_if value="$bomb.distanceto.{$barrel} lt 10m">
+            <attach_object_to_target object="$bomb" target="$barrel"/>
+          </do_if>
+        </do_for_each>
+
+        <find_object_component object="$Level" name="$firehazards_small" macro="macro.scs_gen_destructible_hazard_fire_01_macro" multiple="true" recursive="true"/>
+        <do_for_each name="$firehazard_small" in="$firehazards_small">
+          <set_object_hull object="$firehazard_small" exact="0" comment="will set to minimum hull value defined in the macro"/>
+        </do_for_each>
+      </actions>
+      <cues>
+
+        <cue name="StopUseCase"/>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Chief" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Terrorist" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text chance="$DebugChance" text="'Scenario has been successfully set up and can start'"/>
+                  <signal_cue cue="IntroCutscene"/>
+                </do_else>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="IntroCutscene">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$CutsceneActors" exact="table[]"/>
+            <set_value name="$CutsceneActors.$Chief" exact="table[ $entity = $Chief ]"/>
+            <set_value name="$CutsceneActors.$Terrorist" exact="table[ $entity = $Terrorist ]"/>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Terrorist', $speak = 306140501, $recipient = 'player', $comment = '... and if demands not met station will explode.'],
+                          table [$actor = '$Chief',     $speak = 306140501, $recipient = 'player', $comment = 'Egg salad egg salad egg salad!'],
+                          table [$actor = '$Chief',     $speak = 306140502, $recipient = 'player', $comment = 'Rogias! Are you alive? Can you hear me? Can you move?'],
+                          table [$actor = '$Chief',     $speak = 306140504, $recipient = 'player', $comment = 'Management will never pay this ransom.', $speakcallbackcue = IntroCutscene_ShowOtherBomb],
+                        ],
+              $abortcallbackcue = StopCutscene,
+              $abortonsignalledcue = StopUseCase
+            ]" />
+            <play_cutscene cinematicmode="true" result="$IntroCutscene" key="'scenario_spacesuit_4_intro_cutscene'">
+              <param name="level" object="$Level"/>
+            </play_cutscene>
+          </actions>
+          <cues>
+            <cue name="IntroCutscene_ShowOtherBomb">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cutscene_event key="'scenario_spacesuit_4_intro_cutscene'" event="'showotherbomb'"/>
+                <create_position name="$CutscenePosition" object="$Level" x="241" y="7" z="-130"/>
+                <find_object_component name="$Firehazard" object="$Level" macro="macro.scs_gen_destructible_hazard_fire_02_macro" multiple="false" sortbydistanceto="$CutscenePosition"/>
+                <add_effect effect="'sparkles_s'" object="$Firehazard"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <set_object_hull object="$Firehazard" exact="0"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [ 1s,
+                                    table [$actor = '$Terrorist', $speak = 306140513, $recipient = 'player', $comment = 'Split think station fall apart without bomb!'],
+                                    table [$actor = '$Chief',     $speak = 306140503, $recipient = 'player', $comment = 'Maybe we have a chance.'],
+                                    table [$actor = '$Chief',     $speak = 306140505, $recipient = 'player', $comment = 'Only one way to survive this: defuse the bombs.', $speakcallbackcue = IntroCutscene_ShowCamera],
+                                  ],
+                        $abortcallbackcue = StopCutscene,
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+              </actions>
+              <cues>
+                <cue name="CutsceneBombDestroyed">
+                  <conditions>
+                    <event_object_destroyed group="$Bombs"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$DefusedBombs" operation="add"/>
+                    <remove_from_group group="$Bombs" object="event.object"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="IntroCutscene_ShowCamera">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cutscene_event key="'scenario_spacesuit_4_intro_cutscene'" event="'showcamera'"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [
+                                    table [$actor = '$Chief',     $speak = 306140506, $recipient = 'player', $comment = 'Do not make this Split suspicious. He might just blow you up as a warning!'],
+                                  ],
+                        $callbackcue = StopCutscene,
+                        $abortcallbackcue = StopCutscene,
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+
+
+              </actions>
+            </cue>
+
+            <cue name="StopCutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <stop_cutscene cutscene="$IntroCutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="CutsceneStopped">
+              <conditions>
+                <event_cutscene_stopped cutscene="$IntroCutscene"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="IntroCutscene"/>
+                <signal_cue cue="StopUseCase" check="false"/>
+                <signal_cue cue="Start_Scenario"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <muffle_sound strength="0" duration="0s"/>
+            <blur_screen strength="0" duration="0s"/>
+            <play_music music="'music_soundtrack_timelines_spacesuit_4'" loop="true"/>
+          </actions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+            <cue name="MitsunoHack">
+              <delay min="30s" max="3min"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupMission">
+              <actions>
+                <set_value name="$MissionDuration" exact="10min"/>
+                <set_value name="$StartTime" exact="player.age"/>
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false" name="{30614,4001}" description="{30614,4004}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                  <briefing>
+                    <objective step="1" action="objective.destroy" group="$Bombs"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+            </cue>
+
+            <cue name="UpdateTimerDisplay">
+              <actions>
+                <set_value name="$textcolour_primary" exact="'text_normal'"/>
+                <set_value name="$textcolour_secondary" exact="'overlay_scenario_stat_text'"/>
+              </actions>
+              <delay exact="1ms"/>
+              <actions>
+                <show_overlay_text relwidth="1.0" reloffsetx="0.01" reloffsety="0.05" fromtop="true" >
+                  <row>
+                    <col idx="1"
+                         text="{1001,3404} + {1001,120}"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="20"
+                         halign="right"
+                         valign="bottom" />
+                    <col idx="2"
+                         text="($MissionDuration - (player.age - $StartTime)).formatted.{'%m:%.3S'}"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_primary"
+                         fontsize="20"
+                         halign="left"
+                         valign="bottom" />
+                    <col idx="6"
+                     text="' '"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="20"
+                     halign="left"
+                     valign="bottom" />
+                  </row>
+                  <row fromtop="true">
+                    <col idx="1"
+                     text="{30614,209} + {1001,120}"
+                     bgcolor="'overlay_scenario_stat_background'"
+                     textcolor="$textcolour_secondary"
+                     fontsize="12"
+                     halign="right"
+                     valign="bottom" />
+                    <col idx="2"
+                         text="'\033#text_normal#' + $DefusedBombs + '\033X/' + $TotalNumBombs"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="12"
+                         halign="left"
+                         valign="bottom"/>
+                  </row>
+                </show_overlay_text>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <cue name="Timeout">
+              <delay exact="$MissionDuration"/>
+              <actions>
+                <signal_cue cue="TriggerAllBombs"/>
+              </actions>
+              <delay exact="1s"/>
+              <actions>
+                <!--Just in case the area damage doesn't get the player for some reason-->
+                <destroy_object object="player.controlled" explosion="true"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerDamagedUsecase">
+              <conditions>
+                <event_object_hull_damaged group="global.$PlayerControlledGroup"/>
+                <check_value value="player.exists"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                $script = [
+                            table [$actor = '$Chief', $speak = 306140105, $recipient = 'player', $comment = 'Careful!'],
+                          ],
+                $abortonsignalledcue = StopUseCase
+              ]" />
+              </actions>
+              <delay exact="5s"/>
+              <actions>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerOxygenLow" checkinterval="1s">
+              <conditions>
+                <check_value value="player.spacesuit and player.spacesuit.oxygenlow"/>
+              </conditions>
+              <actions>
+                <debug_text chance="$DebugChance" text="'Player oxygen is low'"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Chief', $speak = 306140511, $recipient = 'player', $comment = 'You should find an oxygen station.'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+                <set_objective cue="$MissionCue" action="objective.approach" group="$OxygenStations" updatebriefing="false"/>
+              </actions>
+              <cues>
+                <cue name="OxygenRecharged">
+                  <conditions>
+                    <event_object_triggered group="$OxygenStations"/>
+                  </conditions>
+                  <actions>
+                    <debug_text chance="$DebugChance" text="'Player oxygen is recharged'"/>
+                    <set_objective cue="$MissionCue" step="1" action="objective.destroy" group="$Bombs" updatebriefing="true"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="PlayerNearCamera">
+              <delay exact="1ms"/>
+              <actions>
+                <do_for_each name="$camera" in="$Cameras">
+                  <do_if value="player.ship and $camera.bboxdistanceto.{player.ship} lt 5m">
+                    <set_value name="$cameranear" exact="true"/>
+                  </do_if>
+                  <break/>
+                </do_for_each>
+                <do_if value="$cameranear?">
+                  <debug_text chance="$DebugChance" text="'Player near visual detector'"/>
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                    $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                    $script = [
+                                table [$actor = '$Chief', $speak = 306140507, $recipient = 'player', $comment = 'There is a camera nearby.'],
+                              ],
+                    $abortonsignalledcue = StopUseCase
+                  ]" />
+                </do_if>
+                <do_else>
+                  <reset_cue cue="this"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="PlayerNearAudioSensor">
+              <delay exact="1ms"/>
+              <actions>
+                <do_for_each name="$microphone" in="$Microphones">
+                  <do_if value="player.ship and $microphone.bboxdistanceto.{player.ship} lt 5m">
+                    <set_value name="$microphonesnear" exact="true"/>
+                    <break/>
+                  </do_if>
+                </do_for_each>
+                <do_if value="$microphonesnear?">
+                  <debug_text chance="$DebugChance" text="'Player near audio detector'"/>
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                    $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                    $script = [
+                                table [$actor = '$Chief', $speak = 306140508, $recipient = 'player', $comment = 'You are near a noise sensor. Do not touch your thrusters or collide while inside!'],
+                              ],
+                    $abortonsignalledcue = StopUseCase
+                  ]" />
+                </do_if>
+                <do_else>
+                  <reset_cue cue="this"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="PlayerSeen" instantiate="true">
+              <conditions>
+                <event_object_triggered group="$Cameras"/>
+                <check_value value="player.exists and event.param == player.ship and player.age ge $NextDetectionTime"/>
+              </conditions>
+              <actions>
+                <check_line_of_sight name="$LineOfSight" object="event.object" target="player.ship"/>
+                <do_if value="$LineOfSight">
+                  <debug_text chance="$DebugChance" text="'Player inside visual detector with line of sight'"/>
+                  <set_value name="$Suspicion" exact="$Suspicion + 1"/>
+                  <set_value name="$NextDetectionTime" exact="player.age + 5s"/>
+                  <signal_cue cue="CheckSuspicion"/>
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Terrorist', $speak = [306140503, 306140507, 306140508].random, $recipient = 'player', $comment = 'I see creature! What is it doing? / You! Creature! Leave! / Creature go away now!'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+                </do_if>
+                <do_else>
+                  <debug_text chance="$DebugChance" text="'Player inside visual detector but no line of sight'"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="PlayerHeard" instantiate="true">
+              <conditions>
+                <event_object_triggered group="$Microphones"/>
+                <check_value value="player.exists and event.param == player.ship and player.age ge $NextDetectionTime"/>
+                <check_any>
+                  <check_value value="player.input.flight.throttle != 0"/>
+                  <check_value value="player.input.flight.horizontal != 0"/>
+                  <check_value value="player.input.flight.vertical != 0"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text chance="$DebugChance" text="'Player accelerated inside audio detector'"/>
+                <set_value name="$Suspicion" exact="$Suspicion + 1"/>
+                <set_value name="$NextDetectionTime" exact="player.age + 5s"/>
+                <signal_cue cue="CheckSuspicion"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Terrorist', $speak = [306140504, 306140505, 306140506].random, $recipient = 'player', $comment = 'What was noise? / What was sound? / Something going on!'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+              </actions>
+            </cue>
+
+            <cue name="PlayerCollided" instantiate="true">
+              <conditions>
+                <event_object_collided group="global.$PlayerControlledGroup"/>
+                <check_value value="player.exists and player.age ge $NextDetectionTime"/>
+              </conditions>
+              <actions>
+                <debug_text chance="$DebugChance" text="'Player collided with ' + event.param.knownname"/>
+                <debug_text chance="$DebugChance" text="'Checking ' + $Microphones.count + ' audio detectors'"/>
+                <do_for_each name="$microphone" in="$Microphones">
+                  <do_if value="$microphone.isdetecting.{event.object}">
+                    <debug_text chance="$DebugChance" text="'Player collided inside audio detector'"/>
+                    <set_value name="$Suspicion" exact="$Suspicion + 1"/>
+                    <set_value name="$NextDetectionTime" exact="player.age + 5s"/>
+                    <signal_cue cue="CheckSuspicion"/>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                      $script = [
+                                  table [$actor = '$Terrorist', $speak = [306140504, 306140505, 306140506].random, $recipient = 'player', $comment = 'What was noise? / What was sound? / Something going on!'],
+                                ],
+                      $abortonsignalledcue = StopUseCase
+                    ]" />
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="CameraDestroyed" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$Cameras"/>
+                <check_value value="player.exists"/>
+              </conditions>
+              <actions>
+                <remove_from_group group="$Cameras" object="event.object"/>
+                <debug_text chance="$DebugChance" text="'Camera destroyed with kill method ' + event.param2"/>
+                <set_value name="$Suspicion" exact="$Suspicion + 3"/>
+                <signal_cue cue="CheckSuspicion"/>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                            table [$actor = '$Terrorist', $speak = [306140517, 306140518].random, $recipient = 'player', $comment = 'Why is camera off? Split suspicious! / Some creature shooting cameras?'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+              </actions>
+            </cue>
+
+            <cue name="BombDefused" instantiate="true">
+              <conditions>
+                <event_player_bomb_defused/>
+                <check_value value="player.exists"/>
+              </conditions>
+              <actions>
+                <do_if value="$Bombs.indexof.{event.param}">
+                  <remove_from_group group="$Bombs" object="event.param"/>
+                  <set_objective cue="$MissionCue" step="1" action="objective.destroy" group="$Bombs" updatebriefing="true"/>
+                  <debug_text chance="$DebugChance" text="'Bomb defused - remaining: ' + $Bombs.count"/>
+                  <set_value name="$DefusedBombs" exact="$DefusedBombs + 1"/>
+                  <destroy_object object="event.param" explosion="true"/>
+                </do_if>
+                <do_if value="$Bombs.count == 0">
+                  <signal_cue cue="Finish"/>
+                </do_if>
+                <do_else>
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                    $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                    $script = [
+                                table [$actor = '$Chief', $speak = 306140512, $recipient = 'player', $comment = 'It was trapped!'],
+                              ],
+                    $abortonsignalledcue = StopUseCase
+                  ]" />
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="BombDestroyed" instantiate="true">
+              <conditions>
+                <event_object_destroyed group="$Bombs"/>
+                <check_value value="player.exists"/>
+              </conditions>
+              <actions>
+                <remove_from_group group="$Bombs" object="event.object"/>
+                <set_objective cue="$MissionCue" step="1" action="objective.destroy" group="$Bombs" updatebriefing="true"/>
+                <debug_text chance="$DebugChance" text="'Bomb destroyed with kill method ' + event.param2 + ' - remaining: ' + $Bombs.count"/>
+                <set_value name="$DefusedBombs" exact="$DefusedBombs + 1"/>
+                <do_if value="$Bombs.count == 0">
+                  <signal_cue cue="Finish"/>
+                </do_if>
+                <do_else>
+                  <do_if value="event.param2 == killmethod.hitbybullet">
+                    <do_for_each name="$camera" in="$Cameras">
+                      <do_if value="$camera.isdetecting.{event.object}">
+                        <debug_text chance="$DebugChance" text="'Destroyed bomb is on camera'"/>
+                        <set_value name="$detected" exact="true"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                    <do_if value="$detected?">
+                      <set_value name="$Suspicion" exact="$Suspicion + 5"/>
+                      <signal_cue cue="CheckSuspicion"/>
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [
+                                    table [$actor = '$Terrorist', $speak = 306140509, $recipient = 'player', $comment = 'Stop it! Final warning!'],
+                                    table [$actor = '$Chief',     $speak = 306140513, $recipient = 'player', $comment = 'He saw that... There must be a more subtle way.'],
+                                  ],
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [
+                                    table [$actor = '$Terrorist', $speak = if $BombShotFirstLineSpoken? then 306140514 else 306140510, $recipient = 'player', $comment = 'Not another one? / Why bomb no longer working?'],
+                                  ],
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+                      <set_value name="$BombShotFirstLineSpoken" exact="true"/>
+                    </do_else>
+                  </do_if>
+                  <do_else>
+                    <do_if value="not $BombsDestroyedByEnvironment?">
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [
+                                    table [$actor = '$Terrorist', $speak = 306140511, $recipient = 'player', $comment = 'No! My bomb!'],
+                                    table [$actor = '$Chief', $speak = 306140509, $recipient = 'player', $comment = 'Smart! Make it look like an accident!'],
+                                  ],
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                        $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                        $script = [
+                                    table [$actor = '$Terrorist', $speak = 306140512, $recipient = 'player', $comment = 'Not again!'],
+                                  ],
+                        $abortonsignalledcue = StopUseCase
+                      ]" />
+                    </do_else>
+                    <set_value name="$BombsDestroyedByEnvironment" exact="@$BombsDestroyedByEnvironment + 1"/>
+                  </do_else>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="CheckSuspicion" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text chance="$DebugChance" text="'Suspicion is now ' + $Suspicion"/>
+                <do_if value="$Suspicion ge 8">
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                    $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                    $script = [
+                                table [$actor = '$Terrorist', $speak = 306140516, $recipient = 'player', $comment = 'You ask for it!!'],
+                              ],
+                    $callbackcue = TriggerAllBombs,
+                    $abortcallbackcue = TriggerAllBombs,
+                    $abortonsignalledcue = StopUseCase
+                  ]" />
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Finish">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Terrorist', $speak = 306140515, $recipient = 'player', $comment = 'Tkkpmnznkl!'],
+                              table [$actor = '$Chief',     $speak = 306140510, $recipient = 'player', $comment = 'You did it! We are saved!'],
+                            ],
+                  $callbackcue = FinalSpeakFinished,
+                  $abortcallbackcue = FinalSpeakFinished,
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+
+                <do_if value="$Suspicion == 0">
+                  <unlock_achievement name="TL_KEEP_FLOATING" scenario="true"/>
+                </do_if>
+              </actions>
+              <cues>
+                <cue name="FinalSpeakFinished">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="ResultWindow"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="TriggerAllBombs">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_for_each name="$bomb" in="$Bombs">
+              <set_object_active object="$bomb" activate="true"/>
+            </do_for_each>
+            <destroy_group group="$Bombs" explosion="true"/>
+            <cancel_cue cue="Start_Scenario"/>
+          </actions>
+        </cue>
+
+        <cue name="PlayerDied">
+          <conditions>
+            <event_object_destroyed object="player.entity"/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Chief', $speak = 306140106, $recipient = 'player', $comment = 'Rogias? Rogias? ROGIIIAAAAAS!'],
+                        ],
+              $abortonsignalledcue = StopUseCase
+            ]" />
+          </actions>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$Duration" exact="player.age - $StartTime"/>
+            <set_value name="$TimeRemaining" exact="if (not $ResultData.$PlayerDied and not $Bombs.count) then ($MissionDuration - $Duration) else 0s"/>
+            <set_value name="$Score_Time" exact="$TimeBonusPerSecond * ($TimeRemaining)f"/>
+            <set_value name="$Score_DefusedBombs" exact="$DefusedBombs * $ScorePerBomb"/>
+            <set_value name="$Score_Undetected" exact="if $Suspicion == 0 then $UndetectedBonus else 0"/>
+            <add_scenario_stat id="'bombs'" name="{30614,209}" uivalue="$DefusedBombs" description="{30614,212}" score="$Score_DefusedBombs" maxscore="$TotalNumBombs * $ScorePerBomb"/>
+            <add_scenario_stat id="'detected'" name="{30614,210}" uivalue="if $Suspicion == 0 then {1001,2618} else {1001,2617}" description="{30614,213}" score="$Score_Undetected" maxscore="$UndetectedBonus"/>
+            <do_if value="$TimeRemaining gt 0s">
+              <substitute_text text="$timebonushinttext" source="{30614,204}">
+                <replace string="'$SCORE$'" with="$TimeBonusPerSecond"/>
+                <replace string="'$TIME$'" with="$MissionDuration.formatted.default" />
+              </substitute_text>
+              <add_scenario_stat id="'time'" name="{30614,202}" uivalue="$TimeRemaining.formatted.{'%m:%.3S'}" description="$timebonushinttext" score="$Score_Time" maxscore="2100 - $TotalNumBombs * $ScorePerBomb - $UndetectedBonus"/>
+            </do_if>
+            <set_value name="$ResultData.$Score" exact="$Score_Time + $Score_Undetected + $Score_DefusedBombs"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

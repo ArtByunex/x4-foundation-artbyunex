@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="//cue[@name='Test_Platform']//do_if[@value='$DockAreas.count']//append_to_list[@name='$ArgonShips'][1]" pos="before">
+    <do_if value="not $TerranShips?">
+      <set_value name="$TerranShips" exact="[]"/>
+    </do_if>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_fighter_04_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_m_corvette_02_a_macro"/>
+    <append_to_list name="$TerranShips" exact="macro.ship_ter_s_xperimental_01_a_macro"/>
+
+    <append_list_elements name="$ShipMacros" other="$TerranShips"/>
+  </add>
+
+  <add sel="//cue[@name='Test_Platform']//do_elseif[@value='$ParanidShips.indexof.{$ShipMacro}']" pos="after">
+    <do_elseif value="$TerranShips.indexof.{$ShipMacro}">
+      <generate_loadout result="$loadout" faction="faction.terran" macro="$ShipMacro"/>
+    </do_elseif>
+  </add>
+</diff>

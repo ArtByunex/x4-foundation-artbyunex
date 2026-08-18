@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Scavenger operation near gate -->
+  <director key="Story_Boron_Prelude2" />
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_ship1" />
+      <reference object="target_ship2" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera>
+            <position>
+              <reference object="target_gate" x="-4000" y="-1800" z="2000"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="PanShip" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera_orbit reference="target_ship1" orient_to="object" cycle="none">
+            <begin angle="80" distance="600" elevation="80" />
+            <end angle="112" distance="800" elevation="130" time="12000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="OrbitShip2" environment="scenezone" duration="5800">
+          <camera_orbit reference="target_ship2" orient_to="object" cycle="none" y="150">
+            <begin angle="-18" distance="1800" elevation="50" />
+            <end angle="-90" distance="800" elevation="140" time="5400"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera>
+            <position>
+              <reference object="target_ship2" x="-5" y="24" z="-120"/>
+            </position>
+            <lookdirection>
+              <reference object="target_ship1" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Welfare time-trail cutscene 1 -->
+  <director key="Story_welfare_2">
+    <params>
+      <!--Object 1-->
+      <param name="obj_1" object="true"/>
+      <!--Object 2-->
+      <param name="obj_2" object="true"/>
+      <!--Object 3-->
+      <param name="obj_3" object="true"/>
+      <!--Fly through object-->
+      <param name="flythrough_obj" object="true"/>
+      <!--Race ship-->
+      <param name="ship" object="true" />
+
+      <!--Camera positions-->
+      <param name="obj_1_x" number="true"/>
+      <param name="obj_1_y" number="true"/>
+      <param name="obj_1_z" number="true"/>
+
+      <param name="obj_1_x2" number="true"/>
+      <param name="obj_1_y2" number="true"/>
+      <param name="obj_1_z2" number="true"/>
+
+      <param name="obj_2_x" number="true"/>
+      <param name="obj_2_y" number="true"/>
+      <param name="obj_2_z" number="true"/>
+
+      <param name="obj_2_x2" number="true"/>
+      <param name="obj_2_y2" number="true"/>
+      <param name="obj_2_z2" number="true"/>
+
+      <param name="obj_3_x" number="true"/>
+      <param name="obj_3_y" number="true"/>
+      <param name="obj_3_z" number="true"/>
+
+      <param name="obj_3_x2" number="true"/>
+      <param name="obj_3_y2" number="true"/>
+      <param name="obj_3_z2" number="true"/>
+
+      <param name="fly_through_x" number="true"/>
+      <param name="fly_through_y" number="true"/>
+      <param name="fly_through_z" number="true"/>
+
+      <param name="fly_through_x2" number="true"/>
+      <param name="fly_through_y2" number="true"/>
+      <param name="fly_through_z2" number="true"/>
+
+      <param name="ship_x" number="true"/>
+      <param name="ship_y" number="true"/>
+      <param name="ship_z" number="true"/>
+
+      <param name="ship_x2" number="true"/>
+      <param name="ship_y2" number="true"/>
+      <param name="ship_z2" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="obj1scene" zone="@auto:obj_1" />
+    <environment_implicit name="obj2scene" zone="@auto:obj_2" />
+    <environment_implicit name="obj3scene" zone="@auto:obj_3" />
+    <environment_implicit name="flythroughscene" zone="@auto:flythrough_obj" />
+    <environment_implicit name="shipscene" zone="@auto:ship" />
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Obj1Sequence" start="0">
+        <shot name="Obj1" environment="shipscene" duration="onevent:Obj1End">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="obj_1_x"/>
+                  <value var="obj_1_y"/>
+                  <value var="obj_1_z"/>
+                </keyframe>
+                <keyframe timestamp="10000" interpolation="linear">
+                  <value var="obj_1_x2"/>
+                  <value var="obj_1_y2"/>
+                  <value var="obj_1_z2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <reference object="obj_1" x="5" z="30"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Obj2Sequence" start="onevent:Obj2Start">
+        <shot name="Obj2" environment="shipscene" duration="onevent:Obj2End">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="obj_2_x"/>
+                  <value var="obj_2_y"/>
+                  <value var="obj_2_z"/>
+                </keyframe>
+                <keyframe timestamp="10000" interpolation="linear">
+                  <value var="obj_2_x2"/>
+                  <value var="obj_2_y2"/>
+                  <value var="obj_2_z2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <reference object="obj_2" x="2300" y="1000" z="10000"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Obj3Sequence" start="onevent:Obj3Start">
+        <shot name="Obj3" environment="shipscene" duration="onevent:Obj3End">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="obj_3_x"/>
+                  <value var="obj_3_y"/>
+                  <value var="obj_3_z"/>
+                </keyframe>
+                <keyframe timestamp="10000" interpolation="linear">
+                  <value var="obj_3_x2"/>
+                  <value var="obj_3_y2"/>
+                  <value var="obj_3_z2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <reference object="obj_3" x="50" y="100" z="200"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="FlyThroughSequence" start="onevent:FlyThroughtStart">
+        <shot name="FlyThrough" environment="flythroughscene" duration="onevent:FlyThroughEnd">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="fly_through_x"/>
+                  <value var="fly_through_y"/>
+                  <value var="fly_through_z"/>
+                </keyframe>
+                <keyframe timestamp="10000" interpolation="linear">
+                  <value var="fly_through_x2"/>
+                  <value var="fly_through_y2"/>
+                  <value var="fly_through_z2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <angles>
+                    <yaw>
+                      <value exact="79"/>
+                    </yaw>
+                    <pitch>
+                      <value exact="2"/>
+                    </pitch>
+                  </angles>
+                </keyframe>
+                <keyframe timestamp="10000" interpolation="linear">
+                  <angles>
+                    <yaw>
+                      <value exact="86"/>
+                    </yaw>
+                    <pitch>
+                      <value exact="-6"/>
+                    </pitch>
+                  </angles>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="ShipSequence" start="onevent:ShipStart">
+        <shot name="Ship" environment="shipscene" duration="7000">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="ship_x"/>
+                  <value var="ship_y"/>
+                  <value var="ship_z"/>
+                </keyframe>
+                <keyframe timestamp="7000" interpolation="linear">
+                  <value var="ship_x2"/>
+                  <value var="ship_y2"/>
+                  <value var="ship_z2"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <reference object="ship"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

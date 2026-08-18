@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Story_Pirate_Prelude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <cue name="Start" namespace="this" mapeditor="false">
+      <conditions>
+        <event_cue_completed cue="md.Setup_DLC_Pirate.X4ep1_Prelude_Setup" />
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <set_value name="$DebugChance"                exact="100"/>
+        <set_value name="$DeepDebugChance"            exact="0"     comment="for AI scripts and similar external code"/>
+        <set_value name="$MissionCue"                 exact="this"/>
+        <set_value name="$Page"                       exact="30283"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup">
+          <actions>
+            <find_sector name="$PirateSectors" extension="'ego_dlc_pirate'" multiple="true"/>
+          </actions>
+        </cue>
+
+        <!-- mini-scenes -->
+
+        <cue name="Prelude_Scavenger_Miniscene" version="2">
+          <actions>
+            <debug_text text="'Setup Scavenger Miniscene'" chance="$DebugChance"/>
+            <find_sector name="$BlackHoleSunIVSector" macro="macro.cluster_06_sector001_macro" space="player.galaxy"/>
+            <find_sector name="$S1cSector" macro="macro.cluster_503_sector001_macro" space="player.galaxy"  extension="'ego_dlc_pirate'"/>
+
+            <find_gate name="$PirateDLCGates" multiple="true" space="$S1cSector"/>
+            <debug_text text="'gates = ' + $PirateDLCGates" chance="$DebugChance"/>
+            <do_for_each name="$g" in="$PirateDLCGates" >
+              <do_if value=" $g.exit.exists and $g.exit.sector == $BlackHoleSunIVSector">
+                <set_value name="$BHSGate" exact="$g.exit"/>
+              </do_if>
+            </do_for_each>
+            <remove_value name="$PirateDLCGates"/>
+
+            <do_if value="not $BHSGate?" comment="pirate dlc and basegame not connected, cancel the cutscene">
+              <cancel_cue cue="this"/>
+            </do_if>
+            <do_else>
+              <!-- remember that cancel_cue only cancels the cue after ALL actions in the action-block ran (not really important in this case, but for consistency) -->
+              <find_zone name="$ScrapyardZone" macro="macro.zone004_cluster_06_sector001_macro"/>
+              <create_position name="$ScrapyardPosition" space="$ScrapyardZone" x="-6420.549" z="-11415.078" />
+            </do_else>
+            <set_value name="$PreludeTriggerDistance" exact="75km"/>
+          </actions>
+          <patch sinceversion="2">
+            <set_value name="$PreludeTriggerDistance" exact="75km"/>
+          </patch>
+          <cues>
+
+            <!--cue name="Prelude_TestPosition" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_position name="$sectorpos" space="player.sector" object="player.ship"/>
+                <debug_text text="'player pos=' + player.ship.position"/>
+                <debug_text text="'player sectorpos=' + $sectorpos"/>
+              </actions>
+            </cue-->
+
+            <cue name="Prelude_Scavenger_Setup">
+              <actions>
+
+                <create_cue_actor name="$ScavengerActor" cue="namespace" macro="character_prelude_scavenger_captain">
+                  <page exact="10177"/>
+                  <owner exact="faction.scavenger"/>
+                  <skills>
+                    <skill type="management"  exact="10"/>
+                    <skill type="morale"      exact="2"/>
+                    <skill type="piloting"    exact="7"/>
+                    <skill type="engineering" exact="3"/>
+                    <skill type="boarding"    exact="0"/>
+                  </skills>
+                </create_cue_actor>
+
+                <create_cue_actor name="$SalvageActor" cue="namespace" macro="character_prelude_scavenger_salvageteam">
+                  <page exact="10172"/>
+                  <owner exact="faction.scavenger"/>
+                  <skills>
+                    <skill type="management"  exact="5"/>
+                    <skill type="morale"      exact="3"/>
+                    <skill type="piloting"    exact="7"/>
+                    <skill type="engineering" exact="9"/>
+                    <skill type="boarding"    exact="0"/>
+                  </skills>
+                </create_cue_actor>
+
+
+                <set_value name="$ScavengerCutsceneKey" exact="table[ $key = 'ShowNPCFace']"/>
+
+                <!-- Note: No correct loadout yet / no engines, thrusters so it can't move -->
+                <create_ship name="$SalvageShip" sector="$BlackHoleSunIVSector" macro="ship_pir_l_scrapper_01_macro" missioncue="Prelude_Scavenger_Miniscene" capturable="false" commandeerable="false" zone="$ScrapyardZone">
+                  <pilot actor="$ScavengerActor"/>
+                  <paint ware="ware.paintmod_0127"/>
+                  <!-- = Scavenger -->
+                  <people ref="argon_freighter_crew">
+                    <fillpercent exact="15"/>
+                  </people>
+                  <!--loadout  loadout="$loadout"/-->
+                  <owner exact="faction.scavenger"/>
+                  <safepos value="$ScrapyardPosition" />
+                </create_ship>
+                <set_object_min_hull object="$SalvageShip" exact="30"/>
+                <create_order object="$SalvageShip" id="'Wait'" default="true"/>
+                <set_object_name object="$SalvageShip" page="30289" line="101" comment="The Last Scrap"/>
+                <create_group groupname="$ScrapyardWreckages"/>
+                <signal_cue cue="Prelude_Scavenger_Wreckfield"/>
+              </actions>
+              <cues>
+                <cue name="Prelude_Scavenger_Mission_DEBUG" onfail="cancel">
+                  <conditions>
+                    <check_value value="false and player.debug"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$MissionCue" exact="this"/>
+                    <create_mission cue="$MissionCue" name="'Story Debug Scavenger Cutscene'" description="'Set Guidance to the Scavenger Cutscene for Story Debugging.'" type="missiontype.plot" faction="faction.civilian"  difficulty="level.trivial" abortable="false" activate="false">
+                      <briefing>
+                        <objective step="1" action="objective.flyto" object="$SalvageShip"/>
+                      </briefing>
+                    </create_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="1"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Prelude_Scavenger_Approach_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+              <param name="ApproachTarget"    value="$BHSGate"/>
+              <param name="ApproachDistance"  value="$PreludeTriggerDistance"/>
+              <param name="SuccessSignalCue"  value="Prelude_Scavenger_DND"/>
+            </cue>
+
+            <cue name="Prelude_Scavenger_DND">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="player.module == 'x4ep1_gamestart_pirate1' and (md.GS_Pirate1.Ch1_Intro.state != cuestate.cancelled)">
+                  <!-- Let child cues do their work. -->
+                </do_if>
+                <do_else>
+                  <signal_cue cue="Prelude_Scavenger_Cutscene"/>
+                </do_else>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Scavenger_DND_Move_Away_From_Gate" onfail="cancel">
+                  <conditions>
+                    <check_value value="player.module == 'x4ep1_gamestart_pirate1'"/>
+                  </conditions>
+                  <cues>
+                    <cue name="Prelude_Scavenger_DND_Move_Away_From_Gate_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                      <param name="ApproachTarget"    value="$BHSGate"/>
+                      <param name="ApproachDistance"  value="$PreludeTriggerDistance + 10km"/>
+                      <param name="Invert"            value="true"/>
+                      <param name="SuccessSignalCue"  value="Prelude_Scavenger_DND_Reset_Approach_Handler"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="Prelude_Scavenger_DND_Reset_Approach_Handler">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="Prelude_Scavenger_Approach_Gate_Ref"/>
+                    <reset_cue cue="parent"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Prelude_Scavenger_Wreckfield" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$ScrapyardWreckages.count lt 20">
+                  <!-- Large wreck -->
+                  <create_object macro="macro.env_debris_debris_l_02_macro" groupname="$ScrapyardWreckages" zone="$ScrapyardZone">
+                    <safepos value="$ScrapyardPosition"/>
+                    <rotation pitch="15deg" roll="0deg" yaw="30deg" comment="hardcoded rotation to make cutscene camera positioning easier"/>
+                  </create_object>
+                  <!-- A couple small ones -->
+                  <set_value name="$DebrisMacros" exact="[
+                              macro.env_debris_debris_s_01_macro,
+                              macro.env_debris_debris_m_01_macro,
+                              macro.env_debris_debris_m_02_macro,
+                              macro.env_debris_debris_m_03_macro,
+                              macro.env_debris_debris_m_04_macro,
+                              macro.env_debris_debris_m_05_macro,
+                              macro.env_debris_debris_m_06_macro,
+                              macro.env_debris_debris_m_07_macro,
+                              macro.env_debris_debris_m_08_macro,
+                              macro.env_debris_debris_m_09_macro,
+                              macro.env_debris_debris_m_10_macro
+                              ]"/>
+                  <do_while value="$ScrapyardWreckages.count lt 40">
+                    <set_value name="$RandomPitch" min="0deg" max="360deg"/>
+                    <set_value name="$RandomRoll" min="0deg" max="360deg"/>
+                    <set_value name="$RandomYaw" min="0deg" max="360deg"/>
+                    <create_object macro="$DebrisMacros.random" name="$Wreckage" groupname="$ScrapyardWreckages" zone="$ScrapyardZone">
+                      <safepos object="$SalvageShip"/>
+                      <rotation pitch="$RandomPitch" roll="$RandomRoll" yaw="$RandomYaw"/>
+                    </create_object>
+                  </do_while>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="Prelude_Scavenger_Cutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="Prelude_Scavenger_DND" comment="cutscene triggered, stop checking"/>
+                <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+                <signal_cue cue="Prelude_Scavenger_Wreckfield"/>
+              </actions>
+              <delay exact="1.5s"/>
+              <actions>
+                <debug_text text="'cutscene'" chance="$DebugChance"/>
+
+                <append_to_list name="md.$MissionDND" exact="Prelude_Scavenger_Cutscene"/>
+
+                <force_player_speed speed="0"/>
+                <stop_player_autopilot/>
+                <play_cutscene result="this.$CutsceneID" key="'Story_Pirate_Prelude1'">
+                  <param name="target_ship" object="$SalvageShip"/>
+                  <param name="target_gate" object="$BHSGate"/>
+                  <param name="target_wreck" object="$ScrapyardWreckages.{1}"/>
+
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Approach_Cutscene_Started">
+                  <conditions>
+                    <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue cue="Prelude_SalvageOperation_Chatter"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_SalvageOperation_Chatter">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Scavenger Chatter started'" chance="$DebugChance"/>
+                  </actions>
+                  <cues>
+
+                    <!-- TODO: Update cutscene to use recyclingship/cube-maker and tugboat ship to drag it -->
+                    <cue name="Prelude_SalvageOperationChatter1_Ref" ref="md.LIB_Dialog.Speak_Actors">
+                      <param name="Actor"             value="[$ScavengerActor, $SalvageActor, $ScavengerActor, $SalvageActor, $ScavengerActor, $SalvageActor, $ScavengerActor, $SalvageActor]"/>
+                      <param name="Lines"             value="[[[30289301]],
+                                                              [[30289401],[30289402,0.75s], [30289403]],
+                                                              [[30289302]],
+
+                                                              [[30289211,3s],[30289212,0.5s],[30289213,0.5s]],
+                                                              [[30289303,1s],[30289304,0.5s],[30289305,3s]],
+
+                                                              [[30289214], [30289215]],
+                                                              [[30289306], [30289307]],
+                                                              [[30289216], [30289217]],
+                                                            ]"/>
+                      <param name="Cutscene"          value="[false, false, false, false, false, false, false, false]"/>
+                      <param name="WaitForFullscreen" value="[false, false, false, false, false, false, false, false]"/>
+                      <param name="CutsceneKey"       value="[$ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey, $ScavengerCutsceneKey]"/>
+                      <param name="EndSignalCue"      value="[Prelude_SalvageOperation_InProgress, null, null, null, null, Prelude_SalvageOperation_HeadingHome, null, Prelude_SalvageOperation_Chatter_Finished]"/>
+                    </cue>
+
+                    <!--
+                      <t id="30283354">xxx</t>
+                    -->
+
+                    <cue name="Prelude_SalvageOperation_InProgress">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Salvage Operation in Progress'" chance="$DebugChance"/>
+                        <cutscene_event key="'Story_Pirate_Prelude1'" event="'TriggerSequence1Done'"/>
+                        <cutscene_event key="'Story_Pirate_Prelude1'" event="'TriggerSequence2Start'"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_SalvageOperation_HeadingHome">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Heading home'" chance="$DebugChance"/>
+                        <cutscene_event key="'Story_Pirate_Prelude1'" event="'TriggerSequence2Done'"/>
+                        <cutscene_event key="'Story_Pirate_Prelude1'" event="'TriggerSequence3Start'"/>
+
+                        <find_sector name="$PirateSectors" extension="'ego_dlc_pirate'" multiple="true"/>
+                        <find_station name="$ScavengerStation" space="$PirateSectors" owner="faction.scavenger"/>
+                      </actions>
+                      <delay exact="3s"/>
+                      <actions>
+                        <cancel_all_orders object="$SalvageShip"/>
+                        <do_if value="$ScavengerStation.exists">
+                          <debug_text text="'MoveTo Scavenger Station'" chance="$DebugChance"/>
+                          <create_order object="$SalvageShip" id="'MoveToObject'" comment="Move to target station first">
+                            <param name="destination" value="$ScavengerStation"/>
+                            <param name="noattackresponse" value="true"/>
+                          </create_order>
+                          </do_if>
+                        </actions>
+                      <delay exact="120s"/>
+                      <actions>
+                        <do_if value="$ScavengerStation.exists">
+                          <debug_text text="'MoveDie-byIdle'" chance="$DebugChance"/>
+                          <create_order object="$SalvageShip" id="'MoveDie'" comment="And queue MoveDie, so that it docks once it arrives">
+                            <param name="atstation" value="$ScavengerStation"/>
+                            <param name="byidle" value="false"/>
+                            <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                          </create_order>
+                        </do_if>
+                        <do_else>
+                          <debug_text text="'MoveDie'" chance="$DebugChance"/>
+                          <create_order object="$SalvageShip" id="'MoveDie'">
+                            <param name="mintime" value="120s" comment="stay alive for specified time"/>
+                          </create_order>
+                        </do_else>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_SalvageOperation_Chatter_Finished">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Scavenger Chatter ended'" chance="$DebugChance"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+
+
+                <cue name="Prelude_Approach_Cutscene_Ended">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                  </conditions>
+                  <actions>
+                    <debug_text text="'Scavenger Cutscene ended'" chance="$DebugChance"/>
+                    <remove_from_list name="md.$MissionDND" exact="Prelude_Scavenger_Cutscene"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="Prelude_Vegas_Miniscene">
+          <actions>
+            <find_sector name="$PirateSectors" extension="'ego_dlc_pirate'" multiple="true"/>
+            <find_station name="$PirateLandmark02" space="$PirateSectors" godstationentry="'pirate_landmark_02'" required="true"/>
+          </actions>
+          <cues>
+
+            <cue name="Prelude_Vegas" onfail="cancel">
+              <conditions>
+                <check_value value="$PirateLandmark02.exists"/>
+              </conditions>
+              <actions>
+                <create_cue_actor name="$VegasActor" cue="namespace" macro="character_prelude_vegas_announcer">
+                  <page exact="10178"/>
+                  <owner exact="faction.loanshark"/>
+                  <skills>
+                    <skill type="management"  exact="13"/>
+                    <skill type="morale"      exact="12"/>
+                    <skill type="piloting"    exact="1"/>
+                    <skill type="engineering" exact="1"/>
+                    <skill type="boarding"    exact="0"/>
+                  </skills>
+                </create_cue_actor>
+                <create_ship name="$TouristShip" sector="$PirateLandmark02.sector" macro="ship_arg_m_trans_container_01_a_macro" missioncue="Prelude_Vegas_Miniscene" capturable="false" commandeerable="false">
+                  <pilot group="argon.pilot">
+                    <owner exact="faction.civilian"/>
+                  </pilot>
+                  <paint ware="ware.paintmod_0127"/> <!-- = Scavenger -->
+                  <people ref="argon_freighter_crew">
+                    <fillpercent exact="15"/>
+                  </people>
+                  <!--loadout  loadout="$loadout"/-->
+                  <owner exact="faction.civilian"/>
+                  <safepos x="41667" z="27336"/>
+                </create_ship>
+                <set_object_min_hull object="$TouristShip" exact="30"/>
+                <create_order object="$TouristShip" id="'Wait'" default="true"/>
+                <set_object_name object="$TouristShip" page="30289" line="301" comment="Everlasting Joy"/>
+                <set_value name="$VegasCutsceneKey" exact="table[ $key = 'ShowNPCFace']"/>
+              </actions>
+              <cues>
+
+                <cue name="Prelude_Vegas_Destroyed">
+                  <conditions>
+                    <event_object_destroyed object="$PirateLandmark02"/>
+                  </conditions>
+                  <actions>
+                    <create_order object="$TouristShip" id="'MoveDie'">
+                      <param name="byidle" value="false"/>
+                      <param name="mintime" value="120s"/>
+                    </create_order>
+                    <cancel_cue cue="Prelude_Vegas_Miniscene"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Approach_Vegas_Ref" ref="md.LIB_Generic.ApproachObject_Handler">
+                  <param name="ApproachTarget"    value="$PirateLandmark02"/>
+                  <param name="ApproachDistance"  value="35km"/>
+                  <param name="SuccessSignalCue"  value="Prelude_Vegas_Cutscene"/>
+                </cue>
+
+                <cue name="Prelude_Vegas_Cutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="(player.module == 'x4ep1_gamestart_pirate1') and (md.GS_Pirate1.Ch2_AuroraCasino.state == cuestate.waiting)" comment="only for pirate-gs1, and only if we didn't make a run for it (failing the delivery mission)">
+                      <signal_cue cue="Prelude_Vegas_Cutscene_pirate1"/>
+                      <cancel_cue cue="Prelude_Vegas_Cutscene_default"/>
+                    </do_if>
+                    <do_else>
+                      <signal_cue cue="Prelude_Vegas_Cutscene_default"/>
+                      <cancel_cue cue="Prelude_Vegas_Cutscene_pirate1"/>
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <cue name="Prelude_Vegas_Cutscene_pirate1">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+                  </actions>
+                  <delay exact="1.5s"/>
+                  <actions>
+                    <debug_text text="'Vegas cutscene (pirate1)'" chance="$DebugChance"/>
+                    <set_value name="$LoansharkPirateActor" exact="md.GS_Pirate1.Start.$LoansharkPirateActor"/>
+
+                    <append_to_list name="md.$MissionDND" exact="Prelude_Vegas_Cutscene"/>
+
+                    <force_player_speed speed="0"/>
+                    <stop_player_autopilot/>
+
+                    <create_order object="$TouristShip" id="'MoveDie'">
+                      <param name="atstation" value="$PirateLandmark02"/>
+                      <param name="byidle" value="false"/>
+                      <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                    </create_order>
+
+                    <play_cutscene result="this.$CutsceneID" key="'Story_Pirate_Prelude2p1'">
+                      <param name="target_station" object="$PirateLandmark02"/>
+                      <param name="target_ship" object="$TouristShip"/>
+                    </play_cutscene>
+
+                  </actions>
+                  <cues>
+
+                    <cue name="Prelude_Vegas_Cutscene_p1_Started">
+                      <conditions>
+                        <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Prelude_Vegas_Cutscene_p1_Chatter"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Vegas_Cutscene_p1_Chatter">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <delay exact="2s"/>
+                      <actions>
+                        <debug_text text="'speaking ' + $TouristShip.pilot" chance="$DebugChance"/>
+                        <speak actor="$TouristShip.pilot" line="10701" priority="75" comment="Requesting permission to dock."/>
+                      </actions>
+                      <cues>
+                        <cue name="Prelude_Vegas_Cutscene_p1_Chatter_Reply">
+                          <conditions>
+                            <event_speak_finished actor="$TouristShip.pilot" line="10701"/>
+                          </conditions>
+                          <delay exact="1s"/>
+                          <actions>
+                            <debug_text text="'speaking2 ' + $TouristShip.pilot" chance="$DebugChance"/>
+                            <speak actor="$PirateLandmark02.assignedcontrolentity.{controlpost.manager}" line="10704" priority="75" />
+                            <signal_cue cue="Prelude_Vegas_Cutscene_p1_AbortDock"/>
+                          </actions>
+                          <delay exact="2.0s" comment="intentionally interrupting previous speaker"/>
+                          <actions>
+                            <speak actor="$LoansharkPirateActor" priority="76" >
+                              <text line="30287130" comment="Out of the way!"/>
+                            </speak>
+                          </actions>
+                        </cue>
+                        <cue name="Prelude_Vegas_Cutscene_p1_AbortDock">
+                          <conditions>
+                            <event_cue_signalled/>
+                          </conditions>
+                          <actions>
+                            <!-- Ship continued to dock in the original MoveDie atstation, which conflicted with the dialog. -->
+                            <cancel_all_orders object="$TouristShip"/>
+                            <create_order object="$TouristShip" id="'MoveDie'">
+                              <!--<param name="atstation" value="$PirateLandmark02"/>
+                        <param name="byidle" value="false"/>
+                        <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>-->
+                            </create_order>
+                          </actions>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                    <cue name="Prelude_Vegas_Cutscene_p1_Ended">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Scavenger Cutscene ended'" chance="$DebugChance"/>
+                        <!--set_known object="$PirateLandmark02" known="true"/-->
+                        <remove_from_list name="md.$MissionDND" exact="Prelude_Vegas_Cutscene"/>
+                      </actions>
+                      <delay exact="1s"/>
+                      <actions>
+                        <signal_cue cue="Prelude_Vegas_Cutscene_p1_Vig2Player"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Vegas_Cutscene_p1_Vig2Player">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <cues>
+                        <cue name="Ch1_DockingScene_Vig2Player_Speak_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="Actor"             value="$LoansharkPirateActor"/>
+                          <param name="CutsceneKey"       value="table[ $key = 'ShowNPCFace']"/>
+                          <param name="WaitForFullscreen" value="false"/>
+                          <param name="Lines"             value="[[30287131],[30287132]]"/>
+                        </cue>
+                      </cues>
+                    </cue>
+
+                  </cues>
+                </cue>
+
+                <cue name="Prelude_Vegas_Cutscene_default">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1.5s"/>
+                  <actions>
+                    <fade_screen fadeout="1.5s" fadein="1.5s" realtime="true"/>
+                  </actions>
+                  <delay exact="1.5s"/>
+                  <actions>
+                    <debug_text text="'Vegas cutscene (default)'" chance="$DebugChance"/>
+                    <append_to_list name="md.$MissionDND" exact="Prelude_Vegas_Cutscene"/>
+
+                    <force_player_speed speed="0"/>
+                    <stop_player_autopilot/>
+
+                    <create_order object="$TouristShip" id="'MoveDie'">
+                      <param name="atstation" value="$PirateLandmark02"/>
+                      <param name="byidle" value="false"/>
+                      <param name="mintime" value="120s" comment="stay alive for specified time, after it docks"/>
+                    </create_order>
+
+                    <play_cutscene result="this.$CutsceneID" key="'Story_Pirate_Prelude2'">
+                      <param name="target_station" object="$PirateLandmark02"/>
+                      <param name="target_ship" object="$TouristShip"/>
+                    </play_cutscene>
+                  </actions>
+                  <cues>
+
+                    <cue name="Prelude_Vegas_Cutscene_Started">
+                      <conditions>
+                        <event_cutscene_started cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="Prelude_Vegas_Chatter"/>
+                      </actions>
+                    </cue>
+
+                    <cue name="Prelude_Vegas_Chatter">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Vegas Chatter started'" chance="$DebugChance"/>
+
+                        <speak actor="$VegasActor" priority="100" caninterrupt="false">
+                          <text line="30289301"/>
+                          <text line="30289302" delay="0.5s"/>
+                          <text line="30289303" delay="0.5s"/>
+                          <text line="30289304"/>
+                          <text line="30289305"/>
+                          <text line="30289306"/>
+                          <text line="30289307"/>
+                          <text line="30289308"/>
+                          <text line="30289309"/>
+                          <text line="30289310"/>
+                        </speak>
+                      </actions>
+                      <cues>
+                        <!--cue name="Prelude_Vegas_Chatter_Ref" ref="md.LIB_Dialog.Speak_Actor">
+                          <param name="Actor"             value="$VegasActor"/>
+                          <param name="CutsceneKey"       value="$VegasCutsceneKey"/>
+                          <param name="WaitForFullscreen" value="false"/>
+                          <param name="Lines"             value="[[30289301], [30289302,0.5s], [30289303,0.5s], [30289304], [30289305], [30289306], [30289307], [30289308], [30289309], [30289310]]"/>
+                          <param name="EndSignalCue"      value="Prelude_Vegas_Chatter_Finished"/>
+                        </cue-->
+
+                        <cue name="Prelude_Vegas_Chatter_Finished">
+                          <conditions>
+                            <check_any>
+                              <event_speak_line_finished actor="$VegasActor" line="30289301"/>
+                              <event_speak_finished actor="$VegasActor" line="30289301"/>
+                            </check_any>
+                          </conditions>
+                          <actions>
+                            <debug_text text="'Vegas Station discovered'" chance="$DebugChance"/>
+                            <set_known object="$PirateLandmark02" comment="station name was mentioned in the cutscene" known="true"/>
+                          </actions>
+                        </cue>
+
+                      </cues>
+                    </cue>
+
+
+                    <cue name="Prelude_Vegas_Cutscene_Ended">
+                      <conditions>
+                        <event_cutscene_stopped cutscene="parent.$CutsceneID"/>
+                      </conditions>
+                      <actions>
+                        <debug_text text="'Scavenger Cutscene ended'" chance="$DebugChance"/>
+                        <remove_from_list name="md.$MissionDND" exact="Prelude_Vegas_Cutscene"/>
+                      </actions>
+                    </cue>
+
+                  </cues>
+
+                </cue>
+
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+  </cues>
+
+</mdscript>

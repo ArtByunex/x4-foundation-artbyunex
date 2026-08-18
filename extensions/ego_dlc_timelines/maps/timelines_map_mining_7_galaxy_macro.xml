@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_mining_7_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate048to112" ref="gates">
+        <offset>
+          <position x="-17343.057" z="3110.627"/>
+          <rotation yaw="-124.99997"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_sector_001_zone_002_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate048to100" ref="gates">
+        <offset>
+          <position x="-32271.057" z="13088.627"/>
+          <rotation yaw="89.99995"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_sector_001_zone_003_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+    <connections>
+      <connection name="connection_clustergate048to027" ref="gates">
+        <offset>
+          <position x="10370.057" z="12331.627"/>
+          <rotation yaw="-60"/>
+        </offset>
+        <macro connection="space" ref="props_anc_gate_01_blocked_macro">
+          <properties>
+            <identification description="{20001,702}"/>
+          </properties>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_sector_001_zone_004_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <properties>
+      <identification name="{20004,7780011}" description="{20004,7780012}"/>
+    </properties>
+    <connections>
+      <connection name="zone004_cluster_48_sector001_connection" ref="zones">
+        <offset>
+          <position x="232354.297" z="104691.82"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+      <connection name="zone001_cluster_48_sector001_connection" ref="zones">
+        <offset>
+          <position x="-106998.914" z="77455.43"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_sector_001_zone_002_macro" connection="sector"/>
+      </connection>
+      <connection name="zone003_cluster_48_sector001_connection" ref="zones">
+        <offset>
+          <position x="-49561.941" z="-104808.938"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_sector_001_zone_003_macro" connection="sector"/>
+      </connection>
+      <connection name="zones_59923" ref="zones">
+        <offset>
+          <position x="-107650.75" z="-71235.508"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_sector_001_zone_004_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_001_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_scenario_mining_7_getsu_fune"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_002_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_scenario_mining_7_scrap"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_003_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="audioregion_timelines_map_mining_1to7"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_004_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_scenario_mining_7_nividium_L"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_005_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_scenario_mining_7_nividium_SM"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_region_006_macro">
+    <component ref="standardregion" connection="cluster"/>
+    <properties>
+      <region ref="region_scenario_mining_7_nividium_nebula"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_mining_7_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <properties>
+      <identification name="{20003,7780001}" description="{20003,7780002}"/>
+    </properties>
+    <connections>
+      <connection name="cluster_48_sector001_connection" ref="sectors">
+        <macro ref="timelines_map_mining_7_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="c48s01_region002_connection" ref="regions">
+        <offset>
+          <position z="-0.6119"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_region_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_118622" ref="regions">
+        <offset>
+          <position x="239.134" z="446.276"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_region_002_macro" connection="cluster"/>
+      </connection>
+      <connection name="c48s01_region001_connection" ref="regions">
+        <macro ref="timelines_map_mining_7_cluster_001_region_003_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_59854" ref="regions">
+        <offset>
+          <position x="-110489.195" z="-37289.762"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_region_004_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_59882" ref="regions">
+        <offset>
+          <position x="-110432.891" z="-37362.891"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_region_005_macro" connection="cluster"/>
+      </connection>
+      <connection name="regions_59890" ref="regions">
+        <offset>
+          <position x="-110483.992" z="-37440.645"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_region_006_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro>
+          <component connection="space" ref="cluster_48"/>
+        </macro>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_mining_7_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="cluster_48_connection" ref="clusters">
+        <offset>
+          <position x="-90000000" z="34650000"/>
+        </offset>
+        <macro ref="timelines_map_mining_7_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

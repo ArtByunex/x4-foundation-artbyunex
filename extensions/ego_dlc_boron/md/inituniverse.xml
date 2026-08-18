@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/library[@name='InitStationActions']/actions/do_if/do_if[@value='$tradestation?']" pos="before">
+
+    <do_elseif value="$modulesets.indexof.{'tradestation_boron'}">
+      <!-- do not set $tradestation to true so no redundant tradewares are not added -->
+      <do_if value="$controllable.godentry == 'boron_trade_602_001' or $controllable.godentry == 'boron_trade_604_001'" comment="Trading Station in Barren Shores and Ocean of Fantasy">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+        <add_tradeware object="$controllable" ware="ware.sojahusk" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.foodrations" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.nostropoil" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.advancedcomposites" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.engineparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.scanningarrays" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+        <add_tradeware object="$controllable" ware="ware.advancedelectronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.antimatterconverters" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.claytronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.dronecomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.fieldcoils" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.missilecomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.shieldcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.smartchips" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.turretcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.weaponcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.khaakalloy" allowbuy="true" allowsell="true" lockavgprice="true" />
+
+      </do_if>
+
+      <do_elseif value="$controllable.godentry == 'boron_tradingport_606_003'" comment="Towering Wave">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.microchips" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.quantumtubes" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.graphene" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.refinedmetals" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+
+      <do_elseif value="$controllable.godentry == 'boron_supplyreservoir_609_001'" comment="Menelaus' Oasis">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.plasmaconductors" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.scanningarrays" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.antimattercells" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.helium" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+
+      <do_elseif value="$controllable.godentry == 'boron_orbitalmooring_606_001'" comment="Kingdom End I">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bogas" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.plankton" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+        <add_tradeware object="$controllable" ware="ware.sojahusk" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.foodrations" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.nostropoil" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.advancedcomposites" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.engineparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.scanningarrays" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+        <add_tradeware object="$controllable" ware="ware.advancedelectronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.antimatterconverters" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.claytronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.dronecomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.fieldcoils" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.missilecomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.shieldcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.smartchips" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.turretcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.weaponcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.nividium" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+
+      <do_elseif value="$controllable.godentry == 'boron_supplyquay_607_001'" comment="Rolk's Demise">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.scanningarrays" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.antimattercells" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.superfluidcoolant" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.silicon" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.ore" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.ice" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+
+      <do_elseif value="$controllable.godentry == 'boron_logisticsharbour_608_001'" comment="Atreus' Clouds">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.engineparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.hullparts" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+        <add_tradeware object="$controllable" ware="ware.advancedelectronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.shieldcomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.claytronics" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.smartchips" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.majadust" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.spacefuel" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.spaceweed" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.khaakalloy" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+
+      <do_elseif value="$controllable.godentry == 'boron_alliancehub_606_002'" comment="Reflected Stars">
+        <!-- common wares -->
+        <add_tradeware object="$controllable" ware="ware.medicalsupplies" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.water" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.bofu" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- import wares -->
+        <add_tradeware object="$controllable" ware="ware.foodrations" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.sojahusk" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- hightech wares -->
+        <add_tradeware object="$controllable" ware="ware.dronecomponents" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.scanningarrays" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.microchips" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <!-- shiptech wares -->
+
+        <!-- special wares -->
+        <add_tradeware object="$controllable" ware="ware.antimattercells" allowbuy="true" allowsell="true" lockavgprice="true" />
+        <add_tradeware object="$controllable" ware="ware.helium" allowbuy="true" allowsell="true" lockavgprice="true" />
+      </do_elseif>
+    </do_elseif>
+
+  </add>
+
+</diff>

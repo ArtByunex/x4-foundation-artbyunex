@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!--
+    Scenario_Transport_Refugees:
+    supress explosion imminent on final destruction
+    <cue name="PlayerWarning" instantiate="true" namespace="static">
+      <conditions>
+  -->
+  <add sel="//cue[@name=&quot;PlayerWarning&quot;]/conditions">
+    <check_all>
+      <check_value value="not @md.Scenario_Transport_Refugees.Start.$MissionCue.$SuppressPlayerWarning" />
+      <check_value value="not @md.Scenario_Transport_Refugees_Escort.Start.$MissionCue.$SuppressPlayerWarning" />
+      <check_value value="not @md.Scenario_Transport_Refugees_Engineer.Start.$MissionCue.$SuppressPlayerWarning" />
+    </check_all>
+  </add>
+  <!--
+    Scenario_Transport_Refugees:
+    disable station greetings
+  -->
+  <add sel="//cue[@name=&quot;DockGreeting&quot;]/conditions">
+    <check_all>
+      <check_value value="player.module != 'scenario_transport_refugees'" />
+      <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+      <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+    </check_all>
+  </add>
+  <!--
+    Scenario_Transport_Refugees:
+    allow friendly fire - i.e. no penalty or warnings of friendly fire
+    <cue name="PlayerAttacks" instantiate="true" namespace="this">
+  -->
+  <add sel="//cue[@name=&quot;PlayerAttacks&quot;]/conditions">
+    <check_any>
+      <check_all comment="scenario is not station rescue">
+        <check_value value="player.module != 'scenario_transport_refugees'" />
+        <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+        <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+      </check_all>
+      <check_value value="event.param == player.target" comment="actually targeted" />
+      <check_value value="event.param == @player.target.defensible" comment="actually targeted" />
+      <check_value value="event.param.owner.hasrelation.enemy.{faction.player}" comment="enemy" />
+      <check_value value="not @player.ship.turrets.operational.indexof.{event.param3.{2}}" comment="weapon is not a turret, assume main guns" />
+    </check_any>
+  </add>
+  <!--
+    Scenario_Transport_Refugees:
+    disable notifications of player-owned npcs being attacked to remove distractions.
+  -->
+  <add sel="//cue[@name=&quot;PlayerOwnedAttacked&quot;]/conditions">
+    <check_all>
+      <check_value value="player.module != 'scenario_transport_refugees'" />
+      <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+      <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+    </check_all>
+  </add>
+  <!--
+    Scenario_Transport_Refugees:
+    disable notifications of spacesuit scanners as the new unlockable dataleak_s_scenario_01_macro is used in this scenario.
+  -->
+  <add sel="//cue[@name=&quot;SignalUnlockStarted&quot;]/conditions">
+    <check_value value="player.module != 'scenario_transport_refugees'" />
+    <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+    <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+  </add>
+  <add sel="//cue[@name=&quot;SignalUnlockFailed&quot;]/conditions">
+    <check_value value="player.module != 'scenario_transport_refugees'" />
+    <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+    <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+  </add>
+  <add sel="//cue[@name=&quot;SignalUnlockFinished&quot;]/conditions">
+    <check_value value="player.module != 'scenario_transport_refugees'" />
+    <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+    <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+  </add>
+  <add sel="//cue[@name=&quot;SignalUnlockImpossible&quot;]/conditions">
+    <check_value value="player.module != 'scenario_transport_refugees'" />
+    <check_value value="player.module != 'scenario_transport_refugees_engineer'" />
+    <check_value value="player.module != 'scenario_transport_refugees_escort'" />
+  </add>
+</diff>

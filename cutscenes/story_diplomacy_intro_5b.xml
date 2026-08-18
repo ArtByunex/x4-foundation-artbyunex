@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Diplomacy_Intro_5b">
+    <params>
+      <param name="room" object="true" />
+      <param name="teladi" object="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scene" zone="@auto:room" />
+    <environment_implicit name="teladiscene" zone="@auto:teladi" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+
+      <!--first sequence starts at 0 - ends on event-->
+      <sequence name="PanDownSequence" start="0">
+        <shot name="PanDown" environment="scene" duration="onevent:PanDownEnd">
+          <camera_orbit reference="room" x="-352" y="25.3" z="90" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-0.2" distance="315" elevation="7.4"/>
+            <end angle="0.2" distance="310" elevation="3" time="11000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="TheTriforceSequence" start="onevent:TheTriforceStart">
+        <shot name="TheTriforce" environment="scene" duration="onevent:TheTriforceEnd">
+          <camera_orbit reference="room" x="-352" y="65.3" z="107.4" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-3.1" distance="309.3" elevation="-37.2"/>
+            <end angle="-3.1" distance="309.3" elevation="-37.2" time="11000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="TeladiFollowSequence" start="onevent:TeladiFollowStart">
+        <shot name="TeladiFollow" environment="teladiscene" duration="onevent:TeladiFollowEnd">
+          <!--ecliptic doesn't seem to do anything. If the character rotates slightly, so does the camera-->
+          <camera_orbit reference="teladi" x="0" y="-0.9" z="0" orient_to="ecliptic" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="290" distance="2" elevation="0"/>
+            <end angle="290" distance="2" elevation="0" time="11000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="PanDown2Sequence" start="onevent:PanDown2Start">
+        <shot name="PanDown2" environment="scene" duration="onevent:PanDown2End">
+          <camera_orbit reference="room" x="40" y="25.3" z="96" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="182" distance="98" elevation="8"/>
+            <end angle="182" distance="95" elevation="3" time="11000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="SideTalkSequence" start="onevent:SideTalkStart">
+        <shot name="SideTalk" environment="scene" duration="onevent:SideTalkEnd">
+          <camera_orbit reference="room" x="-47" y="28.3" z="90" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="230" distance="2.5" elevation="0.15"/>
+            <end angle="230" distance="2.5" elevation="0.15" time="11000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>
+

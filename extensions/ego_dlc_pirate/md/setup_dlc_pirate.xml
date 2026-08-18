@@ -1,0 +1,2584 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Setup_DLC_Pirate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <!-- will run once, either on gamestart or when a game is loaded where this DLC was not active before -->
+    <cue name="Setup" namespace="this" mapeditor="false" version="11">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <!--do_if value="global.$smugglercoverfactions?">
+          <do_if value="not global.$smugglercoverfactions.indexof.{faction.terran}">
+            <append_to_list name="global.$smugglercoverfactions" exact="faction.terran"/>
+          </do_if>
+        </do_if-->
+
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <!--Disable certain game events from happening in certain Sectors -->
+          <!--No encounters in S2a/b/c and S3, and S1b (neither Khaak, nor Xenon)-->
+          <find_sector name="$IgnoredSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector002_macro, macro.cluster_500_sector003_macro, macro.cluster_504_sector001_macro,
+           macro.Cluster_502_Sector001_macro]" multiple="true"/>
+          <append_list_elements name="md.Encounters.Manager.$IgnoredSectors" other="$IgnoredSectors"/>
+          <add_to_group groupname="md.Khaak_Activity.Manager.$IgnoredSectors" list="$IgnoredSectors"/>
+          <remove_value name="$IgnoredSectors"/>
+          <find_sector groupname="md.$XenonCrisisIgnoredSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector002_macro, macro.cluster_500_sector003_macro, macro.cluster_504_sector001_macro]" multiple="true" comment="Avarice sectors and Leap of Faith"/>
+        </do_if>
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$ButlerMacros" exact="macro.character_butler_male_cau_01_macro"/>
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$ButlerMacros" exact="macro.character_butler_male_afr_01_macro"/>
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$ButlerMacros" exact="macro.character_butler_male_asi_01_macro"/>
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$CasinoWelfareModuleMacros" exact="macro.welfare_gen_casino_01_macro"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.scavenger}"    exact="table[$DiplomatAvailable = ['yes', tag.group_18],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.loanshark}"  exact="table[$DiplomatAvailable = ['yes', tag.group_20],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_finemeal}" other="[faction.scavenger]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_aquaponicvegetable}" other="[faction.scavenger, faction.loanshark]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.scavenger, faction.loanshark]" create="true"/>
+        <set_userdata name="'limited_blueprint_ship_gen_m_yacht_01_a'" value="1" signed="true" comment="Sets the build limit for this ship to 1"/>
+      </actions>
+      <patch sinceversion="3">
+        <do_if value="not md.NPC_Instantiation.Instantiation.$CasinoWelfareModuleMacros?">
+          <set_value name="md.NPC_Instantiation.Instantiation.$CasinoWelfareModuleMacros" exact="[]"/>
+        </do_if>
+        <append_to_list name="md.NPC_Instantiation.Instantiation.$CasinoWelfareModuleMacros" exact="macro.welfare_gen_casino_01_macro"/>
+      </patch>
+      <patch sinceversion="4">
+        <!--Check if the Erlking main weapon blueprint crate no longer exists and was not collected. If so, add the blueprint to the player-->
+        <find_object name="$BlueprintDatavault3" godobjectentry="'erlking_blueprint_3'" space="player.galaxy"/>
+        <do_if value="$BlueprintDatavault3">
+          <!--Recursive as the crate is also an object-->
+          <find_object_component name="$BlueprintDatavault3Crate" macro="macro.props_sm_container_xs_erlking_blueprint_03_macro" recursive="true" object="$BlueprintDatavault3"/>
+          <do_if value="not $BlueprintDatavault3Crate.isoperational and not player.blueprints.{ware.weapon_pir_xl_battleship_01_mk1}.any.exists">
+            <debug_text text="'Adding missing Erlking blueprint ' + ware.weapon_pir_xl_battleship_01_mk1" filter="savegame"/>
+            <add_blueprints wares="ware.weapon_pir_xl_battleship_01_mk1"/>
+          </do_if>
+        </do_if>
+        <remove_value name="$BlueprintDatavault3"/>
+        <remove_value name="$BlueprintDatavault3Crate"/>
+
+        <!--Add the two new datavaults to certain random DLC sectors, limited on the Y value-->
+        <find_sector name="$PotentialDatavaultSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector003_macro, macro.cluster_501_sector001_macro,
+           macro.cluster_502_sector001_macro, macro.cluster_503_sector001_macro]" multiple="true"/>
+        <set_value name="$DatavaultSector" exact="$PotentialDatavaultSectors.random"/>
+        <create_position name="$DatavaultPos" space="$DatavaultSector" value="$DatavaultSector.coreposition" min="$DatavaultSector.coresize * 0.9" max="$DatavaultSector.coresize * 1.2"/>
+        <set_value name="$DatavaultYPos" min="$DatavaultSector.coreposition.y - 10km" max="$DatavaultSector.coreposition.y + 10km"/>
+        <set_value name="$DatavaultPos" exact="position.[$DatavaultPos.x, $DatavaultYPos, $DatavaultPos.z]"/>
+        <create_object name="$NewDatavault" macro="macro.landmarks_erlking_vault_04_macro" sector="$DatavaultSector">
+          <safepos value="$DatavaultPos" allowyaxis="false"/>
+        </create_object>
+        <debug_text text="'Added new datavault ' + $NewDatavault + ' ' + $NewDatavault.macro + ' to ' + $DatavaultSector.knownname" filter="savegame"/>
+
+        <set_value name="$DatavaultSector" exact="$PotentialDatavaultSectors.random"/>
+        <create_position name="$DatavaultPos" space="$DatavaultSector" value="$DatavaultSector.coreposition" min="$DatavaultSector.coresize * 0.9" max="$DatavaultSector.coresize * 1.2"/>
+        <set_value name="$DatavaultYPos" min="$DatavaultSector.coreposition.y - 10km" max="$DatavaultSector.coreposition.y + 10km"/>
+        <set_value name="$DatavaultPos" exact="position.[$DatavaultPos.x, $DatavaultYPos, $DatavaultPos.z]"/>
+        <create_object name="$NewDatavault" macro="macro.landmarks_erlking_vault_05_macro" sector="$DatavaultSector">
+          <safepos value="$DatavaultPos" allowyaxis="false"/>
+        </create_object>
+        <debug_text text="'Added new datavault ' + $NewDatavault + ' ' + $NewDatavault.macro + ' to ' + $DatavaultSector.knownname" filter="savegame"/>
+
+        <remove_value name="$PotentialDatavaultSectors"/>
+        <remove_value name="$DatavaultSector"/>
+        <remove_value name="$NewDatavault"/>
+        <remove_value name="$DatavaultYPos"/>
+        <remove_value name="$DatavaultPos"/>
+      </patch>
+      <patch sinceversion="5">
+        <do_if value="md.X4Ep1_Mentor_Subscriptions.Start.state == cuestate.complete">
+          <debug_text text="'Adding ToA DLC factions to Boso signal leak factions'" filter="savegame"/>
+          <append_list_elements name="md.X4Ep1_Mentor_Subscriptions.Start.$SignalLeakStationFactions" other="[faction.loanshark, faction.scavenger]"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="6">
+        <!-- So far we were only able to check for and get the Pirate faction, but we now also need to check for Riptide in Base Game now -->
+        <do_if value="not md.$RiptideScavengersFaction?">
+          <set_value name="md.$RiptideScavengersFaction" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$RiptideScavengersFaction" other="[faction.scavenger]"/>
+      </patch>
+      <patch sinceversion="7">
+        <do_if value="@$ScrapyardStation.exists">
+          <set_object_encyclopedia_visibility object="$ScrapyardStation" visible="true"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="8">
+        <find_sector groupname="md.$XenonCrisisIgnoredSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector002_macro, macro.cluster_500_sector003_macro, macro.cluster_504_sector001_macro]" multiple="true" comment="Avarice sectors and Leap of Faith"/>
+      </patch>
+      <patch sinceversion="9">
+        <do_if value="not md.Diplomacy.Start.$DiplomacyFactionTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable" exact="table[]"/>
+        </do_if>
+        <!-- Add the diplomatic table entries for the DLC factions -->
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.scavenger}"    exact="table[$DiplomatAvailable = ['yes', tag.group_18],
+                                                                                                    $EventCapable = 'no',
+                                                                                                    $InateAgentExperience = 'negotiation']"/>
+        <set_value name="md.Diplomacy.Start.$DiplomacyFactionTable.{faction.loanshark}"  exact="table[$DiplomatAvailable = ['yes', tag.group_20],
+                                                                                                    $EventCapable = 'yes',
+                                                                                                    $InateAgentExperience = 'espionage']"/>
+
+        <do_if value="not md.Diplomacy.Start.$DiplomaticBribesTable?">
+          <set_value name="md.Diplomacy.Start.$DiplomaticBribesTable" exact="table[]"/>
+        </do_if>
+
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_finemeal}" other="[faction.scavenger]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_aquaponicvegetable}" other="[faction.scavenger, faction.loanshark]" create="true"/>
+        <append_list_elements name="md.Diplomacy.Start.$DiplomaticBribesTable.{ware.inv_infusedbeverage}" other="[faction.scavenger, faction.loanshark]" create="true"/>
+      </patch>
+      <patch sinceversion="10">
+        <set_userdata name="'limited_blueprint_ship_gen_m_yacht_01_a'" value="1" signed="true" comment="Sets the build limit for this ship to 1"/>
+      </patch>
+      <patch sinceversion="11">
+        <!-- we now also need to check for Loanshark/Vigor syndicate in the Base Game now -->
+        <do_if value="not md.$DLCVigorSyndicateFaction?">
+          <set_value name="md.$DLCVigorSyndicateFaction" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCVigorSyndicateFaction" other="[faction.loanshark]"/>
+      </patch>
+    </cue>
+
+    <!--Run Start_Actions on a new game-->
+    <cue name="Start" namespace="this">
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Game_Loaded"/>
+      </actions>
+    </cue>
+
+    <!--Run Start_Actions when loading a savegame with the DLC enabled for the first time-->
+    <cue name="Game_Loaded" namespace="this">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <include_actions ref="Start_Actions"/>
+        <cancel_cue cue="Start"/>
+      </actions>
+    </cue>
+
+    <cue name="Update_HQ_Plot_Data">
+      <conditions>
+        <event_cue_completed cue="md.X4Ep1_Mentor_Subscriptions.Start"/>
+      </conditions>
+      <actions>
+        <append_list_elements name="md.X4Ep1_Mentor_Subscriptions.Start.$SignalLeakStationFactions" other="[faction.loanshark, faction.scavenger]"/>
+      </actions>
+    </cue>
+
+    <library name="Start_Actions">
+      <actions>
+
+        <!-- Setup tables to track equipment -->
+        <do_if value="not md.$EquipmentTable?">
+          <set_value name="md.$EquipmentTable" exact="table[]"/>
+        </do_if>
+        <get_ware_definition result="md.$EquipmentTable.{faction.loanshark}" faction="faction.loanshark" flags="equipment" />
+        <get_ware_definition result="md.$EquipmentTable.{faction.scavenger}" faction="faction.scavenger" flags="equipment" />
+
+        <!-- Set up empty tables to track faction HQs and representatives throughout the game -->
+        <do_if value="not md.$FactionData?">
+          <set_value name="md.$FactionData" exact="table[]"/>
+        </do_if>
+        <do_if value="not md.$FactionData.{faction.loanshark}?">
+          <set_value name="md.$FactionData.{faction.loanshark}" exact="table[]" />
+        </do_if>
+        <do_if value="not md.$FactionData.{faction.scavenger}?">
+          <set_value name="md.$FactionData.{faction.scavenger}" exact="table[]" />
+        </do_if>
+
+        <!-- Pirate DLC FactionLists (Prevent tables being set multiple times) -->
+
+        <do_if value="not md.$DLCPirateFactions?">
+          <set_value name="md.$DLCPirateFactions" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCPirateFactions" other="[faction.loanshark]"/>
+
+        <do_if value="not md.$RiptideScavengersFaction?">
+          <set_value name="md.$RiptideScavengersFaction" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$RiptideScavengersFaction" other="[faction.scavenger]"/>
+
+        <do_if value="not md.$DLCVigorSyndicateFaction?">
+          <set_value name="md.$DLCVigorSyndicateFaction" exact="[]" />
+        </do_if>
+        <append_list_elements name="md.$DLCVigorSyndicateFaction" other="[faction.loanshark]"/>
+
+      </actions>
+    </library>
+
+    <!-- will run once when a new game is started with this DLC already active but not on loading a save -->
+    <!--<cue name="FirstStartOnly" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <!-- will run once when a game is loaded where this DLC was not active before but not on first start -->
+    <!--<cue name="LoadedOnly" namespace="this">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+      </actions>
+    </cue>-->
+
+    <cue name="X4ep1_Prelude_Setup" namespace="this" mapeditor="false" version="2">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <!--Custom gamestart flags (only reliable after 6.20 gamestarts)-->
+        <set_value name="$story_erlking_possession" exact="gamestart.storystate.story_erlking_possession"/>
+        <set_value name="$story_erlking_upgrade" exact="gamestart.storystate.story_erlking_upgrade"/>
+
+        <!-- find list of gates from Terran DLC into base-game-->
+        <find_sector name="$PirateSectors" extension="'ego_dlc_pirate'" multiple="true"/>
+        <find_sector name="$BaseSectors" extension="''" multiple="true"/>
+        <find_sector name="$SectorS3" macro="macro.cluster_504_sector001_macro" comment="S3" required="true"/>
+      </actions>
+      <patch sinceversion="2">
+        <set_value name="$story_erlking_possession" exact="false"/>
+        <set_value name="$story_erlking_upgrade" exact="false"/>
+      </patch>
+      <cues>
+
+        <cue name="Setup_PersistentCharacters">
+          <actions>
+            <signal_cue_instantly cue="Setup_PersistentCharacters_TidebreakOperator"/>
+          </actions>
+        </cue>
+
+        <cue name="Setup_PersistentCharacters_TidebreakOperator" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="not md.$PersistentCharacters.$TidebreakOperatorActor?"/>
+          </conditions>
+          <actions>
+            <create_cue_actor name="$TidebreakOperatorActor" cue="namespace" macro="character_story_tidebreakoperator_macro">
+              <page exact="10173"/>
+              <owner exact="faction.scavenger"/>
+              <skills>
+                <skill type="management"  exact="4"/>
+                <skill type="morale"      exact="9"/>
+                <skill type="piloting"    exact="12"/>
+                <skill type="engineering" exact="4"/>
+                <skill type="boarding"    exact="8"/>
+              </skills>
+            </create_cue_actor>
+            <set_entity_traits entity="$TidebreakOperatorActor" missionactor="true" customhandler="true" subtitlename="true"/>
+            <set_entity_overrides entity="$TidebreakOperatorActor" icon="'specialist'" title="'{30251,154}'"/>
+            <set_value name="md.$PersistentCharacters.$TidebreakOperatorActor" exact="$TidebreakOperatorActor"/>
+            <set_value name="$TidebreakOperatorActor.$cutscenekey" exact="table[ $key = 'ShowNPCFace']"/>
+            <signal_cue cue="Setup_PersistentCharacters_TidebreakOperator_Done"/>
+          </actions>
+        </cue>
+        <cue name="Setup_PersistentCharacters_TidebreakOperator_Done">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Setup_TidebreakOperator_Conversation" instantiate="true">
+              <conditions>
+                <event_conversation_started actor="$TidebreakOperatorActor"/>
+                <check_value value="$TidebreakOperatorActor.room == player.room"/>
+              </conditions>
+              <actions>
+                <add_npc_line speaker="$TidebreakOperatorActor" hidechoices="true">
+                  <text line="5027" comment="readtext.{10173}.{5027}"/>
+                </add_npc_line>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="InitialiseShadyGuys" checkinterval="1s">
+          <conditions>
+            <cue_is_waiting cue="md.NPC_ShadyGuy.EvaluateSectors"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$DebugChance" exact="0"/>
+            <set_value name="this.$PreviousCount" exact="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count"/>
+            <debug_text text="'Attempting to trigger shady guy spawns in Pirate DLC space'" chance="this.$DebugChance"/>
+            <signal_cue_instantly cue="md.NPC_ShadyGuy.EvaluateSectors" param="$PirateSectors"/>
+
+            <do_all chance="this.$DebugChance">
+              <do_if value="this.$PreviousCount == md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count" chance="this.$DebugChance">
+                <debug_text text="'no shady guys added'"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'added: ' + (md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup.count - this.$PreviousCount)"/>
+                <do_for_each name="$TestStation" in="md.NPC_ShadyGuy.GameStarted.$TrackedStationGroup">
+                  <set_value name="$TestShadyGuy" exact="$TestStation.shadyguy"/>
+                  <do_if value="$TestStation.shadyguy">
+                    <debug_text text="'Shady Guy: ' + $TestShadyGuy.name + ' is aboard ' + $TestStation.knownname + ' in ' + $TestStation.sector.knownname + '. Unlocked status is: ' + $TestShadyGuy.tradesvisible" />
+                  </do_if>
+                </do_for_each>
+                <remove_value name="$TestShadyGuy"/>
+              </do_else>
+            </do_all>
+
+          </actions>
+        </cue>
+
+        <cue name="SetupS3Station">
+          <actions>
+            <find_station name="$S3_Landmark" space="$PirateSectors" godstationentry="'monument_s3station'" required="true"/>
+            <set_object_name object="$S3_Landmark" page="20103" line="2801"/>
+
+            <run_actions ref="md.LIB_Generic.SetStationMinHull">
+              <param name="Station" value="$S3_Landmark"/>
+              <param name="MinHullPercent" value="100"/>
+            </run_actions>
+
+            <create_group groupname="$ProtectyonCrates"/>
+
+          </actions>
+          <cues>
+
+            <cue name="SetupS3Station_Astrid_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_ship name="$Astrid" macro="macro.ship_gen_m_yacht_01_a_macro" sector="player.sector">
+                  <owner exact="faction.player" overridenpc="true"/>
+                  <position object="player.ship" y="150"/>
+                </create_ship>
+              </actions>
+            </cue>
+
+            <cue name="SetupS3Station_DestroyCrates_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_for_each name="$ProtectyonCrate" in="$ProtectyonCrates">
+                  <destroy_object object="$ProtectyonCrate" explosion="false"/>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="SetupS3Station_OnEnterDrop" comment="guaranteed drop if player enters (and didn't already enter in the past 15 minutes)">
+              <conditions>
+                <event_object_changed_sector object="player.entity" sector="$SectorS3"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="SetupS3Station_Drops" chance="100"/>
+                <signal_cue cue="SetupS3Station_Drops" chance="100"/>
+                <signal_cue cue="SetupS3Station_Drops" chance="100"/>
+                <signal_cue cue="SetupS3Station_Drops" chance="100"/>
+              </actions>
+              <delay exact="15min"/>
+              <actions>
+                <reset_cue cue="SetupS3Station_OnEnterDrop" comment="reset"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupS3Station_PeriodicDrop">
+              <delay exact="9min + [0min, 3min, 5min].random"/>
+              <actions>
+                <do_if value="player.sector == $SectorS3">
+                  <signal_cue cue="SetupS3Station_Drops" chance="75"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="55"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="35"/>
+                </do_if>
+                <do_elseif value="$ProtectyonCrates.count lt 15">
+                  <!-- simplified drop: less crates with contents on the higher end, if player isn't there -->
+                  <do_all exact="[3,4,5].random" counter="$i">
+                    <set_value name="$Pitch" min="0" max="360" />
+                    <set_value name="$Yaw" min="0" max="360" />
+                    <set_value name="$Roll" min="0" max="360" />
+                    <create_object name="$CondensateContainer" groupname="$ProtectyonCrates" sector="$S3_Landmark.sector" macro="macro.sm_gen_pickup_condensate_01_macro" >
+                      <safepos object="$S3_Landmark"/>
+                      <rotation pitch="($Pitch)deg" yaw="($Yaw)deg" roll="($Roll)deg" />
+                    </create_object>
+                    <add_cargo object="$CondensateContainer" ware="ware.condensate" exact="[150,200,250].random"/>
+                  </do_all>
+                </do_elseif>
+              </actions>
+              <delay exact="2s"/>
+              <actions>
+                <do_if value="player.sector == $SectorS3">
+                  <signal_cue cue="SetupS3Station_Drops" chance="75"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="55"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="35"/>
+                </do_if>
+              </actions>
+              <delay exact="6s"/>
+              <actions>
+                <do_if value="player.sector == $SectorS3">
+                  <signal_cue cue="SetupS3Station_Drops" chance="75"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="55"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="35"/>
+                </do_if>
+              </actions>
+              <delay exact="1min"/>
+              <actions>
+                <do_if value="player.sector == $SectorS3">
+                  <signal_cue cue="SetupS3Station_Drops" chance="75"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="55"/>
+                  <signal_cue cue="SetupS3Station_Drops" chance="35"/>
+                </do_if>
+                <reset_cue cue="SetupS3Station_PeriodicDrop"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupS3Station_Drops" instantiate="true" comment="periodically called by SetupS3Station_PeriodicDrop">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$ProtectyonCrates.count lt 75" comment="limit to reasonable number">
+                  <!-- Randomly pick one of the 3 ejection points -->
+                  <set_value name="$RandomMultiplier" exact="[1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.2, 2.4, 2.6].random"/>
+                  <do_any>
+                    <do_all>
+                      <create_position name="$TargetOffset" space="$S3_Landmark.sector" object="$S3_Landmark" x="0" y="-523.9792" z="-369.569" comment="end of protectyon drop 'ramp'"/>
+                      <set_value name="$TargetVelocityX" exact="-100 * $RandomMultiplier" />
+                      <set_value name="$TargetVelocityY" exact="0"/>
+                      <set_value name="$TargetVelocityZ" exact="0"/>
+                    </do_all>
+                    <do_all>
+                      <create_position name="$TargetOffset" space="$S3_Landmark.sector" object="$S3_Landmark" x="370.0747" y="-200.7475" z="-368.9554" comment="end of protectyon drop 'ramp'"/>
+                      <set_value name="$TargetVelocityX" exact="-100 * $RandomMultiplier"/>
+                      <set_value name="$TargetVelocityY" exact="0"/>
+                      <set_value name="$TargetVelocityZ" exact="-100 * $RandomMultiplier"/>
+                    </do_all>
+                    <do_all>
+                      <create_position name="$TargetOffset" space="$S3_Landmark.sector" object="$S3_Landmark" x="-0.318211" y="-189.7677" z="551.3339" comment="end of protectyon drop 'ramp'"/>
+                      <set_value name="$TargetVelocityX" exact="100 * $RandomMultiplier"/>
+                      <set_value name="$TargetVelocityY" exact="0"/>
+                      <set_value name="$TargetVelocityZ" exact="0"/>
+                    </do_all>
+                  </do_any>
+                  <set_value name="$Pitch" min="0" max="360" />
+                  <set_value name="$Yaw" min="0" max="360" />
+                  <set_value name="$Roll" min="0" max="360" />
+                  <create_object name="$CondensateContainer" groupname="$ProtectyonCrates" sector="$S3_Landmark.sector" macro="macro.sm_gen_pickup_condensate_01_macro" >
+                    <position value="$TargetOffset"/>
+                    <rotation pitch="($Pitch)deg" yaw="($Yaw)deg" roll="($Roll)deg" />
+                  </create_object>
+                  <add_object_velocity object="$CondensateContainer" >
+                    <linear x="$TargetVelocityX" y="$TargetVelocityY" z="$TargetVelocityZ"/>
+                  </add_object_velocity>
+                  <!--add_to_group groupname="md.Setup_DLC_Pirate.TheWave.$WaveIgnoringShipsGroup" object="$CondensateContainer"/-->
+                  <add_cargo object="$CondensateContainer" ware="ware.condensate" exact="[50,75,100,125,250].random"/>
+                </do_if>
+                <do_else>
+                  <set_value name="$i" exact="0"/>
+                  <set_value name="$CratesDestroyed" exact="0"/>
+                  <do_all exact="$ProtectyonCrates.count" counter="$i" reverse="true" comment="make room for new drops">
+                    <do_if value="[0,1].random gt 0">
+                      <destroy_object object="$ProtectyonCrates.{$i}" explosion="true"/>
+                      <remove_from_group group="$ProtectyonCrates" object="$ProtectyonCrates.{$i}" comment="explosion=true, so is still alive (manually remove)"/>
+                      <set_value name="$CratesDestroyed" operation="add"/>
+                      <do_if value="$CratesDestroyed gt 7">
+                        <break/>
+                      </do_if>
+                    </do_if>
+                  </do_all>
+                </do_else>
+              </actions>
+            </cue>
+
+            <!--cue name="SetupS3Station_Recycle" checkinterval="18min" instantiate="true">
+              <actions>
+                <do_for_each name="$ProtectyonCrate" in="$ProtectyonCrates">
+                  <do_if value="$ProtectyonCrate.distanceto.{$S3_Landmark} gt 10km">
+                    <destroy_object object="$ProtectyonCrate" chance="25" explosion="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </cue-->
+
+          </cues>
+        </cue>
+
+        <cue name="SetupTidebreakStation" version="4">
+          <actions>
+            <find_station name="$PirateLandmark01" space="$PirateSectors" godstationentry="'pirate_landmark_01'" required="true"/>
+            <run_actions ref="md.LIB_Generic.SetStationMinHull" comment="indestructible">
+              <param name="Station" value="$PirateLandmark01" comment="Tidebreak Station"/>
+              <param name="MinHullPercent" value="15"/>
+            </run_actions>
+            <!-- Add persistent Control room -->
+            <get_room_definition macro="$TidebreakCorridorMacro" doors="$ResultDoors" race="$PirateLandmark01.owner.primaryrace" tags="tag.corridor"/>
+            <create_dynamic_interior interiorname="$TidebreakInterior" corridorname="$TidebreakCorridor" roomname="$TidebreakRoom" object="$PirateLandmark01" room="macro.room_gen_trafficcontrol_01_macro" corridor="$TidebreakCorridorMacro" name="'{20007,1561}'" persistent="true"/>
+            <!-- find the 3 avarice / riptide sectors -->
+            <find_sector name="$AvariceSectorsList" groupname="$AvariceSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector002_macro, macro.cluster_500_sector003_macro]" multiple="true"/>
+            <do_if value="$TidebreakStationIsPatching?">
+              <debug_text text="'Created tidebreak interior ' + $TidebreakInterior + ' ' + $TidebreakInterior.knownname" filter="savegame"/>
+            </do_if>
+            <do_if value="not md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides?">
+              <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides" exact="table[]"/>
+            </do_if>
+            <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides.{$PirateLandmark01}" exact="[
+                       faction.scavenger, faction.scaleplate, faction.argon,
+                       faction.antigone, faction.hatikvah, faction.teladi]"/>
+          </actions>
+          <patch sinceversion="2" comment="find riptide stations">
+            <find_sector name="$AvariceSectorsList" groupname="$AvariceSectors" macro="[macro.cluster_500_sector001_macro, macro.cluster_500_sector002_macro, macro.cluster_500_sector003_macro]" multiple="true"/>
+          </patch>
+          <patch sinceversion="3">
+            <do_if value="not $PirateLandmark01.exists">
+              <find_station name="$Patch_PirateLandmark01" space="$PirateSectors" godstationentry="'pirate_landmark_01'" required="true"/>
+              <do_if value="$Patch_PirateLandmark01">
+                <set_value name="$TidebreakStationIsPatching" exact="true"/>
+                <debug_text text="'Tidebreak station ' + $Patch_PirateLandmark01 + ' ' + $Patch_PirateLandmark01.knownname + ' was restored. Re-running setup logic.'" filter="savegame"/>
+                <remove_value name="$Patch_PirateLandmark01"/>
+                <reset_cue cue="SetupTidebreakStation"/>
+              </do_if>
+            </do_if>
+          </patch>
+          <patch sinceversion="4">
+            <do_if value="not md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides?">
+              <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides" exact="table[]"/>
+            </do_if>
+            <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides.{$PirateLandmark01}" exact="[
+                       faction.scavenger, faction.scaleplate, faction.argon,
+                       faction.antigone, faction.hatikvah, faction.teladi]"/>
+          </patch>
+          <cues>
+            <cue name="SetupTidebreakStation_RemovePatchingFlag" onfail="cancel">
+              <conditions>
+                <check_value value="$TidebreakStationIsPatching?"/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <remove_value name="$TidebreakStationIsPatching"/>
+              </actions>
+            </cue>
+            <cue name="SetupTidebreakStation_Operator" onfail="cancel">
+              <conditions>
+                <check_value value="$TidebreakOperatorActor?"/>
+              </conditions>
+              <actions>
+                <find_npc_slot name="$TidebreakNPCSlot" object="$PirateLandmark01" tags="[tag.sit]" multiple="true" comment="prefer sitting slots"/>
+                <do_if value="not $TidebreakNPCSlot.count">
+                  <find_npc_slot name="$TidebreakNPCSlot" object="$PirateLandmark01" multiple="true" comment="fallback to any slot"/>
+                </do_if>
+                <do_if value="$TidebreakNPCSlot.count">
+                  <add_actor_to_room result="$TidebreakOperatorActorPlaced" actor="$TidebreakOperatorActor" slot="$TidebreakNPCSlot.random"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'No npcslots found?!'" filter="error"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <cue name="SetupTideBreak_State">
+              <actions>
+                <signal_cue cue="SetupTideBreak_StoryScarcity"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupTideBreak_StoryScarcity" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$TidebreakProtectyonScarce" exact="true"/>
+                <remove_cargo object="$PirateLandmark01" ware="ware.condensate" exact="$PirateLandmark01.cargo.{ware.condensate}.count" result="$TideBreakProtectyonRemoved"/>
+                <debug_text text="'Tidebreak (capacity=%s free=%s flushed=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, $TideBreakProtectyonRemoved]" chance="0"/>
+                <!-- resupply, in small quantity -->
+                <find_station name="$AvariceStations" space="$AvariceSectorsList" multiple="true"/>
+                <add_wares object="$PirateLandmark01" ware="ware.condensate" exact="$AvariceStations.count"/>
+                <debug_text text="'Tidebreak (capacity=%s free=%s in-storage=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) /  ware.condensate.volume]" chance="0"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupTideBreak_StoryNoScarcity" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <remove_value name="$TidebreakProtectyonScarce"/>
+                <add_wares object="$PirateLandmark01" ware="ware.condensate" exact="$PirateLandmark01.cargo.{ware.condensate}.free"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupTideBreak_Resupply" checkinterval="2min" instantiate="true" comment="periodic check">
+              <actions>
+                <!-- 
+                  $PirateLandmark01.cargo.capacity.condensate = 1.000.000
+                  $PirateLandmark01.cargo.free.condensate = 525.800 (initial supply)
+                -->
+                <do_if value="$TidebreakProtectyonScarce?">
+                  <find_station name="$AvariceStations" space="$AvariceSectorsList" multiple="true"/>
+                  <do_if value="$TidebreakStationIsPatching?">
+                    <debug_text text="'Tidebreak resupply (capacity=%s free=%s units-storage=%s #avaricestations=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume, $AvariceStations.count]" filter="savegame"/>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'Tidebreak resupply (capacity=%s free=%s units-storage=%s #avaricestations=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume, $AvariceStations.count]" chance="0"/>
+                  </do_else>
+                  <!--add_wares object="$PirateLandmark01" ware="ware.condensate" exact="($PirateLandmark01.cargo.free.condensate - [2500,5000,7500].random) / ware.condensate.volume" comment="1 unit of condensate takes 10 cargo volume"/-->
+                  <do_if value="$PirateLandmark01.cargo.{ware.condensate}.count lt [$AvariceStations.count, 10].max">
+                    <add_wares object="$PirateLandmark01" ware="ware.condensate" exact="$AvariceStations.count + 3" comment="+x = min resupply, so there is always something even if riptide is entirely gone"/>
+                  </do_if>
+                </do_if>
+                <do_else>
+                  <!--add_wares object="$PirateLandmark01" ware="ware.condensate" exact="($PirateLandmark01.cargo.free.condensate - [2500,5000,7500].random) / ware.condensate.volume" comment="1 unit of condensate takes 10 cargo volume"/-->
+                  <do_if value="$TidebreakStationIsPatching?">
+                    <debug_text text="'Tidebreak resupply (capacity=%s free=%s units-storage=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume]" filter="savegame"/>
+                  </do_if>
+                  <do_else>
+                    <debug_text text="'Tidebreak resupply (capacity=%s free=%s units-storage=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume]" chance="0"/>
+                  </do_else>
+                  <add_wares object="$PirateLandmark01" ware="ware.condensate" exact="$PirateLandmark01.cargo.{ware.condensate}.free"/>
+                </do_else>
+                <do_if value="$TidebreakStationIsPatching?">
+                  <debug_text text="'Tidebreak resupply after (capacity=%s free=%s units-storage=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume]" filter="savegame"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Tidebreak resupply after (capacity=%s free=%s units-storage=%s)'.[$PirateLandmark01.cargo.capacity.condensate, $PirateLandmark01.cargo.free.condensate, ($PirateLandmark01.cargo.capacity.condensate - $PirateLandmark01.cargo.free.condensate) / ware.condensate.volume]" chance="0"/>
+                </do_else>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="SetupAuroraCasino">
+          <delay exact="1s"/>
+          <actions>
+            <find_sector name="$Windfall4Sector" macro="macro.cluster_503_sector001_macro" extension="'ego_dlc_pirate'" comment="Windfall IV"/>
+            <find_station name="$AuroraCasino" space="$PirateSectors" godstationentry="'pirate_landmark_02'" required="true"/>
+            <set_value name="md.NPC_Instantiation.Instantiation.$DockareaAlliedFactionOverrides.{$AuroraCasino}" exact="[
+                       faction.scaleplate, faction.loanshark, faction.argon,
+                       faction.antigone, faction.hatikvah, faction.teladi]"/>
+            <signal_objects object="player.galaxy" param="'init station'" param2="$AuroraCasino" param3="false"/>
+            <!-- Add persistent Casino room -->
+            <get_room_definition macro="$CasinoCorridorMacro" doors="$ResultDoors" race="$AuroraCasino.owner.primaryrace" tags="tag.corridor"/>
+            <create_dynamic_interior interiorname="$CasinoInterior" corridorname="$CasinoCorridor" roomname="$CasinoRoom" object="$AuroraCasino" room="macro.room_gen_casino_01_macro" corridor="$CasinoCorridorMacro" name="'{20007,1341}'" persistent="true"/>
+            <run_actions ref="md.NPC_Instantiation.Add_Casino_Workers">
+              <param name="ActorCue" value="this"/>
+              <param name="Room" value="$CasinoRoom"/>
+            </run_actions>
+          </actions>
+        </cue>
+
+        <cue name="SetupPrisonStation">
+          <actions>
+            <find_sector name="$EighteenBillionSector" macro="macro.cluster_02_sector001_macro" required="true"/>
+            <find_station name="$PrisonStation" space="$EighteenBillionSector" godstationentry="'story_prison_station_id'" required="true"/>
+
+            <!--<set_object_name object="$PrisonStation" page="20102" line="2301"/>-->
+            <find_object_component name="$PrisonModule"   object="$PrisonStation"  macro="macro.landmarks_gen_prison_01_macro" recursive="true"/>
+
+            <do_if value="player.module != 'x4ep1_gamestart_pirate2'" comment="pirate-gs2 will create this in the gamestart (so the player can be placed there), other gamestarts still need it">
+              <create_dynamic_interior interiorname="$PrisonInterior" corridorname="$PrisonCorridor" roomname="$PrisonRoom" object="$PrisonStation" module="$PrisonModule" room="macro.room_gen_detentioncell_01_macro" corridor="macro.prison_escape_v2_macro" door="'con_room_02'" name="'{30288,100}'" persistent="true" renderoutside="true"/>
+              <set_dynamic_interior_private object="$PrisonStation" interior="$PrisonInterior" private="true"/>
+            </do_if>
+            <do_else>
+              <!--interior module="landmarks_gen_prison_01_macro" corridor="prison_escape_v2_macro" door="con_room_02" room="room_gen_detentioncell_01_macro" private="true" persistent="true" renderoutside="true"/-->
+              <set_value name="$PrisonRoom" exact="player.room" comment="Player starts in the prison-room when starting the Pirate Gamestart 2"/>
+              <find_object_component name="$PrisonCorridor" object="$PrisonModule"      macro="macro.prison_escape_v2_macro" recursive="true" required="true"/>
+            </do_else>
+
+            <!--set_object_name object="$PrisonCorridor" page="30288" line="100" comment="Prison Block -> Object is not nameable"/-->
+
+            <add_room_to_dynamic_interior interior="$PrisonCorridor.parent" door="'con_room_01'" room="macro.room_gen_detentioncell_01_macro" name="$PrisonRoom2" roomtype="roomtype.prison" check="false"/>
+            <add_room_to_dynamic_interior interior="$PrisonCorridor.parent" door="'con_room_03'" room="macro.room_gen_detentioncell_01_macro" name="$PrisonRoom3" roomtype="roomtype.prison" check="false"/>
+            <add_room_to_dynamic_interior interior="$PrisonCorridor.parent" door="'con_room_04'" room="macro.room_gen_detentioncell_01_macro" name="$PrisonRoom4" roomtype="roomtype.prison" check="false"/>
+
+            <!-- special handling, no signal leaks or generic missions -->
+            <add_to_group groupname="md.Signal_Leaks.Manager.$ExcludedObjects" object="$PrisonStation"/>
+            <add_to_group groupname="md.GenericMissions.Manager.$ExcludedOfferObjects" object="$PrisonStation"/>
+
+            <!-- Floor 2 Triggers behind the panels: initially locked so player cannot proceed in criminal story ch6 unless he freed Stev -->
+            <find_object_component name="$PrisonSwitch2A" object="$PrisonModule" macro="macro.props_special_doorclamp_01_macro" grouptag="tag.airlockcontrol1" required="true"/>
+            <find_object_component name="$PrisonSwitch2B" object="$PrisonModule" macro="macro.props_special_doorclamp_01_macro" grouptag="tag.airlockcontrol2" required="true"/>
+            <set_object_min_hull object="$PrisonSwitch2A" exact="100"/>
+            <set_object_min_hull object="$PrisonSwitch2B" exact="100"/>
+
+            <!--Set to invincible-->
+            <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+              <param name="Object" value="$PrisonStation"/>
+              <param name="RequesterCue" value="SetupPrisonStation"/>
+              <param name="DebugChance" value="0"/>
+            </run_actions>
+          </actions>
+          <cues>
+
+            <cue name="SetupDoors">
+              <actions>
+                <set_triggers_locked object="$PrisonCorridor" group="tag.transporter_01" locked="true" comment="Transporter to station locked at gamestart (unlocked for criminal story ch6)"/>
+                <set_triggers_locked object="$PrisonCorridor" group="tag.airlock_02" locked="true" comment="Spacesuit/Airlock 2A"/>
+                <set_triggers_locked object="$PrisonCorridor" group="tag.airlock_06" locked="true" comment="Spacesuit/Airlock 2B"/>
+                <set_triggers_locked object="$PrisonCorridor" group="tag.airlock_07" locked="true" comment="Floor3 spacesuit-airlock I" />
+                <set_triggers_locked object="$PrisonCorridor" group="tag.airlock_03" locked="true" comment="Floor3 spacesuit-airlock II" />
+              </actions>
+            </cue>
+
+            <cue name="SetupCells">
+              <actions>
+                <!-- teladi prison all cells locked -->
+                <set_triggers_locked object="$PrisonRoom3" group="tag.door_01" locked="true" comment="left"/>
+                <set_triggers_locked object="$PrisonRoom3" group="tag.door_02" locked="true" comment="center"/>
+              </actions>
+            </cue>
+
+            <cue name="UnlockCells_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- teladi prison all cells locked -->
+                <set_triggers_locked object="$PrisonRoom3" group="tag.door_01" locked="false" comment="left"/>
+                <set_triggers_locked object="$PrisonRoom3" group="tag.door_02" locked="false" comment="center"/>
+                <set_triggers_locked object="$PrisonRoom3" group="tag.door_03" locked="false" comment="right cell / door button"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupPrisoner">
+              <actions>
+                <create_cue_actor name="$OtherPrisoner" cue="namespace">
+                  <select race="race.teladi" faction="faction.teladi"/>
+                  <page exact="10560"/>
+                  <owner exact="faction.civilian"/>
+                  <skills>
+                    <skill type="management"  exact="4"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="5"/>
+                    <skill type="engineering" exact="15"/>
+                    <skill type="boarding"    exact="6"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$OtherPrisoner" missionactor="true" customhandler="true" subtitlename="false"/>
+                <set_entity_role entity="$OtherPrisoner" role="entityrole.prisoner"/>
+                <set_entity_role_object entity="$OtherPrisoner" object="$PrisonStation"/>
+
+                <find_npc_slot name="$NPCSlot" object="$PrisonRoom3" tags="tag.prisoner" multiple="true" excludefilled="false" />
+                <do_all exact="$NPCSlot.count" counter="$i">
+                  <do_if value="$NPCSlot.{$i}.group == tag.door_03">
+                    <add_actor_to_room result="$Prisoner1result" actor="$OtherPrisoner" slot="$NPCSlot.{$i}"/>
+                    <debug_text text="'adding other prisoner: ' + $Prisoner1result"/>
+                    <do_if value="$Prisoner1result == false">
+                      <debug_text text="'Adding actor failed?!'"/>
+                    </do_if>
+                  </do_if>
+                </do_all>
+
+                <set_value name="$OtherPrisonerSpeak" exact="-1"/>
+                <set_value name="$OtherPrisonerActive" exact="true"/>
+              </actions>
+              <cues>
+
+                <cue name="Prisoner_Conversation_Started" comment="Don't instantiate. Axiom wants to say something after the conversation finishes, and being able to restart it breaks that dialog.">
+                  <conditions>
+                    <event_conversation_started actor="$OtherPrisoner"/>
+                    <check_value value="$OtherPrisonerActive"/>
+                  </conditions>
+                  <actions>
+                    <add_npc_line speaker="$OtherPrisoner" line="30288101" comment="How did you get out? Take me with you!"/>
+                  </actions>
+                </cue>
+
+                <cue name="Prisoner_Complaining" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.room == $PrisonRoom3"/>
+                    <check_value value="not player.isinconversation"/>
+                    <check_value value="$OtherPrisonerActive"/>
+                    <check_value value="not md.GS_Pirate2.$SilenceOtherPrisoner?"/>
+                  </conditions>
+                  <delay exact="0.1s"/>
+                  <actions>
+                    <do_if value="(player.room == $OtherPrisoner.room) and not player.isinconversation">
+                      <set_value name="$OtherPrisonerSpeak" operation="add"/>
+
+                      <!-- After the prisoner has said his 3 default lines for the first time, play special lines once.-->
+                      <do_if value="$OtherPrisonerSpeak == 3">
+                        <speak actor="$OtherPrisoner" line="30288105" comment="Special line 1"/>
+                      </do_if>
+                      <do_elseif value="$OtherPrisonerSpeak == 4">
+                        <speak actor="$OtherPrisoner" line="30288106" comment="Special line 2"/>
+                      </do_elseif>
+                      <do_elseif value="$OtherPrisonerSpeak == 5">
+                        <speak actor="$OtherPrisoner" line="30288107" comment="Special line 3"/>
+                      </do_elseif>
+                      <do_elseif value="$OtherPrisonerSpeak == 6">
+                        <speak actor="$OtherPrisoner" line="30288108" comment="Special line 4"/>
+                      </do_elseif>
+
+                      <!-- Otherwise replay the same 3 lines over and over. -->
+                      <do_else>
+                        <speak actor="$OtherPrisoner" line="30288102 + ($OtherPrisonerSpeak % 3)"/>
+                      </do_else>
+                    </do_if>
+                  </actions>
+                  <delay min="6s" max="8s"/>
+                  <actions>
+                    <reset_cue cue="Prisoner_Complaining"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Setup_AirlockLights_Initial">
+              <actions>
+                <signal_cue cue="Setup_AirlockLights_Update" comment="update airlock green/orange lights"/>
+              </actions>
+            </cue>
+
+            <cue name="Setup_AirlockLights_Update" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$AirlockHandling" exact="[
+                  [tag.airlock_01, tag.airlocklight_01], 
+                  [tag.airlock_02, tag.airlocklight_02], 
+                  [tag.airlock_03, tag.airlocklight_03], 
+                  [tag.airlock_05, tag.airlocklight_05], 
+                  [tag.airlock_06, tag.airlocklight_06], 
+                  [tag.airlock_07, tag.airlocklight_07] ]" comment="1A=_01, 1B=_05,   2A=_02, 2B=_06,   3A=_03, 3B=_07"/>
+                <do_for_each name="$it" in="$AirlockHandling">
+                  <find_object_component name="$AirlockLight"   object="$PrisonCorridor" grouptag="$it.{2}"/>
+                  <do_if value="$AirlockLight.exists">
+                    <do_if value="$PrisonCorridor.isgrouplocked.{$it.{1}}">
+                      <trigger_animation object="$AirlockLight" trigger="deactivate" comment="orange"/>
+                    </do_if>
+                    <do_else>
+                      <trigger_animation object="$AirlockLight" trigger="activate" comment="green"/>
+                    </do_else>
+                  </do_if>
+                </do_for_each>
+                <!--debug_text text="'=> %s locked=%s'.[$Airlock01, $PrisonCorridor.isgrouplocked.{tag.airlock_01} ]"/-->
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="SetupScrapyard" comment="Keepsafe">
+          <actions>
+            <find_sector name="$S1b_Center" macro="macro.Cluster_502_Sector001_macro" required="true" />
+            <find_zone name="$ScrapZone" space="$S1b_Center" macro="macro.zone006_cluster_502_sector001_macro" required="true"/>
+            <set_value name="$DebugChance" exact="0"/>
+          </actions>
+          <cues>
+
+            <cue name="SetupScrapyardStation">
+              <actions>
+                <find_station name="$ScrapyardStation" godstationentry="'Story_ScrapyardStation'" space="$ScrapZone.sector" required="true"/>
+                <debug_text text="$ScrapyardStation.knownname" chance="$DebugChance"/>
+                <!--
+                <create_station name="$ScrapyardStation" zone="$ScrapZone" macro="macro.station_gen_factory_base_01_macro" owner="faction.loanshark" state="componentstate.operational" constructionplan="'Story_ScrapyardStation'">
+                  <position x="3km" y="1.5km" z="1.5km"/>
+                </create_station>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$ScrapyardStation" param3="false"/>
+                <set_object_name object="$ScrapyardStation" page="20102" line="2501" comment="Keepsafe"/>
+                -->
+              </actions>
+              <cues>
+                <cue name="DestroyScrapyardStation_DEBUG">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <destroy_object object="$ScrapyardStation" explosion="false"/>
+                  </actions>
+                </cue>
+                <cue name="RebuildScrapyardStation" version="3">
+                  <conditions>
+                    <event_object_destroyed object="$ScrapyardStation"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="this"/>
+                  </actions>
+                  <delay exact="[15min, 30min, 45min].random"/>
+                  <actions>
+                    <create_station name="$ScrapyardStation" zone="$ScrapZone" macro="macro.station_gen_factory_base_01_macro" owner="faction.loanshark" encyclopedia="true">
+                      <position x="3km" y="1.5km" z="1.5km"/>
+                    </create_station>
+                    <set_object_name object="$ScrapyardStation" page="20102" line="2501" comment="Keepsafe"/>
+                    <add_build_to_expand_station object="$ScrapyardStation.buildstorage" buildobject="$ScrapyardStation" constructionplan="'Story_ScrapyardStation'"/>
+                    <signal_cue cue="RebuildScrapyardStation_Storage"/>
+                    <reset_cue cue="SetupScrapyardFences" comment="relocate fences"/>
+                    <reset_cue cue="RebuildScrapyardStation"/>
+                  </actions>
+                  <patch sinceversion="2" state="waiting">
+                    <do_if value="not $ScrapyardStation.assignedcontrolentity.{controlpost.engineer}.exists">
+                      <signal_objects object="player.galaxy" param="'init station'" param2="$ScrapyardStation" param3="false"/>
+                    </do_if>
+                    <reset_cue cue="RebuildScrapyardStation"/>
+                  </patch>
+                  <patch sinceversion="3">
+                    <cancel_cue cue="RebuildScrapyardStation"/>
+                  </patch>
+                </cue>
+                <!--Debug cue to add resources to allow it to rebuild quicker-->
+                <cue name="RebuildScrapyardStation_Storage" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="player.debug"/>
+                  </conditions>
+                  <delay exact="1s" comment="Essential delay. Without it, the build task won't be ready and we won't know which wares we need."/>
+                  <actions>
+                    <!-- fill buildstorage with needed wares -->
+                    <debug_text text="'filling storage'" chance="$DebugChance"/>
+                    <set_value name="$BuildProcessor" exact="$ScrapyardStation.buildstorage.buildprocessor"/>
+                    <set_value name="$BuildWares" exact="$BuildProcessor.neededsequenceresources.list"/>
+                    <do_all exact="$BuildWares.count" counter="$k">
+                      <debug_text text="'- ' + $BuildWares.{$k}.name + ' amount=' + $BuildProcessor.neededsequenceresources.{$BuildWares.{$k}}.count" chance="100"/>
+                      <add_cargo object="$ScrapyardStation.buildstorage" ware="$BuildWares.{$k}" exact="$BuildProcessor.neededsequenceresources.{$BuildWares.{$k}}.count"/>
+                    </do_all>
+                  </actions>
+                </cue>
+
+                <!-- Create Scrapyardfield -->
+                <cue name="SetupScrapyardFences" version="2">
+                  <actions>
+                    <do_if value="$ScrapGroupFences?">
+                      <do_for_each name="$ScrapFence" in="$ScrapGroupFences">
+                        <destroy_object object="$ScrapFence" explosion="false"/>
+                      </do_for_each>
+                    </do_if>
+                    <set_value name="$xmax" exact="17"/>
+                    <set_value name="$zmax" exact="9"/>
+                    <do_all counter="$x" exact="$xmax">
+                      <do_all counter="$z" exact="$zmax">
+                        <do_if value="($x == 1)  or ($x==$xmax) or ($z==1) or ($z==$zmax)" comment="outer edge">
+                          <do_if value="(($x == 1) or ($x==$xmax)) and (($z gt 1) and ($z lt $zmax))" comment="outer edge">
+                            <create_object name="$ScrapFence" groupname="$ScrapGroupFences" sector="$ScrapZone.sector" macro="macro.props_special_fence_01_macro">
+                              <position object="$ScrapyardStation" x="-3000m + ($x * 500m)" y="-3km" z="-3000m + ($z * 600m)"/>
+                              <rotation yaw="-90deg"/>
+                            </create_object>
+                          </do_if>
+                          <do_else>
+                            <create_object name="$ScrapFence" groupname="$ScrapGroupFences" sector="$ScrapZone.sector" macro="macro.props_special_fence_01_macro">
+                              <position object="$ScrapyardStation" x="-3000m + ($x * 500m)" y="-3km" z="-3000m + ($z * 600m)"/>
+                            </create_object>
+                          </do_else>
+                        </do_if>
+                      </do_all>
+                    </do_all>
+                  </actions>
+                  <patch sinceversion="2">
+                    <reset_cue cue="SetupScrapyardFences" comment="re-place"/>
+                  </patch>
+                </cue>
+
+                <cue name="SetupScrapyardWrecksXL">
+                  <actions>
+                    <signal_cue_instantly cue="CleanupScrapyardWrecksXL"/>
+
+                    <set_value name="$ro" exact="[-25m, -12,5m, 0m, 12m, 25m]"/>
+                    <!-- spawn large wrecks in organized setup-->
+                    <set_value name="$abortx" exact="100"/>
+                    <set_value name="$abortz" exact="100"/>
+                    <set_value name="$x" exact="0"/>
+                    <set_value name="$z" exact="0"/>
+                    <set_value name="$spawned" exact="0"/>
+                    <do_if value="true">
+                      <do_while value="($x lt 6km) and ($abortx gt 0)">
+                        <do_while value="($z lt 3km) and ($abortz gt 0)">
+                          <set_value name="$abortz" operation="subtract"/>
+
+                          <set_value name="$ScrapMacro" exact="[macro.env_debris_debris_xl_03_macro, macro.env_debris_debris_xl_01_macro, macro.env_debris_debris_xl_02_macro, macro.env_debris_paranid_l_01_macro].random"/>
+                          <do_if value="$spawned == 16">
+                            <set_value name="$ScrapMacro" exact="macro.env_debris_xenon_xl_05_macro"/>
+                          </do_if>
+
+                          <create_object name="$ScrapObjectXL" groupname="$ScrapGroupXL" sector="$ScrapZone.sector" macro="$ScrapMacro" owner="faction.loanshark" chance="90">
+                            <position object="$ScrapyardStation" x="-1500m + ($x + $ro.random)" y="-3km" z="-1500m + ($z + $ro.random)"/>
+                            <rotation pitch="[-15deg,-10deg,-5deg,0deg,5deg,10deg,15deg].random" roll="[-15deg,-10deg,-5deg,0deg,5deg,10deg,15deg].random" yaw="[-15deg,-10deg,-5deg,0deg,5deg,10deg,15deg].random"/>
+                          </create_object>
+
+                          <set_value name="$spawned" operation="add"/>
+
+                          <!--debug_text text="'LARGE x=%s z=%s'.[$x, $z]"/-->
+                          <set_value name="$z" exact="$z + 75m"/>
+                          <do_if value="$ScrapObjectXL? and $ScrapObjectXL.exists">
+                            <set_value name="$z" exact="$z + $ScrapObjectXL.size"/>
+                          </do_if>
+                        </do_while>
+                        <set_value name="$abortx" operation="subtract"/>
+                        <set_value name="$x" exact="$x + 25m"/>
+                        <set_value name="$z" exact="$z + 75m"/>
+                        <do_if value="$ScrapObjectXL? and $ScrapObjectXL.exists">
+                          <set_value name="$x" exact="$x + $ScrapObjectXL.size"/>
+                        </do_if>
+                        <set_value name="$z" exact="0"/>
+                        <!--debug_text text="'newx=%s'.[$x]"/-->
+                      </do_while>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="CleanupScrapyardWrecksXL" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$ScrapGroupXL?">
+                      <do_for_each name="$ScrapObject" in="$ScrapGroupXL">
+                        <destroy_object object="$ScrapObject" explosion="false"/>
+                      </do_for_each>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <!-- Refill XL Scrap -->
+                <cue name="RespawnScrapyardWrecksXL" checkinterval="600s" instantiate="1">
+                  <conditions>
+                    <check_all>
+                      <check_value value="@$ScrapyardStation.exists"/>
+                      <check_value value="$ScrapGroupXL?"/>
+                      <check_value value="$ScrapGroupXL.count" max="10"/>
+                      <check_value value="player.sector" exact="$ScrapZone.sector" negate="1"/>
+                    </check_all>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="SetupScrapyardWrecksXL"/>
+                  </actions>
+                </cue>
+
+                <cue name="SetupScrapyardWrecksS">
+                  <actions>
+                    <signal_cue_instantly cue="CleanupScrapyardWrecksS"/>
+                    <!-- spawn small wrecks, in organized setup -->
+                    <set_value name="$abortxS" exact="100"/>
+                    <set_value name="$abortzS" exact="100"/>
+                    <set_value name="$x" exact="6300m"/>
+                    <set_value name="$z" exact="0"/>
+                    <set_value name="$y" exact="0"/>
+                    <do_while value="($x lt 7km) and ($abortxS gt 0)">
+                      <do_while value="($y lt 2)">
+                        <do_while value="($z lt 3km) and ($abortzS gt 0)">
+                          <set_value name="$abortzS" operation="subtract"/>
+                          <create_object name="$ScrapObjectS" groupname="$ScrapGroupS" sector="$ScrapZone.sector" macro="[macro.env_debris_debris_m_02_macro, macro.env_debris_debris_m_03_macro, macro.env_debris_debris_m_05_macro].random" owner="faction.loanshark" chance="60">
+                            <position object="$ScrapyardStation" x="-1500m + ($x + $ro.random)" y="-3km" z="-1500m + ($z + $ro.random)"/>
+                            <rotation pitch="[-3deg,0deg,3deg].random" roll="[-8deg,-4deg,0deg,4deg,8deg].random" yaw="[-8deg,-4deg,0deg,4deg,8deg].random"/>
+                          </create_object>
+                          <!--debug_text text="'SMALL x=%s y=%s z=%s'.[$x, $y, $z]"/-->
+                          <set_value name="$z" exact="$z + 125m"/>
+                        </do_while>
+                        <set_value name="$abortzS" exact="100"/>
+                        <set_value name="$z" exact="0"/>
+                        <set_value name="$y" exact="$y + 1"/>
+                      </do_while>
+                      <set_value name="$abortxS" operation="subtract"/>
+                      <set_value name="$x" exact="$x + 125m"/>
+                      <set_value name="$y" exact="0"/>
+                      <set_value name="$z" exact="0"/>
+                      <!--debug_text text="'x=%s'.[$x]"/-->
+                    </do_while>
+                  </actions>
+                </cue>
+
+                <cue name="CleanupScrapyardWrecksS" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$ScrapGroupS?">
+                      <do_for_each name="$ScrapObject" in="$ScrapGroupS">
+                        <destroy_object object="$ScrapObject" explosion="false"/>
+                      </do_for_each>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <!-- Refill S Scrap -->
+                <cue name="RespawnScrapyardWrecksS" checkinterval="600s" instantiate="1">
+                  <conditions>
+                    <check_all>
+                      <check_value value="@$ScrapyardStation.exists"/>
+                      <check_value value="$ScrapGroupS?"/>
+                      <check_value value="$ScrapGroupS.count" max="10"/>
+                      <check_value value="player.sector" exact="$ScrapZone.sector" negate="1"/>
+                    </check_all>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="SetupScrapyardWrecksS"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="SetupBattleshipXL" onfail="cancel" version="2">
+              <conditions>
+                <check_value value="not $story_erlking_possession and not $story_erlking_upgrade"/>
+              </conditions>
+              <actions>
+                <create_ship name="$BattleshipXL" macro="macro.ship_pir_xl_battleship_01_a_macro" sector="$ScrapZone.sector">
+                  <owner exact="faction.loanshark"/>
+                  <people>
+                    <!-- Capacity: 328 -->
+                    <fillpercent exact="90"/>
+                    <person role="service" weight="85">
+                      <select faction="faction.loanshark" tags="[tag.service, tag.veteran]"/>
+                    </person>
+                    <person role="marine" weight="13">
+                      <select faction="faction.loanshark" tags="[tag.marine, tag.rookie]"/>
+                    </person>
+                    <person role="marine" weight="2">
+                      <select faction="faction.loanshark" tags="[tag.marine, tag.veteran]"/>
+                    </person>
+                    <!--<person role="marine" weight="0">
+                      <select faction="faction.loanshark" tags="[tag.marine, tag.veteran]"/>
+                    </person>
+                    <person role="marine" weight="0">
+                      <select faction="faction.loanshark" tags="[tag.marine, tag.elite]"/>
+                    </person>-->
+                  </people>
+                  <!--position x="4947.46" y="1150.877" z="3002.421"/-->
+                  <position x="-1198.547485m" y="28.173462m" z="-2015.125854m" object="$ScrapyardStation"/>
+                  <rotation yaw="105.48541deg" pitch="-28.67247deg" roll="44.18deg"/>
+                  <!--position x="6358.718" y="1116.205" z="2559.467"/>
+                  <rotation yaw="173.57164deg" pitch="-5.97559deg" roll="0.311691deg"/-->
+                </create_ship>
+                <create_order object="$BattleshipXL" id="'Wait'">
+                  <param name="noattackresponse" value="true"/>
+                </create_order>
+                <run_actions ref="md.LIB_Generic.RequestObjectInvincibility">
+                  <param name="Object" value="$BattleshipXL"/>
+                  <param name="RequesterCue" value="SetupBattleshipXL"/>
+                  <param name="AllowCapturable" value="true"/>
+                </run_actions>
+                <add_to_group groupname="md.GenericMissions.Manager.$ExcludedTargetObjects" object="$BattleshipXL"/>
+                <signal_cue cue="md.Story_Research_Erlking.Start"/>
+              </actions>
+              <patch sinceversion="2">
+                <add_to_group groupname="md.GenericMissions.Manager.$ExcludedTargetObjects" object="$BattleshipXL"/>
+              </patch>
+              <cues>
+                <cue name="BattleshipMission_DEBUG">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_mission cue="this" name="'battleship locator'" description="'objective pointing to the Battleship XL'" type="missiontype.trade" faction="faction.argon" difficulty="level.trivial">
+                      <briefing>
+                        <objective step="1" action="objective.flyto" object="$BattleshipXL"/>
+                      </briefing>
+                      <objective step="1" action="objective.flyto" object="$BattleshipXL"/>
+                    </create_mission>
+                  </actions>
+                  <cues>
+                    <cue name="BattleshipMission_KeepAlive" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <actions>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Erlking_Custom_Gamestart" onfail="cancel" version="2">
+              <conditions>
+                <check_value value="$story_erlking_possession or $story_erlking_upgrade"/>
+              </conditions>
+              <delay exact="50ms"/>
+              <actions>
+                <set_value name="this.$SpawnObject" exact="@md.X4Ep1_Mentor_Subscriptions.Start.$HQ"/>
+                <do_if value="not this.$SpawnObject">
+                  <set_value name="this.$SpawnObject" exact="player.container"/>
+                </do_if>
+                <do_if value="$story_erlking_possession">
+                  <create_ship name="$BattleshipXL" macro="macro.ship_pir_xl_battleship_01_a_macro" sector="this.$SpawnObject.sector">
+                    <owner exact="faction.player"/>
+                    <pilot>
+                      <select faction="faction.player" race="player.entity.race" tags="tag.aipilot"/>
+                    </pilot>
+                    <safepos object="this.$SpawnObject"/>
+                  </create_ship>
+                </do_if>
+                <do_elseif value="$story_erlking_upgrade">
+                  <create_ship name="$BattleshipXL" macro="macro.ship_pir_xl_battleship_01_a_macro" sector="this.$SpawnObject.sector">
+                    <owner exact="faction.player"/>
+                    <pilot>
+                      <select faction="faction.player" race="player.entity.race" tags="tag.aipilot"/>
+                    </pilot>
+                    <loadout ref="erlking_complete"/>
+                    <safepos object="this.$SpawnObject"/>
+                  </create_ship>
+
+                  <add_blueprints wares="[ware.engine_pir_xl_battleship_01_allround_01_mk1, ware.shield_pir_xl_battleship_01_standard_01_mk1, ware.weapon_pir_xl_battleship_01_mk1, ware.turret_pir_l_battleship_01_laser_01_mk1, ware.turret_pir_m_battleship_01_gatling_02_mk1]"/>
+                </do_elseif>
+
+                <signal_cue cue="md.Story_Research_Erlking.Start"/>
+              </actions>
+              <patch sinceversion="2">
+                <do_if value="$story_erlking_upgrade">
+                  <debug_text text="'Adding blueprints for Erlking equipment due to custom gamestart selection'" filter="savegame"/>
+                  <add_blueprints wares="[ware.engine_pir_xl_battleship_01_allround_01_mk1, ware.shield_pir_xl_battleship_01_standard_01_mk1, ware.weapon_pir_xl_battleship_01_mk1, ware.turret_pir_l_battleship_01_laser_01_mk1, ware.turret_pir_m_battleship_01_gatling_02_mk1]"/>
+                </do_if>
+              </patch>
+            </cue>
+
+            <cue name="ScrapGuidance">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="2s"/>
+              <actions>
+                <create_mission cue="this" name="'scrap guidance'" description="'objective pointing to the scrapfield'" type="missiontype.trade" faction="faction.argon" difficulty="level.trivial">
+                  <briefing>
+                    <objective step="1" action="objective.flyto" object="$ScrapObjectS"/>
+                  </briefing>
+                  <objective step="1" action="objective.flyto" object="$ScrapObjectS"/>
+                </create_mission>
+              </actions>
+              <cues>
+                <cue name="MissionKeepAlive6" comment="avoids CreateMission-cue from being auto-removed">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+              </cues>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ALIWharf_TOA" namespace="this">
+          <actions>
+            <set_value name="$DebugChance" exact="0"/>
+            <find_sector name="$ALIWharfSector" macro="macro.Cluster_502_Sector001_macro" required="true" />
+            <create_station rawname="'{20102,6241}'" name="$ALIWharf" sector="$ALIWharfSector" macro="macro.station_gen_factory_base_01_macro" method="closedloop" constructionplan="'ali_wharf_toa'" owner="faction.alliance" state="componentstate.operational">
+              <position x="-70km" y="0km" z="30km" max="5km"/>
+              <safepos includeplotbox="1"/>
+            </create_station>
+          </actions>
+          <cues>
+            <cue name="ALIWharf_TOA_SignalFactionlogic">
+              <!--TODO @Owen would rather not have to delay like this but the listener is not yet set-->
+              <delay exact="1ms"/>
+              <actions>
+                <signal_cue_instantly cue="md.FactionLogic.FactionSignalled" param="[faction.alliance, 'add_excluded_station', $ALIWharf]"/>
+              </actions>
+            </cue>
+            <cue name="ALIWharf_TOA_Setup" version="2">
+              <actions>
+                <!-- Set Ships Sold -->
+                <set_value name="$Equipmentlist" exact="[ware.engine_arg_m_allround_01_mk1,
+                                                         ware.engine_arg_m_combat_01_mk3,
+                                                         ware.engine_arg_m_travel_01_mk1,
+                                                         ware.engine_tel_m_allround_01_mk2,
+                                                         ware.engine_tel_m_combat_01_mk1,
+                                                         ware.engine_tel_m_travel_01_mk3,
+                                                         ware.thruster_gen_m_allround_01_mk1,
+                                                         ware.thruster_gen_m_allround_01_mk3,
+                                                         ware.thruster_gen_m_combat_01_mk2,
+                                                         ware.shield_arg_m_standard_01_mk1,
+                                                         ware.shield_arg_m_standard_01_mk2,
+                                                         ware.shield_tel_m_standard_01_mk1,
+                                                         ware.shield_tel_m_standard_01_mk2,
+                                                         ware.turret_arg_m_beam_01_mk1,
+                                                         ware.turret_arg_m_flak_01_mk1,
+                                                         ware.turret_arg_m_gatling_01_mk1,
+                                                         ware.turret_arg_m_plasma_01_mk1,
+                                                         ware.turret_arg_m_laser_01_mk1,
+                                                         ware.turret_tel_m_laser_01_mk1,
+                                                         ware.turret_tel_m_shotgun_01_mk1,
+                                                         ware.turret_tel_m_gatling_01_mk1,
+                                                         ware.satellite_mk1,
+                                                         ware.satellite_mk2,
+                                                         ware.waypointmarker_01,
+                                                         ware.resourceprobe_01,
+                                                         ware.ship_gen_xs_lasertower_01_a,
+                                                         ware.countermeasure_flares_01]"/>
+                <set_value name="$Shiplist" exact="[ware.ship_tel_m_trans_container_01_a,
+                                                    ware.ship_tel_m_trans_container_01_b,
+                                                    ware.ship_tel_m_trans_container_02_a,
+                                                    ware.ship_tel_m_trans_container_02_b]"/>
+                <set_ship_wares_absolute object="$ALIWharf" wares="$Shiplist"/>
+                <set_equipment_wares_absolute object="$ALIWharf" wares="$Equipmentlist"/>
+                <signal_objects object="player.galaxy" param="'init station'" param2="$ALIWharf" param3="true"/>
+                <remove_value name="$ALIWharfSector"/>
+              </actions>
+              <patch sinceversion="2">
+                <remove_value name="$ALIWharfSector"/>
+              </patch>
+            </cue>
+            <!-- DEBUG -->
+            <cue name="ALIWharf_TOA_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <destroy_object object="$ALIWharf" explosion="false"/>
+              </actions>
+            </cue>
+            <!-- Station Rebuilding -->
+            <cue name="ALIWharf_TOA_Rebuild" version="3">
+              <conditions>
+                <event_object_destroyed object="$ALIWharf"/>
+              </conditions>
+              <delay min="30min" max="90min" profile="bell"/>
+              <actions>
+                <do_any>
+                  <find_sector name="$ALIWharfSector" owner="faction.loanshark" macro="macro.Cluster_501_Sector001_macro" weight="10"/>
+                  <find_sector name="$ALIWharfSector" owner="faction.loanshark" macro="macro.Cluster_502_Sector001_macro" weight="60"/>
+                  <find_sector name="$ALIWharfSector" owner="faction.loanshark" macro="macro.Cluster_503_Sector001_macro" weight="30"/>
+                </do_any>
+                <do_if value="not $ALIWharfSector">
+                  <find_sector name="$ALIWharfSector" owner="faction.scavenger" space="player.galaxy"/>
+                  <do_if value="not $ALIWharfSector">
+                    <debug_text text="'Wharf was not rebuild canceling'" chance="$DebugChance"/>
+                    <cancel_cue cue="ALIWharf_TOA_FabBay"/>
+                    <cancel_cue cue="ALIWharf_TOA_Rebuild"/>
+                  </do_if>
+                </do_if>
+              </actions>
+              <delay exact="1s" comment="added so the teh firdt action block can be reset should teh list be empty"/>
+              <actions>
+                <create_station rawname="'{20102,6241}'" name="$ALIWharf" sector="$ALIWharfSector" macro="macro.station_gen_factory_base_01_macro" method="closedloop" owner="faction.alliance">
+                  <safepos x="0km" y="0km" z="0km" max="100km" includeplotbox="1"/>
+                </create_station>
+                <add_build_to_expand_station object="$ALIWharf.buildstorage" buildobject="$ALIWharf" constructionplan="'ali_wharf_toa'"/>
+                <debug_text text="'Wharf rebuild started in Sector: ' + $ALIWharf.sector.knownname" chance="$DebugChance"/>
+                <remove_value name="$ALIWharfSector"/>
+                <reset_cue cue="ALIWharf_TOA_FabBay"/>
+                <reset_cue cue="ALIWharf_TOA_Rebuild"/>
+              </actions>
+              <patch sinceversion="2" state="waiting">
+                <do_if value="not $ALIWharf.assignedcontrolentity.{controlpost.engineer}.exists">
+                  <signal_objects object="player.galaxy" param="'init station'" param2="$ALIWharf" param3="false"/>
+                </do_if>
+                <reset_cue cue="ALIWharf_TOA_Rebuild"/>
+              </patch>
+              <patch sinceversion="3" state="waiting">
+                <reset_cue cue="ALIWharf_TOA_Rebuild"/>
+              </patch>
+            </cue>
+            <!-- Readjusting Ship lists -->
+            <cue name="ALIWharf_TOA_FabBay">
+              <conditions>
+                <event_build_finished_components object="@$ALIWharf.buildingmodule"/>
+                <count_object_components object="$ALIWharf" class="[class.buildmodule]" min="1"/>
+              </conditions>
+              <actions>
+                <set_ship_wares_absolute object="$ALIWharf" wares="$Shiplist"/>
+                <set_equipment_wares_absolute object="$ALIWharf" wares="$Equipmentlist"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="DiscoverS3">
+          <conditions>
+            <event_object_changed_sector object="player.entity" sector="$SectorS3"/>
+          </conditions>
+          <actions>
+            <unlock_achievement name="TOA_DISCOVER" comment="Destination Unknown"/>
+          </actions>
+        </cue>
+
+        <cue name="AnomalySetup">
+          <actions>
+            <find_object groupname="$ToA_Anomalies" space="$PirateSectors" macro="[macro.wormhole_v1_macro]" multiple="true" comment="standard anomalies ToA sectors"/>
+            <do_for_each name="$Anomaly" in="$ToA_Anomalies" reverse="true">
+              <set_anomaly_transition_destination_state anomaly="$Anomaly" enabled="false" comment="To avoid story issues, ToA anomalies are never destinations (also not of other ToA anomalies)"/>
+            </do_for_each>
+          </actions>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="LoansharkJobs_Setup" mapeditor="false" version="1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <set_value name="$debugchance" exact="0"/>
+        <set_value name="$loansharkjobs" exact="table[]"/>
+        <set_value name="$loansharkjobs.$iceunion" exact="table[]"/>
+        <set_value name="$loansharkjobs.$scrapyard" exact="table[]"/>
+        <set_value name="$loansharkjobs.$aurora" exact="table[]"/>
+        <set_value name="$loansharkjobs.$iceunion.$targetsectors" exact="[macro.cluster_08_sector001_macro, macro.cluster_29_sector001_macro, macro.cluster_32_sector001_macro, macro.cluster_44_sector001_macro, macro.cluster_34_sector001_macro, macro.cluster_09_sector001_macro, macro.cluster_02_sector001_macro, macro.cluster_03_sector001_macro, macro.cluster_39_sector001_macro, macro.cluster_01_sector003_macro]"/>
+        <set_value name="$loansharkjobs.$scrapyard.$targetsectors" exact="[macro.cluster_08_sector001_macro, macro.cluster_02_sector001_macro, macro.cluster_06_sector001_macro]"/>
+        <set_value name="$loansharkjobs.$aurora.$targetsectors" exact="[macro.cluster_01_sector002_macro, macro.cluster_06_sector001_macro, macro.cluster_06_sector002_macro, macro.cluster_13_sector001_macro, macro.cluster_40_sector001_macro, macro.cluster_12_sector001_macro]"/>
+        <do_for_each name="$crew" valuename="$crewdata" in="$loansharkjobs">
+          <do_for_each name="$sectormacro" in="$crewdata.$targetsectors" reverse="true">
+            <find_sector name="$locsector" space="player.galaxy" macro="$sectormacro"/>
+            <do_if value="$locsector.exists">
+              <append_to_list name="$crewdata.$targetsectors" exact="$locsector"/>
+            </do_if>
+            <remove_from_list name="$crewdata.$targetsectors" exact="$sectormacro"/>
+            <remove_value name="$locsector"/>
+          </do_for_each>
+        </do_for_each>
+        <!-- NB: $plunderers and $raiders will only contain unassigned ships and will be immediately assigned. -->
+        <find_ship_by_true_owner groupname="$loansharkjobs.$iceunion.$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.iceunion]" multiple="true"/>
+        <find_ship_by_true_owner groupname="$loansharkjobs.$scrapyard.$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.scrapyard]" multiple="true"/>
+        <find_ship_by_true_owner groupname="$loansharkjobs.$aurora.$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.aurora]" multiple="true"/>
+        <!-- some raiders will tend to be held in reserve. -->
+        <find_ship_by_true_owner groupname="$loansharkjobs.$iceunion.$raiders" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.raider, tag.iceunion]" multiple="true"/>
+        <find_ship_by_true_owner groupname="$loansharkjobs.$scrapyard.$raiders" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.raider, tag.scrapyard]" multiple="true"/>
+        <find_ship_by_true_owner groupname="$loansharkjobs.$aurora.$raiders" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.raider, tag.aurora]" multiple="true"/>
+        <find_ship_by_true_owner groupname="$commonraiders" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.raider, tag.common]" multiple="true"/>
+
+        <set_value name="$loansharkjobs.$iceunion.$maxplunderers" exact="$loansharkjobs.$iceunion.$plunderers.count"/>
+        <set_value name="$loansharkjobs.$scrapyard.$maxplunderers" exact="$loansharkjobs.$scrapyard.$plunderers.count"/>
+        <set_value name="$loansharkjobs.$aurora.$maxplunderers" exact="$loansharkjobs.$aurora.$plunderers.count"/>
+        <set_value name="$loansharkjobs.$iceunion.$maxraiders" exact="$loansharkjobs.$iceunion.$raiders.count"/>
+        <set_value name="$loansharkjobs.$scrapyard.$maxraiders" exact="$loansharkjobs.$scrapyard.$raiders.count"/>
+        <set_value name="$loansharkjobs.$aurora.$maxraiders" exact="$loansharkjobs.$aurora.$raiders.count"/>
+        <debug_text text="'Init: Loanshark crews:\nIce Union Plunderers: %s\nIce Union Raiders: %s\nScrapyard Plunderers: %s\nScrapyard Raiders: %s\nAurora Plunderers: %s\nAurora Raiders: %s\nCommon Raiders: %s'.[$loansharkjobs.$iceunion.$plunderers.count, $loansharkjobs.$iceunion.$raiders.count, $loansharkjobs.$scrapyard.$plunderers.count, $loansharkjobs.$scrapyard.$raiders.count, $loansharkjobs.$aurora.$plunderers.count, $loansharkjobs.$aurora.$raiders.count, $commonraiders.count]" chance="$debugchance"/>
+
+        <include_actions ref="LoansharkJobs_Assign"/>
+
+      </actions>
+      <patch sinceversion="1">
+        <do_if value="$loansharkjobs.$iceunion.$raiders.count or $loansharkjobs.$scrapyard.$raiders.count or $loansharkjobs.$aurora.$raiders.count">
+          <do_if value="player.debugfilteractive.savegame">
+            <set_value name="$debugchance" exact="100"/>
+          </do_if>
+          <debug_text text="'PATCH: updating loanshark raiding party assignments'" filter="savegame"/>
+          <include_actions ref="LoansharkJobs_Assign"/>
+          <set_value name="$debugchance" exact="0"/>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="LoansharkJobs_JobActivated" instantiate="true" version="1">
+          <conditions>
+            <event_job_ship_activated/>
+            <check_value value="event.param.trueowner == faction.loanshark"/>
+            <check_value value="event.param.iscommandeerable"/>
+            <check_any>
+              <check_value value="event.param.job == 'loanshark_plunderer_iceunion'"/>
+              <check_value value="event.param.job == 'loanshark_plunderer_scrapyard'"/>
+              <check_value value="event.param.job == 'loanshark_plunderer_aurora'"/>
+              <check_value value="event.param.job == 'loanshark_raider_iceunion'"/>
+              <check_value value="event.param.job == 'loanshark_raider_scrapyard'"/>
+              <check_value value="event.param.job == 'loanshark_raider_aurora'"/>
+              <check_value value="event.param.job == 'loanshark_raider_common'"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <debug_text text="'%s activated.'.[event.param.job]" chance="$debugchance"/>
+            <do_if value="event.param.job == 'loanshark_plunderer_iceunion'">
+              <add_to_group groupname="$loansharkjobs.$iceunion.$plunderers" object="event.param"/>
+            </do_if>
+            <do_elseif value="event.param.job == 'loanshark_plunderer_scrapyard'">
+              <add_to_group groupname="$loansharkjobs.$scrapyard.$plunderers" object="event.param"/>
+            </do_elseif>
+            <do_elseif value="event.param.job == 'loanshark_plunderer_aurora'">
+              <add_to_group groupname="$loansharkjobs.$aurora.$plunderers" object="event.param"/>
+            </do_elseif>
+            <do_elseif value="event.param.job == 'loanshark_raider_iceunion'">
+              <add_to_group groupname="$loansharkjobs.$iceunion.$raiders" object="event.param"/>
+            </do_elseif>
+            <do_elseif value="event.param.job == 'loanshark_raider_scrapyard'">
+              <add_to_group groupname="$loansharkjobs.$scrapyard.$raiders" object="event.param"/>
+            </do_elseif>
+            <do_elseif value="event.param.job == 'loanshark_raider_aurora'">
+              <add_to_group groupname="$loansharkjobs.$aurora.$raiders" object="event.param"/>
+            </do_elseif>
+            <do_elseif value="event.param.job == 'loanshark_raider_common'">
+              <add_to_group groupname="$commonraiders" object="event.param"/>
+            </do_elseif>
+
+            <include_actions ref="LoansharkJobs_Assign"/>
+
+          </actions>
+          <patch sinceversion="1" state="waiting">
+            <!-- from job definitions as of 2023-05-30 -->
+            <set_value name="$loansharkjobs.$iceunion.$maxplunderers" exact="11"/>
+            <set_value name="$loansharkjobs.$scrapyard.$maxplunderers" exact="2"/>
+            <set_value name="$loansharkjobs.$aurora.$maxplunderers" exact="3"/>
+
+            <set_value name="$loansharkjobs.$iceunion.$maxraiders" exact="11"/>
+            <set_value name="$loansharkjobs.$scrapyard.$maxraiders" exact="5"/>
+            <set_value name="$loansharkjobs.$aurora.$maxraiders" exact="2"/>
+
+            <do_for_each name="$crew" valuename="$crewdata" in="$loansharkjobs" reverse="true">
+              <do_if value="$crewdata.$raiders.count ge $crewdata.$maxraiders / 2">
+                <debug_text text="'PATCH: excessive %s raiders found in Windfall. reassigning.'.[$crew]" filter="savegame"/>
+                <set_value name="$go"/>
+                <break/>
+              </do_if>
+            </do_for_each>
+            <do_if value="$go?">
+              <include_actions ref="LoansharkJobs_Assign"/>
+            </do_if>
+            <remove_value name="$go"/>
+          </patch>
+        </cue>
+      </cues>
+    </cue>
+
+    <library name="LoansharkJobs_Assign">
+      <actions>
+        <!-- NB: $loansharkjobs tends to be iterated over in alphabetical order and we want scrapyard to tend to have heavier raider cover. -->
+        <do_for_each name="$crew" valuename="$crewdata" in="$loansharkjobs" reverse="true">
+          <do_if value="$crewdata.$plunderers.count">
+            <debug_text text="'%s has %s available plunder ships'.[$crew, $crewdata.$plunderers.count]" chance="$debugchance"/>
+            <do_if value="$crewdata.$raiders.count or $commonraiders.count">
+              <set_value name="$availableraiders" exact="$crewdata.$raiders.list"/>
+              <append_list_elements name="$availableraiders" other="$commonraiders.list"/>
+              <do_for_each name="$locraider" in="$availableraiders" reverse="true">
+                <do_if value="not $locraider.iscommandeerable">
+                  <remove_from_list name="$availableraiders" exact="$locraider"/>
+                </do_if>
+              </do_for_each>
+              <do_if value="$availableraiders.count">
+                <!-- NB: occasional heavy reinforcement if raiders accumulate before plunderer is built. on init, first crew may exhaust the common pool. -->
+                <set_value name="$maxnum_raiders" exact="$availableraiders.count / [$crewdata.$plunderers.count, 1].max"/>
+                <debug_text text="'%s: %s plunder ships and %s raiders available. assigning.'.[$crew, $crewdata.$plunderers.count, $availableraiders.count]" chance="$debugchance"/>
+
+                <do_for_each name="$locplunderer" in="$crewdata.$plunderers" reverse="true">
+                  <do_if value="$locplunderer.defaultorder.id == 'Plunder' and $locplunderer.iscommandeerable">
+                    <set_value name="$potentialsectors" exact="$crewdata.$targetsectors.clone"/>
+                    <shuffle_list list="$potentialsectors"/>
+                    <do_for_each name="$locsector" in="$potentialsectors">
+                      <do_if value="($locsector.owner != faction.xenon) and ($locplunderer.gatedistance.{$locsector} ge 0)">
+                        <set_value name="$targetsector" exact="$locsector"/>
+                        <break/>
+                      </do_if>
+                    </do_for_each>
+                    <remove_value name="$potentialsectors"/>
+
+                    <do_if value="@$targetsector.exists">
+                      <create_position name="$plunderpos" space="$targetsector" value="$targetsector.coreposition" min="$targetsector.coresize/3m" max="$targetsector.coresize/2m"/>
+                      <commandeer_object object="$locplunderer"/>
+                      <edit_order_param order="$locplunderer.defaultorder" param="'space'" value="$targetsector"/>
+                      <create_order id="'MoveWait'" object="$locplunderer">
+                        <param name="destination" value="[$targetsector, $plunderpos]"/>
+                        <param name="timeout" value="1s"/>
+                      </create_order>
+                      <debug_text text="'sending %s %s %s to plunder sector %s.'.[@$locplunderer.idcode, @$locplunderer.knownname, $locplunderer, $targetsector.knownname]" chance="$debugchance"/>
+
+                      <do_if value="$maxnum_raiders gt 0">
+                        <include_actions ref="LoansharkJobs_AssignRaiders"/>
+                      </do_if>
+                      <remove_value name="$raidpos"/>
+                      <remove_value name="$locraider"/>
+                      <remove_value name="$plunderpos"/>
+                      <remove_from_group group="$crewdata.$plunderers" object="$locplunderer"/>
+                    </do_if>
+                  </do_if>
+                  <do_elseif value="$locplunderer.iscommandeerable">
+                    <debug_text text="'Plunderer %s %s %s with job: %s has unexpected default order: %s. skipping.'.[@$locplunderer.idcode, @$locplunderer.knownname, $locplunderer, $locplunderer.job, @$locplunderer.defaultorder.id]" filter="error"/>
+                  </do_elseif>
+                  <remove_value name="$targetsector"/>
+                </do_for_each>
+                <remove_value name="$numreserve"/>
+                <remove_value name="$numiter"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'%s has no available raiders.'.[$crew]" chance="$debugchance"/>
+              </do_else>
+            </do_if>
+          </do_if>
+          <!-- this used to maintain a reserve in Windfall, but since raider fleets awaiting new commanders accumulate, don't maintain a reserve. -->
+          <!--<do_elseif value="$crewdata.$raiders.count ge $crewdata.$maxraiders / 2">-->
+          <do_elseif value="$crewdata.$raiders.count">
+            <debug_text text="'%s has no available plunderers but has an excessive number of raiders. sending raiders to enforce for deployed plunderers.'.[$crew]" chance="$debugchance"/>
+            <do_if value="$crew == '$iceunion'">
+              <find_ship_by_true_owner groupname="$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.iceunion]" multiple="true"/>
+            </do_if>
+            <do_elseif value="$crew == '$scrapyard'">
+              <find_ship_by_true_owner groupname="$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.scrapyard]" multiple="true"/>
+            </do_elseif>
+            <do_elseif value="$crew == '$aurora'">
+              <find_ship_by_true_owner groupname="$plunderers" faction="faction.loanshark" space="player.galaxy" jobtags="[tag.plunderer, tag.aurora]" multiple="true"/>
+            </do_elseif>
+            <debug_text text="'%s %s plunderers found'.[$plunderers.count, $crew]" chance="$debugchance"/>
+
+            <do_if value="@$plunderers.count">
+              <set_value name="$availableraiders" exact="$crewdata.$raiders.list"/>
+              <append_list_elements name="$availableraiders" other="$commonraiders.list"/>
+              <do_for_each name="$locraider" in="$availableraiders" reverse="true">
+                <do_if value="not $locraider.iscommandeerable">
+                  <!-- currently assigned ships are removed from $crewdata.$raiders -->
+                  <release_commandeered_object object="$locraider"/>
+                </do_if>
+              </do_for_each>
+              <debug_text text="'%s raiders available'.[$availableraiders.count]" chance="$debugchance"/>
+
+              <do_if value="$availableraiders.count">
+                <set_value name="$maxnum_raiders" exact="[$availableraiders.count / [$plunderers.count, 1].max, 1].max"/>
+                <debug_text text="'max raiders per plunderer: %s'.[$maxnum_raiders]" chance="$debugchance"/>
+
+                <do_if value="$maxnum_raiders gt 0">
+                  <shuffle_group group="$plunderers"/>
+                  <do_for_each name="$locplunderer" in="$plunderers" reverse="true">
+                    <!-- $availableraiders changes as we iterate over $plunderers -->
+                    <set_value name="$maxnum_raiders" exact="[$maxnum_raiders, $availableraiders.count].min"/>
+                    <do_if value="$maxnum_raiders gt 0">
+                      <do_if value="$locplunderer == $plunderers.{1}">
+                        <debug_text text="'$maxnum_raiders increased from %s to %s'.[$maxnum_raiders, $availableraiders.count]" chance="$debugchance"/>
+                        <set_value name="$maxnum_raiders" exact="$availableraiders.count"/>
+                      </do_if>
+                      <do_if value="$locplunderer.defaultorder.id == 'Plunder' and not $locplunderer.iscommandeerable and $locplunderer.defaultorder.$space.isclass.sector and $locplunderer.defaultorder.$space != $locplunderer.jobmainsector">
+                        <set_value name="$targetsector" exact="$locplunderer.defaultorder.$space"/>
+                        <debug_text text="'ordering %s raiders to reinforce %s %s %s in sector %s'.[$maxnum_raiders, $locplunderer.idcode, $locplunderer.knownname, $locplunderer, $locplunderer.sector.knownname]" chance="$debugchance"/>
+                        <include_actions ref="LoansharkJobs_AssignRaiders"/>
+                      </do_if>
+                    </do_if>
+                  </do_for_each>
+                  <remove_value name="$numreserve"/>
+                  <remove_value name="$numiter"/>
+                </do_if>
+              </do_if>
+            </do_if>
+            <remove_value name="$plunderers"/>
+          </do_elseif>
+          <do_else>
+            <debug_text text="'%s has no available plunderers.'.[$crew]" chance="$debugchance"/>
+          </do_else>
+          <debug_text text="'%s: unassigned plunder ships remaining: %s, unassigned raiders remaining: %s'.[$crew, $crewdata.$plunderers.count, @$availableraiders.count]" chance="$debugchance"/>
+          <remove_value name="$maxnum_raiders"/>
+          <remove_value name="$availableraiders"/>
+        </do_for_each>
+      </actions>
+    </library>
+
+    <library name="LoansharkJobs_AssignRaiders">
+      <actions>
+        <!-- expects:
+          $availableraiders
+          $maxnum_raiders
+          $targetsector
+
+          caller should clean up:
+          $numreserve
+          $numiter -->
+        <do_if value="@$numreserve">
+          <debug_text text="'$maxnum_raiders increased from %s to %s'.[$maxnum_raiders, $maxnum_raiders + $numreserve]" chance="$debugchance"/>
+          <set_value name="$maxnum_raiders" exact="$maxnum_raiders + $numreserve"/>
+        </do_if>
+
+        <set_value name="$numiter" min="1" max="$maxnum_raiders" profile="increasing"/>
+        <do_if value="$numiter lt $maxnum_raiders">
+          <set_value name="$numreserve" exact="$maxnum_raiders - $numiter"/>
+          <debug_text text="'%s held in reserve'.[$numreserve]" chance="$debugchance"/>
+        </do_if>
+
+        <do_all exact="$numiter">
+          <do_if value="$availableraiders.count">
+            <set_value name="$locraider" exact="$availableraiders.random"/>
+            <do_if value="$locraider.defaultorder.id == 'Patrol' and $locraider.iscommandeerable">
+              <create_position name="$raidpos" space="$targetsector" value="$targetsector.coreposition" min="$targetsector.coresize/2m" max="$targetsector.coresize"/>
+              <commandeer_object object="$locraider"/>
+              <get_zone_at_position name="$loczone" sector="$targetsector" value="$raidpos" createifnone="true"/>
+              <do_if value="$loczone.exists">
+                <edit_order_param order="$locraider.defaultorder" param="'space'" value="$loczone"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'no zone at %s in sector %s %s. raider will patrol entire sector.'.[$raidpos, $targetsector.knownname, $targetsector]" filter="error"/>
+                <edit_order_param order="$locraider.defaultorder" param="'space'" value="$targetsector"/>
+              </do_else>
+              <remove_value name="$loczone"/>
+              <create_order id="'MoveWait'" object="$locraider">
+                <param name="destination" value="[$targetsector, $raidpos]"/>
+                <param name="timeout" value="1s"/>
+              </create_order>
+              <debug_text text="'sending %s %s %s with %s subordinates to raid at sector %s.'.[@$locraider.idcode, @$locraider.knownname, $locraider, $locraider.allsubordinates.count, $targetsector.knownname]" chance="$debugchance"/>
+              <do_if value="$crewdata.$raiders.indexof.{$locraider}">
+                <remove_from_group group="$crewdata.$raiders" object="$locraider"/>
+              </do_if>
+              <do_elseif value="$commonraiders.indexof.{$locraider}">
+                <remove_from_group group="$commonraiders" object="$locraider"/>
+              </do_elseif>
+              <remove_from_list name="$availableraiders" exact="$locraider"/>
+            </do_if>
+            <do_elseif value="$locraider.iscommandeerable">
+              <debug_text text="'Raider %s %s %s with job: %s has unexpected default order: %s. skipping.'.[@$locraider.idcode, @$locraider.knownname, $locraider, $locraider.job, @$locraider.defaultorder.id]" filter="error"/>
+            </do_elseif>
+            <remove_value name="$locraider"/>
+          </do_if>
+        </do_all>
+      </actions>
+    </library>
+
+    <cue name="TidebreakCondensate" mapeditor="false" version="3">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <find_station_by_true_owner name="$TideBreak" faction="faction.civilian" space="player.galaxy" godstationentry="'pirate_landmark_01'" required="true" />
+        <do_if value="$TideBreak">
+          <add_tradeware object="$TideBreak" ware="ware.condensate" allowbuy="false" allowsell="true"/>
+          <set_sell_amount_override object="$TideBreak" ware="ware.condensate" amount="1"/>
+        </do_if>
+        <do_else>
+          <cancel_cue cue="this"/>
+        </do_else>
+      </actions>
+      <patch sinceversion="2" state="cancelled">
+        <find_station_by_true_owner name="$TideBreak" faction="faction.civilian" space="player.galaxy" godstationentry="'pirate_landmark_01'" required="true" />
+        <do_if value="$TideBreak">
+          <debug_text text="'Adding condensate tradeware to restored Tidebreak station ' + $TideBreak" filter="savegame"/>
+          <force_cue cue="TidebreakCondensate"/>
+        </do_if>
+      </patch>
+      <patch sinceversion="3">
+        <find_station_by_true_owner name="$TideBreak" faction="faction.civilian" space="player.galaxy" godstationentry="'pirate_landmark_01'" required="true" />
+        <do_if value="$TideBreak">
+          <debug_text text="'Setting sell amount override for condensate ware to 1 on Tidebreak station ' + $TideBreak" filter="savegame"/>
+          <set_sell_amount_override object="$TideBreak" ware="ware.condensate" amount="1"/>
+        </do_if>
+      </patch>
+      <cues>
+        <!--A keep alive cue to be removed later when we add more handling here-->
+        <cue name="TidebreakCondensate_TEMP">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+        </cue>
+      </cues>
+    </cue>
+
+    <cue name="TidebreakWaveMessages" mapeditor="false" version="2">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <actions>
+        <find_station_by_true_owner name="$TideBreak" faction="faction.civilian" space="player.galaxy" godstationentry="'pirate_landmark_01'" required="true" />
+        <signal_cue_instantly cue="Setup_PersistentCharacters_TidebreakOperator"/>
+        <set_value name="$TidebreakOperatorActor" exact="md.$PersistentCharacters.$TidebreakOperatorActor"/>
+      </actions>
+      <patch sinceversion="2">
+        <do_if value="not $TideBreak.exists">
+          <find_station_by_true_owner name="$Patch_TideBreak" faction="faction.civilian" space="player.galaxy" godstationentry="'pirate_landmark_01'" required="true" />
+          <do_if value="$Patch_TideBreak">
+            <debug_text text="'Resetting tidebreak message manager.'" filter="savegame"/>
+            <remove_value name="$Patch_TideBreak"/>
+            <force_cue cue="TidebreakWaveMessages"/>
+          </do_if>
+        </do_if>
+      </patch>
+      <cues>
+        <cue name="TidebreakWaveMessageStart" instantiate="true">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <do_if value="event.param == 'warning'">
+              <signal_cue cue="TideBreakWaveMessage_Warning"/>
+            </do_if>
+            <do_elseif value="event.param == 'tidebreak_waveforecastwarning'">
+              <signal_cue cue="TideBreakWaveMessage_Wave"/>
+            </do_elseif>
+            <do_elseif value="event.param == 'wave'">
+              <signal_cue cue="Achievement_Ride_The_Tide" check="false"/>
+            </do_elseif>
+          </actions>
+        </cue>
+
+        <cue name="Achievement_Ride_The_Tide">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="player.cluster == $TideBreak.cluster"/>
+            <check_value value="player.station"/>
+          </conditions>
+          <actions>
+            <unlock_achievement name="TOA_RIDE_TIDE" comment="Ride the Tide"/>
+          </actions>
+        </cue>
+
+        <cue name="TideBreakWaveMessage_Warning">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="$TideBreak.cluster == player.cluster"/>
+          </conditions>
+          <actions>
+            <set_value name="$lines" exact="[30251101, 30251112]"/>
+            <append_to_list name="$lines" exact="30251103" chance="50"/>
+            <append_to_list name="$lines" exact="30251104"/>
+            <append_to_list name="$lines" exact="30251105" chance="50"/>
+            <append_to_list name="$lines" exact="30251106"/>
+            <!--            
+            <t id="	30251101	">	(	1/6	)	Greetings, fellow denizens and voyagers!		</t>
+            <t id="	30251112	">	(	2b/6	)	This is Tidebreak, the station built into an asteroid so massive, it withstands even the most vigorous of Tides!	(Tide same as {30251,1}, station name same as {20103,2901})	</t>
+            <t id="	30251103	">	(	3/6	)	It looks like our sun is especially shiny today.		</t>
+            <t id="	30251104	">	(	4/6	)	If you are not already accomodated at one of our safe havens or on the way out of the system, we now strongly advise you engage your travel drive and haste into safety.		</t>
+            <t id="	30251105	">	(	5/6	)	We at Tidebreak of course recommend our own establishment, the 'Drifting Buoy', for your visit.		</t>
+            <t id="	30251106	">	(	6/6	)	That's it for now. Fly safe!		</t>
+            -->
+            <speak actor="$TidebreakOperatorActor" priority="90" line="$lines"/>
+          </actions>
+          <cues>
+            <cue name="TideBreakWaveMessage_Warning_Reset">
+              <conditions>
+                <event_speak_finished actor="$TidebreakOperatorActor" line="30251101" comment="first line of the speak, catch interruptions"/>
+              </conditions>
+              <actions>
+                <reset_cue cue="TideBreakWaveMessage_Warning"/>
+                <reset_cue cue="TideBreakWaveMessage_Wave"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="TideBreakWaveMessage_Wave">
+          <conditions>
+            <event_cue_signalled/>
+            <check_value value="$TideBreak.cluster == player.cluster"/>
+          </conditions>
+          <actions>
+            <set_value name="$lines" exact="[30251101, 30251121, 30251122]"/>
+            <append_to_list name="$lines" exact="30251123" chance="if ($TideBreak == player.station) then 100 else 0"/>
+            <append_to_list name="$lines" exact="30251124"/>
+            <!--
+            <t id="	30251101	">	(	1/6	)	Greetings, fellow denizens and voyagers!		</t>
+            <t id="	30251121	">				We sincerely hope that you found your way into safety, as the sun is now erupting.		</t>
+            <t id="	30251122	">				The Tide will now travel through the system and, in violent force, damage stations and ships alike.	(Tide same as {30251,1})	</t>
+            <t id="	30251123	">				Visitors on our station are now recommended to draw their attention to the windows or visit our docks to enjoy the view.		</t>
+            <t id="	30251124	">				Be safe.		</t>
+            -->
+            <speak actor="$TidebreakOperatorActor" priority="90" line="$lines"/>
+          </actions>
+          <cues>
+            <cue name="TideBreakWaveMessage_Wave_Reset">
+              <conditions>
+                <event_speak_finished actor="$TidebreakOperatorActor" line="30251101" comment="first line of the speak, catch interruptions"/>
+              </conditions>
+              <actions>
+                <reset_cue cue="TideBreakWaveMessage_Warning"/>
+                <reset_cue cue="TideBreakWaveMessage_Wave"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="TideBreak_Welcome">
+          <conditions>
+            <check_any>
+              <check_all>
+                <event_object_docked_at container="$TideBreak"/>
+                <check_value value="event.param == player.ship"/>
+              </check_all>
+              <check_all>
+                <event_object_changed_object object="player.entity" newobject="$TideBreak"/>
+              </check_all>
+            </check_any>
+          </conditions>
+          <cues>
+            <cue name="TideBreak_Welcome_Ref" ref="md.LIB_Dialog.Speak_Actor">
+              <param name="Actor" value="$TidebreakOperatorActor"/>
+              <param name="CutsceneKey" value="table[ $key = 'ShowNPCFace']"/>
+              <param name="DelayInitial" value="5s" comment="avoid interrupting Betty saying 'succesfully docked'"/>
+              <param name="Lines" value="[[30251113],[30251114]]"/>
+              <param name="IsInMission"   value="false"/>
+              <param name="EndSignalCue"  value="TideBreak_Welcome_Reset"/>
+              <!--      
+                <t id="	30251113	">				Welcome to Tidebreak, traveller!	(station name same as {20103,2901})	</t>
+                <t id="	30251114	">				Enjoy your stay.		</t>
+                -->
+            </cue>
+
+            <cue name="TideBreak_Welcome_Reset">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="TideBreak_Welcome_Reset_Event">
+                  <conditions>
+                    <check_any>
+                      <event_object_undocked group="global.$PlayerContainerGroup"/>
+                      <event_object_changed_object object="player.entity"/>
+                    </check_any>
+                    <check_value value="player.station != $TideBreak"/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="parent.parent"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="TheWave" mapeditor="false">
+      <conditions>
+        <event_universe_generated/>
+        <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" comment="only in main-galaxy"/>
+      </conditions>
+      <cues>
+
+        <cue name="TheWaveSetup" version="3">
+          <delay exact="1s" comment="TODO: small delay as a workaround for events firing in different order when loading an existing savegame (see also Setup_Torus)"/>
+          <actions>
+            <find_sector name="$SectorS2b" macro="macro.cluster_500_sector002_macro" comment="S2B" required="true"/>
+            <find_sector name="$SectorS3" macro="macro.cluster_504_sector001_macro" comment="S3" required="true"/>
+            <find_object name="$AnomaliesS2toS3" class="class.anomaly" space="$SectorS2b" multiple="false" godobjectentry="'S2B_anomaly_01'" required="true" />
+            <find_object name="$AnomaliesS3toS2" class="class.anomaly" space="$SectorS3" multiple="false" godobjectentry="'S3_anomaly_01'" required="true" />
+            <add_anomaly_destination anomaly="$AnomaliesS3toS2" destination="$AnomaliesS2toS3" comment="exit from S3 into S2 (not tied to the wave)"/>
+            <signal_cue cue="TheWaveHandler"/>
+          </actions>
+          <patch sinceversion="2">
+            <find_sector name="$SectorS2b" macro="macro.cluster_500_sector002_macro" comment="S2B" required="true"/>
+            <find_sector name="$SectorS3" macro="macro.cluster_504_sector001_macro" comment="S3" required="true"/>
+            <find_object name="$AnomaliesS2toS3" class="class.anomaly" space="$SectorS2b" multiple="false" godobjectentry="'S2B_anomaly_01'" required="true" />
+            <find_object name="$AnomaliesS3toS2" class="class.anomaly" space="$SectorS3" multiple="false" godobjectentry="'S3_anomaly_01'" required="true" />
+            <add_anomaly_destination anomaly="$AnomaliesS3toS2" destination="$AnomaliesS2toS3" comment="exit from S3 into S2 (not tied to the wave)"/>
+          </patch>
+          <patch sinceversion="3">
+            <do_if value="not $AnomaliesS2toS3.exists or not $AnomaliesS3toS2.exists">
+              <find_object name="$AnomaliesS2toS3" class="class.anomaly" space="$SectorS2b" multiple="false" godobjectentry="'S2B_anomaly_01'" required="true" />
+              <find_object name="$AnomaliesS3toS2" class="class.anomaly" space="$SectorS3" multiple="false" godobjectentry="'S3_anomaly_01'" required="true" />
+              <do_if value="$AnomaliesS2toS3 and $AnomaliesS3toS2">
+                <debug_text text="'Setting the destination between anomalies ' + $AnomaliesS2toS3 + ' and ' + $AnomaliesS2toS3" filter="savegame"/>
+                <add_anomaly_destination anomaly="$AnomaliesS3toS2" destination="$AnomaliesS2toS3" comment="exit from S3 into S2 (not tied to the wave)"/>
+              </do_if>
+            </do_if>
+          </patch>
+        </cue>
+
+        <cue name="TheWaveHandler" version="7">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <find_cluster name="$WaveCluster" macro="macro.cluster_500_macro  " required="true"/>
+            <find_object_component name="$WaveClusterCelestialBody" object="$WaveCluster" class="class.celestialbody"/>
+            <find_object_component name="$WaveClusterRegions" object="$WaveCluster" class="class.region" multiple="true"/>
+
+            <!-- Wave Durations -->
+            <set_value name="$Duration_CalmToWarning_PhaseRequest"  exact="60min" comment="+- 5min randomised"/>
+            <set_value name="$Duration_WarningToWave_PhaseRequest"  exact="10min" comment="+- 3min randomised"/>
+            <set_value name="$Duration_AnomalyActivationAfterWave"  exact="10s"   comment="anomalies enable shortly after wave-effect"/>
+            <set_value name="$Duration_AnomalyDeactivation"         exact="2min"  comment="anomalies disable shortly after wave-effect"/>
+            <!-- After Activation, Anomaly Activation and Anomaly Deactivation, wave_deactivatewarning is triggered -->
+            <set_value name="$Duration_WaveDamage"                  exact="60s"   comment="first part of animation wave_active, where ships are pushed and damage is dealt"/>
+
+            <set_value name="$WaveCount" exact="0" comment="Iterates so that the story can check if there was a wave inbetween scenes"/>
+
+            <do_for_each name="$WaveClusterRegion" in="$WaveClusterRegions">
+              <set_region_time_profile_source region="$WaveClusterRegion" object="$WaveClusterCelestialBody" />
+            </do_for_each>
+
+            <set_value name="$AnimationDuration" exact="60s" comment="tracking were we rely on animation duration for all animations"/>
+
+            <set_value name="$RequestedPhase" exact="''"/>
+            <!-- Animation States & Transitions Overview: -->
+            <!-- (1)wave_inactive            (3s)    // allowed triggers: (2)wave_activatewarning                         //autotransition: (1)wave_inactive
+                 (2)wave_warningactivating   (60s)   // allowed triggers: X                                               //autotransition: (3)wave_warningactive
+                 (3)wave_warningactive       (60s)   // allowed triggers: (4)wave_activatewave, (5)wave_deactivatewarning //autotransition: (3)wave_warningactive
+                 (4)wave_active              (120s)  // allowed triggers: X                                               //autotransition: (5)wave_warningdeactivating
+                 (5)wave_warningdeactivating (60s)   // allowed triggers: X                                               //autotransition: (1)wave_inactive
+            -->
+            <set_value name="$AnimationLength_Wave_Inactive"            exact="3s"/>
+            <set_value name="$AnimationLength_Wave_WarningActivating"   exact="60s"/>
+            <set_value name="$AnimationLength_Wave_WarningActive"       exact="60s"/>
+            <set_value name="$AnimationLength_Wave_Active"              exact="120s"/>
+            <set_value name="$AnimationLength_Wave_WarningDeactivating" exact="60s"/>
+
+            <!-- Story Wants to Do:
+                    - Stop Progression
+                    - Request Warning
+                    - Request Wave
+            -->
+            <set_value name="$WaveDebugChance" exact="0"/>
+
+            <create_group groupname="$WaveIgnoringShipsGroup"/>
+          </actions>
+          <patch sinceversion="2">
+            <find_cluster name="$WaveCluster" macro="macro.cluster_500_macro  " required="true"/>
+            <find_object_component name="$WaveClusterCelestialBody" object="$WaveCluster" class="class.celestialbody"/>
+            <find_object_component name="$WaveClusterRegions" object="$WaveCluster" class="class.region" multiple="true"/>
+            <set_value name="$WaveCount" exact="0" comment="Iterates so that the story can check if there was a wave inbetween scenes"/>
+
+            <do_for_each name="$WaveClusterRegion" in="$WaveClusterRegions">
+              <set_region_time_profile_source region="$WaveClusterRegion" object="$WaveClusterCelestialBody" />
+            </do_for_each>
+
+            <set_value name="$AnimationDuration" exact="60s" comment="tracking were we rely on animation duration for all animations"/>
+
+            <set_value name="$WaveDebugChance" exact="0"/>
+          </patch>
+          <patch sinceversion="3">
+            <set_value name="$RequestedPhase" exact="''"/>
+          </patch>
+          <patch sinceversion="4">
+            <create_group groupname="$WaveIgnoringShipsGroup"/>
+          </patch>
+          <patch sinceversion="6">
+            <set_value name="$Duration_CalmToWarning"               exact="60min" comment="+- 5min randomised"/>
+            <set_value name="$Duration_WarningToWave"               exact="10min" comment="+- 3min randomised"/>
+            <set_value name="$Duration_AnomalyActivationAfterWave"  exact="10s"   comment="10s anomalies enable shortly after wave-effect"/>
+            <set_value name="$Duration_AnomalyDeactivation"         exact="60s"   comment="60s anomalies disable shortly after wave-effect"/>
+          </patch>
+          <patch sinceversion="7">
+            <set_value name="$Duration_CalmToWarning_PhaseRequest"      exact="$Duration_CalmToWarning"/>
+            <set_value name="$Duration_WarningToWave_PhaseRequest"      exact="$Duration_WarningToWave"/>
+            <set_value name="$Duration_AnomalyDeactivation"             exact="2min"/>
+            <set_value name="$Duration_WaveDamage"                      exact="60s"/>
+            <set_value name="$AnimationLength_Wave_Inactive"            exact="3s"/>
+            <set_value name="$AnimationLength_Wave_WarningActivating"   exact="60s"/>
+            <set_value name="$AnimationLength_Wave_WarningActive"       exact="60s"/>
+            <set_value name="$AnimationLength_Wave_Active"              exact="120s"/>
+            <set_value name="$AnimationLength_Wave_WarningDeactivating" exact="60s"/>
+          </patch>
+          <cues>
+            <cue name="TheWave_DEBUG">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$MissionCue" exact="this"/>
+                <create_mission cue="$MissionCue" name="'Story Debug Anomaly'" description="'Set Guidance to the Anomaly'" type="missiontype.plot" faction="faction.civilian"  difficulty="level.trivial" abortable="false" activate="false">
+                  <briefing>
+                    <objective step="1" action="objective.flyto" object="$AnomaliesS2toS3"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+            </cue>
+
+            <!-- WAVE AUTOMATIC PROGRESSION -->
+            <cue name="TheWave_StagesProgression">
+              <!-- Cancel this cue for custom wave handling using the RequestPhase_* cues 
+                   Reset this cue to continue automatic handling appropriate to the current state -->
+              <cues>
+                <!-- Start Next Phase Correctly -->
+                <cue name="TheWave_InitStage">
+                  <actions>
+                    <set_value name="$RequestedPhase" exact="''" comment="clear any requests"/>
+                    <signal_cue_instantly cue="TheWave_NextStage" param="$WaveClusterCelestialBody.phase.current.id"/>
+                  </actions>
+                </cue>
+
+                <!-- Iterate Automatically -->
+                <cue name="TheWave_NextStage" instantiate="true">
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_object_phase_started object="$WaveClusterCelestialBody"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!-- 'Calm' -> wave is over, Start Warning Cooldown -->
+                    <do_if value="event.param == 'calm'" comment="wave is over">
+
+                      <!-- Calculate all delays and endtimes for the current loop. Also used by the objective timer in story_thefan. Round up to sync with animation loops, which take 3s in calm and 60s otherwise. -->
+                      <set_value name="$Duration_CalmToWarning_PhaseRequest_Randomised" min="($Duration_CalmToWarning_PhaseRequest - 5min)"
+                                                                                        max="($Duration_CalmToWarning_PhaseRequest + 5min)"/>
+                      <set_value name="$Duration_CalmToWarning_PhaseStart" exact="(($Duration_CalmToWarning_PhaseRequest_Randomised + ($AnimationLength_Wave_Inactive - 0.001s)) / $AnimationLength_Wave_Inactive)i * $AnimationLength_Wave_Inactive + $AnimationLength_Wave_WarningActivating" comment="()i rounds DOWN to full numbers; subtracting .001s prevents the calculation from adding another cycle if the duration already matches the cycle exactly"/>
+                      <set_value name="$EndTime_CalmToWarning_PhaseStart" exact="player.age + $Duration_CalmToWarning_PhaseStart"/>
+
+                      <set_value name="$Duration_WarningToWave_PhaseRequest_Randomised" min="($Duration_WarningToWave_PhaseRequest - 3min)"
+                                                                                        max="($Duration_WarningToWave_PhaseRequest + 3min)"/>
+                      <set_value name="$Duration_WarningToWave_PhaseStart" exact="(($Duration_WarningToWave_PhaseRequest_Randomised + ($AnimationLength_Wave_WarningActive - 0.001s)) / $AnimationLength_Wave_WarningActive)i * $AnimationLength_Wave_WarningActive" comment="()i rounds DOWN to full numbers; subtracting .001s prevents the calculation from adding another cycle if the duration already matches the cycle exactly"/>
+                      <set_value name="$EndTime_WarningToWave_PhaseStart" exact="$EndTime_CalmToWarning_PhaseStart + $Duration_WarningToWave_PhaseStart"/>
+
+                      <!-- At the beginning of the calm phase, the anomaly is still active, but we're already calculating the deactivation time for the next loop.
+                           We save the previous endtime in TheWave_Anomaly, in case an objective wants to show a timer for the currently still active anomaly. -->
+                      <set_value name="$EndTime_AnomalyActivationAfterWave" exact="$EndTime_WarningToWave_PhaseStart + $Duration_WaveDamage + $Duration_AnomalyActivationAfterWave"/>
+
+                      <set_value name="$EndTime_AnomalyDeactivation_Next" exact="$EndTime_AnomalyActivationAfterWave + $Duration_AnomalyDeactivation"/>
+
+                      <signal_cue cue="TheWave_Stage1_WaitForWarning"/>
+                      <reset_cue  cue="TheWave_Stage2_WaitForWave"/>
+                    </do_if>
+                    <!-- 'Warning' -> warning over, Start Wave Cooldown -->
+                    <do_elseif value="event.param == 'warning'" comment="reached warning">
+                      <!-- Set calculated 'warning' phase start to "now", even if the phase was started manually ahead of time. -->
+                      <set_value name="$EndTime_CalmToWarning_PhaseStart" exact="player.age"/>
+
+                      <!-- Update endtimes that are still in the future. Don't change the durations that were calculated at the start of the loop. -->
+                      <set_value name="$EndTime_WarningToWave_PhaseStart" exact="$EndTime_CalmToWarning_PhaseStart + $Duration_WarningToWave_PhaseStart"/>
+                      <set_value name="$EndTime_AnomalyActivationAfterWave" exact="$EndTime_WarningToWave_PhaseStart + $Duration_WaveDamage + $Duration_AnomalyActivationAfterWave"/>
+                      <set_value name="$EndTime_AnomalyDeactivation_Next" exact="$EndTime_AnomalyActivationAfterWave + $Duration_AnomalyDeactivation"/>
+
+                      <signal_cue cue="TheWave_Stage2_WaitForWave"/>
+                      <reset_cue  cue="TheWave_Stage1_WaitForWarning"/>
+                    </do_elseif>
+                    <!-- 'Wave' -> we wait until 'calm' starts and take it from there -->
+                    <do_elseif value="event.param == 'wave'">
+                      <!-- Set calculated 'wave' phase start to "now", even if the phase was started manually ahead of time. -->
+                      <set_value name="$EndTime_WarningToWave_PhaseStart" exact="player.age"/>
+
+                      <!-- Update endtimes that are still in the future. Don't change the durations that were calculated at the start of the loop. -->
+                      <set_value name="$EndTime_AnomalyActivationAfterWave" exact="$EndTime_WarningToWave_PhaseStart + $Duration_WaveDamage + $Duration_AnomalyActivationAfterWave"/>
+                      <set_value name="$EndTime_AnomalyDeactivation_Next" exact="$EndTime_AnomalyActivationAfterWave + $Duration_AnomalyDeactivation"/>
+                    </do_elseif>
+                    <debug_text text="'\n' +
+                                      '------------------- WAVE TIMING UPDATED -------------------' + '\n' +
+                                      '$Duration_CalmToWarning_PhaseRequest_Randomised:  ' + $Duration_CalmToWarning_PhaseRequest_Randomised.formatted.default + '\n' +
+                                      '$Duration_CalmToWarning_PhaseStart:               ' + $Duration_CalmToWarning_PhaseStart.formatted.default + '\n' +
+                                      '$Duration_WarningToWave_PhaseRequest_Randomised:  ' + $Duration_WarningToWave_PhaseRequest_Randomised.formatted.default + '\n' +
+                                      '$Duration_WarningToWave_PhaseStart:               ' + $Duration_WarningToWave_PhaseStart.formatted.default + '\n\n' +
+                                      'Current phase:                                    ' + $WaveClusterCelestialBody.phase.current.id + '\n' +
+                                      '$WaveClusterCelestialBody.phase.current.starttime ' + $WaveClusterCelestialBody.phase.current.starttime.formatted.default + '\n' +
+                                      'player.age:                                       ' + player.age.formatted.default + '\n\n' +
+                                      '$EndTime_AnomalyDeactivation_Previous:            ' + @$EndTime_AnomalyDeactivation_Previous.formatted.default + '\n' +
+                                      '$EndTime_CalmToWarning_PhaseStart:                ' + $EndTime_CalmToWarning_PhaseStart.formatted.default + '\n' +
+                                      '$EndTime_WarningToWave_PhaseStart:                ' + $EndTime_WarningToWave_PhaseStart.formatted.default + '\n' +
+                                      '$EndTime_AnomalyActivationAfterWave:              ' + $EndTime_AnomalyActivationAfterWave.formatted.default + '\n' +
+                                      '$EndTime_AnomalyDeactivation_Next:                ' + $EndTime_AnomalyDeactivation_Next.formatted.default + '\n' +
+                                      '-----------------------------------------------------------'" chance="$WaveDebugChance"/>
+                  </actions>
+                </cue>
+
+                <!-- Wait on Calm, then Request Warning -->
+                <cue name="TheWave_Stage1_WaitForWarning">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="$Duration_CalmToWarning_PhaseRequest_Randomised"/>
+                  <actions>
+                    <signal_cue_instantly cue="RequestPhase_Warning"/>
+                  </actions>
+                </cue>
+
+                <!-- Wait on Warning, then Request Wave -->
+                <cue name="TheWave_Stage2_WaitForWave">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$Tidebreak_WaveForecastTimespan" exact="30s" comment="How long before the wave Tidebreak should be warning the player"/>
+                  </actions>
+                  <delay exact="$Duration_WarningToWave_PhaseRequest_Randomised - $Tidebreak_WaveForecastTimespan"/>
+                  <actions>
+                    <signal_cue_instantly cue="TidebreakWaveMessageStart" param="'tidebreak_waveforecastwarning'"/>
+                  </actions>
+                  <delay exact="$Tidebreak_WaveForecastTimespan"/>
+                  <actions>
+                    <signal_cue_instantly cue="RequestPhase_Wave"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <!-- WAVE PHASE REQUEST HANDLING -->
+            <cue name="TheWave_AnimationStateUpdate">
+              <!-- TheWave_StagesProgression trigger RequestPhase_*  -->
+              <!-- Update_PhaseRequest contains debug about the requested/current/scheduled phase (signal at will) -->
+              <cues>
+                <cue name="RequestPhase_Warning" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$RequestedPhase"          exact="'warning'"/>
+                    <signal_cue_instantly cue="Update_PhaseRequest"/>
+                  </actions>
+                </cue>
+                <cue name="RequestPhase_Wave" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$RequestedPhase"          exact="'wave'"/>
+                    <signal_cue_instantly cue="Update_PhaseRequest"/>
+                  </actions>
+                </cue>
+                <cue name="RequestPhase_Calm" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$RequestedPhase"          exact="'calm'"/>
+                    <signal_cue_instantly cue="Update_PhaseRequest"/>
+                  </actions>
+                </cue>
+
+                <cue name="StartPhase_Warning" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$WaveClusterCelestialBody.phase.current.transitions.indexof.{'warning'}"/>
+                    <check_any>
+                      <!-- already scheduled transitions are ignored but produce debug output -->
+                      <check_value value="not $WaveClusterCelestialBody.phase.scheduled.exists"/>
+                      <check_all>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.exists"/>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.id != 'warning'"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!--<trigger_animation object="$WaveClusterCelestialBody" trigger="wave_activatewarning" comment="60s buildup, then 60s animation loop (minimum 1x)"/>-->
+                    <start_phase object="$WaveClusterCelestialBody" phase="'warning'" />
+                  </actions>
+                </cue>
+                <cue name="StartPhase_Wave" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$WaveClusterCelestialBody.phase.current.transitions.indexof.{'wave'}"/>
+                    <check_any>
+                      <!-- already scheduled transitions are ignored but produce debug output -->
+                      <check_value value="not $WaveClusterCelestialBody.phase.scheduled.exists"/>
+                      <check_all>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.exists"/>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.id != 'wave'"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!--<trigger_animation object="$WaveClusterCelestialBody" trigger="wave_activatewave"/>-->
+                    <start_phase object="$WaveClusterCelestialBody" phase="'wave'" />
+                  </actions>
+                </cue>
+                <cue name="StartPhase_Calm" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="$WaveClusterCelestialBody.phase.current.transitions.indexof.{'calm'}"/>
+                    <check_any>
+                      <!-- already scheduled transitions are ignored but produce debug output -->
+                      <check_value value="not $WaveClusterCelestialBody.phase.scheduled.exists"/>
+                      <check_all>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.exists"/>
+                        <check_value value="$WaveClusterCelestialBody.phase.scheduled.id != 'calm'"/>
+                      </check_all>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!--<trigger_animation object="$WaveClusterCelestialBody" trigger="wave_deactivatewarning"/>-->
+                    <start_phase object="$WaveClusterCelestialBody" phase="'calm'" />
+                  </actions>
+                </cue>
+
+                <cue name="Update_PhaseRequest" instantiate="true">
+                  <!-- Check changes to phase.current and $RequestedPhase -->
+                  <!-- Attempt approaching $RequestedPhase -->
+                  <conditions>
+                    <check_any>
+                      <event_cue_signalled/>
+                      <event_object_phase_started object="$WaveClusterCelestialBody"/>
+                    </check_any>
+                  </conditions>
+                  <actions>
+                    <!-- Check for Wave -->
+                    <do_if value="event.name == 'event_object_phase_started'">
+                      <signal_cue_instantly cue="TidebreakWaveMessageStart" param="event.param"/>
+                      <do_if value="event.param == 'wave'" comment="calm, warning or wave">
+                        <signal_cue_instantly cue="WaveActive"/>
+                        <signal_cue_instantly cue="GateEffect_On"/>
+                      </do_if>
+
+                      <do_all chance="$WaveDebugChance">
+                        <debug_text text="'phase changed to: %s - Excluding %s ships'.[event.param, $WaveIgnoringShipsGroup.count]"/>
+                        <do_for_each name="$IgnoredShip" in="$WaveIgnoringShipsGroup">
+                          <debug_text text="'AI Wave Handling will ignore ship in $WaveIgnoringShipsGroup: ' + $IgnoredShip.knownname"/>
+                        </do_for_each>
+                      </do_all>
+                      <find_ship name="$allships" excluded="$WaveIgnoringShipsGroup" space="player.galaxy" unit="false" multiple="true" recursive="true"/>
+                      <do_for_each name="$locship" in="$allships">
+                        <do_if value="$locship.order and $locship.pilot and (@$locship.pilot.$fledtide or $locship.hascontext.{$WaveCluster} or @$locship.order.$target.hascontext.{$WaveCluster} or @$locship.order.$destination.hascontext.{$WaveCluster} or @$locship.order.$destination.{1}.hascontext.{$WaveCluster} or (@$locship.order.id == 'DeployToStation' and not $locship.isdeployedconstructionvessel and @$locship.order.$station.hascontext.{$WaveCluster}))">
+                          <debug_text text="'signalling %s %s %s. phase: %s'.[@$locship.idcode, $locship.knownname, $locship, event.param]" chance="$WaveDebugChance"/>
+                          <!-- param2=[phase, celestialbody] -->
+                          <signal_objects object="$locship" param="'tide_phasechange'" param2="[event.param, $WaveClusterCelestialBody]"/>
+                        </do_if>
+                      </do_for_each>
+                      <remove_value name="$allships"/>
+                    </do_if>
+
+                    <!-- Proccess Phase Request -->
+                    <do_if value="$RequestedPhase == $WaveClusterCelestialBody.phase.current.id">
+                      <debug_text text="'(Reached Requested Phase) ' + $RequestedPhase" chance="$WaveDebugChance"/>
+                      <set_value name="$RequestedPhase" exact="''"/>
+                    </do_if>
+                    <do_else>
+                      <debug_text text="'REQUESTED PHASE: ' + $RequestedPhase" chance="$WaveDebugChance"/>
+                      <!-- Trigger Inactive, should always go through eventually -->
+                      <do_if value="$RequestedPhase == 'calm'">
+                        <signal_cue_instantly cue="StartPhase_Calm"/>
+                      </do_if>
+
+                      <!-- Trigger Warning, should always go through eventually -->
+                      <do_elseif value="$RequestedPhase == 'warning'">
+                        <signal_cue_instantly cue="StartPhase_Warning"/>
+                      </do_elseif>
+
+                      <!-- Trigger Wave, goes through from Warning but not from Inactive, so we need to differentiate -->
+                      <do_elseif value="$RequestedPhase == 'wave'">
+                        <do_if value="'calm' == $WaveClusterCelestialBody.phase.current.id">
+                          <signal_cue_instantly cue="StartPhase_Warning" check="false"/>
+                        </do_if>
+                        <do_else>
+                          <signal_cue_instantly cue="StartPhase_Wave"/>
+                        </do_else>
+                      </do_elseif>
+                    </do_else>
+
+                    <!-- Debug Current / Scheduled Phase -->
+                    <debug_text text="'CURRENT PHASE:   ' +  $WaveClusterCelestialBody.phase.current.id + ' ' + $WaveClusterCelestialBody.phase.current.starttime + '/' + player.age + ' (starttime / player.age)'"  chance="$WaveDebugChance"/>
+
+                    <do_if value="$WaveClusterCelestialBody.phase.scheduled.exists">
+                      <debug_text text="'SCHEDULED PHASE: ' +  $WaveClusterCelestialBody.phase.scheduled.id + ' ' + $WaveClusterCelestialBody.phase.scheduled.starttime + '/' + player.age + ' (starttime / player.age)'" chance="$WaveDebugChance"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="GateEffect_On">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <!-- find the Windfall to Avarice Jump Gate -->
+                    <find_sector macro="macro.Cluster_502_Sector001_macro"  required="true" groupname="$S1_SectorGroup" name="$S1b_Center"/>
+                    <find_sector macro="macro.Cluster_500_Sector003_macro"  required="true" groupname="$S2_SectorGroup" name="$S2c_West"/>
+                    <find_gate name="$Gate_S1_S2" space="$S1b_Center" destination="$S2c_West" required="true"/>
+
+                    <create_position name="$GatePosition" object="$Gate_S1_S2" space="$Gate_S1_S2.sector"/>
+                    <create_object name="$GateEffect" groupname="$GateEffectGroup" macro="macro.fx_special_gateforce_01_macro"
+                                   sector="$S1b_Center">
+                      <position value="$GatePosition" object="$S1b_Center" space="$S1b_Center"/>
+                      <rotation value="$Gate_S1_S2.rotation"/>
+                    </create_object>
+                  </actions>
+                  <cues>
+                    <cue name="GateEffect_Sound">
+                      <actions>
+                        <play_sound object="$GateEffect" sound="'gate_wave_active'" type="effect"/>
+                      </actions>
+                      <delay exact="7.3s" comment="Sound sample is 7.59s long, create a bit of an overlap for a smoother transition"/>
+                      <actions>
+                        <reset_cue cue="this"/>
+                      </actions>
+                    </cue>
+                    <cue name="GateEffect_Off">
+                      <conditions>
+                        <event_object_phase_started object="$WaveClusterCelestialBody"/>
+                        <check_value value="event.param != 'wave'"/>
+                      </conditions>
+                      <actions>
+                        <reset_cue cue="parent"/>
+                        <destroy_object object="$GateEffect"/>
+                        <destroy_group group="$GateEffectGroup"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="WaveActive" instantiate="true">
+                  <!-- For Story Usage -->
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s" comment="needs 1s before it's visible"/>
+                  <actions>
+                    <debug_text text="'Iterating Wave Count'" chance="$WaveDebugChance"/>
+                    <set_value name="$WaveCount" exact="1" operation="add"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- WAVE DAMAGE EFFECT -->
+            <cue name="TheWave_Damage" comment="outside of Wave Stages to not be cancelled with those" instantiate="true">
+              <conditions>
+                <event_object_phase_started object="$WaveClusterCelestialBody" phase="'wave'"/>
+              </conditions>
+              <actions>
+                <find_station name="$WaveClusterStations" space="$WaveCluster" multiple="true"/>
+                <do_for_each name="$WaveClusterStation" in="$WaveClusterStations">
+                  <signal_cue_instantly cue="TheWave_DamageStation" param="[$WaveClusterStation, $WaveClusterCelestialBody.phase.current.propagation.arrivaltime.{$WaveClusterStation}]" />
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <cue name="Debug_Test_Explosions">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="''"/>
+                <find_sector macro="macro.Cluster_500_Sector001_macro"  required="true" groupname="$S2_SectorGroup" name="$S2a_North"/>
+                <find_sector macro="macro.Cluster_500_Sector002_macro"  required="true" groupname="$S2_SectorGroup" name="$S2b_South"/>
+                <find_sector macro="macro.Cluster_500_Sector003_macro"  required="true" groupname="$S2_SectorGroup" name="$S2c_West"/>
+                <do_for_each in="$S2_SectorGroup" name="this.$sector">
+                  <find_station space="this.$sector" multiple="true" name="$stations"/>
+                  <do_for_each in="$stations" name="$s">
+                    <add_effect object="$s" effect="'toa_surfaceexplosions_l'"/>
+                  </do_for_each>
+                </do_for_each>
+              </actions>
+            </cue>
+
+            <!-- WAVE STATION DAMAGE -->
+            <cue name="TheWave_DamageStation" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="event.param.{2}"/>
+              <actions>
+                <do_if value="event.param.{1}.haswaveprotection">
+                  <do_for_each name="$ProtectionWare" in="event.param.{1}.sector.waveprotectionresources.list">
+                    <remove_cargo object="event.param.{1}" ware="$ProtectionWare" exact="1"/>
+                  </do_for_each>
+                </do_if>
+                <do_else>
+                  <!-- Explosion effect -->
+                  <!--<do_if value="event.param.{1}.attention ge attention.nearby" comment="active physics check, but apparently not necessary">-->
+                  <add_effect object="event.param.{1}" effect="'toa_surfaceexplosions_l'"/>
+                  <!--damage each module by 25% to 75% of its max hull-->
+                  <find_object_component name="$Modules" object="event.param.{1}" module="true" multiple="true"/>
+                  <do_for_each name="$Module" in="$Modules">
+                    <set_value name="$newhullvalue" min="$Module.hullpercentage - 25" max="$Module.hullpercentage - 75"/>
+                    <set_object_hull object="$Module" exact="[$newhullvalue, 0].max"/>
+                    <do_if value="$Module.hull le 0">
+                      <destroy_object object="$Module" explosion="true"/>
+                    </do_if>
+                  </do_for_each>
+                  <!--damage every docked ship by 5% to 15% of its max hull, and fully drain shields-->
+                  <find_object_component name="$Ships" object="event.param.{1}" class="class.ship" multiple="true"/>
+                  <do_for_each name="$Ship" in="$Ships">
+                    <set_value name="$NewShiphull" min="$Ship.hullpercentage - 15" max="$Ship.hullpercentage - 5"/>
+                    <!--playerships don't go below 1% from this to prevent the game from getting stuck-->
+                    <do_if value="$Ship.isplayerowned and $NewShiphull lt 1">
+                      <set_value name="$NewShiphull" exact="[1, $Ship.hullpercentage].min"/>
+                    </do_if>
+                    <set_object_hull object="$Ship" exact="[$NewShipHull, 0].max"/>
+                    <set_object_shield object="$Ship" exact="0"/>
+                    <do_if value="$Ship.hull le 0">
+                      <destroy_object object="$Ship" explosion="true"/>
+                    </do_if>
+                  </do_for_each>
+                  <!--destroy all surface elements-->
+                  <find_object_component groupname="$SurfaceElements" object="event.param.{1}" surfaceelement="true" multiple="true"/>
+                  <destroy_group group="$SurfaceElements"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <!-- WAVE SOUND -->
+            <cue name="TheWave_StationSound">
+              <conditions>
+                <event_object_phase_started object="$WaveClusterCelestialBody" phase="'wave'"/>
+              </conditions>
+              <cues>
+                <cue name="TheWave_StationSound_On" checkinterval="1s">
+                  <conditions>
+                    <check_value value="player.station"/>
+                    <check_value value="player.station.isinhazardousregion"/>
+                    <check_value value="player.station.cluster == $WaveCluster"/>
+                    <check_value value="($WaveClusterCelestialBody.phase.current.starttime + $WaveClusterCelestialBody.phase.current.propagation.arrivaltime.{player.station}) le player.age"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="player.room.dynamicinterior">
+                      <play_sound object="player.entity" sound="'interior_wave_active'" type="effect"/>
+                    </do_if>
+                    <do_else>
+                      <play_sound object="player.entity" sound="'dockarea_wave_active'" type="effect"/>
+                    </do_else>
+                  </actions>
+                  <delay exact="7.3s" comment="Sound sample is 7.59s long, create a bit of an overlap for a smoother transition"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+                <cue name="TheWave_StationSound_Deactivate">
+                  <conditions>
+                    <event_object_phase_started object="$WaveClusterCelestialBody"/>
+                    <check_value value="event.param != 'wave'"/>
+                  </conditions>
+                  <actions>
+                    <reset_cue cue="parent"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <!-- ANOMALY HANDLING -->
+            <cue name="TheWave_Anomaly" comment="outside of Wave Stages to not be cancelled with those" instantiate="true">
+              <conditions>
+                <event_object_phase_started object="$WaveClusterCelestialBody" phase="'wave'"/>
+              </conditions>
+              <delay exact="$Duration_WaveDamage + $Duration_AnomalyActivationAfterWave"/>
+              <actions>
+                <set_value name="$EndTime_AnomalyDeactivation_Previous" exact="$EndTime_AnomalyDeactivation_Next" comment="Preserve current deactivation endtime, so that it doesn't get overwritten in phase 'calm' while the anomaly is still active."/>
+                <signal_cue cue="TheWave_Anomaly_Activate"/>
+              </actions>
+              <delay exact="$Duration_AnomalyDeactivation" comment="additional wave-duration"/>
+              <actions>
+                <signal_cue cue="TheWave_Anomaly_Deactivate"/>
+              </actions>
+            </cue>
+
+            <cue name="TheWave_Anomaly_Activate" instantiate="true" comment="Outside of TheWave_Anomaly, to allow other scripts to listen for the activation of the anomaly.">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'S3 anomaly enabled'" chance="$WaveDebugChance"/>
+                <add_anomaly_destination anomaly="$AnomaliesS2toS3" destination="$AnomaliesS3toS2"/>
+                <!--add_anomaly_destination anomaly="$AnomaliesS3toS2" destination="$AnomaliesS2toS3"/-->
+              </actions>
+            </cue>
+
+            <cue name="TheWave_Anomaly_Deactivate" instantiate="true" comment="Outside of TheWave_Anomaly, to allow other scripts to listen for the deactivation of the anomaly.">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <debug_text text="'S3 anomaly disabled'" chance="$WaveDebugChance"/>
+                <remove_anomaly_destination anomaly="$AnomaliesS2toS3" destination="$AnomaliesS3toS2"/>
+                <!--remove_anomaly_destination anomaly="$AnomaliesS3toS2" destination="$AnomaliesS2toS3"/-->
+              </actions>
+            </cue>
+
+            <!-- TODO: Currently Placeholder effect -->
+            <cue name="TheWaveEffect" checkinterval="5s" instantiate="true">
+              <conditions>
+                <check_value value="$AnomaliesS2toS3? and @$AnomaliesS2toS3.destinations.count"/>
+              </conditions>
+              <delay exact="[3.1s, 4.2s, 5.3s].random"/>
+              <actions>
+                <add_effect object="$AnomaliesS2toS3" effect="'wormhole_active'"/>
+                <!--add_effect object="$AnomaliesS3toS2" effect="'tm_explosion'"/-->
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+    <cue name="WaresAllocationPatch_TOA" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <do_if value="not md.Setup.Start.$WaresAllocationPatch_TOA?">
+          <cancel_cue cue="WaresAllocationPatch_TOA"/>
+        </do_if>
+      </actions>
+      <delay exact="60s"/>
+      <actions>
+        <find_station name="$Wharf_VIG" godstationentry="['loanshark_wharf_01']" multiple="1" space="player.galaxy"/>
+        <do_for_each in="$Wharf_VIG" counter="$VIG">
+          <add_build_to_expand_station result="$BuildTask" buildobject="$Wharf_VIG.{$VIG}" object="$Wharf_VIG.{$VIG}.buildstorage" constructionplan="'loanshark_wharf'"/>
+          <debug_text text="'Build task Added to ' + $Wharf_VIG.{$VIG}.name " filter="savegame"/>
+        </do_for_each>
+      </actions>
+    </cue>
+
+    <cue name="AstridLimitedTagPatch" namespace="this">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <do_if value="player.galaxy.macro.ismacro.xu_ep2_universe_macro and global.$Trophies.indexof.{tag.trophy_story_thefan_astrid}">
+          <add_blueprints wares="[ware.ship_gen_m_yacht_01_a, ware.engine_gen_m_yacht_01_mk1, ware.shield_gen_m_yacht_01_mk1, ware.turret_gen_m_yacht_01_mk1, ware.weapon_gen_m_yacht_01_mk1]"/>
+        </do_if>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Scenario_Weaken_Station_Cutscene" />
+  <!--
+  Shot 1:
+  Shot 2:
+  Shot 3:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_enemystation" />
+    <object_group name="target_group">
+      <reference object="target_destroyer_1" />
+      <reference object="target_destroyer_2" />
+      <reference object="target_enemystation"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Sequence01" start="0">
+        <shot name="PanOverExpedition" environment="scenezone" duration="10000">
+          <camera_panover reference="target_destroyer_1" showing="back" pan_direction="rightwards" panstart="100" panend="0" interpolation="linear">
+            <begin distance="230" elevation="12"/>
+            <end distance="230" elevation="12"/>
+          </camera_panover>
+        </shot>
+
+        <shot name="LookAtGate" environment="scenezone" duration="12000">
+          <camera_orbit reference="target_destroyer_1" orient_to="object" interpolation="smooth" y="-50">
+            <begin angle="174" distance="5500" elevation="-50" />
+            <end angle="270" distance="4500" elevation="-50" time="13500"/>
+          </camera_orbit>
+        </shot>
+
+        <shot name="StaticCameraShot01" environment="scenezone" duration="4000">
+          <camera>
+            <position>
+              <reference object="target_enemystation" x="1200" y="-350" z="-1200"/>
+            </position>
+            <lookdirection>
+              <reference object="target_destroyer_1" x="0" y="0" z="300" />
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="StaticCameraShot03" environment="scenezone" duration="6000">
+          <camera>
+            <position>
+              <reference object="target_destroyer_1" x="0" y="-35" z="15"/>
+            </position>
+            <lookdirection>
+              <reference object="target_enemystation" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

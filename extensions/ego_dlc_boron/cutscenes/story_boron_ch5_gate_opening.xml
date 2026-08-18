@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Boron_Ch5_Gate_Opening" />
+  <!--
+  Shot 1: Gate from  below, it triggers
+  Shot 2: Gate slow zoom
+  Shot 3: Alliance Fleet
+  Shot 4: Gate through which Boron Fleet emerges
+  Shot 5: POV of Boron Fleet looking at Alliance
+  Shot 6: Bridge of Alliance looking at Boron Fleet + Gate
+  Shot 7: Boron Fleet
+  Shot 8: Leda We and Boron Fleet in one Shot
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_gate" />
+    <environment_implicit name="scenezone_bridge" zone="@auto:target_alliance_leader" />
+    <object_group name="target_group">
+      <reference object="target_gate" />
+      <reference object="target_boronship1"/>
+      <reference object="target_boronship2"/>
+      <reference object="target_leda_ship"/>
+      <reference object="target_alliance_ship"/>
+      <reference object="target_alliance_leader"/>
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence01" start="0">
+        <shot name="StaticCameraShot01" environment="scenezone" duration="onevent:TriggerSequence01Done">
+          <camera>
+            <position>
+              <reference object="target_gate" x="-4000" y="-1800" z="2000"/>
+            </position>
+            <lookdirection>
+              <reference object="target_gate" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="GateSlowZoom02" environment="scenezone" duration="onevent:TriggerSequence02Done">
+          <camera_orbit reference="target_gate" orient_to="object">
+            <begin angle="-90" distance="8700" elevation="0" />
+            <end angle="-90" distance="7300" elevation="0" time="15800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="AllianceFleetMoveTowardsGate03" environment="scenezone" duration="onevent:TriggerSequence03Done">
+          <camera_orbit reference="target_alliance_ship" orient_to="object">
+            <begin angle="-85" distance="2100" elevation="40" />
+            <end angle="-70" distance="1500" elevation="100" time="16800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence04" start="onevent:TriggerSequence04Start">
+        <shot name="GateAndBoronFleet04" environment="scenezone" duration="onevent:TriggerSequence04Done">
+          <camera_orbit reference="target_boronship1" orient_to="object" z="800">
+            <begin angle="33" distance="2600" elevation="80" />
+            <end angle="1" distance="4100" elevation="40" time="18800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence05" start="onevent:TriggerSequence05Start">
+        <shot name="AllianceBridgeOrbit05" environment="scenezone_bridge" duration="onevent:TriggerSequence05Done">
+          <camera_orbit reference="target_alliance_leader" orient_to="object" y="0.8">
+            <begin angle="-90" distance="2.5" elevation="0.2" />
+            <end angle="-80" distance="2.5" elevation="0.2" time="13800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence06" start="onevent:TriggerSequence06Start">
+        <shot name="OrbitShip06" environment="scenezone" duration="onevent:TriggerSequence06Done">
+          <camera_orbit reference="target_boronship2" orient_to="object" y="200">
+            <begin angle="107" distance="3300" elevation="-40" />
+            <end angle="87" distance="3800" elevation="-70" time="14000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <sequence name="Sequence07" start="onevent:TriggerSequence07Start">
+        <shot name="OrbitShip07" environment="scenezone" duration="onevent:TriggerSequence07Done">
+          <camera_orbit reference="target_boronship1" orient_to="object" y="121">
+            <begin angle="-118" distance="650" elevation="-78" />
+            <end angle="-98" distance="1000" elevation="-38" time="15800"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="Sequence08" start="onevent:TriggerSequence08Start">
+        <shot name="AllianceFleetStatic08" environment="scenezone" duration="onevent:TriggerSequence08Done">
+          <camera>
+            <position>
+              <reference object="target_leda_ship" x="-580" y="76" z="-1036"/>
+            </position>
+            <lookdirection>
+              <reference object="target_boronship2" x="0" y="0" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

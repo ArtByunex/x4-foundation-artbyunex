@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/cue[@name='Start']/patch[@sinceversion='3']">
+    <signal_cue cue="Place_PrisonStation"/>
+  </add>
+
+  <add sel="/mdscript/cues">
+    <cue name="Place_PrisonStation" comment="patchcode for 3.x existing savegames">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <do_if value="player.galaxy.macro.ismacro.{macro.xu_ep2_universe_macro}">
+          <find_sector name="$PrisonStationSector" macro="macro.cluster_02_sector001_macro" required="true"/>
+          <find_station name="$PrisonStation" space="$PrisonStationSector" godstationentry="'story_prison_station_id'"/>
+          <do_if value="$PrisonStationSector and not $PrisonStation.exists">
+            <!-- Note that with create_station we need a macro, when spawned in the god.xml not - probably because type=factory handles that -->
+            <create_god_station name="$PrisonStation" id="'story_prison_station_id'"/>
+            <signal_objects object="player.galaxy" param="'init station'" param2="$PrisonStation" param3="false" comment="Add control entities."/>
+            <debug_text text="'creating prison station: ' + $PrisonStation" chance="0"/>
+          </do_if>
+          <do_else>
+            <debug_text text="'prison station already exists'" chance="0"/>
+          </do_else>
+        </do_if>
+
+      </actions>
+    </cue>
+  </add>
+
+</diff>

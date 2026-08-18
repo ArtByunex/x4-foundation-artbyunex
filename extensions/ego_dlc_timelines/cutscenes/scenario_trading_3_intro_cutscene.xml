@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_trading_3_intro_cutscene" />
+  <!--
+  Shot 1:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_targetship_1" zone="@auto:target_targetship_1" />
+    <environment_implicit name="scenezone_targetship_3" zone="@auto:target_targetship_3" />
+    <object_group name="target_group">
+      <reference object="target_station" />
+      <reference object="target_targetship_1" />
+      <reference object="target_targetship_2" />
+      <reference object="target_targetship_3" />
+      <reference object="target_playership" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      
+      <sequence name="Sequence01" start="0">
+
+        <shot name="OrbitStation" environment="scenezone_targetship_1" duration="12000">
+          <camera_orbit reference="target_station" orient_to="object" cycle="none" >
+            <begin distance="14800" angle="130" elevation="90"/>
+            <end distance="12600" angle="100" time="10500" elevation="98"/>
+          </camera_orbit>
+        </shot>
+        <shot name="FlyFrom_Ship1_To_Ship2" environment="scenezone_targetship_1" duration="15000">
+          <!--duration="onevent:stopscene" evaluates to -1 so does not work with a non-static camera / a camera using keyframes, we *need* to know the duration beforehand-->
+          <!--Don't use 'delay' with camera_flyfromto, because that is added to the duration, which then accepts invalid timestamps (beyond the keyframe maxtime), it can't find the keyframe out of the range (null) and then it crashes.-->
+          <camera_flyfromto reference="target_targetship_1" distance="220" flyto_reference="target_targetship_2" flyto_distance="220" interpolation="smooth" time_firstobject="6000" time_fly="3000" cycle="none"
+                            orbit1_yaw_start="-110" orbit1_yaw_end="-90" orbit1_elevation="10"
+                            orbit2_yaw_start="180" orbit2_yaw_end="180" orbit2_pitch="10"/>
+
+        </shot>
+        <!-- TODO: Investiage whether we can have the camera fly between the player ship and the destroyer, even if they start out in different environment zones -->
+        <shot name="OrbitDestroyer" environment="scenezone_targetship_3" duration="12000">
+          <camera_orbit reference="target_targetship_3" orient_to="object" cycle="none" >
+            <begin distance="1600" angle="-60" elevation="125"/>
+            <end distance="800" angle="-90" time="9500" elevation="220"/>
+          </camera_orbit>
+        </shot>
+        
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

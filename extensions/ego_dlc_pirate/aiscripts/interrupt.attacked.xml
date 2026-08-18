@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- in-house patches to ai should not contain blocking actions. messes with aicompat. -->
+  <add sel="//handler[@name='AttackHandler']/conditions/check_any[@comment='fight or flight']/check_all[@comment='call for help']" pos="after">
+    <check_all comment="loanshark">
+      <check_value value="this.trueowner == faction.loanshark"/>
+      <check_value value="this.sector and (this.sector.owner != this.trueowner)"/>
+      <check_value value="not this.$time_loanshark_lastcalledforhelp? or ((player.age - this.$time_loanshark_lastcalledforhelp) gt 15s)"/>
+      <set_value name="$loanshark_callforhelp"/>
+    </check_all>
+  </add>
+  <add sel="//handler[@name='AttackHandler']/actions//do_elseif[@value='@$callforhelp']" pos="after">
+    <do_if value="@$loanshark_callforhelp">
+      <!-- call raider ships for backup if any are available. do so regardless of response. -->
+      <signal_objects object="player.galaxy" param="'ship_in_distress'" param2="event.object" param3="event.param" delay="10ms"/>
+      <do_if value="this.sector">
+        <signal_objects object="this.sector" param="'ship_in_distress'" param2="event.object" param3="event.param" delay="10ms"/>
+      </do_if>
+      <debug_text text="'%1 (%2) under attack. Calling for help.'.[this.defensible.knownname, this.defensible]" chance="@$debugchance"/>
+      <set_value name="this.$time_loanshark_lastcalledforhelp" exact="player.age"/>
+    </do_if>
+    <remove_value name="$loanshark_callforhelp"/>
+  </add>
+</diff>

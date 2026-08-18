@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="ShowCharacterDal">
+    <params>
+      <!-- NOTE: Using the NPC's room as cutscene environment -->
+      <param name="npcref" object="true"/>
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+
+    <!-- asset-setup:
+      assets/cutscenecore_talkboron_03.xml
+      with events (this sets the connection to which to connect the mdscript's npcref-parameter)
+      - <event name="createCharacter" frame="0" param1="0" param2="connection_npc01" param3="npcref" param4="eventmonitor"/>
+      - <event name="createCharacter" frame="0" param1="0" param2="connection_npc002" param3="npcref2" param4="eventmonitor"/>    
+      with connections
+      - connection_npc01 with tags "npc pilot sit_evemon"
+      - connection_npc002 with tags "npc pilot stand npc_generic"
+      - ConnectionFor_interiors_room_bor_room_03_macro
+      
+      assets/interiors/eventmonitor_scenes/interiors_room_bor_room_03_data
+      with connections
+      - Connection21 with part = anim_anim
+      - Connection22 with part = anim_anim01
+      - con_npc_boron_01 with tags "npc stand npc_generic service"
+      - con_npc_boron_002 with tags "npc stand npc_generic service"
+
+      assets/interiors/rooms/room_gen_boronoffice_01.xml 
+      with connections
+      - con_npc_boron_01 with tags "npc boron_tank"
+      - con_prop_dal_computer with tags "prop prop_dal_computer" (placing Dal's computer in the HQ)
+      -->
+
+    <!-- Use a clone of the room (special asset) -->
+    <!--environment_plot name="scenezone">
+      <anchor name="cutscenecore_talkboron_03_macro" />
+      <teleport zone="tzonecluster_black2_sector01_zone02_macro">
+        <offset>
+          <position x="0" y="0" z="0"/>
+          <rotation yaw="0" pitch="0"/>
+        </offset>
+      </teleport>
+    </environment_plot-->
+
+    <!-- Use the persistent room from the game -->
+    <environment_implicit name="scenezone" zone="@auto:npcref" />
+
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+
+      <sequence name="DalDefaultSequence" start="0">
+        <!-- Looking directly at Dal -->
+        <shot name="DalDefaultShot" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <!--position comment="further back, so more in view">
+              <value exact="-0.90" comment="World X coordinate" />
+              <value exact=" 1.68" comment="World Y coordinate" />
+              <value exact="-6.15" comment="World Z coordinate" />
+            </position-->
+            <position>
+              <value exact="-2.40" comment="World X coordinate" />
+              <value exact=" 1.68" comment="World Y coordinate" />
+              <value exact="-5.38" comment="World Z coordinate" />
+            </position>
+            <lookdirection comment="at dal's face">
+              <value exact="-3.62" comment="world x look-pos"/>
+              <value exact=" 1.68" comment="world y look-pos"/>
+              <value exact="-4.45" comment="world Z look-pos (not angle!)"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence>
+
+      <sequence name="DalComputerSequence" start="onevent:TriggerDalComputerSequence">
+        <!-- looking from towards the right (Dal standing left of his computer) -->
+        <shot name="DalComputerShot" environment="scenezone" duration="onevent:stopscene">
+          <camera>
+            <position>
+              <value exact="-2.27" comment="World X coordinate" />
+              <value exact=" 1.75" comment="World Y coordinate" />
+              <value exact="-5.53" comment="World Z coordinate" />
+            </position>
+            <lookdirection comment="at computer-desk">
+              <value exact="-3.43" comment="world x look-pos"/>
+              <value exact=" 1.70" comment="world y look-pos"/>
+              <value exact="-4.66" comment="world Z look-pos (not angle!)"/>
+            </lookdirection>
+            <roll>
+              <value exact="0"/>
+            </roll>
+          </camera>
+        </shot>
+      </sequence>
+      
+    </actions>
+  </presentation>
+
+</cutscene>
+

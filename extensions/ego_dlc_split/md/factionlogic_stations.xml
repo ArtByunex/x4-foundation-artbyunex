@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredShipyardPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.split or $Faction == faction.freesplit">
+      <set_value name="$DesiredShipyards" exact="1"/>
+    </do_elseif>
+    <!--Additional shipyards for Xenon when DLC is active-->
+    <do_if value="$Faction == faction.xenon">
+      <set_value name="$DesiredShipyards" operation="add" exact="2"/>
+    </do_if>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredWharfPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.split">
+      <set_value name="$DesiredWharfs" exact="2"/>
+    </do_elseif>
+    <do_elseif value="$Faction == faction.freesplit">
+      <set_value name="$DesiredWharfs" exact="1"/>
+    </do_elseif>
+    <!--Additional wharfs for Argon and Paranid when DLC is active-->
+    <do_if value="$Faction == faction.argon or $Faction == faction.paranid">
+      <set_value name="$DesiredWharfs" operation="add"/>
+    </do_if>
+    <do_elseif value="$Faction == faction.xenon">
+      <set_value name="$DesiredWharfs" operation="add" exact="2"/>
+    </do_elseif>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredEquipmentDockPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.split or $Faction == faction.freesplit">
+      <set_value name="$DesiredEquipmentDocks" exact="2"/>
+    </do_elseif>
+  </add>
+
+  <add sel="/mdscript/cues/library[@name='Manage_Stations']/cues/cue[@name='Process']/cues/cue[@name='Analyse_Stations']/actions/do_elseif[@value='@$DesiredTradeStationPatchMarker']" pos="after">
+    <do_elseif value="$Faction == faction.split or $Faction == faction.freesplit or $Faction == faction.court">
+      <set_value name="$DesiredTradeStation" exact="1"/>
+    </do_elseif>
+  </add>
+
+</diff>

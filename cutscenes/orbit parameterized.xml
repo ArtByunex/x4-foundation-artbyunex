@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="OrbitParameterized">
+    <params>
+      <param name="targetobject" object="true" />
+      <param name="orbitdist" number="true" />
+      <param name="orbitelevation" number="true" />
+    </params>
+  </director>
+  
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:targetobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="OrbitSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <!--shot name="OrbitShot" environment="scenezone" duration="onevent:stopscene"-->
+        <shot name="OrbitShot" environment="scenezone" duration="onevent:stopscene">
+          <!-- Do a little pan/zoom effect to zero in on the object, makes it look a bit cooler. -->
+          <camera_orbit reference="targetobject" orient_to="ecliptic" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="0">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </begin>
+            <end angle="360" time="48000">
+              <distance>
+                <value var="orbitdist"/>
+              </distance>
+              <elevation>
+                <value var="orbitelevation"/>
+              </elevation>
+            </end>
+            
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

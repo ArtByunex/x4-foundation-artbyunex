@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Spacesuit_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Matthias Haan"/>
+  </documentation>
+  <cues>
+
+    <cue name="Start" namespace="this" module="scenario_spacesuit_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.civilian"/>
+
+        <set_value name="$MissionActors"     exact="table[]"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+        <set_external_view_allowed allow="false"/>
+
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <find_object name="$Level" macro="macro.landmarks_gen_spacesuit_level_01_obstaclecourse_01_macro" space="player.sector" required="true"/>
+        <find_object_component groupname="$Displays" macro="macro.scs_gen_prop_textdisplay_02_macro" object="$Level" multiple="true" recursive="true"/>
+        <debug_text text="'Found displays: ' + $Displays.count"/>
+
+        <set_value name="$PlayerSpawnPos" exact="player.ship.relativeposition.{$Level}"/>
+
+        <set_value name="$TimeBonusPerSecond" exact="100"/>
+        <set_value name="$TimeBonusThreshold" exact="3min"/>
+
+        <!-- Positions are relative to the level -->
+        <create_position name="$RaceFinishPos" x="0m" y="80m" z="-144m"/>
+        <set_value name="$FinishCheckDelta" exact="32m"/>
+        <create_position name="$ShortcutEntryPos" x="216m" y="50m" z="-144m"/>
+        <set_value name="$ShortcutCheckDelta" exact="16m"/>
+      </actions>
+      <delay exact="1ms"/>
+      <actions>
+        <!-- Find matching crates, detach them from the level -->
+        <find_object_component name="$crates" macro="macro.scs_gen_prop_crate_01_macro" object="$Level" multiple="true" includeobjects="true"/>
+        <do_for_each name="$crate" in="$crates">
+          <do_if value="$crate.position.y gt 20m">
+            <detach_object object="$crate" keeprotating="true"/>
+          </do_if>
+        </do_for_each>
+      </actions>
+      <cues>
+
+        <cue name="StopUseCase"/>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="md.Scenario_Spacesuit_LIB.Setup_Chief" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="IntroCutscene"/>
+                </do_else>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="IntroCutscene">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <set_value name="$CutsceneActors" exact="table[]"/>
+            <set_value name="$CutsceneActors.$Chief" exact="table[ $entity = $Chief ]"/>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Chief', $speak = 306140201, $recipient = 'player', $comment = 'Greetings, new hire!'],
+                          table [$actor = '$Chief', $speak = 306140202, $recipient = 'player', $comment = 'I am supervisor Henateklis Tismulinis Tansadras VIII.'],
+                          table [$actor = '$Chief', $speak = 306140203, $recipient = 'player', $comment = 'You must prove your skill.'],
+                          table [$actor = '$Chief', $speak = 306140204, $recipient = 'player', $comment = 'I have marked a route.'],
+                        ],
+              $callbackcue = StopCutscene,
+              $abortcallbackcue = StopCutscene,
+              $abortonsignalledcue = StopUseCase
+            ]" />
+            <play_cutscene cinematicmode="true" result="$IntroCutscene" key="'scenario_spacesuit_1_intro_cutscene'">
+              <param name="level" object="$Level"/>
+            </play_cutscene>
+          </actions>
+          <cues>
+            <cue name="StopCutscene">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <delay exact="1s"/>
+              <actions>
+                <stop_cutscene cutscene="$IntroCutscene"/>
+              </actions>
+            </cue>
+
+            <cue name="CutsceneStopped">
+              <conditions>
+                <event_cutscene_stopped cutscene="$IntroCutscene"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="IntroCutscene"/>
+                <signal_cue cue="StopUseCase" check="false"/>
+                <signal_cue cue="Start_Scenario"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <muffle_sound strength="0" duration="0s"/>
+            <blur_screen strength="0" duration="0s"/>
+          </actions>
+          <cues>
+            <!-- The cues that make up the scenario will go here -->
+
+            <cue name="SetupMission">
+              <actions>
+                <!-- Mission Objective -->
+                <create_mission cue="$MissionCue" abortable="false" name="{30614,1001}" description="{30614,1004}"
+                                difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}">
+                  <briefing>
+                    <objective step="1" action="objective.race"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="1"/>
+              </actions>
+            </cue>
+
+            <cue name="ShortcutUseCase" checkinterval="1ms">
+              <conditions>
+                <check_value value="player.ship.exists"/>
+                <set_value name="$PlayerShipRelPos" exact="player.ship.relativeposition.{$Level}"/>
+                <check_value value="$PlayerShipRelPos.distanceto.{$ShortcutEntryPos} lt $ShortcutCheckDelta"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Chief', $speak = 306140205, $recipient = 'player', $comment = 'You found the shortcut!'],
+                              table [$actor = '$Chief', $speak = 306140206, $recipient = 'player', $comment = '*** sadistic cackle ***'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+              </actions>
+            </cue>
+
+            <cue name="DisplayStartText">
+              <actions>
+                <show_help custom="'{30614,10001}'" position="1" force="true" timeout="false"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerWaitingUsecase">
+              <delay exact="10s"/>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                  $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                  $script = [
+                              table [$actor = '$Chief', $speak = 306140103, $recipient = 'player', $comment = 'Any sezura now.'],
+                            ],
+                  $abortonsignalledcue = StopUseCase
+                ]" />
+              </actions>
+            </cue>
+
+            <cue name="StartTimer" checkinterval="1ms">
+              <conditions>
+                <check_value value="player.ship.exists"/>
+                <set_value name="$PlayerShipRelPos" exact="player.ship.relativeposition.{$Level}"/>
+                <check_value value="$PlayerShipRelPos.distanceto.{$PlayerSpawnPos} gt 0.1m"/>
+              </conditions>
+              <actions>
+                <play_sound object="player.entity" sound="'ui_notification_player_alert_13'" type="ui"/>
+                <remove_help all="true"/>
+                <set_value name="$StartTime" exact="player.age"/>
+                <debug_text text="'Player at start position, timer starts at time ' + $StartTime" chance="$DebugChance"/>
+                <play_music music="'music_soundtrack_timelines_spacesuit_1'" loop="true"/>
+                <cancel_cue cue="PlayerWaitingUsecase"/>
+              </actions>
+              <cues>
+                <cue name="UpdateTimerDisplay">
+                  <actions>
+                    <set_value name="$textcolour_primary" exact="'text_normal'"/>
+                    <set_value name="$textcolour_secondary" exact="'overlay_scenario_stat_text'"/>
+                    <set_value name="$CurrentLap" exact="1"/>
+                    <set_value name="$NumLaps" exact="1"/>
+                  </actions>
+                  <delay exact="1ms"/>
+                  <actions>
+                    <show_overlay_text relwidth="1.0" reloffsetx="0.01" reloffsety="0.05" fromtop="true" >
+                      <row>
+                        <col idx="1"
+                             text="{30614,10007}"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_secondary"
+                             fontsize="20"
+                             halign="right"
+                             valign="bottom" />
+                        <col idx="2"
+                             text="(player.age - $StartTime).formatted.{'%m:%.3S'}"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_primary"
+                             fontsize="20"
+                             halign="left"
+                             valign="bottom" />
+                        <col idx="6"
+                         text="' '"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="20"
+                         halign="left"
+                         valign="bottom" />
+                      </row>
+                      <row fromtop="true">
+                        <col idx="1"
+                         text="{30614,10008}"
+                         bgcolor="'overlay_scenario_stat_background'"
+                         textcolor="$textcolour_secondary"
+                         fontsize="12"
+                         halign="right"
+                         valign="bottom" />
+                        <col idx="2"
+                             text="'\033#text_normal#' + $CurrentLap + '\033X/' + $NumLaps"
+                             bgcolor="'overlay_scenario_stat_background'"
+                             textcolor="$textcolour_secondary"
+                             fontsize="12"
+                             halign="left"
+                             valign="bottom"/>
+                      </row>
+                    </show_overlay_text>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+                <cue name="PlayerCollided">
+                  <conditions>
+                    <event_object_collided group="global.$PlayerControlledGroup"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$PlayerCollided" exact="true"/>
+                  </actions>
+                </cue>
+                <cue name="PlayerDamagedUsecase">
+                  <conditions>
+                    <event_object_hull_damaged group="global.$PlayerControlledGroup"/>
+                  </conditions>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                      $script = [
+                                  table [$actor = '$Chief', $speak = if not $TookDamageBefore? then 306140104 else 306140105, $recipient = 'player', $comment = 'Careful.'],
+                                ],
+                      $abortonsignalledcue = StopUseCase
+                    ]" />
+                    <set_value name="$TookDamageBefore" exact="true"/>
+                  </actions>
+                  <delay exact="5s"/>
+                  <actions>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+                <cue name="EndTimer" checkinterval="1ms">
+                  <conditions>
+                    <check_value value="player.ship.exists"/>
+                    <set_value name="$PlayerShipRelPos" exact="player.ship.relativeposition.{$Level}"/>
+                    <check_value value="abs($PlayerShipRelPos.x - $RaceFinishPos.x) lt $FinishCheckDelta and abs($PlayerShipRelPos.y - $RaceFinishPos.y) lt $FinishCheckDelta and abs($PlayerShipRelPos.z - $RaceFinishPos.z) lt $FinishCheckDelta"/>
+                  </conditions>
+                  <actions>
+                    <play_sound object="player.entity" sound="'ui_notification_player_alert_13'" type="ui"/>
+                    <set_value name="$Duration" exact="player.age - $StartTime"/>
+                    <cancel_cue cue="UpdateTimerDisplay"/>
+                    <debug_text text="'Player at end position, duration is ' + player.age + ' - ' + $StartTime + ' = ' + $Duration" chance="$DebugChance"/>
+                    <!--Calculate score, speak line appropriate to rating-->
+                    <set_value name="$Score_Time" exact="if $Duration lt $TimeBonusThreshold then $TimeBonusPerSecond * ($TimeBonusThreshold - $Duration)f else 0"/>
+                    <set_value name="$TotalScore" exact="$Score_Time"/>
+                    <set_value name="$Rating" exact="player.allmodules.{player.module}.rating.{$TotalScore}"/>
+                    <do_if value="$Rating == 0">
+                      <set_value name="$FinalLine" exact="[306140108, 306140118].random" comment="Tss. A substandard result. / Do better."/>
+                    </do_if>
+                    <do_elseif value="$Rating lt 3">
+                      <set_value name="$FinalLine" exact="306140109" comment="Satisfactory. With room for improvement."/>
+                    </do_elseif>
+                    <do_elseif value="$Rating lt 5">
+                      <set_value name="$FinalLine" exact="[306140115, 306140119].random" comment="Impressive! Most impressive! / Well done!"/>
+                    </do_elseif>
+                    <do_else>
+                      <set_value name="$FinalLine" exact="306140116" comment="Inconceivable! That beat my record!"/>
+                    </do_else>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                      $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+                      $script = [
+                                  table [$actor = '$Chief', $speak = $FinalLine, $recipient = 'player'],
+                                ],
+                      $callbackcue = FinalSpeakFinished,
+                      $abortcallbackcue = FinalSpeakFinished,
+                      $abortonsignalledcue = StopUseCase
+                    ]" />
+                    <do_if value="not $PlayerCollided?">
+                      <unlock_achievement name="TL_MOVE_LIKE_SPACEFLY" scenario="true"/>
+                    </do_if>
+                  </actions>
+                  <cues>
+                    <cue name="FinalSpeakFinished">
+                      <conditions>
+                        <check_any>
+                          <event_cue_signalled/>
+                        </check_any>
+                      </conditions>
+                      <actions>
+                        <signal_cue cue="ResultWindow"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="PlayerDied">
+          <conditions>
+            <event_object_destroyed object="player.entity"/>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+              $caller = this, $preset = '$plotlike', $actors = $CutsceneActors, $debugchance = 0,
+              $script = [
+                          table [$actor = '$Chief', $speak = 306140107, $recipient = 'player', $comment = 'Egg salad!'],
+                        ],
+              $abortonsignalledcue = StopUseCase
+            ]" />
+          </actions>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <do_if value="$Duration?" comment="null if the course has not been completed, probably due to the player dying">
+              <set_value name="$ResultData.$Score" exact="$TotalScore"/>
+              <substitute_text text="$timebonushinttext" source="{30614,204}">
+                <replace string="'$SCORE$'" with="$TimeBonusPerSecond"/>
+                <replace string="'$TIME$'" with="$TimeBonusThreshold.formatted.default" />
+              </substitute_text>
+              <add_scenario_stat id="'time'" name="{30620,52}" uivalue="$Duration.formatted.{'%m:%.3S'}" description="$timebonushinttext" score="$Score_Time"/>
+            </do_if>
+            <do_else>
+              <set_value name="$ResultData.$Score" exact="0"/>
+            </do_else>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_spacesuit_3_intro_cutscene"/>
+
+  <environments>
+    <environment_implicit name="zone" zone="@auto:level" />
+    <object_group name="target_group">
+      <reference object="level" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <shot name="Shot1" duration="onevent:stopscene" environment="zone">
+          <camera>
+            <position>
+              <reference object="level" x="160" y="0" z="-5" />
+            </position>
+            <lookdirection>
+              <reference object="@playership" x="0" y="0" z="2" />
+            </lookdirection>
+          </camera>
+          <light name="cutscene_light_macro">
+            <position>
+              <reference object="@playership" x="0" y="-1" z="0" />
+            </position>
+          </light>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

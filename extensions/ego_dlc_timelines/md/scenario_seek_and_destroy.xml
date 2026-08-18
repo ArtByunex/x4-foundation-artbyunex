@@ -1,0 +1,1455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Seek_And_Destroy" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Heinrich Unrau"/>
+  </documentation>
+  <cues>
+    <cue name="Start" namespace="this" module="scenario_seek_and_destroy">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30606"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.kill"/>
+        <set_value name="$MissionFaction"     exact="faction.holyorder"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"
+                   comment="prevent map ships/stations from having entities (engineers)/random amounts of wares/workforce"/>-->
+
+        <!-- TODO: Disable masstraffic jobs (gamestarts flag not eliminating all yet) -->
+
+        <debug_text text="'Initialising Scenario: ' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+        <!-- Custom Scenario-Related variables -->
+
+        <set_value name="$Duration" exact="10min"/>
+
+        <set_value name="$EnemyOwner" exact="faction.paranid"/>
+
+        <create_group groupname="$PlayerShips"/>
+        <create_group groupname="$PlayerShips_Launched"/>
+        <create_group groupname="$Targets_Find"/>
+        <create_group groupname="$Targets_Kill"/>
+        <create_group groupname="$Targets_Bonus" comment="grant points but dont point at it"/>
+        <set_value name="$Score_Kills" exact="0"/>
+
+        <set_value name="$Kill_LookUp_DisplayOrder" comment="We don't want the order to randomly change so keys to iterate over are ordered"
+                   exact="[
+                      shiptype.resupplier,
+                      shiptype.destroyer,
+                      shiptype.scout,
+                      shiptype.fighter,
+                      shiptype.heavyfighter,
+                      shiptype.frigate,
+                      shiptype.gunboat,
+                      shiptype.corvette,
+                      shiptype.smalldrone,
+                      shiptype.lasertower,
+                      '$satellite',
+                      '$mine',
+                      '$mineHit']"/>
+
+        <set_value name="$Kill_LookUp"
+                   exact="table[
+                   $mineHit = table[$kill_amount = 0, $max_expected_amount = 1],
+                   $satellite = table[$kill_amount = 0, $max_expected_amount = 1],
+                   $mine = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.lasertower} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.xsdrone} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.smalldrone} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.scout} = table[$kill_amount = 0, $max_expected_amount = 3],
+                   {shiptype.fighter} = table[$kill_amount = 0, $max_expected_amount = 4],
+                   {shiptype.heavyfighter} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.frigate} = table[$kill_amount = 0, $max_expected_amount = 9],
+                   {shiptype.corvette} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.gunboat} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.resupplier} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   {shiptype.destroyer} = table[$kill_amount = 0, $max_expected_amount = 1],
+                   ]"
+                   />
+
+        <!-- Score Multiplier -->
+        <set_value name="$Kill_LookUp.$mineHit.$score"                exact="-5"/>
+        <set_value name="$Kill_LookUp.$satellite.$score"              exact="5"/>
+        <set_value name="$Kill_LookUp.$mine.$score"                   exact="5"/>
+        <set_value name="$Kill_LookUp.{shiptype.lasertower}.$score"   exact="5"/>
+        <set_value name="$Kill_LookUp.{shiptype.xsdrone}.$score"      exact="5"/>
+        <set_value name="$Kill_LookUp.{shiptype.smalldrone}.$score"   exact="5"/>
+        <set_value name="$Kill_LookUp.{shiptype.scout}.$score"        exact="10"/>
+        <set_value name="$Kill_LookUp.{shiptype.fighter}.$score"      exact="15"/>
+        <set_value name="$Kill_LookUp.{shiptype.heavyfighter}.$score" exact="20"/>
+        <set_value name="$Kill_LookUp.{shiptype.frigate}.$score"      exact="60"/>
+        <set_value name="$Kill_LookUp.{shiptype.corvette}.$score"     exact="60"/>
+        <set_value name="$Kill_LookUp.{shiptype.gunboat}.$score"      exact="60"/>
+        <set_value name="$Kill_LookUp.{shiptype.resupplier}.$score"   exact="600"/>
+        <set_value name="$Kill_LookUp.{shiptype.destroyer}.$score"    exact="600"/>
+
+        <set_value name="$AuxiliaryPointsPerSecond" exact="1"/>
+
+        <do_if value="$AuxiliaryPointsPerSecond == 1">
+          <substitute_text text="$Text_KillScore_Resupplier" source="readtext.{30600}.{3042}">
+            <replace string="'$NUM1$'" with="$Kill_LookUp.{shiptype.resupplier}.$score"/>
+          </substitute_text>
+        </do_if>
+        <do_else>
+          <substitute_text text="$Text_KillScore_Resupplier" source="readtext.{30600}.{3043}">
+            <replace string="'$NUM1$'" with="$Kill_LookUp.{shiptype.resupplier}.$score"/>
+            <replace string="'$NUM2$'" with="$AuxiliaryPointsPerSecond"/>
+          </substitute_text>
+        </do_else>
+
+        <!-- SCORE:
+            It shouldn't be possible to get above 1000 points within 10 minutes without destroying the Auxiliary ship.
+
+            30p   Scouts: 3 (first wave)
+            50p   Scouts: 5 (satellite guards)
+
+            45p   Fighters: 3 (first wave)
+            30p   Fighters: 2 (auxiliary escort)
+            DELETED: 45p   Fighters: 3 (other sector guard)
+
+            700p  Auxiliary
+            100p  Accuracy
+
+            120p  2 Frigates
+            420p  7 Frigates
+
+            60p  Corvette
+
+            ============================
+
+            Minimum Auxiliary Run:
+            30p   Scouts
+            75p   Fighters
+            700p  Auxiliary
+            100p  Accuracy
+            120p  Frigate
+            ==> 1025
+            + Late Attack Corvette 60p potentionally
+
+            Everything Else Run:
+            80p   Scouts
+            75p   Fighters
+            100p  Accuracy
+            540p  Frigates
+            60p   Corvette
+            DELETED: 45p   Other side Fighters
+            ==> 855p
+        -->
+
+        <!-- Object UI Text -->
+        <set_value name="$Kill_LookUp.$mineHit.$stat_name"                  exact="readtext.{30600}.{3011}"/>
+        <set_value name="$Kill_LookUp.$satellite.$stat_name"                exact="readtext.{30600}.{3020}"/>
+        <set_value name="$Kill_LookUp.$mine.$stat_name"                     exact="readtext.{30600}.{3021}"/>
+        <set_value name="$Kill_LookUp.{shiptype.lasertower}.$stat_name"     exact="readtext.{30600}.{6005}"/>
+        <set_value name="$Kill_LookUp.{shiptype.xsdrone}.$stat_name"        exact="readtext.{30600}.{6003}"/>
+        <set_value name="$Kill_LookUp.{shiptype.smalldrone}.$stat_name"     exact="readtext.{30600}.{6003}"/>
+        <set_value name="$Kill_LookUp.{shiptype.scout}.$stat_name"          exact="readtext.{30600}.{6021}"/>
+        <set_value name="$Kill_LookUp.{shiptype.fighter}.$stat_name"        exact="readtext.{30600}.{6022}"/>
+        <set_value name="$Kill_LookUp.{shiptype.heavyfighter}.$stat_name"   exact="readtext.{30600}.{6023}"/>
+        <set_value name="$Kill_LookUp.{shiptype.frigate}.$stat_name"        exact="readtext.{30600}.{6032}"/>
+        <set_value name="$Kill_LookUp.{shiptype.corvette}.$stat_name"       exact="readtext.{30600}.{6033}"/>
+        <set_value name="$Kill_LookUp.{shiptype.gunboat}.$stat_name"        exact="readtext.{30600}.{6056}"/>
+        <set_value name="$Kill_LookUp.{shiptype.resupplier}.$stat_name"     exact="readtext.{30600}.{6052}"/>
+        <set_value name="$Kill_LookUp.{shiptype.destroyer}.$stat_name"      exact="readtext.{30600}.{6041}"/>
+
+        <!-- Score values defined in gamestarts.xml .. -->
+        <set_value name="$Score_Target_Star_1" exact="player.allmodules.{player.module}.score.{1}"/>
+        <set_value name="$Score_Target_Star_2" exact="player.allmodules.{player.module}.score.{2}"/>
+        <set_value name="$Score_Target_Star_3" exact="player.allmodules.{player.module}.score.{3}"/>
+        <set_value name="$Score_Target_Star_4" exact="player.allmodules.{player.module}.score.{4}"/>
+        <set_value name="$Score_Target_Star_5" exact="player.allmodules.{player.module}.score.{5}"/>
+
+        <set_value name="$PlayerRadarRange" exact="40km" comment="should be the player radar range regardless of ship; exceptions are equipment mods"/>
+
+        <set_value name="$PlayerPage" exact="10302"/>
+        <set_value      name="$PlayerTauntLines" exact="[]"/>
+        <append_to_list name="$PlayerTauntLines" exact="2009"   comment="Begone."/>
+        <!--<append_to_list name="$PlayerTauntLines" exact="4008"   comment="Stay sharp."/>-->
+        <append_to_list name="$PlayerTauntLines" exact="9004"   comment="Unworthy one!"/>
+        <append_to_list name="$PlayerTauntLines" exact="9005"   comment="Foolish lowerlife!"/>
+        <append_to_list name="$PlayerTauntLines" exact="10061"  comment="The target has been destroyed."/>
+        <append_to_list name="$PlayerTauntLines" exact="10064"  comment="We can provide plenty more of that."/>
+        <!--<append_to_list name="$PlayerTauntLines" exact="10065"  comment="We will defeat you without difficulty."/>-->
+        <append_to_list name="$PlayerTauntLines" exact="10071"  comment="You are unimpressive."/>
+        <append_to_list name="$PlayerTauntLines" exact="10080"  comment="You will feel my wrath!"/>
+        <append_to_list name="$PlayerTauntLines" exact="10088"  comment="This is just the beginning."/>
+        <append_to_list name="$PlayerTauntLines" exact="10089"  comment="You will not survive this."/>
+
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <!-- Setup Libraries -->
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_Map" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_Factions" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_Player" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_Character_HighCommandActor" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_EnteringSystem" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_ShipVars" />
+
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_HOP_Station" />
+                <include_actions chance="if $HasError then 0 else 100" ref="Setup_Monument" />
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="StartScenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Map">
+              <actions>
+                <!-- SPACE: Pontifexs Claim -->
+                <find_cluster required="true" macro="macro.timelines_map_seek_and_destroy_cluster_11_macro"      name="$Cluster_PontifexsClaim" />
+                <find_sector  required="true" macro="macro.timelines_map_seek_and_destroy_c11_sector_01_macro"   name="$Sector_PontifexsClaim" />
+
+                <find_gate name="$Gates_PontifexsClaim" multiple="true" space="$Sector_PontifexsClaim"/>
+                <set_value name="$Gate_PontifexsClaim_HOP" exact="if ($Gates_PontifexsClaim.{1}.position.x lt 0) then $Gates_PontifexsClaim.{1} else $Gates_PontifexsClaim.{2}"/>
+                <set_value name="$Gate_PontifexsClaim_PAR" exact="if ($Gates_PontifexsClaim.{1}.position.x lt 0) then $Gates_PontifexsClaim.{2} else $Gates_PontifexsClaim.{1}"/>
+
+                <!-- regions -->
+                <create_position name="$Pos_Minefield" x="25000.0" y="500" z="5500.0"/>
+
+                <!-- Set Map Known -->
+                <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+                  <param name="InitialMap" value="[macro.timelines_map_seek_and_destroy_c11_sector_01_macro]"/>
+                  <param name="UncoverStationFaction"     value="faction.holyorder"/>
+                  <param name="UncoverShipyardsAndWharfs" value="true" comment="optional"/>
+                  <param name="UncoverTradeStations"      value="true" comment="optional"/>
+                  <param name="UncoverHighways"           value="true"/>
+                </run_actions>
+
+              </actions>
+            </library>
+
+            <library name="Setup_Factions">
+              <actions>
+                <set_faction_relation_locked faction="faction.paranid"    locked="true"/>
+                <set_faction_relation_locked faction="faction.holyorder"  locked="true"/>
+
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="generaluseequipment"/>
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="generaluseship"/>
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="militaryequipment"/>
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="militaryship"/>
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="capitalequipment"/>
+                <add_licence faction="faction.player" licencefaction="faction.holyorder" type="capitalship"/>
+              </actions>
+            </library>
+
+            <library name="Setup_Player">
+              <actions>
+                <set_emergency_eject_active active="false"/>
+                <set_faction_identity faction="faction.player" image="'faction_holyorder'" />
+
+                <add_to_group groupname="$PlayerShips"            object="player.ship"/>
+                <add_to_group groupname="$MissionRelevantObjects" object="player.ship"/>
+
+                <!-- Set crew -->
+                <do_all exact="player.ship.people.free">
+                  <get_character_definition macro="$HOP_Macro" faction="faction.holyorder" tags="[entityrole.service.tag, tag.service, tag.elite]"/>
+                  <create_npc_template name="$ServiceCrew" object="player.ship" macro="$HOP_Macro" role="entityrole.service"/>
+                  <set_skill object="player.ship" template="$ServiceCrew" exact="15" type="skilltype.engineering"/>
+                  <set_skill object="player.ship" template="$ServiceCrew" exact="15" type="skilltype.morale"/>
+                  <set_skill object="player.ship" template="$ServiceCrew" exact="15" type="skilltype.piloting"/>
+                  <set_skill object="player.ship" template="$ServiceCrew" exact="15" type="skilltype.boarding"/>
+                  <set_skill object="player.ship" template="$ServiceCrew" exact="15" type="skilltype.management"/>
+                </do_all>
+
+                <!-- Set player speed at GS -->
+                <find_object_component name="$Engines" object="$PlayerShips.{1}" class="[class.engine]" multiple="true"/>
+                <force_player_speed speed="$PlayerShips.{1}.maxspeed"/>
+
+                <!-- Set Weapon groups -->
+
+                <do_for_each in="player.ship.weapons.all.list" name="$weapon">
+                  <do_if value="$weapon.macro == macro.weapon_gen_m_gatling_01_mk2_macro">
+                  </do_if>
+                  <do_if value="$weapon.macro == macro.weapon_gen_m_plasma_01_mk2_macro">
+                    <remove_weapon_from_weapongroup weapon="$weapon" weapongroup="0" primary="true"/>
+                    <add_weapon_to_weapongroup      weapon="$weapon" weapongroup="0" primary="false"/>
+                  </do_if>
+                </do_for_each>
+                <show_help line="27103" position="1" force="true" comment="Press $INPUT_STATE_FIRE_SECONDARY_WEAPON$ to fire secondary weapons."/>
+
+                <!-- ERROR -->
+                <do_if value="not $PlayerShips.count">
+                  <debug_text text="'$PlayerShips not found'" filter="error"/>
+                  <set_value name="$HasError"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Character_HighCommandActor">
+              <actions>
+                <create_cue_actor name="$HighCommandActor" cue="namespace" macro="character_timelines_seek_and_destroy_military_command_macro">
+                  <page exact="10306"/>
+                  <owner exact="faction.civilian"/>
+                  <skills>
+                    <skill type="management"  exact="14"/>
+                    <skill type="morale"      exact="15"/>
+                    <skill type="piloting"    exact="7"/>
+                    <skill type="engineering" exact="5"/>
+                    <skill type="boarding"    exact="11"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits    entity="$HighCommandActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$HighCommandActor" title="'{30606,101}'" icon="'captain'"/>
+                <set_value name="md.$PersistentCharacters.$HighCommandActor" exact="$HighCommandActor"/>
+
+                <!-- NPC Usecase Setup -->
+                <do_if value="not $MissionActors?">
+                  <set_value name="$MissionActors" exact="table[]"/>
+                </do_if>
+                <set_value name="$MissionActors.$HighCommandActor" exact="table[
+                                              $entity = $HighCommandActor,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <signal_cue_instantly cue="md.Setup.AddStoryMentor" param="table[$story=namespace, $actor=$HighCommandActor]"/>
+              </actions>
+            </library>
+
+            <library name="Setup_EnteringSystem">
+              <actions>
+                <speak actor="player.computer" priority="5">
+                  <text line="600" comment="Entering system" />
+                  <name value="$Cluster_PontifexsClaim" />
+                </speak>
+              </actions>
+            </library>
+
+            <library name="Setup_HOP_Station">
+              <actions>
+                <find_station_by_true_owner name="$HOP_Station" faction="faction.holyorder" space="$Sector_PontifexsClaim"/>
+                <!-- add satellite next to station -->
+                <create_object name="$Satellite" macro="macro.eq_arg_satellite_02_macro" owner="faction.player" sector="player.sector">
+                  <safepos x="0km" y="5km" z="0km" object="$HOP_Station"/>
+                </create_object>
+
+                <!-- deactivate turrets -->
+                <find_module name="$HOP_Station_Modules" object="$HOP_Station" multiple="true"/>
+                <do_for_each in="$HOP_Station_Modules" name="$module">
+                  <find_object_component name="$HOP_Station_Turrets" object="$module" class="[class.turret]" multiple="true"/>
+                  <do_for_each in="$HOP_Station_Turrets" name="$turret">
+                    <set_object_hacked object="$turret" duration="9999h"/>
+                  </do_for_each>
+                </do_for_each>
+
+                <!-- flush cargo so station doesn't build defence drones-->
+                <do_for_each in="$HOP_Station.cargo.table" name="$cargoware" valuename="$cargoamount">
+                  <remove_cargo object="$HOP_Station" ware="$cargoware" exact="$cargoamount"/>
+                </do_for_each>
+
+                <!-- remove defence drones -->
+                <remove_units object="$HOP_Station" category="unitcategory.defence" mk="1" exact="$HOP_Station.units.{unitcategory.defence}.count"/>
+                <debug_text text="'DEFENCE DRONES ' + $HOP_Station.units.{unitcategory.defence}.count" chance="0"/>
+                <signal_cue cue="Setup_HOP_Station_RemoveDrones"/>
+
+                <set_object_relation_behaviour object="$HOP_Station" disable="true"/>
+
+                <set_value name="$Zone_HOP_EQ_Dock" exact="$HOP_Station.zone"/>
+
+                <!-- ERROR -->
+                <do_if value="not $HOP_Station.exists" comment="#TemplateExample">
+                  <debug_text text="'$HOP_Station not found'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <cue name="Setup_HOP_Station_RemoveDrones">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <cues>
+                <cue name="RemoveDronesLoop" checkinterval="0.1s" instantiate="true">
+                  <actions>
+                    <do_if value="$HOP_Station.isoperational">
+                      <remove_units object="$HOP_Station" category="unitcategory.defence" mk="1" exact="$HOP_Station.units.{unitcategory.defence}.count"/>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <library name="Setup_Monument">
+              <actions>
+                <find_object name="$ParanidMonument" space="$Sector_PontifexsClaim" macro="macro.landmarks_par_monument_01_macro" required="true"/>
+                <create_position name="$ParanidMonumentPosition" object="$ParanidMonument" space="$Sector_PontifexsClaim"/>
+                <set_known object="$ParanidMonument" known="true"/>
+
+                <!-- ERROR -->
+                <do_if value="not $ParanidMonument.exists" comment="#TemplateExample">
+                  <debug_text text="'$ParanidMonument not found'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_ShipVars" purpose="include_actions">
+              <actions>
+                <set_value name="$Macros" exact="table[]"/>
+                <set_value exact="macro.ship_par_s_scout_01_a_macro"        name="$Macros.$Scout"/>
+                <set_value exact="macro.ship_par_s_fighter_01_a_macro"      name="$Macros.$Fighter"       comment="Perseus, 2 guns, fast; figher score"/>
+                <set_value exact="macro.ship_par_s_fighter_02_a_macro"      name="$Macros.$FighterHeavy"  comment="Theseus, 3 guns, slow but not shiptype heavy => fighter score"/>
+                <set_value exact="macro.ship_par_m_frigate_01_a_macro"      name="$Macros.$Frigate"/>
+                <set_value exact="macro.ship_par_m_corvette_01_a_macro"     name="$Macros.$Corvette"/>
+                <set_value exact="macro.ship_par_l_destroyer_02_a_macro"    name="$Macros.$Destroyer"/>
+                <set_value exact="macro.ship_par_xl_resupplier_02_a_macro"  name="$Macros.$Auxiliary"/>
+              </actions>
+            </library>
+
+            <!-- Objective Handling -->
+            <cue name="Gravidar_Events" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_gravidar_has_scanned group="$PlayerShips"/>
+                  <event_gravidar_has_scanned group="$PlayerShips_Launched"/>
+                </check_any>
+                <count_gravidar_contacts result="$contacts" object="event.object" min="0" comment="trigger on 0 since we also update on ships leaving"/>
+                <!-- contacts with a large bounding box can be picked up above the maxradarrange, i.e. 44km for a station, but that's okay -->
+              </conditions>
+              <actions>
+                <debug_text text="'Gravidar Update'" chance="0"/>
+                <remove_value name="$UpdateBriefing"/>
+
+                <!-- KILL: move targets from "Find" to "Kill" -->
+                <do_for_each in="$Targets_Find" name="$contact" reverse="true">
+                  <do_if value="$contacts.indexof.{$contact}">
+                    <debug_text text="'%s %s FOUND %s %s at %s'.[event.object, event.object.knownname, $contact, $contact.knownname, event.object.distanceto.{$contact}]"  chance="0"/>
+                    <remove_from_group group="$Targets_Find" object="$contact"/>
+                    <add_to_group  groupname="$Targets_Kill" object="$contact"/>
+
+                    <set_value name="$UpdateBriefing"/>
+                  </do_if>
+                </do_for_each>
+
+                <!-- FIND: move targets from "Kill" to "Find" -->
+                <do_for_each in="$Targets_Kill" name="$contact" reverse="true">
+                  <do_if value="not $contacts.indexof.{$contact}">
+                    <debug_text text="'%s %s LOST %s %s at $'.[event.object, event.object.knownname, $contact, $contact.knownname, event.object.distanceto.{$contact}]"  chance="0"/>
+                    <remove_from_group group="$Targets_Kill" object="$contact"/>
+                    <add_to_group  groupname="$Targets_Find" object="$contact"/>
+                    <set_value name="$UpdateBriefing"/>
+                  </do_if>
+                </do_for_each>
+
+                <!-- Update Briefing -->
+                <do_if value="$UpdateBriefing? and (event.object == player.entity.container)">
+                  <remove_value name="$UpdateBriefing"/>
+                  <signal_cue cue="UpdateBriefing"/>
+                </do_if>
+              </actions>
+            </cue>
+
+            <cue name="UpdateBriefing" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <do_if value="$Score_Kills ge $Score_Target_Star_4">
+                  <set_value name="$Score_Target_Current" exact="$Score_Target_Star_5"/>
+                </do_if>
+                <do_elseif value="$Score_Kills ge $Score_Target_Star_3">
+                  <set_value name="$Score_Target_Current" exact="$Score_Target_Star_4"/>
+                </do_elseif>
+                <do_elseif value="$Score_Kills ge $Score_Target_Star_2">
+                  <set_value name="$Score_Target_Current" exact="$Score_Target_Star_3"/>
+                </do_elseif>
+                <do_elseif value="$Score_Kills ge $Score_Target_Star_1">
+                  <set_value name="$Score_Target_Current" exact="$Score_Target_Star_2"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="$Score_Target_Current" exact="$Score_Target_Star_1"/>
+                </do_else>
+
+                <!-- keep auxiliary out -->
+                <do_if value="@$AuxiliaryShip">
+                  <remove_from_group group="$Targets_Find" object="$AuxiliaryShip"/>
+                  <remove_from_group group="$Targets_Kill" object="$AuxiliaryShip"/>
+                </do_if>
+
+                <do_if value="$Targets_Kill.count">
+                  <remove_value name="$UpdateBriefing_Objective_Find" comment="prevent unnecessary updating/pinging in the ui"/>
+                  <set_objective cue="$MissionCue" step="$MissionStep" action="objective.destroy" group="$Targets_Kill" silent="true" updatebriefing="true">
+                    <progress text="{30606,501}" progress="$Score_Kills" max="$Score_Target_Current"/>
+                  </set_objective>
+                  <signal_cue_instantly cue="Betty_HostilesDetected" param="$Targets_Kill.{1}" check="false"/>
+                </do_if>
+                <do_elseif value="(not $Targets_Kill.count) and (not $UpdateBriefing_Objective_Find?)"  comment="(not $Targets_Kill.count)">
+                  <set_value    name="$UpdateBriefing_Objective_Find" comment="prevent unnecessary updating/pinging in the ui"/>
+                  <!--<substitute_text text="$Text_FindHostiles" source="readtext.{30606}.{1201}">
+                    <replace string="'$NUM$'" with="$Targets_Find.count"/>
+                  </substitute_text> debugging -->
+                  <set_value name="$Text_FindHostiles" exact="readtext.{30606}.{1202}"/>
+                  <set_objective cue="$MissionCue" step="$MissionStep" action="objective.find" text="$Text_FindHostiles" silent="true" updatebriefing="true">
+                    <progress text="{30606,501}" progress="$Score_Kills" max="$Score_Target_Current"/>
+                  </set_objective>
+                </do_elseif>
+                <do_elseif value="player.age lt 2s">
+                  <set_value name="$FirstUpdate"/>
+                  <set_value name="$Text_FindHostiles" exact="readtext.{30606}.{1202}"/>
+                  <set_objective cue="$MissionCue" step="$MissionStep" action="objective.find" text="$Text_FindHostiles" silent="true" updatebriefing="true"
+                   object="$Gate_PontifexsClaim_PAR">
+                    <progress text="{30606,501}" progress="$Score_Kills" max="$Score_Target_Current"/>
+                  </set_objective>
+                </do_elseif>
+              </actions>
+            </cue>
+
+            <cue name="RegisterCorvette_Nemesis" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$HostileNemesis" exact="event.param.$ship"/>
+              </actions>
+              <cues>
+                <cue name="RegisterCorvette_Nemesis_InRange">
+                  <conditions>
+                    <check_any>
+                      <event_gravidar_has_scanned group="$PlayerShips"/>
+                      <event_gravidar_has_scanned group="$PlayerShips_Launched"/>
+                    </check_any>
+                    <count_gravidar_contacts result="$contacts" object="event.object" min="1"/>
+                    <!-- contacts with a large bounding box can be picked up above the maxradarrange, i.e. 44km for a station, but that's okay -->
+                    <check_value value="@$HostileNemesis"/>
+                    <check_value value="$HostileNemesis.isoperational"/>
+                  </conditions>
+                  <actions>
+                    <speak actor="player.computer" priority="100">
+                      <text page="10002" line="505" comment="Hostiles detected. (object name)" />
+                      <name value="$HostileNemesis" />
+                    </speak>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="RegisterHostile" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_cue_signalled/>
+                  <event_object_launched_lasertower group="$Targets_Find"/>
+                  <event_object_launched_lasertower group="$Targets_Kill"/>
+                  <event_object_launched_mine       group="$Targets_Find"/>
+                  <event_object_launched_mine       group="$Targets_Kill"/>
+                  <event_object_launched_satellite  group="$Targets_Find"/>
+                  <event_object_launched_satellite  group="$Targets_Kill"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!-- support adding groups of objects and update briefing once only ? -->
+
+                <do_if value="event.name == 'event_cue_signalled'">
+                  <set_value name="this.$ship" exact="event.param.$ship"/>
+                </do_if>
+                <do_else>
+                  <set_value name="this.$ship" exact="event.param"/>
+                </do_else>
+
+                <do_if value="this.$ship.distanceto.{player.entity} gt $PlayerRadarRange">
+                  <add_to_group groupname="$Targets_Find" object="this.$ship"/>
+                </do_if>
+                <do_else>
+                  <add_to_group groupname="$Targets_Kill" object="this.$ship"/>
+                </do_else>
+
+                <!-- defence drones -->
+                <!-- getting macros not units .. -->
+                <!--<do_if value="not this.$ship.isclass.[class.satellite, class.mine]">
+                  <do_for_each in="this.$ship.units.{unitcategory.defence}.list" name="$drone">
+                    <do_if value="$drone.distanceto.{player.entity} gt $PlayerRadarRange">
+                      <add_to_group groupname="$Targets_Find" object="$drone"/>
+                    </do_if>
+                    <do_else>
+                      <add_to_group groupname="$Targets_Kill" object="$drone"/>
+                    </do_else>
+                  </do_for_each>
+                </do_if>-->
+
+                <signal_cue cue="UpdateBriefing"/>
+              </actions>
+            </cue>
+
+            <cue name="Register_PlayerObject" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_launched_lasertower group="$PlayerShips"/>
+                  <event_object_launched_mine       group="$PlayerShips"/>
+                  <event_object_launched_satellite  group="$PlayerShips"/>
+                  <event_object_launched_lasertower group="$PlayerShips_Launched"/>
+                  <event_object_launched_mine       group="$PlayerShips_Launched"/>
+                  <event_object_launched_satellite  group="$PlayerShips_Launched"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <add_to_group groupname="$PlayerShips_Launched" object="event.param"/>
+              </actions>
+            </cue>
+
+            <cue name="PlayerTauntLine" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <!-- event.param is the destroyed object.type -->
+                <do_if value="(shiptype.resupplier == event.param) and ($Score_Kills ge $Score_Target_Star_5)">
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                $script = [
+                                  table[ $actor = '$HighCommandActor', $speak = 10090, $recipient = 'player', $monitor=false, $voiceover = true],
+                                ]
+                              ]" />
+                  <!-- <t id="10090">(variant)(victorious cheering)To victory!</t> -->
+                </do_if>
+                <do_elseif value="$PlayerTauntLines.count" chance="33">
+                  <set_value name="$line" exact="$PlayerTauntLines.random"/>
+                  <speak actor="player.entity" page="$PlayerPage" line="$line"/>
+                  <remove_from_list name="$PlayerTauntLines" exact="$line"/>
+                </do_elseif>
+              </actions>
+            </cue>
+
+            <!-- Destroyed Targets UpdateBriefing + Log -->
+            <cue name="Kill_Log" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed group="$Targets_Kill"/>
+                  <event_object_destroyed group="$Targets_Find"/>
+                  <event_object_destroyed group="$Targets_Bonus"/>
+                </check_any>
+                <check_value value="event.param"/>
+                <check_value value="event.param.knownname"/>
+              </conditions>
+              <actions>
+                <remove_from_group object="event.object" group="$Targets_Kill"/>
+                <remove_from_group object="event.object" group="$Targets_Find"/>
+
+                <!-- only player kills count -->
+                <do_if value="event.param.trueowner == faction.player">
+                  <!-- Scoring -->
+                  <do_if value="event.object.isclass.satellite">
+                    <debug_text text="'Player destroyed satellite'" chance="$DebugChance"/>
+                    <set_value name="$Kill_LookUp.$satellite.$kill_amount" operation="add"/>
+                  </do_if>
+                  <do_elseif value="event.object.isclass.mine and (killmethod.selfdestructed != event.param2)">
+                    <debug_text text="'Player destroyed mine ' + event.param2" chance="$DebugChance"/>
+                    <set_value name="$Kill_LookUp.$mine.$kill_amount" operation="add"/>
+                  </do_elseif>
+                  <do_elseif value="event.object.isclass.mine and (killmethod.selfdestructed == event.param2)">
+                    <debug_text text="'Player got hit by mine ' + event.param2" chance="$DebugChance"/>
+                    <set_value name="$Kill_LookUp.$mineHit.$kill_amount" operation="add"/>
+                  </do_elseif>
+                  <!-- shiptype keys -->
+                  <do_elseif value="$Kill_LookUp.{event.object.type}?">
+                    <debug_text text="'Player destroyed %s'.[event.object.type]" chance="$DebugChance"/>
+                    <!-- bonus points if the capital ship is destroyed earlier + 1 point per second -->
+                    <do_if value="event.object.type == shiptype.resupplier">
+                      <debug_text text="'help %s'.[event.object.knownname]"/>
+                      <set_value name="$Kill_LookUp.{shiptype.resupplier}.$score"   exact="$Duration - player.age" operation="add"/>
+
+                      <set_value name="$MinutesPassed" exact="(player.age / 60)f"/>
+                      <do_all exact="10" reverse="true" counter="$i">
+                        <do_if value="$MinutesPassed le $i">
+                          <set_value name="$Within" exact="$i"/>
+                        </do_if>
+                      </do_all>
+                      <do_if value="$Within le 1">
+                        <set_value name="$Within" exact="2"/>
+                      </do_if>
+
+                      <!-- "Destroyed Auxiliary within $Within minutes" (number between 2 and 10) -->
+                      <substitute_text text="$Kill_LookUp.{shiptype.resupplier}.$stat_name" source="readtext.{30600}.{3041}">
+                        <replace string="'$NUM$'" with="$Within"/>
+                      </substitute_text>
+                    </do_if>
+
+                    <set_value name="$Kill_LookUp.{event.object.type}.$kill_amount" operation="add"/>
+                    <signal_cue_instantly cue="PlayerTauntLine" param="event.object.type"/>
+                  </do_elseif>
+                  <do_else>
+                    <debug_text text="'player destroyed some unknown other thing ' + event.object + event.object.knownname"/>
+                  </do_else>
+
+                  <set_value name="$Score_Kills" exact="0"/>
+                  <do_for_each in="$Kill_LookUp" name="$key" valuename="$value">
+                    <set_value name="$Score_Kills" operation="add" exact="$value.$kill_amount * $value.$score"/>
+                  </do_for_each>
+
+                  <debug_text text="'NEW PLAYER SCORE ' + $Score_Kills" chance="$DebugChance"/>
+
+                  <substitute_text text="$Text_DestroyedHostile" source="readtext.{30606}.{1300}">
+                    <replace string="'$TIME$'"    with="player.age.formatted.{'%m:%s'}"/>
+                    <replace string="'$HOSTILE$'" with="event.object.knownname"/>
+                    <replace string="'$KILLER$'"  with="event.param.knownname"/>
+                  </substitute_text>
+                  <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$Text_DestroyedHostile" silent="true" updatebriefing="true"/>
+                  <set_value name="$MissionStep" operation="add"/>
+
+                </do_if>
+                <signal_cue_instantly cue="UpdateBriefing"/>
+              </actions>
+            </cue>
+
+            <!-- Hostiles Warning -->
+            <cue name="Betty_HostilesDetected" instantiate="false" comment="we never want this to run multiple times at once">
+              <conditions>
+                <event_cue_signalled/>
+                <check_value value="player.computer" comment="prevent errors after game over"/>
+              </conditions>
+              <actions>
+                <speak actor="player.computer" priority="5">
+                  <text page="10002" line="505" comment="Hostiles detected. (object name)" />
+                  <name value="event.param" />
+                </speak>
+              </actions>
+              <delay exact="90s"/>
+              <actions>
+                <reset_cue cue="this"/>
+              </actions>
+            </cue>
+
+            <!-- Hostiles Handling -->
+            <cue name="Hostiles">
+              <actions>
+                <create_list name="$Respawn_Listeners"/>
+              </actions>
+              <cues>
+
+                <!-- ORDERS -->
+
+                <cue name="Order_Attack_Station" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$Zone_HOP_EQ_Dock"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="false"/>
+                    </create_order>
+                    <do_if value="$HOP_Station.exists">
+                      <create_order id="'Attack'" object="event.param.$ship" immediate="true">
+                        <param name="primarytarget" value="$HOP_Station"/>
+                        <param name="pursuetargets" value="true"/>
+                      </create_order>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Bombard_Station" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$Zone_HOP_EQ_Dock"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="false"/>
+                    </create_order>
+                    <do_if value="$HOP_Station.exists">
+                      <create_order id="'Attack'" object="event.param.$ship" immediate="true">
+                        <param name="primarytarget"         value="$HOP_Station"/>
+                        <param name="allowboost"            value="false"/>
+                        <param name="allowothertargets"     value="false"/>
+                        <param name="pursuetargets"         value="true" comment="outside sector"/>
+                      </create_order>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Patrol_PAR_Gate" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$Gate_PontifexsClaim_PAR.zone"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="false"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Patrol_Monument" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$ParanidMonument.zone"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="false"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Patrol_Minefield" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="range" value="class.zone"/>
+                    </create_order>
+                    <create_order id="'MoveGeneric'" name="this.$MoveOrder" object="event.param.$ship" immediate="true">
+                      <param name="destination"   value="$Sector_PontifexsClaim"/>
+                      <param name="position"      value="$Pos_Minefield"/>
+                      <param name="noboost"       value="true" comment="we don't want randomness in shield strength"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Hunt_Player_Late" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$shiptable" exact="event.param"/>
+                  </actions>
+                  <delay exact="7min"/>
+                  <actions>
+                    <signal_cue_instantly cue="Order_Hunt_Player" param="this.$shiptable"/>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Hunt_Player" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$Gate_PontifexsClaim_PAR.zone"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="true"/>
+                    </create_order>
+                    <do_if value="$PlayerShips.count">
+                      <create_order id="'Attack'" object="event.param.$ship" immediate="true">
+                        <param name="primarytarget"         value="$PlayerShips.{1}"/>
+                        <param name="allowboost"            value="true"/>
+                        <param name="allowothertargets"     value="false"/>
+                        <param name="pursuetargets"         value="true" comment="outside sector"/>
+                      </create_order>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="Order_Guard_Satellite" instantiate="true">
+                  <!-- called once per satellite, increments over a list of satellites to assign a ship per satellite -->
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="event.param.$CommanderGroup.indexof.{event.param.$ship}" comment="commander only"/>
+                  </conditions>
+                  <actions>
+                    <cancel_all_orders object="event.param.$ship"/>
+                    <!--<debug_text text="'ZOOONE ' + $Satellites.{$Satellites_Counter}.zone"/>-->
+                    <create_order id="'Patrol'" object="event.param.$ship" default="true">
+                      <param name="space" value="$Satellites.{$Satellites_Counter}.zone"/>
+                      <param name="range" value="class.zone"/>
+                      <param name="pursuetargets" value="false"/>
+                    </create_order>
+                    <set_value name="$Satellites_Counter" operation="add"/>
+                  </actions>
+                </cue>
+
+
+                <!-- ESCORT FLEETS -->
+
+                <cue name="Escort_Fighter_2x" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$ParamTable" exact="event.param"/>
+                    <set_value name="$ParamTable.$Scenario_Amount" exact="2" comment="not using $Amount as it might become a valid lib return value in the future"/>
+                    <signal_cue_instantly cue="Escort_Fighter" param="$ParamTable"/>
+                  </actions>
+                </cue>
+
+                <cue name="Escort_Fighter" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_group groupname="this.$CommanderGroup"/>
+                    <add_to_group groupname="this.$CommanderGroup" object="event.param.$ship"/>
+                    <set_value name="this.$Amount"          exact="if event.param.$Scenario_Amount? then event.param.$Scenario_Amount else 1"/>
+                    <set_value name="this.$ExitGate"        exact="event.param.$ExitGate"/>
+                    <set_value name="this.$DelayInit"       min="1s" max="3s"/>
+                  </actions>
+                  <cues>
+                    <cue name="Escort_Fighter_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                      <param name="Amount"          value="parent.$Amount"/>
+                      <param name="DelayInit"       value="parent.$DelayInit"/>
+                      <param name="ExitGate"        value="parent.$ExitGate"/>
+                      <param name="Macro"           value="$Macros.$Fighter"/>
+                      <param name="Owner"           value="$EnemyOwner"/>
+                      <param name="Loadout"         value="'scenario_seek_and_destroy_perseus_combat'"/>
+                      <param name="People"          value="'paranid_elite_military_crew'"/>
+                      <param name="SignalCue"       value="[RegisterHostile]"/>
+                      <param name="CommanderGroup"  value="parent.$CommanderGroup"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+
+
+                <!-- RESPAWN HANDLER -->
+
+                <cue name="Respawn_On_Death" instantiate="true">
+                  <!-- Limitation: Respawns only the first running ParentCue Fleet once all $ShipGroup ships are dead, ignores further instances (i.e. 5 fleet calls but only a specific 1 will respawn). -->
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$ShipGroup" exact="event.param.$ShipGroup"/>
+                    <set_value name="this.$ParentCue" exact="event.param.$ParentCue"/>
+
+                    <do_if value="not $Respawn_Listeners.indexof.{this.$ParentCue}">
+                      <append_to_list name="$Respawn_Listeners" exact="this.$ParentCue"/>
+                    </do_if>
+                    <do_else>
+                      <cancel_cue cue="this"/>
+                    </do_else>
+                  </actions>
+                  <cues>
+                    <cue name="Respawn_Event">
+                      <conditions>
+                        <event_object_destroyed group="parent.$ShipGroup"/>
+                        <check_value value="parent.$ShipGroup.count == 1" comment="last one about to be destroyed"/>
+                      </conditions>
+                      <actions>
+                        <remove_from_list name="$Respawn_Listeners" exact="parent.$ParentCue"/>
+                        <debug_text text="'Respawning ' + parent.$ParentCue"/>
+                        <reset_cue cue="parent.$ParentCue"/>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+
+                <!-- DEBUG WAVE GROUPS -->
+
+                <cue name="Debug_DestroyAfterXMin" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="120s"/>
+                  <actions>
+                    <debug_text text="'attempting destroyings at ' + player.age + ' ' + event.param.$CommanderGroup.{1}.knownname"/>
+                    <destroy_object object="event.param.$CommanderGroup.{1}" explosion="true"/>
+                  </actions>
+                  <delay exact="4s"/>
+                  <actions>
+                    <signal_cue_instantly cue="ResultWindow"/>
+                  </actions>
+                </cue>
+
+                <cue name="DEBUG_Entered_MainSector" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$ships" exact="event.param.$CommanderGroup"/>
+                  </actions>
+                  <cues>
+                    <cue name="DEBUG_Entered_MainSector_Event" instantiate="true">
+                      <conditions>
+                        <event_object_changed_sector group="parent.$ships"/>
+                        <debug_text text="'%s %s %s'.[player.age, event.object.knownname, event.param.knownname]"/>
+                      </conditions>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <cue name="DEBUG_WaveGroups" instantiate="true">
+                  <!-- Call from CreateFleetAtExitGate SignalCue for Debug Spam; don't get too lucky with RNG Instance Number -->
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$INSTANCE" min="100000" max="999999"/>
+                    <set_value name="this.$CMD" exact="event.param.$CommanderGroup"/>
+                    <set_value name="this.$SHP" exact="event.param.$ShipGroup"/>
+                  </actions>
+                  <cues>
+                    <cue name="Wave1_DEBUG" instantiate="true" checkinterval="4s">
+                      <actions>
+                        <debug_text text="'%s ----'.[parent.$INSTANCE]"/>
+                        <debug_text text="'%s  CMD %s %s %s '.[parent.$INSTANCE, parent.$CMD, parent.$CMD.{1}.knownname, parent.$CMD]"/>
+                        <debug_text text="'%s --c--'.[parent.$INSTANCE]"/>
+                        <do_for_each in="parent.$CMD" name="$ship">
+                          <debug_text text="'%s %s %s  %s '.[parent.$INSTANCE, $ship, $ship.knownname, $ship.order.name]"/>
+                        </do_for_each>
+                        <debug_text text="'%s --g--'.[parent.$INSTANCE]"/>
+                        <do_for_each in="parent.$SHP" name="$ship">
+                          <debug_text text="'%s %s %s %s '.[parent.$INSTANCE, $ship, $ship.knownname, $ship.order.name]"/>
+                        </do_for_each>
+                      </actions>
+                    </cue>
+                  </cues>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Add_Stat_Cause_Of_Death" ref="md.LIB_Scenario.Track_Cause_Of_Death">
+              <param name="SpecifyWeapon" value="true"/>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="StartScenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+
+            <cue name="MitsunoHack">
+              <delay min="$MuffleDuration + 7s" max="$MuffleDuration + 12s"/>
+              <actions>
+                <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+              </actions>
+            </cue>
+
+            <cue name="Debug_Cheat" onfail="cancel">
+              <conditions>
+                <check_value value="false"/>
+              </conditions>
+              <cues>
+                <cue name="Debug_Cheat_Heal" checkinterval="1s" instantiate="true">
+                  <actions>
+                    <set_object_shield  object="player.ship" exact="100"/>
+                    <set_object_hull    object="player.ship" exact="100"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Ch1_Mission">
+              <actions>
+                <debug_text text="'Starting Chapter 1'" chance="$DebugChance"/>
+                <!-- Mission Objective -->
+                <set_value name="$MissionStep" exact="1"/>
+                <create_mission comment="Mission: Seek and Destroy" endtime="$Duration"
+                                name="{30606,1001}" description="{30606,4}" rewardtext="{30606,1002}"
+                                icon="'briefing_mission_director_01'" iconcaption="{30293,102}" faction="$MissionFaction"
+                                cue="$MissionCue" abortable="true" difficulty="$Difficulty" type="$MissionType">
+                  <briefing>
+                    <objective step="$MissionStep" action="objective.kill"/>
+                  </briefing>
+                </create_mission>
+                <set_objective_from_briefing cue="$MissionCue" step="$MissionStep"/>
+              </actions>
+              <cues>
+
+                <cue name="Call_MissionCommand_Intro">
+                  <delay exact="5s"/>
+                  <actions>
+                    <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                $script = [
+                                  table[ $actor = '$HighCommandActor', $speak = 5030, $recipient = 'player', $monitor=false, $voiceover = true],
+                                ]
+                              ]" />
+
+                    <!-- <t id="5030">Be prepared for combat encounters.</t> -->
+                  </actions>
+                </cue>
+
+                <cue name="Satellites">
+                  <cues>
+                    <cue name="Satellites_Spawn">
+                      <actions>
+                        <create_list name="$list_positions"/>
+                        <create_list name="$Satellites"/>
+                        <set_value   name="$Satellites_Counter"/>
+                        <do_all exact="5" counter="$name">
+                          <get_safe_pos result="$safepos" object="$Gate_PontifexsClaim_PAR" radius="$PlayerRadarRange * 1.5" allowyaxis="true" sector="$Sector_PontifexsClaim"/>
+                          <do_if value="not $list_positions.indexof.{$safepos}">
+                            <append_to_list name="$list_positions" exact="$safepos"/>
+                            <create_object name="this.$Target" macro="macro.eq_arg_satellite_01_macro" owner="$EnemyOwner" sector="$Sector_PontifexsClaim">
+                              <position object="$Sector_PontifexsClaim" space="$Sector_PontifexsClaim" value="$safepos"/>
+                            </create_object>
+                            <!--<set_object_name object="this.$Target" name="'number ' + $name"/>-->
+                            <append_to_list name="$Satellites" exact="this.$Target"/>
+                            <signal_cue cue="SatelliteGuard"/>
+                            <signal_cue_instantly cue="RegisterHostile" param="table[$ship = this.$Target]"/>
+                          </do_if>
+                        </do_all>
+                      </actions>
+                    </cue>
+
+                    <cue name="SatelliteGuard" instantiate="true">
+                      <conditions>
+                        <event_cue_signalled/>
+                      </conditions>
+                      <cues>
+                        <cue name="SatelliteGuard_Scouts_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                          <param name="Amount"          value="1"/>
+                          <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                          <param name="Macro"           value="$Macros.$Scout"/>
+                          <param name="Owner"           value="$EnemyOwner"/>
+                          <param name="Loadout"         value="'scenario_seek_and_destroy_burst'"/>
+                          <param name="People"          value="'paranid_elite_military_crew'"/>
+                          <param name="SignalCue"       value="[Order_Guard_Satellite, RegisterHostile]"/>
+                          <param name="Assignment"      value="assignment.defence"/>
+                        </cue>
+                      </cues>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Initial Fleets (not respawning; Allowed to spawn from traversible gates which won't be allowed for fleets which respawn) -->
+
+                <cue name="Auxiliary_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                  <!-- spawn capital ship first so it doesn't fight with small ships for safepos -->
+                  <param name="Amount"          value="1"/>
+                  <param name="DelayInit"       value="210s"/>
+                  <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                  <param name="Macro"           value="$Macros.$Auxiliary"/>
+                  <param name="Owner"           value="$EnemyOwner"/>
+                  <param name="Loadout"         value="'scenario_seek_and_destroy_auxiliary'"/>
+                  <param name="People"          value="'paranid_elite_military_crew'"/>
+                  <param name="SignalCue"       value="[Order_Patrol_Minefield, RegisterHostile, Escort_Fighter_2x, Register_Auxiliary]"/>
+                </cue>
+                <cue name="Register_Auxiliary" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$AuxiliaryShip" exact="event.param.$ship"/>
+                    <add_to_group object="$AuxiliaryShip" groupname="$Targets_Bonus"/>
+                  </actions>
+                </cue>
+
+                <!--<cue name="Wave_Scouts_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                  <param name="Amount"          value="3"/>
+                  <param name="DelayInit"       value="1s"/>
+                  <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                  <param name="Macro"           value="$Macros.$Scout"/>
+                  <param name="Owner"           value="$EnemyOwner"/>
+                  <param name="Loadout"         value="'scenario_seek_and_destroy_burst'"/>
+                  <param name="People"          value="'paranid_elite_military_crew'"/>
+                  <param name="SignalCue"       value="[Order_Hunt_Player, RegisterHostile]"/>
+                  <param name="Assignment"      value="assignment.attack"/>
+                </cue>-->
+
+                <cue name="Wave_Scouts_Initial">
+                  <actions>
+                    <do_all exact="3" counter="$i">
+                      <signal_cue_instantly cue="Wave_Scouts_Initial_Spawn" param="$i * 1s"/>
+                    </do_all>
+                  </actions>
+                </cue>
+                <cue name="Wave_Scouts_Initial_Spawn" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="event.param"/>
+                  <actions>
+
+                    <run_actions ref="md.LIB_Generic.GetPositionBetweenObjects" result="$LocationTable">
+                      <param name="FromObject"          value="$Gate_PontifexsClaim_HOP"/>
+                      <param name="ToObject"            value="$Gate_PontifexsClaim_PAR"/>
+                      <param name="Distance01"          value="null"/>
+                      <param name="Distance_Absolute"   value="50km" comment="overwrites Distance01 if not Distance01"/>
+                    </run_actions>
+
+                    <create_position name="$Pos" object="$Gate_PontifexsClaim_HOP" value="$LocationTable.$position" space="$Sector_PontifexsClaim"/>
+                    <create_rotation name="$Rot" pitch="0deg" roll="180deg" yaw="270deg"/>
+
+                    <create_ship name="$ship" macro="$Macros.$Scout" sector="$Sector_PontifexsClaim"
+                                 commandeerable="false" capturable="false" missioncue="namespace">
+                      <owner exact="$EnemyOwner" overridenpc="true"/>
+                      <pilot>
+                        <select race="$EnemyOwner.primaryrace"/>
+                      </pilot>
+                      <loadout ref="scenario_seek_and_destroy_burst"/>
+                      <people>
+                        <fillpercent exact="100"/>
+                      </people>
+                      <safepos value="$Pos" space="$Sector_PontifexsClaim"/>
+                      <rotation pitch="$Rot.pitch" yaw="$Rot.yaw" roll="$Rot.roll"/>
+                    </create_ship>
+
+                    <add_to_group groupname="$ShipGroup"      object="$ship"/>
+                    <add_to_group groupname="$CommanderGroup" object="$ship"/>
+
+                    <set_value name="$ResultTable" exact="table[
+                       $ship = $ship,
+                       $ShipGroup = $ShipGroup,
+                       $CommanderGroup = $CommanderGroup,
+                       $ParentCue = parent,
+                       $DelayInit = 0s,
+                       $ExitGate = null
+                       ]"/>
+
+                    <signal_cue_instantly cue="Order_Hunt_Player"           param="$ResultTable"/>
+                    <signal_cue_instantly cue="RegisterHostile"             param="$ResultTable"/>
+                  </actions>
+                </cue>
+
+                <cue name="FighterWing_1_Commander_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                  <param name="Amount"          value="1"/>
+                  <param name="DelayInit"       value="1s"/>
+                  <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                  <param name="Macro"           value="$Macros.$FighterHeavy"/>
+                  <param name="Owner"           value="$EnemyOwner"/>
+                  <param name="Loadout"         value="'scenario_seek_and_destroy_theseus_combat'"/>
+                  <param name="People"          value="'paranid_elite_military_crew'"/>
+                  <param name="SignalCue"       value="[Order_Patrol_Monument, RegisterHostile, Escort_Fighter_2x]"/>
+                </cue>
+
+                <cue name="FighterWing_2_Commander_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                  <param name="Amount"          value="1"/>
+                  <param name="DelayInit"       value="50s"/>
+                  <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                  <param name="Macro"           value="$Macros.$FighterHeavy"/>
+                  <param name="Owner"           value="$EnemyOwner"/>
+                  <param name="Loadout"         value="'scenario_seek_and_destroy_theseus_combat'"/>
+                  <param name="People"          value="'paranid_elite_military_crew'"/>
+                  <param name="SignalCue"       value="[Order_Hunt_Player, RegisterHostile, Escort_Fighter_2x]"/>
+                </cue>
+
+                <cue name="Wave_Frigates_Bombardent">
+                  <actions>
+                    <set_value name="this.$DelayInit" exact="10s"/>
+                    <do_all exact="9" counter="$i">
+                      <signal_cue_instantly cue="Wave_Frigates" param="155s + ($i * 1s)"/>
+                    </do_all>
+                  </actions>
+                </cue>
+                <cue name="Wave_Frigates" instantiate="true">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <set_value name="this.$DelayInit" exact="event.param"/>
+                  </actions>
+                  <cues>
+                    <cue name="Wave_Frigates_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                      <param name="Amount"          value="1"/>
+                      <param name="DelayInit"       value="parent.$DelayInit"/>
+                      <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                      <param name="Macro"           value="$Macros.$Frigate"/>
+                      <param name="Owner"           value="$EnemyOwner"/>
+                      <param name="Loadout"         value="'scenario_seek_and_destroy_torpedo'"/>
+                      <param name="Drop"            value="'drops_scenario_lasertower_basic'"/>
+                      <param name="People"          value="'paranid_elite_military_crew'"/>
+                      <param name="SignalCue"       value="[Order_Bombard_Station, RegisterHostile]"/>
+                      <param name="Assignment"      value="assignment.assist" comment="assist copies commanders default order, keeps up with changes"/>
+                    </cue>
+                  </cues>
+                </cue>
+
+                <!-- Respawning Fleets (only from $Gates_EnemySpawn gates) -->
+
+                <cue name="Wave_Corvette_Ref" ref="md.LIB_Generic.CreateFleetAtExitGate">
+                  <param name="Amount"          value="1"/>
+                  <param name="DelayInit"       value="$Duration - 120s"/>
+                  <param name="ExitGate"        value="$Gate_PontifexsClaim_PAR"/>
+                  <param name="Macro"           value="$Macros.$Corvette"/>
+                  <param name="Owner"           value="$EnemyOwner"/>
+                  <param name="Loadout"         value="'scenario_seek_and_destroy_corvette_combat'"/>
+                  <param name="People"          value="'paranid_elite_military_crew'"/>
+                  <param name="SignalCue"       value="[Order_Hunt_Player, RegisterHostile, RegisterCorvette_Nemesis]"/>
+                  <param name="Assignment"      value="assignment.defence"/>
+                </cue>
+
+                <cue name="Timeout">
+                  <delay exact="$Duration"/>
+                  <actions>
+                    <signal_cue_instantly cue="ResultWindow"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="Overlay" instantiate="true" checkinterval="100ms">
+              <actions>
+                <do_if value="(not player.isinfullscreenmenu)
+                          and (ResultWindow.state == cuestate.waiting)
+                          and (($Duration - player.age) le 20s)">
+
+                  <!-- Setup Overlay Formatting Vars -->
+                  <set_value name="$UIPrimaryFontSize" exact="25"/>
+                  <set_value name="$UISecondaryFontSize" exact="50"/>
+
+                  <set_value name="$textcolour_primary"   exact="'text_normal'"/>
+                  <set_value name="$textcolour_secondary" exact="'overlay_scenario_stat_text'"/>
+                  <set_value name="$textcolour_warning"   exact="'overlay_scenario_stat_flash'"/>
+
+                  <!-- Setup Overlay Data -->
+                  <set_value name="$Overlay_Time_Text" exact="readtext.{1001}.{3404} + readtext.{1001}.{120}"/>
+                  <set_value name="$Overlay_Time_Value" exact="''+ ($Duration - player.age)i + readtext.{1001}.{100}"/>
+
+                  <!-- Show Overlay -->
+                  <show_overlay_text relwidth="1.0" reloffsetx="0.0" reloffsety="0.05" fromtop="true" >
+                    <!-- Time Left: -->
+                    <row>
+                      <!-- ENGINES: -->
+                      <col idx="1"
+                           text="$Overlay_Time_Text"
+                           bgcolor="[0,0,0,0]"
+                           textcolor="$textcolour_secondary"
+                           fontsize="$UIPrimaryFontSize"
+                           halign="right"
+                           valign="bottom"
+                           colspan="3" />
+                      <!-- 1 -->
+                      <col idx="4"
+                           text="'' + $Overlay_Time_Value"
+                           bgcolor="[0,0,0,0]"
+                           textcolor="$textcolour_primary"
+                           fontsize="$UISecondaryFontSize"
+                           halign="left"
+                           valign="bottom"
+                           offsety="-10"
+                           colspan="6" />
+                      <!-- empty space to the right -->
+                      <col idx="12"
+                           text="' '"
+                           bgcolor="[0,0,0,0]"
+                           textcolor="$textcolour_secondary"
+                           fontsize="$UIPrimaryFontSize"
+                           halign="left"
+                           valign="bottom" />
+                    </row>
+                  </show_overlay_text>
+                </do_if>
+                <do_else>
+                  <remove_overlay_text force="true"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <!--
+            NOTES:
+            * Score Unlocks Something?
+            * Did you Succeed + How well?
+            * Benchmark player against the Clock
+            * "1 kill more requires some creative thinking", i.e. EQ dock usage?
+            * Request LEaderboard/SCores from testers
+
+            Engaging:
+            - Vary Target Sizes/Types
+            - Provide Intel               Target Location; Last Seen; Contact who has intel; Give player sense of purpose + direction
+            - Add Boss Battle             More challenging skills/tactics to take down
+            - Interactive Environment     Hazards to navigate, i.e. Minefield (patrols? Capital ships)
+
+            .. consider capital ship and if players are supposed to take it down for the last star.
+
+            Negative for missing Hull? (percentage)    ==> Tharka Story !
+            -->
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <remove_overlay_text force="true"/>
+            <debug_text text="player.age.formatted.{'%m:%.3S'}"/>
+
+            <!-- Stat: Accuracy -->
+            <run_actions ref="md.LIB_Scenario.Add_Scenario_Stat_Accuracy" result="$Score_Accuracy">
+              <param name="ScoreMultiplier" value="1"/>
+            </run_actions>
+
+            <!-- Stat: Score Kills -->
+            <set_value name="$Score_Kills" exact="0"/>
+
+            <set_value name="$Kill_LookUp.{shiptype.smalldrone}.$kill_amount"
+                      exact="$Kill_LookUp.{shiptype.smalldrone}.$kill_amount + $Kill_LookUp.{shiptype.xsdrone}.$kill_amount"/>
+
+            <do_all exact="$Kill_LookUp_DisplayOrder.count" counter="$i">
+              <set_value name="$key"    exact="$Kill_LookUp_DisplayOrder.{$i}"/>
+              <set_value name="$value"  exact="$Kill_LookUp.{$key}"/>
+              <do_if value="($value.$kill_amount) or ($key == shiptype.scout) or ($key == shiptype.fighter)" comment="kills ge 1; always show scout and fighter">
+                <do_if value="$key == shiptype.resupplier">
+                  <add_scenario_stat id="'kills_resupplier'" name="$value.$stat_name" uivalue="$value.$kill_amount" score="$value.$kill_amount * $value.$score" maxscore="$value.$max_expected_amount * $value.$score" description="$Text_KillScore_Resupplier"/>
+                </do_if>
+                <do_else>
+                  <add_scenario_stat id="'kills_' + $key" name="$value.$stat_name" uivalue="$value.$kill_amount" score="$value.$kill_amount * $value.$score" maxscore="$value.$max_expected_amount * $value.$score"/>
+                </do_else>
+              </do_if>
+              <set_value name="$Score_Kills" operation="add" exact="$value.$kill_amount * $value.$score"/>
+            </do_all>
+
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$ResultData.$Score" exact="$Score_Kills + $Score_Accuracy"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

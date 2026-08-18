@@ -1,0 +1,1000 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="libraries.xsd">
+
+  <!-- LOANSHARK (Vigor)
+        Ice Union (North) - Barbarossa, Kyd
+        Scrapyard (West) - Shih, Kyd
+        Aurora (South) - Lux, Kyd
+        anything not sector-bound such as expansion/compression groups exclusively use Kyd -->
+  <!-- Plunderer -->
+  <job id="loanshark_plunderer_iceunion" name="{20204,11301}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Plunder" default="true">
+        <param name="range_internal" value="'sector'"/>
+        <param name="plundermode" value="0"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[plunderer, iceunion]" size="ship_l"/>
+    <quota galaxy="11"/>
+    <location class="sector" macro="Cluster_501_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <basket basket="pirate_container"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+  <job id="loanshark_plunderer_scrapyard" name="{20204,13401}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Plunder" default="true">
+        <param name="range_internal" value="'sector'"/>
+        <param name="plundermode" value="0"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[plunderer, scrapyard]" size="ship_s"/>
+    <quota galaxy="2"/>
+    <location class="sector" macro="Cluster_502_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <basket basket="pirate_container"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, scrapyard]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+  <job id="loanshark_plunderer_aurora" name="{20204,14501}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Plunder" default="true">
+        <param name="range_internal" value="'sector'"/>
+        <param name="plundermode" value="0"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[plunderer, aurora]" size="ship_s"/>
+    <quota galaxy="3"/>
+    <location class="sector" macro="Cluster_503_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <basket basket="pirate_container"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, aurora]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+  <!--<job id="loanshark_plunderer_common" name="{20204,4201}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Plunder" default="true">
+        <param name="range_internal" value="'sector'"/>
+        <param name="plundermode" value="2"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[plunderer]" size="ship_s"/>
+    <quota galaxy="7"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <basket basket="pirate_container"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <level min="0.7" max="1.0"/>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>-->
+
+  <!-- Raiders -->
+  <job id="loanshark_raider_iceunion" name="{20204,11201}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, raider, iceunion]" size="ship_l"/>
+    <quota galaxy="11"/>
+    <location class="sector" macro="Cluster_501_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.7"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_iceunion_raider" assignment="attack"/>
+      <subordinate job="loanshark_escort_common" assignment="defence"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_raider_scrapyard" name="{20204,13201}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, raider, scrapyard]" size="ship_s"/>
+    <quota galaxy="5"/>
+    <location class="sector" macro="Cluster_502_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, scrapyard]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_scrapyard" assignment="attack"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_raider_aurora" name="{20204,14201}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, raider, aurora]" size="ship_s"/>
+    <quota galaxy="2"/>
+    <location class="sector" macro="Cluster_503_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, aurora]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_aurora" assignment="attack"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_raider_common" name="{20204,3401}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, raider, common]" size="ship_s"/>
+    <quota galaxy="7"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common" assignment="attack"/>
+    </subordinates>
+  </job>
+
+  <!-- Patrols -->
+  <job id="loanshark_patrol_iceunion" name="{20204,11601}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, iceunion]" size="ship_l"/>
+    <quota galaxy="2"/>
+    <location class="sector" macro="Cluster_501_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.7"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_iceunion_patrol" assignment="attack"/>
+      <subordinate job="loanshark_escort_common" assignment="defence"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_patrol_scrapyard" name="{20204,13601}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, scrapyard]" size="ship_s"/>
+    <quota galaxy="5"/>
+    <location class="sector" macro="Cluster_502_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, scrapyard]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_scrapyard" assignment="attack"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_patrol_aurora" name="{20204,14601}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military, aurora]" size="ship_s"/>
+    <quota galaxy="7"/>
+    <location class="sector" macro="Cluster_503_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, aurora]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_aurora" assignment="attack"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_patrol_common" name="{20204,3501}" comment="expansion">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_s"/>
+    <quota galaxy="11" sector="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common" assignment="attack"/>
+    </subordinates>
+  </job>
+
+  <!-- Police -->
+  <job id="loanshark_police_iceunion" name="{20204,11701}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Police" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[police]" size="ship_l"/>
+    <quota galaxy="1"/>
+    <location class="sector" macro="Cluster_501_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_police_scrapyard" name="{20204,13701}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Police" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[police]" size="ship_s"/>
+    <quota galaxy="1"/>
+    <location class="sector" macro="Cluster_502_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, scrapyard]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_police_aurora" name="{20204,14701}">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Police" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[police]" size="ship_s"/>
+    <quota galaxy="1"/>
+    <location class="sector" macro="Cluster_503_Sector001_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, aurora]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_police_common" name="{20204,6101}" comment="expansion, light">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Police" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[police]" size="ship_s"/>
+    <quota sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="self" comparison="exact"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+
+  <!-- Escorts -->
+  <job id="loanshark_escort_iceunion_raider" name="{20204,11201}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_l"/>
+    <quota wing="1" variation="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.7"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_escort_iceunion_patrol" name="{20204,11601}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_l"/>
+    <quota wing="1" variation="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[plunderer]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.7"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_escort_scrapyard" name="{20204,13101}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_s"/>
+    <quota wing="3" variation="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, scrapyard]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common_l2"/>
+      <!--<subordinate job="loanshark_escort_common"/>-->
+    </subordinates>
+  </job>
+  <job id="loanshark_escort_aurora" name="{20204,14101}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_s"/>
+    <quota wing="9" variation="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, aurora]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common_l2"/>
+      <!--<subordinate job="loanshark_escort_common"/>-->
+    </subordinates>
+  </job>
+  <job id="loanshark_escort_common" name="{20204,2601}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_s"/>
+    <quota wing="6" variation="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="loanshark_escort_common_l2"/>
+    </subordinates>
+  </job>
+  <job id="loanshark_escort_common_l2" name="{20204,2601}" startactive="false">
+    <modifiers commandeerable="false" subordinate="true"/>
+    <orders>
+      <order order="Escort" default="true"/>
+    </orders>
+    <category faction="loanshark" tags="[military]" size="ship_s"/>
+    <quota wing="1" variation="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[fighter, light]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- Trading Jobs -->
+  <job id="loanshark_bio_trader_l_iceunion" name="{20204,11901}">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="bio_argon"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+    <quota galaxy="4" cluster="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="loanshark_energy_trader_l_iceunion" name="{20204,11901}">
+    <modifiers rebuild="true" commandeerable="true"/>
+    <orders>
+      <order order="Middleman" default="true">
+        <param name="range" value="4"/>
+      </order>
+    </orders>
+    <basket basket="energycells"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+    <quota galaxy="6" cluster="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="loanshark_food_trader_l_iceunion" name="{20204,11901}">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="food_argon"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+    <quota galaxy="5" cluster="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="loanshark_tech_trader_l_iceunion" name="{20204,11901}">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="construction_stations"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+    <quota galaxy="5" cluster="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="loanshark_water_trader_l_iceunion" name="{20204,11901}">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="water"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, trader]" size="ship_l"/>
+    <quota galaxy="3" cluster="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[trader, container]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- Mining Jobs -->
+  <job id="loanshark_free_miner_l_ice_iceunion" name="{20204,11801}">
+    <modifiers rebuild="false" commandeerable="true"/>
+    <orders>
+      <order order="MiningRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="ice"/>
+    <category faction="loanshark" tags="[factionlogic, freighter, miner]" size="ship_l"/>
+    <quota galaxy="8"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="loanshark" relation="ally" comparison="ge" regionbasket="ice"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[miner, solid]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.7"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+      <cargo>
+        <wares>
+          <fillpercent min="0" max="100" profile="inversebell"/>
+        </wares>
+      </cargo>
+    </ship>
+  </job>
+
+  <!-- loanshark static defense jobs -->
+  <job id="loanshark_staticdefense_engineer_m" name="{20204, 8401}" comment="Combat Engineer">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="DeployStaticDefenseStrategy" default="true">
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[staticdefense]" size="ship_s"/>
+    <quota galaxy="0" maxgalaxy="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[military]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="loanshark_staticdefense_minelayer_s" name="{20204, 8501}" comment="Saboteur">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="DeployStaticDefenseStrategy" default="true">
+        <param name="isminesonly" value="true" />
+      </order>
+    </orders>
+    <category faction="loanshark" tags="[staticdefense]" size="ship_s"/>
+    <quota galaxy="0" maxgalaxy="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="loanshark" tags="[military]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.6"/>
+        </quality>
+      </loadout>
+      <owner exact="loanshark" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- SCAVENGER (Riptide) -->
+  <job id="scavenger_construction_vessel_xl" name="{20204,5101}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="FindBuildTasks" default="true">
+        <param name="maxjumps" value="2"/>
+      </order>
+    </orders>
+    <category faction="scavenger" tags="[factionlogic, builder]" size="ship_xl"/>
+    <quota galaxy="5" sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="neutral" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[builder]" size="ship_xl"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+  <job id="scavenger_free_tug_m" name="{20204,5401}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="SalvageRoutine" default="true">
+        <param name="range" value="4"/>
+      </order>
+    </orders>
+    <basket basket="all_scrap"/>
+    <category faction="scavenger" tags="[factionlogic, tug]" size="ship_m"/>
+    <quota galaxy="18"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="neutral" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[tug]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7"/>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+  <job id="scavenger_free_compactor_l" name="{20204,10023}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="SalvageRoutine" default="true">
+        <param name="range" value="4"/>
+      </order>
+    </orders>
+    <basket basket="all_scrap"/>
+    <category faction="scavenger" tags="[factionlogic, compactor]" size="ship_l"/>
+    <quota galaxy="4"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="neutral" comparison="ge" regionbasket="rawscrap"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[compactor]" size="ship_l"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="scavenger_condensate_trader_s" name="{20204,8301}">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Middleman" default="true">
+        <param name="range" value="4"/>
+        <param name="aggressiveness" value="10.0"/>
+        <param name="holdbuyprice" value="true"/>
+      </order>
+    </orders>
+    <basket basket="condensate"/>
+    <category faction="scavenger" tags="[factionlogic, trader, condensate]" size="ship_s"/>
+    <quota galaxy="4"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[trader, condensate]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.9">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="scavenger_energy_trader_m" name="{20204,201}">
+    <modifiers rebuild="true" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="energycells"/>
+    <category faction="scavenger" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="4" sector="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.4">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="scavenger_tech_trader_m_export" name="{20204,401}">
+    <modifiers rebuild="true" commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="0"/>
+        <param name="maxbuy" value="4"/>
+        <param name="minsell" value="0"/>
+        <param name="maxsell" value="4"/>
+      </order>
+    </orders>
+    <basket basket="construction_stations"/>
+    <category faction="scavenger" tags="[factionlogic, freighter, trader]" size="ship_m"/>
+    <quota galaxy="12" sector="4"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[trader, container]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- scavenger static defense jobs -->
+  <job id="scavenger_staticdefense_engineer_m" name="{20204, 8401}" comment="Combat Engineer">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="DeployStaticDefenseStrategy" default="true">
+      </order>
+    </orders>
+    <category faction="scavenger" tags="[staticdefense]" size="ship_m"/>
+    <quota galaxy="0" maxgalaxy="3"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[trader]" size="ship_m"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <job id="scavenger_staticdefense_minelayer_s" name="{20204, 8501}" comment="Saboteur">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="DeployStaticDefenseStrategy" default="true">
+        <param name="isminesonly" value="true" />
+      </order>
+    </orders>
+    <category faction="scavenger" tags="[staticdefense]" size="ship_s"/>
+    <quota galaxy="0" maxgalaxy="2"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="scavenger" tags="[trader]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.7"/>
+      </loadout>
+      <owner exact="scavenger" overridenpc="true"/>
+    </ship>
+  </job>
+
+  <!-- Ministry of Finance -->
+  <job id="ministry_food_smuggler_s" name="{20204,10009}" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="minbuy" value="3"/>
+        <param name="maxbuy" value="10"/>
+        <param name="maxsell" value="2"/>
+        <param name="usecover" value="true"/>
+        <param name="preferredcoverfactions" value="[faction.loanshark]"/>
+      </order>
+    </orders>
+    <basket basket="food"/>
+    <category faction="ministry" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+    <quota galaxy="2" sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="scavenger" relation="ally" comparison="ge"/>
+    <environment buildatshipyard="true" preferbuilding="true"/>
+    <ship>
+      <select faction="ministry" tags="[raven]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.3">
+          <variation exact="0.4"/>
+        </quality>
+      </loadout>
+      <owner exact="ministry" overridenpc="true"/>
+    </ship>
+  </job>
+  <job id="ministry_tech_trader_s" name="{20204,401}" startactive="false">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="TradeRoutine" default="true">
+        <param name="maxbuy" value="5"/>
+        <param name="maxsell" value="5"/>
+        <param name="usecover" value="true"/>
+      </order>
+    </orders>
+    <basket basket="surface"/>
+    <category faction="ministry" tags="[factionlogic, freighter, trader]" size="ship_s"/>
+    <quota galaxy="3" sector="1"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="teladi" relation="ally" comparison="ge" matchextension="false"/>
+    <environment buildatshipyard="true" preferbuilding="true"/>
+    <ship>
+      <select faction="ministry" tags="[raven]" size="ship_s"/>
+      <loadout>
+        <quantity exact="1.0"/>
+        <quality exact="0.71">
+          <variation exact="0.5"/>
+        </quality>
+      </loadout>
+      <owner exact="ministry" overridenpc="true"/>
+    </ship>
+  </job>
+</jobs>

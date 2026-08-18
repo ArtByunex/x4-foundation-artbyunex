@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macros>
+  <macro name="timelines_map_scan_anomalies_cluster_001_sector_001_zone_001_macro">
+    <component ref="standardzone" connection="sector"/>
+    <properties>
+      <identification name="{20006,601}"/>
+    </properties>
+  </macro>
+  <macro name="timelines_map_scan_anomalies_cluster_001_sector_001_macro">
+    <component ref="standardsector" connection="cluster"/>
+    <connections>
+      <connection name="editor_cluster_sector_zone_01_connection" ref="zones">
+        <macro ref="timelines_map_scan_anomalies_cluster_001_sector_001_zone_001_macro" connection="sector"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_scan_anomalies_cluster_001_macro">
+    <component ref="standardcluster" connection="galaxy"/>
+    <connections>
+      <connection name="editor_cluster_sector_connection" ref="sectors">
+        <macro ref="timelines_map_scan_anomalies_cluster_001_sector_001_macro" connection="cluster"/>
+      </connection>
+      <connection name="content" ref="content">
+        <macro connection="space" ref="tcluster_01_macro"/>
+      </connection>
+    </connections>
+  </macro>
+  <macro name="timelines_map_scan_anomalies_galaxy_macro">
+    <component ref="standardgalaxy"/>
+    <connections>
+      <connection name="cluster_connection" ref="clusters">
+        <macro ref="timelines_map_scan_anomalies_cluster_001_macro" connection="galaxy"/>
+      </connection>
+    </connections>
+  </macro>
+</macros>

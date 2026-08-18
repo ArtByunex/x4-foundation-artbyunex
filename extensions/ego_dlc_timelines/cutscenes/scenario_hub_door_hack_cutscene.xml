@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Story Criminal Briefing Cutscene -->
+  <director key="scenario_hub_door_hack_cutscene">
+    <params>
+      <param name="target_Mitsuno_Actor" object="true" />
+      <param name="target_Pa_Actor" object="true" />
+      <param name="target_Sae_Actor" object="true" />
+      <param name="target_Player" object="true" />
+      <param name="MissionCentreRoom" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_Pa_Actor" />
+    <object_group name="target_group">
+      <reference object="target_Mitsuno_Actor" />
+      <reference object="target_Pa_Actor" />
+      <reference object="target_Sae_Actor" />
+      <reference object="target_Player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- Shot 2: Wide of the gathered group -->
+      <sequence name="Sequence01" start="0">
+        <shot name="PanAwayShot1" environment="scenezone" duration="onevent:TriggerSequence01Done">
+          <camera>
+            <position>
+              <reference object="target_Pa_Actor" x="1.7" y="1.65" z="-1.3"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Pa_Actor" x="-0.5" y="1.78" z="2.2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 1: Wide of Mitsuno joining -->
+      <sequence name="Sequence02" start="onevent:TriggerSequence02Start">
+        <shot name="StaticCameraShot2" environment="scenezone" duration="onevent:TriggerSequence02Done">
+          <camera_orbit reference="target_Sae_Actor" orient_to="ecliptic" cycle="none" x="-2" z="0.8" y="-0.15">
+            <begin angle="80">
+              <distance>
+                <value exact="6"/>
+              </distance>
+              <elevation>
+                <value exact="0.8"/>
+              </elevation>
+            </begin>
+            <end angle="100" time="8000">
+              <distance>
+                <value exact="5"/>
+              </distance>
+              <elevation>
+                <value exact="0.7"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+      
+      <!-- showing the group from behind -->
+      <sequence name="Sequence03" start="onevent:TriggerSequence03Start">
+        <shot name="PanAwayShot3" environment="scenezone" duration="onevent:TriggerSequence03Done">
+          <camera>
+            <position>
+              <reference object="target_Pa_Actor" x="1.2" y="1.8" z="-1"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Pa_Actor" x="0" y="1.93" z="2.2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      
+      <!-- Shot 4: close up of tapping with door -->
+      <sequence name="Sequence04" start="onevent:TriggerSequence04Start">
+        <shot name="PanAwayShot4" environment="scenezone" duration="onevent:TriggerSequence04Done">
+          <camera>
+            <position>
+              <reference object="target_Mitsuno_Actor" x="-0.562835" y="1.727338" z="-0.374903"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" x="0.143689" y="1.625789" z="3.196889" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 5: rotating around group -->
+      <sequence name="Sequence05" start="onevent:TriggerSequence05Start">
+        <shot name="StaticCameraShot5" environment="scenezone" duration="onevent:TriggerSequence05Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="0">
+            <begin angle="16">
+              <distance>
+                <value exact="3.4"/>
+              </distance>
+              <elevation>
+                <value exact="-0.2"/>
+              </elevation>
+            </begin>
+            <end angle="55" time="6200">
+              <distance>
+                <value exact="3.9"/>
+              </distance>
+              <elevation>
+                <value exact="-0.2"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <!-- Shot 6: Close up on Mitsuno's face -->
+      <sequence name="Sequence06" start="onevent:TriggerSequence06Start">
+        <shot name="CloseupAwayShot6" environment="scenezone" duration="onevent:TriggerSequence06Done">
+          <camera>
+            <position>
+              <reference object="target_Mitsuno_Actor" z="1.8" head="true" x="-0.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" head="true" x="-0.2"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

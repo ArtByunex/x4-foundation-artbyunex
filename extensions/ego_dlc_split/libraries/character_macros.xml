@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <!-- ============== Player Macros ============== -->
+
+
+  <!-- Split Gamestart 1 -->
+  <macro name="character_player_split_gamestart1_macro" class="player">
+    <component ref="character_player_split_female_01" />
+    <properties>
+      <identification name="{1021,602}" race="split" faction="player" female="false" image="briefing_zuus_t_fnk_01" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" exact="0.05" />
+        <eyeposition type="y" exact="0.05" />
+        <eyeposition type="z" exact="0.01" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.1"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="1.0"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.3"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.4"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="-0.5"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.3"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.5"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheeks_down"     exact="-0.6"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.2"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.1"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.3"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="0.0"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.3"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="-0.4"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="0.1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.1"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.3"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_up"          exact="0.1"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.0"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.1"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thick" exact="0.1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="0.0"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.0"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="-0.2"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_long"    exact="0.1"/>
+      </facemods>
+      <spacesuit macro="ship_spl_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head"  ref="assets/characters/split/heads/split_m_head_dynamic" />
+        <model type="torso" ref="assets/characters/split/bodies/split_male_body_jacket_01" />
+        <model type="props" ref="assets/characters/split/props/char_spl_m_hair_braids_ponytail_short_01" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+
+  <macro name="character_rescue_split_gamestart1_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="true" />
+     <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" min="-0.1" max="0.1" />
+        <eyeposition type="y" min="-0.1" max="0.1" />
+        <eyeposition type="z" min="-0.02" max="0.04" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           min="0" max="1"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           min="0" max="1"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          min="0" max="1"/>
+        <facemod type="age"             name="spl.mt_age"                 min="0" max="1"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      min="-1" max="1"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    min="-1" max="1"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     min="-1" max="1"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"    min="-1" max="1"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  min="-1" max="1"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   min="-1" max="1"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     min="-1" max="1"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       min="-1" max="1"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     min="-1" max="1"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      min="-1" max="1"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        min="-1" max="1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       min="-1" max="1"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      min="-1" max="1"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       min="-1" max="1"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        min="-1" max="1"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        min="-1" max="1"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" min="-1" max="1"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin"  min="-1" max="1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      min="-1" max="1"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     min="-1" max="1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         min="-1" max="1"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  min="-1" max="1"/>
+		<facemod type="scar"            name="spl.mt_scar"                min="-10.0" max="4.0" />
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head"  ref="assets/characters/split/heads/split_f_head_dynamic" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+        <model type="props" selection="random">
+          <select index="1" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_bun_01" />
+          <select index="2" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_cornrows_01" />
+          <select index="3" weight="10" ref="assets/characters/split/props/char_spl_hair_braids_cornrows_bun_01" />
+          <select index="4" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_cornrows_ponytail_01" />
+          <select index="5" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_01" />
+          <select index="6" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_undercut_01" />
+          <select index="7" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_ponytail_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_ff_royalty_gamestart_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="true" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" min="-0.1" max="0.1" />
+        <eyeposition type="y" min="-0.1" max="0.1" />
+        <eyeposition type="z" min="-0.02" max="0.04" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           min="0" max="1"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           min="0" max="1"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          min="0" max="1"/>
+        <facemod type="age"             name="spl.mt_age"                 min="0" max="1"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      min="-1" max="1"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    min="-1" max="1"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     min="-1" max="1"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"    min="-1" max="1"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  min="-1" max="1"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   min="-1" max="1"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     min="-1" max="1"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       min="-1" max="1"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     min="-1" max="1"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      min="-1" max="1"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        min="-1" max="1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       min="-1" max="1"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      min="-1" max="1"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       min="-1" max="1"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        min="-1" max="1"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        min="-1" max="1"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" min="-1" max="1"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin"  min="-1" max="1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      min="-1" max="1"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     min="-1" max="1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         min="-1" max="1"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  min="-1" max="1"/>
+		<facemod type="scar"            name="spl.mt_scar"                min="-10.0" max="4.0" />
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_f_head_dynamic" />
+          </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_bun_01" />
+          <select index="2" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_cornrows_01" />
+          <select index="3" weight="10" ref="assets/characters/split/props/char_spl_hair_braids_cornrows_bun_01" />
+          <select index="4" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_cornrows_ponytail_01" />
+          <select index="5" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_01" />
+          <select index="6" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_lose_undercut_01" />
+          <select index="7" weight="15" ref="assets/characters/split/props/char_spl_hair_braids_ponytail_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <!-- Split Gamestart 2 -->
+
+  <macro name="character_player_split_gamestart2_macro" class="player">
+    <component ref="character_player_split_female_01" />
+    <properties>
+      <identification name="{1021,702}" race="split" faction="player" female="true" image="briefing_rael_t_nru_01"/>
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" exact="0.05" />
+        <eyeposition type="y" exact="0.05" />
+        <eyeposition type="z" exact="0.01" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.5"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.2"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.7"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.2"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="0.2"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.3"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.5"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"    exact="-0.5"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.2"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.3"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.3"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="-0.1"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.3"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="0.1"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="-0.1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.2"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.5"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        exact="0.4"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.1"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.3"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin"  exact="0.1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="0.0"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="-0.1"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  exact="0.1"/>
+      </facemods>
+      <spacesuit macro="ship_spl_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head"  ref="assets/characters/split/heads/split_f_head_dynamic" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+        <model type="props" ref="assets/characters/split/props/char_spl_hair_braids_cornrows_ponytail_01" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+
+  <macro name="character_commander_split_gamestart2_macro" class="npc">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="{30280,2020}" race="split" female="false" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" min="-0.1" max="0.1" />
+        <eyeposition type="y" min="-0.1" max="0.1" />
+        <eyeposition type="z" min="-0.02" max="0.04" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           min="0" max="1"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           min="0" max="1"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          min="0" max="1"/>
+        <facemod type="age"             name="spl.mt_age"                 min="0" max="1"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      min="-1" max="1"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    min="-1" max="1"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     min="-1" max="1"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheeks_down"     min="-1" max="1"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  min="-1" max="1"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   min="-1" max="1"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     min="-1" max="1"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       min="-1" max="1"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     min="-1" max="1"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      min="-1" max="1"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        min="-1" max="1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       min="-1" max="1"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      min="-1" max="1"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       min="-1" max="1"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_up"          min="-1" max="1"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        min="-1" max="1"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" min="-1" max="1"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thick" min="-1" max="1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      min="-1" max="1"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     min="-1" max="1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         min="-1" max="1"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_long"    min="-1" max="1"/>
+		<facemod type="scar"            name="spl.mt_scar"              min="-10.0" max="4.0" />
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_m_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_male_body_jacket_01" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" weight="20" ref="assets/characters/split/props/char_spl_m_hair_braids_ponytail_01" />
+          <select index="2" weight="20" ref="assets/characters/split/props/char_spl_m_hair_braids_ponytail_short_01" />
+          <select index="3" weight="20" ref="assets/characters/split/props/char_spl_m_hair_braids_strip_single_01" />
+          <select index="4" weight="20" ref="assets/characters/split/props/char_spl_m_hair_braids_strip_triple_01" />
+          <select index="5" weight="20" ref="none" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_firstmate_split_gamestart2_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="true" />
+      <eyepositions lefteye="eye_position_dummy_l" righteye="eye_position_dummy_r">
+        <eyeposition type="x" exact="0.05" />
+        <eyeposition type="y" exact="0.05" />
+        <eyeposition type="z" exact="0.01" />
+      </eyepositions>
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.5"/>
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.2"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.7"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.2"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="0.2"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.3"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.5"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"    exact="-0.5"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.2"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.3"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.3"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="-0.1"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.3"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="0.1"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="-0.1"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.2"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.5"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        exact="0.4"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.1"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.3"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin"  exact="0.1"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="0.0"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="-0.1"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  exact="0.1"/>
+		<facemod type="scar"            name="spl.mt_scar"                min="-10.0" max="4.0" />
+      </facemods>
+      <spacesuit macro="ship_spl_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_f_head_dynamic" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- Basic Tutorial Gamestart -->
+  <macro name="character_player_scenario_combat_split_macro" class="player">
+    <component ref="character_player_split_female_01" />
+    <properties>
+      <identification name="{1021,102}" race="split" faction="player" female="true" />
+      <spacesuit macro="ship_spl_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head" ref="assets/characters/split_bodies/split_f_head_a" />
+        <model type="torso" ref="assets/characters/split_bodies/split_f_astronaut_suit" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+
+  <!-- Advanced Tutorial Gamestart -->
+  <macro name="character_player_scenario_advanced_split_macro" class="player">
+    <component ref="character_player_split_female_01" />
+    <properties>
+      <identification name="{1021,102}" race="split" faction="player" female="true" />
+      <spacesuit macro="ship_spl_xs_spacesuit_01_a_macro" />
+      <models>
+        <model type="head" ref="assets/characters/split_bodies/split_f_head_a" />
+        <model type="torso" ref="assets/characters/split_bodies/split_f_astronaut_suit" />
+      </models>
+    </properties>
+    <connections>
+      <connection ref="computer">
+        <macro ref="entity_betty_macro" connection="player" />
+      </connection>
+    </connections>
+  </macro>
+
+  <!-- DEMO CHARACTERS -->
+  <macro name="character_scenario_combat_spl_captain_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="{30179,302}" race="split" female="true" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_f_head_06_hair_02" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_scenario_combat_spl_navigation_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="true" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_f_head_04" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_scenario_combat_spl_helm_macro" class="npc">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="@random" race="split" female="false" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_m_head_06_hair_02" />
+        <model type="torso" ref="assets/characters/split/bodies/split_male_body_jacket_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_scenario_combat_spl_gunner_macro" class="npc">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="@random" race="split" female="false" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_m_head_05" />
+        <model type="torso" ref="assets/characters/split/bodies/split_male_body_jacket_01" />
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_scenario_combat_spl_marine_macro" class="npc">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="true" />
+      <models>
+        <model type="head" ref="assets/characters/split/heads/split_f_head_05_b_hair_01" />
+        <model type="torso" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_02" />
+      </models>
+    </properties>
+  </macro>
+
+  <!-- STORY_SPLIT CHARACTERS -->
+
+  <macro name="character_split_curb_macro" class="npc" comment="story split royal female">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="{30221,101}" race="split" female="true" />
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.5" />
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.5" />
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.5" />
+        <facemod type="age"             name="spl.mt_age"                 exact="0.5" />
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="0.5" />
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.3" />
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.3" />
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"   exact="-0.5" />
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.5" />
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.3" />
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="-0.5" />
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="0.1" />
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.2" />
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="0.1" />
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="0.2" />
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.4" />
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.2" />
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.3" />
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        exact="0.3" />
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.2" />
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.4" />
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin" exact="0.3" />
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="0.2" />
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.2" />
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="-0.4" />
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  exact="0.3" />
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_f_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_female_body_pants_02_jacket_01" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" ref="assets/characters/split/props/char_spl_hair_braids_bun_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_outcast_macro" class="npc" comment="story split rebel female">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="{30221,102}" race="split" female="true" />
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.5" />
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.3" />
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.8" />
+        <facemod type="age"             name="spl.mt_age"                 exact="0.1" />
+		<facemod type="scar"            name="spl.mt_scar"				  exact="1.35" />
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="-0.5" />
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.4" />
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.1" />
+        <facemod type="cheeks_down"     name="spl.mt_def_cheek_height"   exact="-0.7" />
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.3" />
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.1" />
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.2" />
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="-0.2" />
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="-0.1" />
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="-0.3" />
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="0.4" />
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.7" />
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.6" />
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.5" />
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_high"        exact="0.7" />
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.5" />
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="-0.4" />
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thin" exact="-0.2" />
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="-0.3" />
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.5" />
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="-0.6" />
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_length"  exact="0.7" />
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_f_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_female_body_pants_03_jacket_02" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" ref="assets/characters/split/props/char_spl_hair_braids_lose_undercut_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_loyalist_macro" class="npc" comment="male split loyal to the patriarchy">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="{30221,103}" race="split" female="false" />
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.1" />
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="1.0"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.2"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.5"/>
+		<facemod type="scar"            name="spl.mt_scar"				  exact="2.0" />
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="-0.5"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.5"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="-0.1"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheeks_down"     exact="-0.3"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="-0.2"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.3"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.3"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="0.2"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.5"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="-0.3"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="-0.5"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="-0.4"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="0.3"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_up"          exact="-0.4"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.6"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="-0.5"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thick" exact="0.5"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="-0.3"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="-0.5"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="0.5"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_long"    exact="-0.3"/>
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_m_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_male_body_vest_01" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" ref="assets/characters/split/props/char_spl_m_hair_braids_strip_triple_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_escaped_macro" class="npc" comment="story split argon escaped slave">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="{30221,104}" race="argon" female="false" />
+      <facemods>
+        <!--<facemod type="race_eur"          name="arm.mt_race_eur"                exact="0.710507"/>
+            european is the base head, not a morph target -->
+        <facemod type="race_afr"          name="arm.mt_race_afr"                exact="0.372935"/>
+        <facemod type="race_asi"          name="arm.mt_race_asi"                exact="0.200164"/>
+        <facemod type="def_gaunt"         name="arm.mt_def_gaunt"               exact="0.163924"/>
+        <facemod type="asymmetry"         name="arm.mt_asymmetry"               exact="-0.427978"/>
+        <facemod type="age"               name="arm.mt_age"                     exact="0.360367"/>
+        <facemod type="bridge_depth"      name="arm.mt_def_bridge_depth"        exact="0.584"/>
+        <facemod type="bridge_width"      name="arm.mt_def_bridge_width"        exact="0.295687"/>
+        <facemod type="brow_angle"        name="arm.mt_def_brow_angle"          exact="-0.881566"/>
+        <facemod type="brow_height"       name="arm.mt_def_brow_height"         exact="-0.683033"/>
+        <facemod type="brow_thickness"    name="arm.mt_def_brow_thickness"      exact="-0.412274"/>
+        <facemod type="brow_width"        name="arm.mt_def_brow_width"          exact="0.107986"/>
+        <facemod type="cheekbone_height"  name="arm.mt_def_cheekbone_height"    exact="-0.724151"/>
+        <facemod type="cheekbone_width"   name="arm.mt_def_cheekbone_width"     exact="0.497223"/>
+        <facemod type="chin_depth"        name="arm.mt_def_chin_depth"          exact="-0.057"/>
+        <facemod type="chin_height"       name="arm.mt_def_chin_height"         exact="-0.320878"/>
+        <facemod type="chin_square"       name="arm.mt_def_chin_square"         exact="-0.082204"/>
+        <facemod type="dome_roundness"    name="arm.mt_def_dome_roundness"      exact="0.0121503"/>
+        <facemod type="ear_angle"         name="arm.mt_def_ear_angle"           exact="0.876105"/>
+        <facemod type="ear_size"          name="arm.mt_def_ear_size"            exact="0.553611"/>
+        <facemod type="ear_depth"         name="arm.mt_def_ear_depth"           exact="-0.892695"/>
+        <facemod type="ear_height"        name="arm.mt_def_ear_height"          exact="-0.120446"/>
+        <facemod type="eye_corner_angle"  name="arm.mt_def_eye_corner_angle"    exact="0.188364"/>
+        <facemod type="eye_hooded"        name="arm.mt_def_eye_hooded"          exact="0.796707"/>
+        <facemod type="eye_unhooded"      name="arm.mt_def_eye_unhooded"        exact="-0.0193069"/>
+        <facemod type="fat"               name="arm.mt_def_fat"                 exact="-0.0442742"/>
+        <facemod type="head_width"        name="arm.mt_def_head_width"          exact="-0.445768"/>
+        <facemod type="jaw_angle_depth"   name="arm.mt_def_jaw_angle_depth"     exact="0.871109"/>
+        <facemod type="jaw_angle_height"  name="arm.mt_def_jaw_angle_height"    exact="-0.300843"/>
+        <facemod type="jaw_width"         name="arm.mt_def_jaw_width"           exact="0.363088"/>
+        <facemod type="lips_thickness"    name="arm.mt_def_lips_thickness"      exact="-0.423518"/>
+        <facemod type="masculine"         name="arm.mt_def_masculine"           exact="1.000"/>
+        <facemod type="mouth_depth"       name="arm.mt_def_mouth_depth"         exact="-0.320415"/>
+        <facemod type="mouth_height"      name="arm.mt_def_mouth_height"        exact="0.237224"/>
+        <facemod type="mouth_width"       name="arm.mt_def_mouth_width"         exact="0.24663"/>
+        <facemod type="nose_depth"        name="arm.mt_def_nose_depth"          exact="0.442262"/>
+        <facemod type="nose_height"       name="arm.mt_def_nose_height"         exact="0.1420828"/>
+        <facemod type="nose_size"         name="arm.mt_def_nose_size"           exact="0.482397"/>
+        <facemod type="nose_tip_angle"    name="arm.mt_def_nose_tip_angle"      exact="0.061496"/>
+        <facemod type="nose_tip_size"     name="arm.mt_def_nose_tip_size"       exact="-0.408333"/>
+        <facemod type="nostril_width"     name="arm.mt_def_nostril_width"       exact="0.0517257"/>
+        <facemod type="skull_length"      name="arm.mt_def_skull_length"        exact="0.260385"/>
+        <facemod type="skull_width"       name="arm.mt_def_skull_width"         exact="0.0996951"/>
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" ref="assets/characters/argon/heads/char_arg_m_dyn_blend_head" />
+        <model type="torso" ref="assets/characters/argon/bodies/char_arg_m_jacket_fighterpilot_01" />
+        <model type="props" ref="assets/characters/argon/props/Ter_m_hair_cau_black_01" />    
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_prisoner1_macro" class="npc" comment="story split argon prisoner1">
+    <component ref="character_argon_male_01" />
+    <properties>
+      <identification name="@random" race="split" female="false" />
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.2" />
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.3"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.8"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.3"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="0.5"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="0.1"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.3"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheeks_down"     exact="0.3"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="-0.2"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="-0.3"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="-0.3"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="0.2"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="0.5"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="0.3"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="0.5"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="0.4"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="-0.3"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_up"          exact="0.4"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="0.2"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.2"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thick" exact="0.2"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="0.3"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="0.5"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="0.8"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_long"    exact="0.3"/>
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_m_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_male_body_jacket_01" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" ref="assets/characters/split/props/char_spl_m_hair_braids_strip_single_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <macro name="character_split_prisoner2_macro" class="npc" comment="story split argon prisoner2">
+    <component ref="character_argon_female_01" />
+    <properties>
+      <identification name="@random" race="split" female="false" />
+      <facemods>
+        <facemod type="race_cau"        name="spl.mt_race_base"           exact="0.8" />
+        <facemod type="race_afr"        name="spl.mt_race_dark"           exact="0.1"/>
+        <facemod type="race_asi"        name="spl.mt_race_light"          exact="0.2"/>
+        <facemod type="age"             name="spl.mt_age"                 exact="0.7"/>
+        <facemod type="brow_angle"      name="spl.mt_def_brow_angle"      exact="0.0"/>
+        <facemod type="brow_forward"    name="spl.mt_def_brow_forward"    exact="-0.1"/>
+        <facemod type="brow_height"     name="spl.mt_def_brow_height"     exact="0.6"/>
+        <facemod type="cheeks_down"     name="spl.mt_def_cheeks_down"     exact="0.8"/>
+        <facemod type="cheeks_forward"  name="spl.mt_def_cheeks_forward"  exact="0.6"/>
+        <facemod type="cheeks_hollow"   name="spl.mt_def_cheeks_hollow"   exact="0.7"/>
+        <facemod type="cheeks_wide"     name="spl.mt_def_cheeks_wide"     exact="0.6"/>
+        <facemod type="chin_long"       name="spl.mt_def_chin_long"       exact="0.5"/>
+        <facemod type="chin_square"     name="spl.mt_def_chin_square"     exact="-0.5"/>
+        <facemod type="ear_length"      name="spl.mt_def_ear_length"      exact="-0.7"/>
+        <facemod type="ear_size"        name="spl.mt_def_ear_size"        exact="0.8"/>
+        <facemod type="eye_angle"       name="spl.mt_def_eye_angle"       exact="0.8"/>
+        <facemod type="eye_squint"      name="spl.mt_def_eye_squint"      exact="-0.3"/>
+        <facemod type="face_long"       name="spl.mt_def_face_long"       exact="-0.6"/>
+        <facemod type="jaw_up"          name="spl.mt_def_jaw_up"          exact="0.1"/>
+        <facemod type="jaw_wide"        name="spl.mt_def_jaw_wide"        exact="-0.4"/>
+        <facemod type="lip_lower_thick" name="spl.mt_def_lip_lower_thick" exact="0.1"/>
+        <facemod type="lip_upper_thick" name="spl.mt_def_lip_upper_thick" exact="0.5"/>
+        <facemod type="mouth_wide"      name="spl.mt_def_mouth_wide"      exact="-0.6"/>
+        <facemod type="nose_narrow"     name="spl.mt_def_nose_narrow"     exact="-0.1"/>
+        <facemod type="nose_up"         name="spl.mt_def_nose_up"         exact="0.6"/>
+        <facemod type="nostril_long"    name="spl.mt_def_nostril_long"    exact="0.1"/>
+      </facemods>
+      <bonemods>
+        <bonemod type="Legs" exact="1.0">
+          <bones>
+            <bone name="Bip01 Pelvis"/>
+          </bones>
+        </bonemod>
+      </bonemods>
+      <models>
+        <model type="head" selection="random">
+          <select index="1" ref="assets/characters/split/heads/split_m_head_dynamic" />
+        </model>
+        <model type="torso" selection="random">
+          <select index="1" ref="assets/characters/split/bodies/split_male_body_pants_02_jacket_02" />
+        </model>
+        <model type="props" selection="random">
+          <select index="1" ref="assets/characters/split/props/char_spl_m_hair_braids_ponytail_01" />
+        </model>
+      </models>
+    </properties>
+  </macro>
+
+  <!-- CUSTOM GAMESTART MACROS -->
+  <!-- npc aliases for spawning them in presentation cutscene -->
+  <macro name="character_npc_player_split_gamestart1_macro" class="npc" ref="character_player_split_gamestart1_macro" />
+  <macro name="character_npc_player_split_gamestart2_macro" class="npc" ref="character_player_split_gamestart2_macro" />
+
+</macros>

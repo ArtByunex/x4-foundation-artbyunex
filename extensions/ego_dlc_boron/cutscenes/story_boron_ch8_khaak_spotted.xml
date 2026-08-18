@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="Story_Boron_Ch8_Khaak_Spotted">
+    <params>
+      <!-- Zone to create scenezone from -->
+      <param name="anchor" object="true" />
+
+      <!-- Camera positions -->
+      <param name="camera_x" number="true"/>
+      <param name="camera_y" number="true"/>
+      <param name="camera_z" number="true"/>
+
+      <param name="lookat_x" number="true"/>
+      <param name="lookat_y" number="true"/>
+      <param name="lookat_z" number="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:anchor" />
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="LookAtShip" start="0">
+        <shot name="LookAtShipShot" environment="scenezone" duration="12000">
+          <camera>
+            <position>
+              <reference object="anchor" x="camera_x" y="camera_y" z="camera_z"/>
+              <!--<keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <value var="camera_x" />
+                  <value var="camera_y" />
+                  <value var="camera_z" />
+                </keyframe>
+              </keyframes>-->
+            </position>
+            <lookdirection>
+              <reference x="lookat_x" y="lookat_y" z="lookat_z" object="anchor"/>
+            </lookdirection>
+            <zoom>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="smooth">
+                  <value exact="1.0"/>
+                </keyframe>
+                <keyframe timestamp="4000" interpolation="smooth">
+                  <value exact="1.0"/>
+                </keyframe>
+                <keyframe timestamp="7000" interpolation="smooth">
+                  <value exact="0.05"/>
+                </keyframe>
+              </keyframes>
+            </zoom>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Story Criminal Briefing Cutscene -->
+  <director key="scenario_hub_sohnen_confrontation_cutscene">
+    <params>
+      <param name="target_MD_Actor" object="true" />
+      <param name="target_Mitsuno_Actor" object="true" />
+      <param name="target_Pa_Actor" object="true" />
+      <param name="target_Sae_Actor" object="true" />
+      <param name="target_SohDummy_Actor" object="true" />
+      <param name="target_Player" object="true" />
+      <param name="cloneroom" object="true" />
+      <param name="sohnenroom" object="true" />
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_MD_Actor" />
+    <object_group name="target_group">
+      <reference object="target_MD_Actor" />
+      <reference object="target_Mitsuno_Actor" />
+      <reference object="target_Pa_Actor" />
+      <reference object="target_Sae_Actor" />
+      <reference object="target_SohDummy_Actor" />
+      <reference object="target_Player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <!-- Shot 1: Establishing Shot of the room -->
+      <sequence name="Sequence1" start="0">
+        <shot name="StaticCameraShot1" environment="scenezone" duration="onevent:TriggerSequence1Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" cycle="none" z="0" y="0">
+            <begin angle="80">
+              <distance>
+                <value exact="15"/>
+              </distance>
+              <elevation>
+                <value exact="-4.5"/>
+              </elevation>
+            </begin>
+            <end angle="100" time="8000">
+              <distance>
+                <value exact="15"/>
+              </distance>
+              <elevation>
+                <value exact="-4.5"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+
+        </shot>
+      </sequence>
+
+      <!-- Shot 2: Wide from Domo looking at the Group arriving -->
+      <sequence name="Sequence2" start="onevent:TriggerSequence2Start">
+        <shot name="PanAwayShot2" environment="scenezone" duration="onevent:TriggerSequence2Done">
+          <camera>
+            <position>
+              <reference object="target_MD_Actor" x="1.2" y="1.6" z="-1"/>
+            </position>
+            <lookdirection>
+              <reference object="target_MD_Actor" x="-0.7" y="1.93" z="2.2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 3: Looking at the Sohnen as it talks -->
+      <sequence name="Sequence3" start="onevent:TriggerSequence3Start">
+        <shot name="StaticCameraShot3" environment="scenezone" duration="onevent:TriggerSequence3Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0">
+            <begin angle="90">
+              <distance>
+                <value exact="6.4"/>
+              </distance>
+            </begin>
+            <end angle="90" time="8200">
+              <distance>
+                <value exact="6.1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 4: Medium Wide, Looking at Mitsuno as she approaches, holding gun -->
+      <sequence name="Sequence4" start="onevent:TriggerSequence4Start">
+        <shot name="PanTowardsShot4" environment="scenezone" duration="onevent:TriggerSequence4Done">
+          <camera>
+            <position>
+              <reference object="target_Mitsuno_Actor" x="0" y="1.9" z="2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" x="0" y="1.2" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 5: Wide, Looking at group as they ask questions to Sohnen -->
+      <sequence name="Sequence5" start="onevent:TriggerSequence5Start">
+        <shot name="PanTowardsShot5" environment="scenezone" duration="onevent:TriggerSequence5Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="-0.1" z="-2.1" x="-0.3">
+            <begin angle="210">
+              <distance>
+                <value exact="2.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.9"/>
+              </elevation>
+            </begin>
+            <end angle="230" time="42800">
+              <distance>
+                <value exact="2.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.9"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 6: Medium Close, Looking at Sohnen again through 302930603 -->
+      <sequence name="Sequence6" start="onevent:TriggerSequence6Start">
+        <shot name="StaticShot6" environment="scenezone" duration="onevent:TriggerSequence6Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="0.5" z="1.15">
+            <begin angle="180">
+              <distance>
+                <value exact="1.9"/>
+              </distance>
+            </begin>
+            <end angle="180" time="8200">
+              <distance>
+                <value exact="1.6"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 7: Close Shot, Cutting quickly back to Mitsuno, threattening -->
+      <sequence name="Sequence7" start="onevent:TriggerSequence7Start">
+        <shot name="PanOutCameraShot7" environment="scenezone" duration="onevent:TriggerSequence7Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="0.6" >
+            <begin angle="95">
+              <distance>
+                <value exact="1.8"/>
+              </distance>
+            </begin>
+            <end angle="95" time="18800">
+              <distance>
+                <value exact="1.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 8: Close Shot, Cutting quickly to Sae -->
+      <sequence name="Sequence8" start="onevent:TriggerSequence8Start">
+        <shot name="PanOutCameraShot8" environment="scenezone" duration="onevent:TriggerSequence8Done">
+          <camera>
+            <position>
+              <reference object="target_Sae_Actor" x="0.18" y="1.44" z="-0.245"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" x="-0.36" y="1.6" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 9: Medium shot of Mitsuno with Pa approaching in the background -->
+      <sequence name="Sequence9" start="onevent:TriggerSequence9Start">
+        <shot name="PanOutCameraShot9" environment="scenezone" duration="onevent:TriggerSequence9Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="0.6" >
+            <begin angle="95">
+              <distance>
+                <value exact="1.9"/>
+              </distance>
+            </begin>
+            <end angle="100" time="18800">
+              <distance>
+                <value exact="1.9"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 10: Back to Sohnen closeup, quickly -->
+      <sequence name="Sequence10" start="onevent:TriggerSequence10Start">
+        <shot name="PanOutCameraShot10" environment="scenezone" duration="onevent:TriggerSequence10Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0">
+            <begin angle="100">
+              <distance>
+                <value exact="3.4"/>
+              </distance>
+            </begin>
+            <end angle="100" time="8200">
+              <distance>
+                <value exact="3.2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 11: Medium Wide of Mitsuno threatening again, Pa right behind her, beginning strike animation -->
+      <sequence name="Sequence11" start="onevent:TriggerSequence11Start">
+        <shot name="PanOutCameraShot11" environment="scenezone" duration="onevent:TriggerSequence11Done">
+          <camera_orbit reference="target_Mitsuno_Actor" orient_to="ecliptic" y="0.6" >
+            <begin angle="100">
+              <distance>
+                <value exact="2.2"/>
+              </distance>
+            </begin>
+            <end angle="100" time="18800">
+              <distance>
+                <value exact="2.2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 12: (Impact of hit off screen, as it cuts)Cutting to the Sohnen, Panning in slowly -->
+      <sequence name="Sequence12" start="onevent:TriggerSequence12Start">
+        <shot name="PanOutCameraShot12" environment="scenezone" duration="onevent:TriggerSequence12Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0.18">
+            <begin angle="90">
+              <distance>
+                <value exact="2.35"/>
+              </distance>
+            </begin>
+            <end angle="90" time="8600">
+              <distance>
+                <value exact="2.05"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 13: Showing Sae in Medium -->
+      <sequence name="Sequence13" start="onevent:TriggerSequence13Start">
+        <shot name="PanOutCameraShot13" environment="scenezone" duration="onevent:TriggerSequence13Done">
+          <camera_orbit reference="target_Sae_Actor" orient_to="ecliptic" y="0.55" >
+            <begin angle="70">
+              <distance>
+                <value exact="1.2"/>
+              </distance>
+            </begin>
+            <end angle="80" time="18800">
+              <distance>
+                <value exact="1.2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 14: Showing Mitsuno on the ground, dissolving(?) -->
+      <sequence name="Sequence14" start="onevent:TriggerSequence14Start">
+        <shot name="PanOutCameraShot14" environment="scenezone" duration="onevent:TriggerSequence14Done">
+          <camera>
+            <position>
+              <reference object="target_Pa_Actor" x="1.2" y="1.7" z="-0.9"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Mitsuno_Actor" x="-0.5" y="0.3" z="-0.5" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      
+      <!-- Shot 15: Cutting to the Group in Wide with MD in the Background -->
+      <sequence name="Sequence15" start="onevent:TriggerSequence15Start">
+        <shot name="PanOutCameraShot15" environment="scenezone" duration="onevent:TriggerSequence15Done">
+          <camera_orbit reference="target_Pa_Actor" orient_to="ecliptic" y="0.65" >
+            <begin angle="140">
+              <distance>
+                <value exact="1.5"/>
+              </distance>
+            </begin>
+            <end angle="140" time="18800">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 16: Mission Director frontal medium -->
+      <sequence name="Sequence16" start="onevent:TriggerSequence16Start">
+        <shot name="PanOutCameraShot16" environment="scenezone" duration="onevent:TriggerSequence16Done">
+          <camera_orbit reference="target_MD_Actor" orient_to="ecliptic" y="0.75" x="-0.8" >
+            <begin angle="282">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </begin>
+            <end angle="285" time="18800">
+              <distance>
+                <value exact="1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 17: Medium Wide of Sae confronting Pa, Pa in Foreground, Sae in back. Both in frame -->
+      <sequence name="Sequence17" start="onevent:TriggerSequence17Start">
+        <shot name="PanOutCameraShot17" environment="scenezone" duration="onevent:TriggerSequence17Done">
+          <camera_orbit reference="target_Pa_Actor" orient_to="ecliptic" y="0.55" x="-0.2">
+            <begin angle="108">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </begin>
+            <end angle="108" time="18800">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 18: Medium of Player Character steps forward, addresses Sohnen, both Player and Sohnen in frame (Side Profile) -->
+      <sequence name="Sequence18" start="onevent:TriggerSequence18Start">
+        <shot name="PanOutCameraShot18" environment="scenezone" duration="onevent:TriggerSequence18Done">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="-3.354134" y="3.997711" z="10.606762" object="sohnenroom"/>
+                </keyframe>
+                <keyframe timestamp="14000" interpolation="linear">
+                  <reference x="-2.969653" y="4.326881" z="13.782370" object="sohnenroom"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="-0.12312" y="4.740339" z="11.651694" object="sohnenroom"/>
+                </keyframe>
+                <keyframe timestamp="14000" interpolation="linear">
+                  <reference x="0.399000" y="4.60560" z="15.814446" object="sohnenroom"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 19: Sohnen frontal closeup as it answers questions -->
+      <sequence name="Sequence19" start="onevent:TriggerSequence19Start">
+        <shot name="PanOutCameraShot19" environment="scenezone" duration="onevent:TriggerSequence19Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0">
+            <begin angle="90">
+              <distance>
+                <value exact="6.4"/>
+              </distance>
+            </begin>
+            <end angle="90" time="8200">
+              <distance>
+                <value exact="6.1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 20: Showing Sae in Medium -->
+      <sequence name="Sequence20" start="onevent:TriggerSequence20Start">
+        <shot name="PanOutCameraShot20" environment="scenezone" duration="onevent:TriggerSequence20Done">
+          <camera_orbit reference="target_Sae_Actor" orient_to="ecliptic" y="0.65" >
+            <begin angle="92">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </begin>
+            <end angle="92" time="18800">
+              <distance>
+                <value exact="0.8"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 21: Fading to Wide shot of Room with white Bodies as Sohnen explains -->
+      <sequence name="Sequence21" start="onevent:TriggerSequence21Start">
+        <shot name="PanOutCameraShot21" environment="scenezone" duration="onevent:TriggerSequence21Done">
+          <camera>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="-6.897448" y="2.645825" z="10.883368" object="cloneroom"/>
+                </keyframe>
+                <keyframe timestamp="16000" interpolation="linear">
+                  <reference x="-4.897448" y="2.645825" z="10.883368" object="cloneroom"/>
+                </keyframe>
+              </keyframes>
+            </position>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference x="-2.539161" y="5.460963" z="13.818628" object="cloneroom"/>
+                </keyframe>
+                <keyframe timestamp="16000" interpolation="linear">
+                  <reference x="-0.539161" y="5.460963" z="13.818628" object="cloneroom"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 22: Back to frontal Sohnen closeup -->
+      <sequence name="Sequence22" start="onevent:TriggerSequence22Start">
+        <shot name="PanOutCameraShot22" environment="scenezone" duration="onevent:TriggerSequence22Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0">
+            <begin angle="100">
+              <distance>
+                <value exact="3.4"/>
+              </distance>
+            </begin>
+            <end angle="100" time="8200">
+              <distance>
+                <value exact="3.2"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 23: Md and Sae asking questions -->
+      <sequence name="Sequence23" start="onevent:TriggerSequence23Start">
+        <shot name="PanOutCameraShot23" environment="scenezone" duration="onevent:TriggerSequence23Done">
+          <camera>
+            <position>
+              <reference object="target_MD_Actor" x="-1.2" y="1.9" z="0.4"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Sae_Actor" x="-0.7" y="1.75" z="2.2" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+      <!-- Shot 24: Back to the whole Group in Wide -->
+      <sequence name="Sequence24" start="onevent:TriggerSequence24Start">
+        <shot name="PanOutCameraShot24" environment="scenezone" duration="onevent:TriggerSequence24Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="1.65" z="1">
+             <begin angle="76">
+              <distance>
+                <value exact="9"/>
+              </distance>
+              <elevation>
+                <value exact="-3.5"/>
+              </elevation>
+            </begin>
+            <end angle="90" time="21000">
+              <distance>
+                <value exact="8"/>
+              </distance>
+              <elevation>
+                <value exact="-3.3"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!-- Shot 25: Frontal of Sohnen, fade to black -->
+      <sequence name="Sequence25" start="onevent:TriggerSequence25Start">
+        <shot name="PanOutCameraShot25" environment="scenezone" duration="onevent:TriggerSequence25Done">
+          <camera_orbit reference="target_SohDummy_Actor" orient_to="ecliptic" y="0">
+            <begin angle="100">
+              <distance>
+                <value exact="3.6"/>
+              </distance>
+            </begin>
+            <end angle="100" time="12200">
+              <distance>
+                <value exact="3.1"/>
+              </distance>
+            </end>
+          </camera_orbit>
+        </shot>
+      </sequence>
+      
+      <!-- Shot 26: Final frontal of MD, fade to black -->
+      <sequence name="Sequence26" start="onevent:TriggerSequence26Start">
+        <shot name="PanOutCameraShot26" environment="scenezone" duration="onevent:TriggerSequence26Done">
+          <camera>
+            <position>
+              <reference object="target_MD_Actor" x="0" y="1.55" z="1"/>
+            </position>
+            <lookdirection>
+              <reference object="target_MD_Actor" x="0" y="1.68" z="0" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

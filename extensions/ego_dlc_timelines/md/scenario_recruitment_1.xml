@@ -1,0 +1,989 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Recruitment_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <author name="Adrian Hamm"/>
+  </documentation>
+  <cues>
+    <cue name="Start" namespace="this" module="scenario_recruitment_1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start"/>
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="0"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="30610"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.argon"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <!-- Group of Objects which will End the Scenario and trigger ResultWindow if destroyed -->
+        <create_group groupname="$MissionRelevantObjects" comment="add objects which trigger mission failure/success on destruction"/>
+
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+        <fade_screen fadeout="0s" holdtime="3s" fadein="1.2s" realtime="true"/>
+        <find_station name="$PrisonStation" space="player.sector"/>
+        <set_value name="$PrisonRoom" exact="player.room"/>
+        <set_value name="$EscapeIsEnabled" exact="false"/>
+        <set_external_view_allowed allow="false"/>
+      </actions>
+      <cues>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Guard" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Kaori" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_MissionDirector" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Client" chance="if $HasError then 0 else 100"/>
+                <!--TEMP: TODO @Adrian Remove once Missions have been disabled for timelines-->
+                <cancel_cue cue="md.GenericMissions.Manager"/>
+
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <include_actions ref="md.Scenario_Hub.Setup_Character_Player" chance="if $HasError then 0 else 100"/>
+
+                <do_if value="not $PlayerActor.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Guard">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <create_cue_actor name="$GuardActor" cue="namespace" macro="character_argon_male_marine_helmet_01_macro">
+                  <page exact="10006"/>
+                  <owner exact="faction.argon"/>
+                  <skills>
+                    <skill type="management"  exact="10"/>
+                    <skill type="morale"      exact="13"/>
+                    <skill type="piloting"    exact="9"/>
+                    <skill type="engineering" exact="5"/>
+                    <skill type="boarding"    exact="15"/>
+                  </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$GuardActor" missionactor="true" customhandler="true" subtitlename="true"/>
+                <set_entity_overrides entity="$GuardActor" icon="'marineofficer'"/>
+
+                <create_position name="$GuardPos" space="$PrisonRoom" x="3.2" y="0.2" z="-1.49"/>
+                <create_orientation name="$GuardOrientation"  refposition="player.entity.position" orientation="look_at" maxpitch="0deg">
+                  <position value="$GuardPos"/>
+                </create_orientation>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $GuardActor,
+                                                                                                      table[
+                                                                                                      $requestercue = namespace,
+                                                                                                      $location = $PrisonRoom,
+                                                                                                      $priority = 100,
+                                                                                                      $rotation = $GuardOrientation,
+                                                                                                      $position = $GuardPos,
+                                                                                                      $debugchance = 0,
+                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+
+                <do_if value="not $GuardActor">
+                  <debug_text text="'Guard does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Kaori">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <include_actions ref="md.Scenario_Hub.Setup_Character_KaoriActor_CivillianClothes"/>
+
+                <create_position name="$PrisonerPos" space="$PrisonRoom" x="0.1" y="0.3" z="-6.29"/>
+                <create_rotation name="$PrisonerOrientation" yaw="-165.5848deg"/>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $KaoriActor,
+                                                                                                      table[
+                                                                                                      $requestercue = namespace,
+                                                                                                      $location = $PrisonRoom,
+                                                                                                      $priority = 100,
+                                                                                                      $rotation = $PrisonerOrientation,
+                                                                                                      $position = $PrisonerPos,
+                                                                                                      $debugchance = 0,
+                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+
+                <do_if value="not $KaoriActor">
+                  <debug_text text="'Kaori does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_MissionDirector">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <include_actions ref="md.Scenario_Hub.Setup_Character_MissionDirectorActor"/>
+
+                <do_if value="not $MissionDirectorActor">
+                  <debug_text text="'MissionDirectorActor does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Client">
+              <actions>
+                <create_cue_actor name="$Client" cue="$MissionCue">
+                  <select faction="$MissionFaction"/>
+                  <owner exact="$MissionFaction"/>
+                </create_cue_actor>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Client" exact="table[
+                                              $entity = $Client,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $Client">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$Client was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+              <actions>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <actions>
+            <!-- Mission Objective -->
+            <set_value name="$MissionStep" exact="1"/>
+            <set_value name="$TimeRemaining" exact="6" comment="Player inputs total before time is up"/>
+            <set_value name="$LoopAmount" exact="0" comment="Check how often the player looped"/>
+            <set_value name="$TotalScore" exact="0"/>
+            <set_value name="$DialogueOptionSequence" exact="[1, 2, 3]"/>
+            <create_mission cue="$MissionCue" comment="Recruit: Kaori Chen" abortable="false"
+                            name="{30295,1001}" description="{30295,1005}"
+                            icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                            difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+              <briefing>
+                <objective step="$MissionStep" action="objective.custom" customaction="{30295,1004}"/>
+              </briefing>
+            </create_mission>
+            <set_objective step="$MissionStep" cue="$MissionCue" action="objective.custom" customaction="{30295,1004}">
+              <progress  progress="0" max="5"/>
+            </set_objective>
+            <activate_mission cue="$MissionCue"/>
+            <play_music music="'music_hub_story_recruiting'" loop="true"/>
+          </actions>
+          <cues>
+
+            <cue name="IntroCutscene">
+              <actions>
+                <precache_hint target="$PrisonRoom"/>
+                <precache_hint target="$KaoriActor"/>
+                <precache_hint target="$GuardActor"/>
+                <set_value name="this.$CutsceneKey" exact="'Scenario_Recruitment_1_Cutscene'"/>
+                <play_cutscene result="this.$CutsceneID" key="this.$CutsceneKey" abortable="true" letterbox="true" movesoundcamera="true">
+                  <param name="target_kaori"  object="$KaoriActor" />
+                  <param name="target_guard"  object="$GuardActor" />
+                  <param name="target_room"  object="$PrisonRoom" />
+                </play_cutscene>
+              </actions>
+              <cues>
+
+                <cue name="IntroCutscene_EndCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <stop_cutscene key="parent.$CutsceneKey"/>
+                    <do_if value="IntroCutscene_BubbleCreation.state != cuestate.complete">
+                      <signal_cue_instantly cue="IntroCutscene_BubbleCreation"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="IntroCutscene_Finished">
+                  <conditions>
+                    <event_cutscene_stopped key="parent.$CutsceneKey"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="event.param3">
+                      <signal_cue_instantly cue="MoveKaori" check="false"/>
+                    </do_if>
+                    <fade_screen fadeout="0s" holdtime="0.5s" fadein="1s" realtime="true"/>
+                    <muffle_sound strength="0" duration="0s"/>
+                    <blur_screen strength="0" duration="0s"/>
+                    <signal_cue cue="IntroDialogue_Abort"/>
+                    <signal_cue cue="StartConversation_Phase1"/>
+                  </actions>
+                </cue>
+
+                <cue name="IntroCutscene_Sequence2Trigger">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence01Done'"/>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence02Start'"/>
+                  </actions>
+                  <delay exact="11s"/>
+                  <actions>
+                    <signal_cue_instantly cue="IntroCutscene_BubbleCreation" check="false"/>
+                  </actions>
+                </cue>
+
+                <cue name="IntroCutscene_BubbleCreation">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <actions>
+                    <create_object name="$Impedence_bubble" macro="macro.impedence_bubble_macro"  zone="$PrisonStation.zone">
+                      <position object="$PrisonRoom" x="-0.5" y="1.2m" z="-4.07m"/>
+                    </create_object>
+                    <play_sound sound="'hub_matrix_transition'" object="player.entity" type="effect"/>
+                    <!--find_object_component object="$PrisonRoom" name="$Impedence_bubble" macro="macro.impedence_bubble_macro"/-->
+                    <do_if value="not $Impedence_bubble">
+                      <debug_text text="'Bubble not found'" filter="error"/>
+                    </do_if>
+                    <!-- "freeze" the guard in place -->
+                    <start_actor_sequence actor="$GuardActor" type="'idle'" behavior="'stand_freeze'" immediate="true" transition="true"/>
+                  </actions>
+                  <delay exact="0.2s"/>
+                  <actions>
+                    <!-- Add player to scene -->
+                    <add_actor_to_room actor="player.entity" object="$PrisonRoom">
+                      <position x="-2.1" y="1.642" z="-3.21" space="$PrisonRoom"/>
+                      <rotation yaw="134.6451deg" pitch="-6.37119deg"/>
+                    </add_actor_to_room>
+                  </actions>
+                  <delay exact="5.4s"/>
+                  <actions>
+                    <signal_cue_instantly cue="IntroCutscene_Sequence3Trigger"/>
+                  </actions>
+                </cue>
+
+                <cue name="IntroCutscene_Sequence3Trigger">
+                  <conditions>
+                    <event_cue_signalled/>
+                    <check_value value="parent.$CutsceneKey"/>
+                  </conditions>
+                  <actions>
+                  </actions>
+                  <delay exact="0.2s"/>
+                  <actions>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence02Done'"/>
+                    <cutscene_event key="parent.$CutsceneKey" event="'TriggerSequence03Start'"/>
+                  </actions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="IntroDialogue">
+              <conditions>
+                <event_cue_completed cue="IntroCutscene"/>
+              </conditions>
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                                                            $abortonsignalledcue = IntroDialogue_Abort,
+                                                                            $script = [
+                                                                                      3s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950101, $monitor = false, $comment = 'Right, recruit Harper. Your mission is to recruit one Kaori Chen. 24 years old. Female. Human.' ],
+                                                                                      1s,
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950102, $speakcallbackcue = IntroCutscene_Sequence2Trigger, $monitor = false, $comment = 'Shes in prison on board a Sol space station, above Jupiter.' ],
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950103, $monitor = false, $comment = 'Apparently she sabotaged a carbon-emitting power generator on Earth. Some place called Ven-ne-zue-la.' ],
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950104, $monitor = false, $comment = 'I cant hold the impedance bubble open for long, so dont mess around.' ],
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950105, $monitor = false, $comment = 'Just get in, tell her the deal, get her agreement and then get out.' ],
+                                                                                      0.8s
+                                                                                      ],
+                                                                              $callbackcue = IntroCutscene_EndCutscene,
+                                                                              $abortcallbackcue  = IntroCutscene_EndCutscene,
+                                                                              ]" />
+              </actions>
+              <cues>
+
+                <cue name="IntroDialogue_Abort">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                </cue>
+
+              </cues>
+            </cue>
+
+            <cue name="KaoriMovementDelay">
+              <delay exact="15.5s"/>
+              <actions>
+                <signal_cue_instantly cue="MoveKaori" param="'cutscene'" check="false"/>
+              </actions>
+            </cue>
+
+            <cue name="MoveKaori">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <create_position name="$PrisonerPos" space="$PrisonRoom" x="-0.15" y="0.3" z="-5.34"/>
+                <create_orientation name="$PrisonerOrientation"  refposition="$GuardActor.position" orientation="look_at" maxpitch="0deg">
+                  <position value="$PrisonerPos"/>
+                </create_orientation>
+
+                <do_if value="event.param != 'cutscene'">
+                  <!-- If the player aborted the cutscene immediately move Kaori via teleport-->
+                  <remove_actor_from_room actor="$KaoriActor"/>
+                </do_if>
+
+                <signal_cue_instantly cue="md.NPC_Instantiation.NPC_Placement_Manager" param="['add_definition', $KaoriActor,
+                                                                                                      table[
+                                                                                                      $requestercue = namespace,
+                                                                                                      $location = $PrisonRoom,
+                                                                                                      $priority = 100,
+                                                                                                      $preventanimation = true,
+                                                                                                      $rotation = $PrisonerOrientation,
+                                                                                                      $position = $PrisonerPos,
+                                                                                                      $debugchance = 0,
+                                                                                                      $debugcaller = if $DebugChance == 100 then this else null]
+                                                                                                      ]"/>
+
+
+              </actions>
+            </cue>
+
+            <!-- Figure out how to to time dilution! -->
+            <cue name="TimeBubble_Effect" onfail="cancel">
+              <conditions>
+                <check_value value="false"/>
+              </conditions>
+            </cue>
+            <cue name="StartConversation_Phase1">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <start_conversation actor="$GuardActor" conversation="recruitment"/>
+              </actions>
+            </cue>
+
+            <cue name="GuardConversation_Section1" instantiate="true">
+              <conditions>
+                <event_conversation_started actor="$GuardActor" conversation="recruitment"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <add_npc_line hidechoices="true" speaker="$GuardActor">
+                  <text line="302930120" delay="3s" comment=""/>
+                </add_npc_line>
+              </actions>
+              <delay exact="2.5s"/>
+              <actions>
+                <signal_cue_instantly cue="StartConversation_Phase2"/>
+              </actions>
+            </cue>
+
+            <cue name="StartConversation_Phase2">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <start_conversation actor="$KaoriActor" conversation="recruitment"/>
+              </actions>
+            </cue>
+
+            <cue name="ConversationStarted_Section1" instantiate="true">
+              <conditions>
+                <event_conversation_started actor="$KaoriActor" conversation="recruitment"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+
+                <add_npc_line hidechoices="true" speaker="$KaoriActor" lookat="$GuardActor">
+                  <text delay="0.5s" line="302950101" comment="Holy frag! What happened to this guy?"/>
+                </add_npc_line>
+                <shuffle_list list="$DialogueOptionSequence"/>
+                <add_player_choice text="{30295,302950101}" comment="Good Option" section="section_who_are_you" choiceparam="'good'" position="$DialogueOptionSequence.{1}"/>
+                <add_player_choice text="{30295,302950102}" comment="Neutral Option" section="section_who_are_you" choiceparam="'neutral'" position="$DialogueOptionSequence.{2}"/>
+                <add_player_choice text="{30295,302950103}" comment="Bad Option" section="section_who_are_you" choiceparam="'bad'" position="$DialogueOptionSequence.{3}"/>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Section2_Who_Are_You" instantiate="true">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_who_are_you"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <do_if value="event.param2 == 'good'">
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <set_value name="$TotalScore" operation="add" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950101" comment="He'll be fine. We call this an impedance bubble. But we can't hold it for long."/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="event.param2 == 'neutral'">
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950102" comment="I wish I had time to explain, but we only have a few moments to talk."/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad'">
+                  <set_value name="$TotalScore" operation="subtract" exact="1" />
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950103" comment="There's no time to explain. I'm here to get you out."/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad_repeat'">
+                  <set_value name="this.$SelectNotRepeatable" exact="true"/>
+                  <set_value name="$TotalScore" operation="subtract" exact="1" />
+                  <set_value name="$LoopAmount" operation="add" exact="1"/>
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950106" comment="I'm not important. But the information I have for you is very important."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950105" comment="Cool your jets a moment."/>
+                    <text line="302950106" comment="If you're going to ignore me, I'd rather you just disappear with your magic bubble."/>
+                  </add_npc_line>
+                </do_elseif>
+
+                <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                  <text delay="1s" line="302950102" comment="Who are you?"/>
+                </add_npc_line>
+
+                <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30295,1004}" silent="true">
+                  <progress  progress="1" max="6"/>
+                </set_objective>
+                <trigger_animation object="$Impedence_bubble" trigger="shrinkbubble" delay="8s"/>
+
+                <shuffle_list list="$DialogueOptionSequence"/>
+                <add_player_choice text="{30295,302950104}" comment="Good Option" section="section_major_domo_explanation" choiceparam="'good'" position="$DialogueOptionSequence.{1}"/>
+                <add_player_choice text="{30295,302950105}" comment="Neutral Option" section="section_major_domo_explanation" choiceparam="'neutral'" position="$DialogueOptionSequence.{2}"/>
+                <add_player_choice text="{30295,302950106}" comment="Bad Option" section="section_who_are_you" choiceparam="'bad_repeat'" position="$DialogueOptionSequence.{3}" selectable="if this.$SelectNotRepeatable? then false else true"/>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Section3" instantiate="true">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_major_domo_explanation"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <do_if value="event.param2 == 'good'">
+                  <set_value name="$TotalScore" operation="add" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950104" comment="I'm Harper Donel. I've been sent here from a far-off place to get you out of jail."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950103" comment="Okaaaay... keep talking."/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="event.param2 == 'neutral'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950105" comment="I'm a friend. I have a non-jail proposition for you."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950104" comment="So I have friends with magic bubbles. Good to know."/>
+                  </add_npc_line>
+                </do_elseif>
+
+                <!-- MD comments -->
+                <do_if value="$LoopAmount ge 1">
+                  <!-- Give Warning -->
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950107" comment="Impedance bubble unstable."/>
+                  </add_npc_line>
+                </do_if>
+                <do_else>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950106" comment="Impedance bubble status green."/>
+                  </add_npc_line>
+                </do_else>
+                <trigger_animation object="$Impedence_bubble" trigger="shrinkbubble" delay="8s"/>
+
+                <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                  <text line="302950107" comment="Who said that?!"/>
+                </add_npc_line>
+
+                <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                <set_objective cue="$MissionCue" action="objective.custom" step="$MissionStep" customaction="{30295,1004}" silent="true">
+                  <progress  progress="2" max="6"/>
+                </set_objective>
+
+                <shuffle_list list="$DialogueOptionSequence"/>
+                <add_player_choice text="{30295,302950107}" comment="Good Option" section="section_purpose" choiceparam="'good'" position="$DialogueOptionSequence.{1}"/>
+                <add_player_choice text="{30295,302950108}" comment="Neutral Option" section="section_purpose" choiceparam="'neutral'" position="$DialogueOptionSequence.{2}"/>
+                <add_player_choice text="{30295,302950109}" comment="Bad Option" section="section_purpose" choiceparam="'bad'" position="$DialogueOptionSequence.{3}"/>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Section4" instantiate="true">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_purpose"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <do_if value="event.param2 == 'good'">
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <set_value name="$TotalScore" operation="add" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950107" comment="Oh er... just a... computer update."/>
+                    <text line="302950108" comment="I need to hurry, and let you know what's going on."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text line="302950108" comment="Oh yes. Standard computer voice here. Reminding Harper to hurry up and tell her the deal!"/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text delay="2s" line="302950108" comment="So what's this deal then?"/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="event.param2 == 'neutral'">
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950109" comment="That's a highly advanced artificial intelligence."/>
+                    <text line="302950110" comment="We call it... him... the Mission Director."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text line="302950109" comment="Yes yes yes. Introductions all made. Now Harper, will you kindly tell her the deal?"/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text delay="2s" line="302950108" comment="So what's this deal then?"/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad'">
+                  <shuffle_list list="$DialogueOptionSequence"/>
+                  <set_value name="$TotalScore" operation="subtract" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950111" comment="I really need to tell you what will happen if you choose to come with us."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text line="302950110" comment="Oh my goodness! Kaori, I'm MD. Just the backup on this mission."/>
+                    <text line="302950111" comment="Harper. Please tell the poor woman the deal before the impedance bubble collapses or she dies of old age."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text delay="2s" line="302950108" comment="So what's this deal then?"/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad_repeat'">
+                  <set_value name="$TotalScore" operation="subtract" exact="1" />
+                  <set_value name="this.$SelectNotRepeatable" exact="true"/>
+                  <set_value name="$LoopAmount" operation="add" exact="1"/>
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950115" comment="I wish I knew exactly."/>
+                    <text line="302950116" comment="We live on a space facility that launches us into different times and different places, where we do missions."/>
+                  </add_npc_line>
+                  <do_if value="$PlayerActor.isfemale">
+                    <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                      <text line="302950112" comment="You're not exactly selling this bubble girl."/>
+                    </add_npc_line>
+                  </do_if>
+                  <do_else>
+                    <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                      <text line="302950111" comment="You're not exactly selling this bubble dude."/>
+                    </add_npc_line>
+                  </do_else>
+
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950117" comment="You're right. Think of it this way..."/>
+                  </add_npc_line>
+                </do_elseif>
+
+                <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30295,1004}" silent="true">
+                  <progress  progress="3" max="6"/>
+                </set_objective>
+
+                <add_player_choice text="{30295,302950110}" comment="Good Option" section="section_kaori_goodbyes" choiceparam="'good'" position="$DialogueOptionSequence.{1}"/>
+                <add_player_choice text="{30295,302950111}" comment="Neutral Option" section="section_kaori_goodbyes" choiceparam="'neutral'" position="$DialogueOptionSequence.{2}"/>
+                <add_player_choice text="{30295,302950112}" comment="Bad Option" section="section_purpose" choiceparam="'bad_repeat'" position="$DialogueOptionSequence.{3}" selectable="if this.$SelectNotRepeatable? then false else true"/>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Section5" instantiate="true">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_kaori_goodbyes"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <do_if value="event.param2 == 'good'">
+                  <set_value name="$TotalScore" operation="add" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950112" comment="If you come with me, we will explore the galaxy and time itself."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950109" comment="No. Fraggin'. Way!"/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="event.param2 == 'neutral'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950113" comment="We're like... Guardians. Sent by a higher power to right the galaxy's wrongs."/>
+                    <text line="302950114" comment="Like you being in jail, for instance."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950110" comment="Now that DOES sound like something I could get behind."/>
+                  </add_npc_line>
+                </do_elseif>
+
+                <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30295,1004}" silent="true">
+                  <progress  progress="4" max="6"/>
+                </set_objective>
+
+                <!-- MD comments -->
+                <do_if value="$LoopAmount == 1">
+                  <!-- Give Warning -->
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950113" comment="Impedance bubble status red"/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="$LoopAmount == 2">
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950114" comment="Impedance bubble collapse imminent! Hurry!"/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_else>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950112" comment="Impedance bubble unstable."/>
+                  </add_npc_line>
+                </do_else>
+                <trigger_animation object="$Impedence_bubble" trigger="shrinkbubble" delay="8s"/>
+
+                <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                  <text line="302950118" delay="1s" comment="Look. There's more. This is a one-way ticket. "/>
+                  <text line="302950119" comment="Once we leave this place, you can never come back to this life."/>
+                </add_npc_line>
+                <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                  <text line="302950113" comment="But I have family. Can I even say goodbye?"/>
+                </add_npc_line>
+
+                <shuffle_list list="$DialogueOptionSequence"/>
+                <add_player_choice text="{30295,302950113}" comment="Good Option" section="section_final_interaction" choiceparam="'good'" position="$DialogueOptionSequence.{1}"/>
+                <add_player_choice text="{30295,302950114}" comment="Neutral Option" section="section_final_interaction" choiceparam="'neutral'" position="$DialogueOptionSequence.{2}"/>
+                <add_player_choice text="{30295,302950115}" comment="Bad Option" section="section_final_interaction" choiceparam="'bad'" position="$DialogueOptionSequence.{3}"/>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Section6" instantiate="true">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_final_interaction"/>
+              </conditions>
+              <actions>
+                <allow_conversation_escape enabled="false" chance="if $EscapeIsEnabled == true then 0 else 100"/>
+                <remove_from_list name="$DialogueOptionSequence" exact="2"/>
+                <shuffle_list list="$DialogueOptionSequence"/>
+                <do_if value="event.param2 == 'good'">
+                  <set_value name="$TotalScore" operation="add" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950120" comment="We don't have that luxury. We either go now, or not at all."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950114" comment="I see. Goodbyes are not an option."/>
+                  </add_npc_line>
+                </do_if>
+                <do_elseif value="event.param2 == 'neutral'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950121" comment="This just isn't possible. But I'm sure they don't want you spending your life here in a cell."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950115" comment="Don't sugar coat it, Harper. Tell me how it really is."/>
+                  </add_npc_line>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad'">
+                  <set_value name="$TotalScore" operation="subtract" exact="1" />
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950122" comment="I really wish that were possible. We'll be there to help you through this."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950116" comment="You know you're just a stranger with a magic bubble. You're not my best friend."/>
+                  </add_npc_line>
+                </do_elseif>
+
+                <!-- MD comments -->
+                <do_if value="$LoopAmount == 1">
+                  <!-- Give Warning -->
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950116"/>
+                  </add_npc_line>
+                  <trigger_animation object="$Impedence_bubble" trigger="shrinkbubble" delay="8s"/>
+                </do_if>
+                <do_elseif value="$LoopAmount ge 2">
+                  <set_value name="$MissionInterrupted"/>
+                </do_elseif>
+                <do_else>
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950117"/>
+                  </add_npc_line>
+                </do_else>
+
+                <!-- Provisional Scoring -->
+                <do_if value="$MissionInterrupted?">
+                  <set_value name="$ScenarioScore" exact="0"/>
+                </do_if>
+                <do_else>
+                  <do_if value="$TotalScore le -4">
+                    <set_value name="$ScenarioScore" exact="0"/>
+                  </do_if>
+                  <do_elseif value="$TotalScore le -2">
+                    <set_value name="$ScenarioScore" exact="1"/>
+                  </do_elseif>
+                  <do_elseif value="$TotalScore le 1">
+                    <set_value name="$ScenarioScore" exact="2"/>
+                  </do_elseif>
+                  <do_elseif value="$TotalScore le 3">
+                    <set_value name="$ScenarioScore" exact="3"/>
+                  </do_elseif>
+                  <do_elseif value="$TotalScore le 4">
+                    <set_value name="$ScenarioScore" exact="4"/>
+                  </do_elseif>
+                  <do_elseif value="$TotalScore ge 5">
+                    <set_value name="$ScenarioScore" exact="5"/>
+                  </do_elseif>
+                </do_else>
+
+                <do_if value="$LoopAmount lt 2">
+                  <do_if value="$ScenarioScore ge 4">
+                    <!-- If player scored 4 or 5 -->
+                    <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                      <text line="302950119" comment="Is there anything else I need to know?"/>
+                    </add_npc_line>
+
+                    <add_player_choice text="{30295,302950121}" comment="Good Option 1" section="section_results" choiceparam="'good_1'" position="$DialogueOptionSequence.{1}"/>
+                    <add_player_choice text="{30295,302950120}" comment="Good Option 2" section="section_results" choiceparam="'good_2'" position="$DialogueOptionSequence.{3}"/>
+                  </do_if>
+                  <do_elseif value="$ScenarioScore ge 2">
+                    <!-- If player scored 2 or 3 -->
+                    <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                      <text line="302950118" comment="This is all a lot to take in so quickly."/>
+                    </add_npc_line>
+
+                    <add_player_choice text="{30295,302950119}" comment="Neutral Option 1" section="section_results" choiceparam="'neutral_1'" position="$DialogueOptionSequence.{3}"/>
+                    <add_player_choice text="{30295,302950118}" comment="Neutral Option 2" section="section_results" choiceparam="'neutral_2'" position="$DialogueOptionSequence.{1}"/>
+                  </do_elseif>
+                  <do_else>
+                    <!-- If player scored 0 or 1 -->
+                    <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                      <text line="302950117" comment="Honestly. You're kind of shady. I think I'll take my chances with the enemy I know."/>
+                    </add_npc_line>
+
+                    <add_player_choice text="{30295,302950117}" comment="Bad Option 1" section="section_results" choiceparam="'bad_1'" position="$DialogueOptionSequence.{1}"/>
+                    <add_player_choice text="{30295,302950116}" comment="Bad Option 2" section="section_results" choiceparam="'bad_2'" position="$DialogueOptionSequence.{2}"/>
+                  </do_else>
+
+                  <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                  <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30295,1004}" silent="true">
+                    <progress  progress="5" max="6"/>
+                  </set_objective>
+                </do_if>
+              </actions>
+            </cue>
+
+            <!-- TODO: MAJOR DOMO INTERRUPTION 302950118/302950119 -->
+
+            <cue name="KaoriConversation_Section_7_Results">
+              <conditions>
+                <event_conversation_next_section actor="$KaoriActor" section="section_results"/>
+              </conditions>
+              <actions>
+                <do_if value="event.param2 == 'good_1'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950123" comment="I have a feeling you're gonna get a kick out of dogfighting in a 23rd century scout ship."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950120" comment="Aww. You had me at dogfighting."/>
+                    <text line="302950121" comment="Come on, Harper. Let's get out of here. The food sucks anyway."/>
+                  </add_npc_line>
+
+                  <set_value name="$ScenarioScore" exact="1" operation="add"/>
+                </do_if>
+                <do_elseif value="event.param2 == 'good_2'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950124" comment="You and me, Kaori. We're gonna make the galaxy safer for everyone."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950122" comment="But you don't really know that, do you Harper?"/>
+                    <text line="302950123" comment="Ah, frag it! Take me away from this place. We'll figure it out together."/>
+                  </add_npc_line>
+
+                  <set_value name="$ScenarioScore" exact="1" operation="subtract"/>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'neutral_1'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950125" comment="You're strong, Kaori Chen. I know you can take this head on."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950124" comment="Arent you a charmer! Go one, then. Beam me up to your time machine."/>
+                  </add_npc_line>
+
+                  <set_value name="$ScenarioScore" exact="1" operation="add"/>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'neutral_2'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950126" comment="It's decision time. Are you coming or not?"/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950125" comment="Look. You need to work on your social skills but I hope there's room for two in your bubble. I'm in."/>
+                  </add_npc_line>
+
+                  <set_value name="$ScenarioScore" exact="1" operation="subtract"/>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad_1'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950127" comment="Look, I'm sorry. I've kind of messed this up. This really is your decision."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950126" comment="Too right it is!"/>
+                    <text line="302950127" comment="Look. You need to work on your social skills but I hope there's room for two in your bubble. I'm in."/>
+                  </add_npc_line>
+
+                  <set_value name="$ScenarioScore" exact="1" operation="add"/>
+                </do_elseif>
+                <do_elseif value="event.param2 == 'bad_2'">
+                  <add_npc_line hidechoices="true" speaker="$PlayerActor">
+                    <text line="302950128" comment="Please! If you say no, they're just going to send me back in time to try again. "/>
+                    <text line="302950129" comment="Again and again until I can change your mind."/>
+                  </add_npc_line>
+                  <add_npc_line hidechoices="true" speaker="$KaoriActor">
+                    <text line="302950128" comment="Yeah. My mum always told me never to get into time machines with strangers."/>
+                    <text line="302950129" comment="Get out of my cell you sociopath, and take your bubble with you."/>
+                  </add_npc_line>
+
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="2s" line="302950120"/>
+                  </add_npc_line>
+                  <set_value name="$ScenarioScore" exact="1" operation="subtract"/>
+                </do_elseif>
+
+                <do_if value="$TotalScore ge -4">
+                  <add_npc_line hidechoices="true" speaker="$MissionDirectorActor">
+                    <text delay="1s" line="302950121"/>
+                  </add_npc_line>
+                </do_if>
+
+                <set_value name="$TimeRemaining" operation="subtract" exact="1"/>
+                <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="{30295,1004}" silent="true">
+                  <progress  progress="6" max="6"/>
+                </set_objective>
+              </actions>
+            </cue>
+
+            <cue name="KaoriConversation_Finished">
+              <conditions>
+                <event_conversation_finished actor="$KaoriActor"/>
+              </conditions>
+              <actions>
+                <play_sound sound="'hub_matrix_transition'" object="player.entity" type="effect"/>
+                <do_if value="$MissionInterrupted?">
+
+                  <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = $DebugChance,
+                                                                            $abortonsignalledcue = IntroDialogue_Abort,
+                                                                            $script = [
+                                                                                      table[ $actor = '$MissionDirectorActor', $recipient = 'player', $speak = 302950115, $comment = 'Bubble collapsed. Mission failed.' ],
+                                                                                      ],
+                                                                              ]" />
+                  <set_value name="this.$delay" exact="5.5s"/>
+                </do_if>
+                <do_else>
+                  <set_value name="this.$delay" exact="2s"/>
+                </do_else>
+                <trigger_animation object="$Impedence_bubble" trigger="collapsebubble" delay="0.5s" />
+                <blur_screen duration="1.5s" strength="1"/>
+              </actions>
+              <delay exact="this.$delay"/>
+              <actions>
+                <signal_cue cue="ResultWindow"/>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed group="$MissionRelevantObjects"/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+
+            <set_value name="$ResultData.$CustomStats" exact="table[]"/>
+
+            <do_if value="$MissionInterrupted?">
+              <set_value name="$ScenarioScore" exact="0"/>
+            </do_if>
+
+            <do_if value="$MissionInterrupted?">
+              <add_scenario_stat id="'failure'" name="{30295,1203}" description="{30295,1204}" comment="Failure case" uivalue="$ScenarioScore" score="$ScenarioScore"/>
+            </do_if>
+            <do_else>
+              <add_scenario_stat id="'score'" name="{30295,1201}" description="{30295,1202}" comment="Persuasion" uivalue="$ScenarioScore" score="$ScenarioScore"/>
+            </do_else>
+
+            <do_if value="not userdata.hub_a3s2_complete? and $ScenarioScore ge 1">
+              <set_userdata name="'hub_a3s2_complete'" value="userdata.timelines_scenarios_finished + 1" comment="set to scenario counter for 'more missions played afterwards' checks, add this scenario as 'completed' on top"/>
+            </do_if>
+            <set_value name="$ResultData.$Score" exact="$ScenarioScore"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

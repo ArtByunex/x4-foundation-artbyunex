@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- Environment in which the scene will take place. -->
+  <director key="scenario_timelines_kaori_tale_cutscene">
+    <params>
+      <param name="target_QUE_npc" object="true"/>
+      <param name="target_Station" object="true"/>
+      <param name="target_Room" object="true"/>
+      <param name="target_Kaori" object="true"/>
+      <param name="target_Player" object="true"/>
+    </params>
+  </director>
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone" zone="@auto:target_Kaori" />
+    <environment_implicit name="manager_scenezone" zone="@auto:target_QUE_npc" />
+    <object_group name="target_group">
+      <reference object="target_QUE_npc" />
+      <reference object="target_Station" />
+      <reference object="target_Room" />
+      <reference object="target_Kaori" />
+      <reference object="target_Player" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      <sequence name="Sequence1" start="0" endevent="onevent:TriggerSequence02Start">
+        <shot name="OvershoulderShot01" environment="scenezone" duration="15000">
+          <camera>
+            <position>
+              <reference object="target_Room" x="0.92" y="3.01" z="-16.99"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Room" x="-1.12" y="3.024" z="-22.83"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="WideShot02" environment="scenezone" duration="18000">
+          <camera_orbit reference="target_Room" orient_to="ecliptic" cycle="none" z="-4" y="0.5">
+            <begin angle="48">
+              <distance>
+                <value exact="14.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.4"/>
+              </elevation>
+            </begin>
+            <end angle="-67" time="14000">
+              <distance>
+                <value exact="16"/>
+              </distance>
+              <elevation>
+                <value exact="6"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+
+        <shot name="CloseUpKaori03" environment="scenezone" duration="15000">
+          <camera>
+            <position>
+              <reference object="target_Kaori" x="0" y="1.5" z="1.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Kaori" x="0" y="1.6" z="-1"/>
+            </lookdirection>
+          </camera>
+        </shot>
+        
+        <shot name="DistantStarGazingShot04" environment="scenezone" duration="19000">
+          <camera>
+            <position>
+              <reference object="target_Room" x="-1.13" y="2.65" z="-18.05"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Room" x="-7.29" y="5.03" z="-29.1"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="QuettanautOfficeShot05" environment="manager_scenezone" duration="12000">
+          <camera>
+            <position>
+              <reference object="target_QUE_npc" x="-3" y="1.4" z="2.7"/>
+            </position>
+            <lookdirection>
+              <reference object="target_QUE_npc" x="-2" y="1.5" z="0"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="ShowPlatformShot06" environment="scenezone" duration="15000">
+          <camera_orbit reference="target_Player" orient_to="ecliptic" cycle="none" z="0" y="0.5">
+            <begin angle="80">
+              <distance>
+                <value exact="14.8"/>
+              </distance>
+              <elevation>
+                <value exact="-0.4"/>
+              </elevation>
+            </begin>
+            <end angle="160" time="13000">
+              <distance>
+                <value exact="15.2"/>
+              </distance>
+              <elevation>
+                <value exact="1"/>
+              </elevation>
+            </end>
+          </camera_orbit>
+        </shot>
+
+        <shot name="CloseUpKaoriShot07" environment="scenezone" duration="11000">
+          <camera>
+            <position>
+              <reference object="target_Kaori" x="0" y="1.5" z="1.2"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Kaori" x="0" y="1.6" z="-1"/>
+            </lookdirection>
+          </camera>
+        </shot>
+
+        <shot name="StationWideShot08" environment="scenezone" duration="onevent:TriggerSequence01Done">
+          <camera>
+            <position>
+              <reference object="target_Station" x="-3356" y="816" z="1776.965"/>
+            </position>
+            <lookdirection>
+              <reference object="target_Station" x="-610" y="1171" z="65"/>
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>

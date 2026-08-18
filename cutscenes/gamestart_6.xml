@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="gamestart_6" comment="Play a gamestart movie">
+  </director>
+
+  <environments>
+    <environment_implicit name="scenezone" zone="tzoneCluster_black2_Sector01_Zone_macro" />
+    <object_group name="testgroup">
+      <reference object="playership" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="DynamicSequence" start="0">
+
+        <shot name="Movie1" environment="scenezone" duration="auto">
+          <video name="videos/gamestart_6"/>
+          <camera_follow reference="playership" orient_to="object" interpolation="smooth"/>
+        </shot>
+
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

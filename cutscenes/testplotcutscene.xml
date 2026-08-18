@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="TestPlotCutscene" />
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_plot name="scenezone">
+      <anchor name="cutscenetest_d_macro" />
+      <!-- teleport zone="@auto:@playership" -->
+      <teleport zone="tzonecluster_c_sector11_zone75_macro">
+        <offset>
+          <position x="-2951.54" y="37004" z="-7685.54"/>
+          <rotation yaw="-9.34719" pitch="-0.870276"/>
+        </offset>
+      </teleport>
+    </environment_plot>
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <sequence name="TestSequence" start="0">
+        <!-- Note that we rely on an event to tell us when to stop playing the scene;
+					 the actual scene duration is controlled by code logic, not manually. -->
+        <shot name="TestShot" environment="scenezone" duration="onevent:stopscene">
+
+          <!-- Animated camera placement: Get camera position from animation in referenced object -->
+          <camera_animated reference="animobject">
+          </camera_animated>
+
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+

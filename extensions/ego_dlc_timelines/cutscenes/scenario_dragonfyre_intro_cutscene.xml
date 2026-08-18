@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_dragonfyre_intro_cutscene"/>
+
+  <environments>
+    <environment_implicit name="playerzone" zone="@auto:@playership" />
+    <object_group name="target_group">
+      <reference object="allied_capship" />
+      <reference object="enemy_capship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+
+      <sequence name="Sequence1" start="0">
+        <!--WE OPEN on a Terran capital ship defending a Terran space station from a fleet of TERRAFORMERS. It is visibly damaged but manages to beat off the last of the fighters.-->
+        <shot name="ShowAlliedShip" duration="1" environment="playerzone">
+          <camera>
+            <position>
+              <reference object="allied_capship" x="-300" z="400" />
+            </position>
+            <lookdirection>
+              <reference object="enemy_capship" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <!--PAN from the ship towards Mars.-->
+        <shot name="PanToMars" duration="onevent:ShowEnemyShip" environment="playerzone">
+          <takeover_position interpolation="smooth" duration="30000"/>
+          <camera>
+            <position>
+              <reference object="allied_capship" x="-400" y="100" z="500" />
+            </position>
+            <lookdirection>
+              <reference object="enemy_capship" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence2" start="onevent:ShowEnemyShip">
+        <!--FOCUS AND ZOOM IN on an incoming TERRAFORMER capital ship.-->
+        <!--Both capital ships open fire on each other. The Terran ship's engines explode.-->
+        <shot name="ShowBattle1" duration="1" environment="playerzone">
+          <camera>
+            <position>
+              <reference object="enemy_capship" x="100" y="-50" z="100" />
+            </position>
+            <lookdirection>
+              <reference object="allied_capship" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ShowBattle2" duration="onevent:ShowPlayerSquad" environment="playerzone">
+          <takeover_position interpolation="smooth" duration="20000"/>
+          <camera>
+            <position>
+              <reference object="enemy_capship" x="100" y="-100" z="-500" />
+            </position>
+            <lookdirection>
+              <reference object="allied_capship" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+      <sequence name="Sequence3" start="onevent:ShowPlayerSquad">
+        <!--CUT TO a squadron of Terran fighters, en route to the battle.-->
+        <!--CAMERA flies to lead fighter while Gunne is speaking.-->
+        <!--FADE TO cockpit view, player now in control of GUNNE.-->
+        <shot name="ShowPlayerSquad" duration="1" environment="playerzone">
+          <camera>
+            <position>
+              <reference object="@playership" y="-30" z="-100"/>
+            </position>
+            <lookdirection>
+              <reference object="@playership" />
+            </lookdirection>
+          </camera>
+        </shot>
+        <shot name="ZoomToPlayerShip" duration="onevent:stopscene" environment="playerzone">
+          <takeover_position interpolation="linear" duration="10000"/>
+          <camera>
+            <position>
+              <reference object="@playership" z="-30" />
+            </position>
+            <lookdirection>
+              <reference object="@playership" />
+            </lookdirection>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <director key="scenario_dragonfyre_odachi_warp_cutscene" />
+  <!--
+  Shot 1:
+  -->
+
+  <!-- Environment in which the scene will take place. -->
+  <environments>
+    <environment_implicit name="scenezone_targetship_1" zone="@auto:origin_ship" />
+    <object_group name="target_group">
+      <reference object="target_ship" />
+      <reference object="origin_ship" />
+    </object_group>
+  </environments>
+
+  <presentation>
+    <actions>
+      
+      <sequence name="Sequence01" start="0">
+        <shot name="FlyFrom_OriginShip_To_TargetShip" environment="scenezone_targetship_1" duration="7200">
+          <camera>
+            <lookdirection>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="origin_ship" x="-11" y="44" z="47"/>
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="linear">
+                  <reference object="origin_ship" x="-11" y="44" z="47"/>
+                </keyframe>
+                <keyframe timestamp="3500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="1.23" z="43.1"/>
+                </keyframe>
+                <keyframe timestamp="4500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="1.23" z="43.1"/>
+                </keyframe>
+                <keyframe timestamp="5500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="8.2" z="-44"/>
+                </keyframe>
+                <keyframe timestamp="6500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="8.2" z="-44"/>
+                </keyframe>
+                <keyframe timestamp="7500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="6.2" z="-24"/>
+                </keyframe>
+              </keyframes>
+            </lookdirection>
+            <position>
+              <keyframes>
+                <keyframe timestamp="0" interpolation="linear">
+                  <reference object="origin_ship" x="43" y="62" z="188"/>
+                </keyframe>
+                <keyframe timestamp="2000" interpolation="linear">
+                  <reference object="origin_ship" x="43" y="62" z="188"/>
+                </keyframe>
+                <keyframe timestamp="3500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="3.27" z="51.1"/>
+                </keyframe>
+                <keyframe timestamp="4500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="3.27" z="51.1"/>
+                </keyframe>
+                <keyframe timestamp="5500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="21" z="-83"/>
+                </keyframe>
+                <keyframe timestamp="6500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="21" z="-83"/>
+                </keyframe>
+                <keyframe timestamp="7500" interpolation="linear">
+                  <reference object="target_ship" x="0" y="8.2" z="-44"/>
+                </keyframe>
+              </keyframes>
+            </position>
+          </camera>
+        </shot>
+      </sequence>
+
+    </actions>
+  </presentation>
+
+</cutscene>

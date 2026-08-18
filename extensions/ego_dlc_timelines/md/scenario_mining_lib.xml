@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Mining_LIB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+
+    <library name="Update_Objective" purpose="include_actions">
+      <actions>
+        <include_actions ref="md.Scenario_Mining_LIB.Create_Objective_Text"/>
+
+        <do_if value="$PlayerAttacked">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$SurviveObjectiveSet?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$SurviveObjectiveSet"/>
+        </do_if>
+        <do_elseif value="$ResourcesCollected ge player.allmodules.{player.module}.score.{5}">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$ThresholdReached_5?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$ThresholdReached_5"/>
+        </do_elseif>
+        <do_elseif value="$ResourcesCollected ge player.allmodules.{player.module}.score.{4}">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$ThresholdReached_4?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$ThresholdReached_4"/>
+        </do_elseif>
+        <do_elseif value="$ResourcesCollected ge player.allmodules.{player.module}.score.{3}">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$ThresholdReached_3?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$ThresholdReached_3"/>
+        </do_elseif>
+        <do_elseif value="$ResourcesCollected ge player.allmodules.{player.module}.score.{2}">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$ThresholdReached_2?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$ThresholdReached_2"/>
+        </do_elseif>
+        <do_elseif value="$ResourcesCollected ge player.allmodules.{player.module}.score.{1}">
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$ThresholdReached_1?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$ThresholdReached_1"/>
+        </do_elseif>
+        <do_else>
+          <set_objective cue="$MissionCue" step="$MissionStep" action="objective.custom" customaction="$ObjectiveText" updatebriefing="true" silent="$InitialObjectiveSet?" endtime="$MissionStartTimeCue.time + $MissionDuration"/>
+          <set_value name="$InitialObjectiveSet"/>
+        </do_else>
+      </actions>
+    </library>
+
+    <library name="Create_Objective_Text" purpose="include_actions">
+      <actions>
+        <substitute_text text="$ObjectiveText" source="if $PlayerAttacked then (if ($ValidWaresList.count == 2) then {30613,404} else {30613,402})
+                                                                          else (if ($ValidWaresList.count == 2) then {30613,403} else {30613,401})">
+          <replace string="'$WARE1$'"         with="$ValidWaresList.{1}"/>
+          <replace string="'$WARE2$'"         with="$ValidWaresList.{2}"/>
+          <replace string="'$CURRENTAMOUNT$'" with="$ResourcesCollected"/>
+          <replace string="'$DESIREDAMOUNT$'" with="if ($ResourcesCollected lt player.allmodules.{player.module}.score.{1}) then player.allmodules.{player.module}.score.{1}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{2}) then player.allmodules.{player.module}.score.{2}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{3}) then player.allmodules.{player.module}.score.{3}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{4}) then player.allmodules.{player.module}.score.{4}
+                                               else player.allmodules.{player.module}.score.{5}"/>
+          <replace string="'$SCORE$'"         with="if ($ResourcesCollected lt player.allmodules.{player.module}.score.{1}) then {30613,301}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{2}) then {30613,302}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{3}) then {30613,303}
+                                               else if ($ResourcesCollected lt player.allmodules.{player.module}.score.{4}) then {30613,304}
+                                               else {30613,305}"/>
+        </substitute_text>
+      </actions>
+    </library>
+
+    <library name="On_Player_Ware_Drop" purpose="run_actions">
+      <params>
+        <param name="DropList"/>
+        <param name="ValidWaresList"/>
+      </params>
+      <actions>
+        <set_value name="$DroppedAmount" exact="0"/>
+        <do_for_each name="$CurrentDrop" in="$DropList">
+          <do_if value="$CurrentDrop.isclass.collectablewares">
+            <do_for_each in="$CurrentDrop.wares.table" name="$CurrentWare" valuename="$DropAmount">
+              <do_if value="$ValidWaresList.indexof.{$CurrentWare}">
+                <set_value name="$DroppedAmount" operation="add" exact="$DropAmount"/>
+              </do_if>
+            </do_for_each>
+          </do_if>
+        </do_for_each>
+
+        <return value="$DroppedAmount"/>
+      </actions>
+    </library>
+
+    <!-- Combined and modified version of SpawnAsteroidKhaak cue in Khaak_Activity and Ch8_9_Cutscene cue in Story_Boron -->
+    <library name="Spawn_Khaak_From_Asteroid" purpose="cue_ref">
+      <params>
+        <param name="SpawnPosition"/>
+        <param name="Sector"/>
+        <param name="NumSubordinates"  default="0"/>
+        <param name="CommanderMacro"   default="macro.ship_kha_m_fighter_01_a_macro"/>
+        <param name="SubordinateMacro" default="macro.ship_kha_s_fighter_01_a_macro"/>
+        <param name="EndSignalCue"     default="null"/>
+      </params>
+      <actions>
+        <set_value name="$HackDelay" exact="4s"/>
+        <create_group groupname="$Subordinates"/>
+        <get_zone_at_position name="$AnchorZone" sector="$Sector" value="$SpawnPosition" createifnone="true"/>
+        <add_effect object="$AnchorZone" effect="'jump_jumpin_khaak'">
+          <position value="$SpawnPosition"/>
+        </add_effect>
+      </actions>
+      <!-- 3.225s after the jump effect has started, the moment is reached where a ship appearing at the centre will look the best. -->
+      <delay exact="3.225s"/>
+      <actions>
+        <create_ship groupname="$Ships" name="$Commander" macro="$CommanderMacro" commandeerable="false" capturable="false" sector="$Sector">
+          <owner exact="faction.khaak" overridenpc="true"/>
+          <pilot>
+            <select faction="faction.khaak" tags="tag.fighterpilot"/>
+          </pilot>
+          <loadout>
+            <level exact="1.0"/>
+          </loadout>
+          <safepos value="$SpawnPosition"/>
+          <rotation yaw="[0deg,360deg].randominrange" pitch="[0deg,360deg].randominrange" roll="[0deg,360deg].randominrange"/>
+        </create_ship>
+        <!--Hack the engines to have the ship drift-->
+        <do_all exact="$NumSubordinates">
+          <create_ship groupname="$Ships" name="$Subordinate" macro="$SubordinateMacro" commandeerable="false" capturable="false" sector="$Sector">
+            <owner exact="faction.khaak" overridenpc="true"/>
+            <pilot>
+              <select faction="faction.khaak" tags="tag.fighterpilot"/>
+            </pilot>
+            <loadout>
+              <level exact="1.0"/>
+            </loadout>
+            <safepos object="$Commander" min="50m" max="100m"/>
+          </create_ship>
+          <add_to_group groupname="$Subordinates" object="$Subordinate"/>
+        </do_all>
+
+        <do_for_each in="$Ships" name="$CurrentShip">
+          <find_object_component name="$Engines" multiple="true" object="$CurrentShip" class="class.engine"/>
+          <do_for_each name="$Engine" in="$Engines">
+            <set_object_hacked object="$Engine" duration="$HackDelay"/>
+          </do_for_each>
+          <set_value name="$linear_x" min="-15m" max="15m"/>
+          <set_value name="$linear_y" min="-15m" max="15m"/>
+          <set_value name="$linear_z" min="-15m" max="15m"/>
+          <set_value name="$angular_x" min="-0.2m" max="0.2m"/>
+          <set_value name="$angular_y" min="-0.2m" max="0.2m"/>
+          <set_value name="$angular_z" min="-0.2m" max="0.2m"/>
+          <add_object_velocity object="$CurrentShip">
+            <linear x="$linear_x" y="$linear_y" z="$linear_z"/>
+            <angular x="$angular_x" y="$angular_y" z="$angular_z"/>
+          </add_object_velocity>
+        </do_for_each>
+      </actions>
+      <delay exact="$HackDelay"/>
+      <actions>
+        <do_if value="$Commander.isoperational">
+          <create_order object="$Commander" id="'Patrol'" default="true">
+            <param name="space" value="$Commander.sector"/>
+          </create_order>
+
+          <find_ship name="$MiningShip" primarypurpose="purpose.mine" owner="faction.player" space="$Commander.sector" sortbydistanceto="$Commander" sortdescending="false">
+            <match_distance object="$Commander" max="5km"/>
+          </find_ship>
+          <do_if value="$MiningShip">
+            <create_order object="$Commander" id="'Attack'">
+              <param name="primarytarget" value="$MiningShip"/>
+            </create_order>
+          </do_if>
+
+          <do_for_each name="$Subordinate" in="$Subordinates">
+            <create_order id="'AssignCommander'" object="$Subordinate">
+              <param name="commander" value="$Commander"/>
+              <param name="assignment" value="assignment.attack"/>
+              <param name="cancelorders" value="true"/>
+            </create_order>
+          </do_for_each>
+        </do_if>
+        <do_if value="$EndSignalCue">
+          <set_value name="$EndSignalCue.$KhaakShips" exact="$Ships"/>
+          <signal_cue cue="$EndSignalCue"/>
+        </do_if>
+      </actions>
+    </library>
+
+    <library name="Drain_Station" purpose="cue_ref">
+      <params>
+        <param name="Station"/>
+        <param name="Ware"/>
+        <param name="TriggerPercentage" default="0.5" comment="At what fill percentage should the drain trigger?"/>
+        <param name="TargetPercentage" default="0.3" comment="Down to what fill percentage should the cargo be drained?"/>
+        <param name="DebugChance" default="100"/>
+      </params>
+      <cues>
+
+        <cue name="Drain_Station_Storage_Level_Exceeded" checkinterval="10s" instantiate="true">
+          <conditions>
+            <check_value value="($Station.cargo.{$Ware}.count / $Station.cargo.{$Ware}.max)f ge $TriggerPercentage"/>
+          </conditions>
+          <actions>
+            <remove_cargo object="$Station" ware="$Ware" exact="$Station.cargo.{$Ware}.max * $TargetPercentage" result="$RemovedCargoAmount"/>
+            <debug_text text="'Drained ' + $RemovedCargoAmount + ' ' + $Ware + ' from ' + $Station.knownname + '.'" chance="$DebugChance"/>
+          </actions>
+        </cue>
+        
+      </cues>
+    </library>
+
+    <library name="Remove_Station_Defence_Drones" purpose="cue_ref">
+      <params>
+        <param name="Station"/>
+      </params>
+      <cues>
+
+        <cue name="Remove_Station_Defence_Drones_Loop" checkinterval="10s" instantiate="true">
+          <conditions>
+            <check_value value="$Station.units.{unitcategory.defence}.count"/>
+          </conditions>
+          <actions>
+            <remove_units object="$Station" category="unitcategory.defence" mk="1" exact="$Station.units.{unitcategory.defence}.count"/>
+          </actions>
+        </cue>
+
+      </cues>
+    </library>
+
+    <library name="Track_Highest_Asteroid_Yield" purpose="cue_ref">
+      <params>
+        <param name="MissionCue"/>
+        <param name="ValidWaresList"/>
+      </params>
+      <actions>
+        <create_group groupname="$RegisteredAsteroids"/>
+        <set_value name="$MissionCue.$HighestAsteroidYield" exact="0"/>
+      </actions>
+      <cues>
+
+        <cue name="Track_Highest_Asteroid_Yield_Object_Attacked" instantiate="true">
+          <conditions>
+            <event_player_owned_attacked_object/>
+            <check_value value="event.param2.isclass.asteroid"/>
+            <check_value value="not $RegisteredAsteroids.indexof.{event.param2}"/>
+          </conditions>
+          <actions>
+            <add_to_group groupname="$RegisteredAsteroids" object="event.param2"/>
+            <set_value name="this.$amount" exact="0"/>
+            <do_for_each in="event.param2.wares.list" name="$CurrentWare">
+              <do_if value="$ValidWaresList.indexof.{$CurrentWare}">
+                <set_value name="this.$amount" exact="event.param2.wares.{$CurrentWare}.count" operation="add"/>
+              </do_if>
+            </do_for_each>
+
+            <do_if value="this.$amount gt $MissionCue.$HighestAsteroidYield">
+              <set_value name="$MissionCue.$HighestAsteroidYield" exact="this.$amount"/>
+            </do_if>
+          </actions>
+        </cue>
+
+      </cues>
+    </library>
+
+    <library name="Track_Mining_Nodes_Destroyed" purpose="cue_ref">
+      <params>
+        <param name="MissionCue"/>
+      </params>
+      <actions>
+        <set_value name="$MissionCue.$MiningNodesDestroyed" exact="0"/>
+      </actions>
+      <cues>
+
+        <cue name="Track_Mining_Nodes_Destroyed_Object_Killed" instantiate="true">
+          <conditions>
+            <event_player_killed_object/>
+            <check_value value="event.param.isclass.miningnode"/>
+          </conditions>
+          <actions>
+            <set_value name="$MissionCue.$MiningNodesDestroyed" operation="add"/>
+          </actions>
+        </cue>
+
+      </cues>
+    </library>
+
+    <library name="Track_Fastest_Run" purpose="cue_ref">
+      <params>
+        <param name="MissionCue"/>
+      </params>
+      <cues>
+
+        <cue name="Track_Fastest_Run_Started" instantiate="true">
+          <conditions>
+            <event_object_undocked group="global.$PlayerOccupiedShipGroup"/>
+            <check_value value="not event.object.cargo.count"/>
+          </conditions>
+          <actions>
+            <set_value name="this.$ship" exact="event.object"/>
+            <set_value name="this.$validated" exact="false"/>
+          </actions>
+          <cues>
+
+            <cue name="Track_Fastest_Run_Validated">
+              <conditions>
+                <event_object_attacked_object object="parent.$ship"/>
+                <check_value value="event.param.isclass.asteroid"/>
+              </conditions>
+              <actions>
+                <set_value name="parent.$validated" exact="true"/>
+              </actions>
+            </cue>
+
+            <cue name="Track_Fastest_Run_Finished">
+              <conditions>
+                <event_object_docking_started object="parent.$ship"/>
+                <check_value value="not parent.$ship.cargo.free.all"/>
+                <check_value value="parent.$validated"/>
+              </conditions>
+              <actions>
+                <do_if value="not $MissionCue.$FastestRunTime? or ((this.time - parent.time) lt $MissionCue.$FastestRunTime)">
+                  <set_value name="$MissionCue.$FastestRunTime" exact="(this.time - parent.time)"/>
+                </do_if>
+              </actions>
+            </cue>
+
+          </cues>
+        </cue>
+
+      </cues>
+    </library>
+
+    <library name="Track_Enemies_Killed" purpose="cue_ref">
+      <params>
+        <param name="MissionCue"/>
+      </params>
+      <actions>
+        <set_value name="$MissionCue.$EnemiesKilled" exact="0"/>
+      </actions>
+      <cues>
+
+        <cue name="Track_Enemies_Killed_Object_Destroyed" instantiate="true">
+          <conditions>
+            <event_player_owned_killed_object/>
+            <check_value value="event.param2.isclass.ship"/>
+            <check_value value="event.param2.trueowner.relationto.{faction.player} le faction.player.relation.killmilitary.max"/>
+          </conditions>
+          <actions>
+            <set_value name="$MissionCue.$EnemiesKilled" operation="add"/>
+          </actions>
+        </cue>
+
+      </cues>
+    </library>
+
+  </cues>
+</mdscript>

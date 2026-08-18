@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="Scenario_Protect_Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <documentation>
+    <!--This scenario is unclaimed. If you'd like to work on it please remove this comment, write in your name below, and commit before beginning to work on it. There is also already an entry in gamestarts.xml that you just need to uncomment.-->
+    <author name=""/>
+  </documentation>
+  <cues>
+
+    <!--This template is a copy of scenario_template, with all the actions and sections marketd with the tag #TemplateExample removed. It can be used as the basis for new scenario scripts. -->
+    <cue name="Start" namespace="this" module="scenario_protect_object">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.Start" />
+      </conditions>
+      <actions>
+        <include_actions ref="md.LIB_Scenario.ScenarioStarted"/>
+
+        <!--========================================================
+            Set some of the commonly used variables
+            ============================================================-->
+
+        <set_value name="$DebugChance"        exact="100"/>
+        <set_value name="$MissionCue"         exact="namespace"/>
+
+        <set_value name="$Page"               exact="0"/>
+        <set_value name="$Difficulty"         exact="if event.param.$Difficulty? then event.param.$Difficulty else level.medium"/>
+        <set_value name="$MissionType"        exact="missiontype.deliver"/>
+        <set_value name="$MissionFaction"     exact="faction.argon"/>
+
+        <set_value name="$HasError"           exact="false" comment="will be set true if any setup fails"/>
+
+        <debug_text text="'Initialising Scenario:' + $Page" chance="$DebugChance"/>
+
+        <!-- Table that will be filled with all actors with active speaking roles -->
+        <set_value name="$MissionActors" exact="table[]"/>
+
+        <create_group groupname="$Satellites"/>
+        <create_group groupname="$Enemies"/>
+
+        <set_value name="$Seed" exact="4216113847932711396L"/>
+
+        <set_value name="$MaxSpawnDistance" exact="100km"/>
+        <set_value name="$SpawnSpread" exact="50km" comment="maximum x coordinate, can be + or -, so total spread width is twice that"/>
+        <set_value name="$SpawnDelay" exact="120s"/>
+        <set_value name="$EscalationCounter" exact="0"/>
+        <set_value name="$NumEnemyGroups" exact="1"/>
+        <set_value name="$NumEnemiesInGroup" exact="6"/>
+        <set_value name="$MinHull" exact="10"/>
+        <set_value name="$MaxHull" exact="40"/>
+
+        <!--========================================================
+            Universe Flags
+            ============================================================-->
+
+        <!--$DisableAutoInitialisation prevents the InitUniverse script interfering with map objects. All map ships/stations will not have any entities such as engineers. Map stations will not have random amounts of wares/workforce
+        Commented out as default but feel free to disable it if required by your scenario-->
+        <!--<set_value name="md.InitUniverse.Start.$DisableAutoInitialisation" exact="true"/>-->
+
+        <!--This disables the spawning of generic missions-->
+        <set_value name="md.GenericMissions.Manager.$Disabled" exact="true"/>
+
+        <!--========================================================
+            Custom scenario-specific variables go here
+            ============================================================-->
+
+        <set_value name="$Progress" exact="0"/>
+        <set_value name="$ProgressPerSec" exact="0.04"/>
+        <set_value name="$CompletedTransmissions" exact="0"/>
+        <run_actions ref="md.LIB_Scenario.Setup_Faction_Terraformers"/>
+        <run_actions ref="md.LIB_Scenario.Setup_Faction_USC"/>
+      </actions>
+      <cues>
+        <cue name="StopUseCase"/>
+
+        <cue name="Setup_Scenario">
+          <cues>
+
+            <cue name="Call_Setup_Libraries">
+              <actions>
+                <include_actions ref="Setup_Player" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Wingman" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Satellites" chance="if $HasError then 0 else 100"/>
+                <include_actions ref="Setup_Enemies" chance="if $HasError then 0 else 100"/>
+
+                <!--If there was an error, signal the CleanUp cue, otherwise signal the scenario to start-->
+                <do_if value="$HasError">
+                  <quit_to_game game="'x4ep1_gamestart_hub'"/>
+                </do_if>
+                <do_else>
+                  <debug_text text="'Scenario has been successfully set up and can start'" chance="$DebugChance"/>
+                  <signal_cue cue="Start_Scenario"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Player">
+              <actions>
+                <!-- Place the Player, then check for Player existence -->
+                <set_value name="$MissionActors.$Betty" exact="table[
+                                              $entity = player.computer,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+                <set_emergency_eject_active active="false"/>
+                <do_if value="not player.exists">
+                  <debug_text text="'Player does not exist'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Wingman">
+              <actions>
+                <create_ship macro="macro.ship_ter_s_fighter_04_b_macro" name="$WingmanShip" capturable="false" commandeerable="false" sector="player.sector">
+                  <paint ware="ware.paintmod_0152"/>
+                  <owner exact="faction.player" overridenpc="true"/>
+                  <pilot macro="character_timelines_protect_objects_wingman_macro"/>
+                  <loadout ref="timelines_scenario_protect_object_wingman"/>
+                  <safepos object="player.ship"/>
+                </create_ship>
+                <set_object_commander object="$WingmanShip" commander="player.ship" assignment="assignment.defence"/>
+                <create_order id="'Escort'" object="$WingmanShip" default="true">
+                  <param name="target" value="$WingmanShip.commander"/>
+                  <param name="formation" value="formationshape.xshapeforward"/>
+                  <param name="overrideformationskill" value="true" />
+                </create_order>
+                <!-- NPC Usecase Setup -->
+                <set_value name="$MissionActors.$Wingman" exact="table[
+                                              $entity = $WingmanShip.pilot,
+                                              $monitor = table[
+                                                $cutscenekey = 'ShowNPCFace',
+                                                $caption = true
+                                              ]
+                                            ]"/>
+
+                <do_if value="not $WingmanShip">
+                  <!--note: characters such as $Client are allowed to be disconnected from the universe so .exists checks would fail on them.-->
+                  <debug_text text="'$WingmanShip was not created'" filter="error"/>
+                  <set_value name="$HasError" exact="true"/>
+                </do_if>
+              </actions>
+            </library>
+
+            <library name="Setup_Satellites">
+              <actions>
+                <create_object macro="macro.eq_arg_satellite_scenario_01_macro" owner="$MissionFaction" sector="player.sector" groupname="$Satellites">
+                  <position x=" 5km"/>
+                </create_object>
+                <create_object macro="macro.eq_arg_satellite_scenario_01_macro" owner="$MissionFaction" sector="player.sector" groupname="$Satellites">
+                  <position x="-5km"/>
+                </create_object>
+                <create_object macro="macro.eq_arg_satellite_scenario_01_macro" owner="$MissionFaction" sector="player.sector" groupname="$Satellites">
+                  <position z="-5km"/>
+                </create_object>
+                <create_object macro="macro.eq_arg_satellite_scenario_01_macro" owner="$MissionFaction" sector="player.sector" groupname="$Satellites">
+                  <position z=" 5km"/>
+                </create_object>
+
+                <do_for_each in="$Satellites" name="$satellite">
+                  <do_if value="not $satellite.exists">
+                    <debug_text text="'Satellite does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <cue name="Spawn_Enemies" instantiate="true">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <set_value name="$z" exact="-$MaxSpawnDistance"/>
+                <do_all exact="$NumEnemyGroups">
+                  <set_value name="$x" min="-$SpawnSpread" max="$SpawnSpread" seed="$Seed"/>
+                  <advance_seed seed="$Seed"/>
+                  <do_if value="event.param != null">
+                    <set_value name="$z" exact="-event.param"/>
+                    <set_value name="$x" exact="$x * event.param / $MaxSpawnDistance"/>
+                  </do_if>
+                  <do_all exact="$NumEnemiesInGroup">
+                    <create_ship name="$ship" macro="macro.ship_xen_s_heavyfighter_01_b_macro" sector="player.sector" capturable="false">
+                      <owner exact="faction.xenon" overridenpc="true" />
+                      <pilot>
+                        <select race="race.drone" tags="tag.aipilot"/>
+                      </pilot>
+                      <loadout ref="timelines_scenario_protect_objects_tfm_s"/>
+                      <safepos x="$x" z="$z"/>
+                    </create_ship>
+                    <create_order object="$ship" id="'Patrol'" default="true">
+                      <param name="space" value="player.zone"/>
+                      <param name="targetclasses" value="[class.satellite]"/>
+                    </create_order>
+                    <disable_travel_mode ship="$ship" duration="100h"/>
+                    <set_object_hull object="$ship" min="$MinHull" max="$MaxHull" seed="$Seed"/>
+                    <advance_seed seed="$Seed"/>
+                    <add_to_group groupname="$Enemies" object="$ship"/>
+                  </do_all>
+                </do_all>
+                <do_if value="$EscalationCounter lt 3">
+                  <set_value name="$EscalationCounter" exact="1" operation="add"/>
+                </do_if>
+                <do_else>
+                  <set_value name="$EscalationCounter" exact="0"/>
+                  <set_value name="$MinHull" exact="[$MinHull + 5, 100].min"/>
+                  <set_value name="$MaxHull" exact="[$MaxHull + 10, 100].min"/>
+                </do_else>
+                <do_if value="$NumEnemyGroups == 1">
+                  <set_value name="$NumEnemyGroups" exact="2"/>
+                </do_if>
+                <do_else>
+                  <set_value name="$NumEnemiesInGroup" exact="1" operation="add"/>
+                </do_else>
+              </actions>
+            </cue>
+
+            <library name="Setup_Enemies">
+              <actions>
+                <set_value name="$spawndistanceoverride" exact="25km"/>
+                <set_value name="$distancebetweenspawns" exact="($SpawnDelay * 200)m"/>
+                <set_value name="$numinitialspawns" exact="(($MaxSpawnDistance - $spawndistanceoverride) / $distancebetweenspawns)i + 1"/>
+
+                <do_all exact="$numinitialspawns">
+                  <signal_cue_instantly cue="Spawn_Enemies" param="$spawndistanceoverride"/>
+                  <set_value name="$spawndistanceoverride" exact="$distancebetweenspawns" operation="add"/>
+                </do_all>
+                <remove_value name="$spawndistanceoverride"/>
+
+                <debug_text text="'Enemy count: ' + $Enemies.count"/>
+
+                <do_for_each in="$Enemies" name="$enemy">
+                  <do_if value="not $enemy.exists">
+                    <debug_text text="'Enemy ship does not exist'" filter="error"/>
+                    <set_value name="$HasError" exact="true"/>
+                  </do_if>
+                </do_for_each>
+              </actions>
+            </library>
+
+            <cue name="Debug">
+
+            </cue>
+
+          </cues>
+        </cue>
+
+        <!--****StartScenario****
+        This cue is signalled if the setup cue hasn't found any issues and the scenario can now start
+        This cue and following subcues will manage the presentation, objects, AI and mission objectives
+        The mission itself does not have to be created until later (see create_mission)-->
+
+        <cue name="Start_Scenario">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Intro_Cutscene">
+              <actions>
+                <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                            $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                            $script = [
+                                                                                        2s,
+                                                                                        table [$actor = '$Wingman', $speak = 306210101, $recipient = 'player', $comment = 'All set. We should be able to cut through the interference with these.'],
+                                                                                        table [$actor = '$Betty',   $speak = 306210101, $recipient = 'player', $comment = 'Transmitter array operational. Commencing broadcast.'],
+                                                                                        table [$actor = '$Wingman', $speak = 306210102, $recipient = 'player', $comment = 'Lets see if this does what the scientists promised...', $speakcallbackcue = Intro_Cutscene_ShowXenon],
+                                                                                        table [$actor = '$Betty',   $speak = 306210102, $recipient = 'player', $comment = 'Hostiles detected.'],
+                                                                                        table [$actor = '$Wingman', $speak = 306210103, $recipient = 'player', $comment = 'Guess it does! Lets make sure this reaches the fleet.'],
+                                                                                      ],
+                                                                                      $callbackcue = StopIntroCutscene,
+                                                                                      $abortcallbackcue = StopIntroCutscene,
+                                                                                      $abortonsignalledcue = StopUseCase
+                                                                            ]" />
+                <play_cutscene result="$IntroCutscene" key="'scenario_protect_object_intro_cutscene'">
+                  <param name="satellite" object="$Satellites.{4}"/>
+                  <param name="enemy" object="$Enemies.{1}"/>
+                </play_cutscene>
+              </actions>
+              <cues>
+                <cue name="Intro_Cutscene_ShowXenon">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="0.5s"/>
+                  <actions>
+                    <cutscene_event key="'scenario_protect_object_intro_cutscene'" event="'ShowXenon'"/>
+                  </actions>
+                </cue>
+
+                <cue name="StopIntroCutscene">
+                  <conditions>
+                    <event_cue_signalled/>
+                  </conditions>
+                  <delay exact="1s"/>
+                  <actions>
+                    <stop_cutscene cutscene="$IntroCutscene"/>
+                  </actions>
+                </cue>
+
+                <cue name="IntroCutsceneStopped">
+                  <conditions>
+                    <event_cutscene_stopped cutscene="$IntroCutscene"/>
+                  </conditions>
+                  <actions>
+                    <cancel_cue cue="Intro_Cutscene"/>
+                    <signal_cue cue="StopUseCase" check="false"/>
+                    <signal_cue cue="Start_Mission"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+
+            <cue name="Start_Mission">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <muffle_sound strength="0" duration="0s"/>
+                <blur_screen strength="0" duration="0s"/>
+              </actions>
+              <cues>
+                <cue name="MitsunoHack">
+                  <delay min="30s" max="3min"/>
+                  <actions>
+                    <run_actions ref="md.LIB_Scenario.Mitsuno_Play_Next_Hack"/>
+                  </actions>
+                </cue>
+
+                <cue name="SetupMission">
+                  <actions>
+                    <!-- Mission Objective -->
+                    <create_mission cue="$MissionCue" abortable="false" name="{30621,1001}" description="{30621,1003}"
+                                    icon="'briefing_mission_director_01'" iconcaption="{30293,102}"
+                                    difficulty="$Difficulty" type="$MissionType" faction="$MissionFaction">
+                      <briefing>
+                        <objective step="1" action="objective.protect" group="$Satellites"/>
+                      </briefing>
+                    </create_mission>
+                    <set_objective_from_briefing cue="$MissionCue" step="1"/>
+                    <update_objective_progress cue="$MissionCue" progress="$Progress" max="100" silent="true"/>
+                  </actions>
+                </cue>
+
+                <cue name="SpawnEnemyWave">
+                  <delay exact="$SpawnDelay"/>
+                  <actions>
+                    <signal_cue_instantly cue="Spawn_Enemies"/>
+                    <reset_cue cue="this"/>
+                  </actions>
+                </cue>
+
+                <cue name="IncrementProgress">
+                  <delay exact="1s"/>
+                  <actions>
+                    <do_if value="$Satellites.count">
+                      <set_value name="$prevprogress" exact="$Progress"/>
+                      <set_value name="$Progress" exact="$Progress + $Satellites.count * $ProgressPerSec"/>
+                      <do_if value="$Progress ge 100">
+                        <set_value name="$Progress" exact="$Progress - 100"/>
+                        <set_value name="$CompletedTransmissions" exact="$CompletedTransmissions + 1"/>
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                                $script = [
+                                                                                            table [$actor = '$Betty', $speak = 306210110, $recipient = 'player', $comment = 'Transmission complete.'],
+                                                                                            table [$actor = '$Betty', $speak = 306210111, $recipient = 'player', $comment = 'Beginning redundancy transmission.'],
+                                                                                          ],
+                                                                                $callbackcue = StopIntroCutscene,
+                                                                                $abortcallbackcue = StopIntroCutscene,
+                                                                                $abortonsignalledcue = StopUseCase
+                                                                              ]" />
+                        <do_if value="$Satellites.count ge 3">
+                          <unlock_achievement name="TL_STRONG_SIGNAL" scenario="true"/>
+                        </do_if>
+                      </do_if>
+                      <do_elseif value="$Progress ge 20 and $prevprogress lt 20">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                                $script = [
+                                                                                            table [$actor = '$Betty', $speak = 306210105, $recipient = 'player', $comment = 'Transmission progress.'],
+                                                                                            table [$actor = '$Betty', $speak = 306210106, $recipient = 'player', $comment = '20 percent.'],
+                                                                                          ],
+                                                                                $callbackcue = StopIntroCutscene,
+                                                                                $abortcallbackcue = StopIntroCutscene,
+                                                                                $abortonsignalledcue = StopUseCase
+                                                                              ]" />
+
+                      </do_elseif>
+                      <do_elseif value="$Progress ge 40 and $prevprogress lt 40">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                                $script = [
+                                                                                            table [$actor = '$Betty', $speak = 306210105, $recipient = 'player', $comment = 'Transmission progress.'],
+                                                                                            table [$actor = '$Betty', $speak = 306210107, $recipient = 'player', $comment = '40 percent.'],
+                                                                                          ],
+                                                                                $callbackcue = StopIntroCutscene,
+                                                                                $abortcallbackcue = StopIntroCutscene,
+                                                                                $abortonsignalledcue = StopUseCase
+                                                                              ]" />
+
+                      </do_elseif>
+                      <do_elseif value="$Progress ge 60 and $prevprogress lt 60">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                                $script = [
+                                                                                            table [$actor = '$Betty', $speak = 306210105, $recipient = 'player', $comment = 'Transmission progress.'],
+                                                                                            table [$actor = '$Betty', $speak = 306210108, $recipient = 'player', $comment = '60 percent.'],
+                                                                                          ],
+                                                                                $callbackcue = StopIntroCutscene,
+                                                                                $abortcallbackcue = StopIntroCutscene,
+                                                                                $abortonsignalledcue = StopUseCase
+                                                                              ]" />
+
+                      </do_elseif>
+                      <do_elseif value="$Progress ge 80 and $prevprogress lt 80">
+                        <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                                $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                                $script = [
+                                                                                            table [$actor = '$Betty', $speak = 306210105, $recipient = 'player', $comment = 'Transmission progress.'],
+                                                                                            table [$actor = '$Betty', $speak = 306210109, $recipient = 'player', $comment = '80 percent.'],
+                                                                                          ],
+                                                                                $callbackcue = StopIntroCutscene,
+                                                                                $abortcallbackcue = StopIntroCutscene,
+                                                                                $abortonsignalledcue = StopUseCase
+                                                                              ]" />
+
+                      </do_elseif>
+                      <update_objective_progress cue="$MissionCue" progress="$Progress" max="100" silent="true"/>
+                      <reset_cue cue="this"/>
+                    </do_if>
+                  </actions>
+                </cue>
+
+                <cue name="SatelliteDestroyed" instantiate="true">
+                  <conditions>
+                    <event_object_destroyed group="$Satellites"/>
+                  </conditions>
+                  <actions>
+                    <do_if value="$Satellites.count le 1">
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                              $script = [
+                                                                                          table [$actor = '$Betty',   $speak = 306210104, $recipient = 'player', $comment = 'All transmitters destroyed. Signal interrupted.'],
+                                                                                          2s,
+                                                                                          table [$actor = '$Wingman', $speak = 306210104, $recipient = 'player', $comment = 'Theyre still coming!'],
+                                                                                        ],
+                                                                              $callbackcue = ResultWindow,
+                                                                              $abortcallbackcue = ResultWindow,
+                                                                              $abortonsignalledcue = StopUseCase
+                                                                            ]" />
+                    </do_if>
+                    <do_else>
+                      <signal_cue_instantly cue="md.NPC_UseCases.UseCase" param="table[
+                                                                              $caller = this, $preset = '$plotlike', $actors = $MissionActors, $debugchance = 0,
+                                                                              $script = [
+                                                                                          table [$actor = '$Betty', $speak = 306210103, $recipient = 'player', $comment = 'Transmitter destroyed. Signal bandwidth reduced.'],
+                                                                                        ],
+                                                                              $callbackcue = StopIntroCutscene,
+                                                                              $abortcallbackcue = StopIntroCutscene,
+                                                                              $abortonsignalledcue = StopUseCase
+                                                                            ]" />
+                    </do_else>
+                  </actions>
+                </cue>
+
+                <cue name="EnemyAttacked" instantiate="true">
+                  <conditions>
+                    <event_object_attacked group="$Enemies"/>
+                  </conditions>
+                  <actions>
+                    <create_order object="event.object" id="'Attack'" immediate="true">
+                      <param name="primarytarget" value="event.param"/>
+                    </create_order>
+                  </actions>
+                </cue>
+
+                <cue name="EnemyDestroyed" instantiate="true">
+                  <conditions>
+                    <event_object_destroyed group="$Enemies"/>
+                  </conditions>
+                  <delay exact="10s"/>
+                  <actions>
+                    <do_if value="event.object.exists">
+                      <!--clean up wreck to prevent performance degradation-->
+                      <destroy_object object="event.object"/>
+                    </do_if>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
+          </cues>
+        </cue>
+
+        <cue name="ResultWindow" comment="Scenario Ended (Failure or Success Case)">
+          <!-- set data when you die or finish a mission in the failure or success case -->
+          <!-- game is force paused -->
+          <conditions>
+            <check_any>
+              <event_cue_signalled/>
+              <event_object_destroyed object="player.entity"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <set_value name="$ResultData" exact="table[]"/>
+            <set_value name="$ResultData.$PlayerDied" exact="event.name == 'event_object_destroyed' and event.object == player.entity"/>
+            <set_value name="$Score_Progress" exact="$Progress"/>
+            <set_value name="$Score_CompletedTransmissions" exact="$CompletedTransmissions * 100"/>
+            <add_scenario_stat id="'transmission_progress'" name="{30621,201}" uivalue="$Progress" description="{30621,202}" score="$Score_Progress" maxscore="100"/>
+            <add_scenario_stat id="'transmissions_completed'" name="{30621,203}" uivalue="$CompletedTransmissions" description="{30621,204}" score="$Score_CompletedTransmissions"/>
+            <set_value name="$ResultData.$Score" exact="$Score_Progress + $Score_CompletedTransmissions"/>
+          </actions>
+          <cues>
+            <cue name="Finished_Ref" ref="md.LIB_Scenario.ScenarioFinished">
+              <param name="ResultData" value="$ResultData"/>
+            </cue>
+          </cues>
+        </cue>
+
+      </cues>
+    </cue>
+
+  </cues>
+</mdscript>

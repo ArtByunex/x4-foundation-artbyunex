@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+  Test Plot Cutscene
+  
+  Demonstrates using a Macro to control timing and animation
+
+  -->
+
+<cutscene xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cutscenes.xsd">
+
+  <!-- This is the key name used to load and reference the scene. -->
+  <director key="Story_Diplomacy_Intro_2">
+    <params>
+      <param name="sequenceobject" object="true"/>
+      
+      <!--BehindChair params-->
+      <param name="bc_targetobject" object="true" />
+      
+      <!--Reen/Dal1 params-->
+      <param name="rd1_targetobject" object="true" />
+
+      <!--ReenFace1 params-->
+      <param name="rf1_targetobject" object="true" />
+
+      <!--DalSide params-->
+      <param name="ds_targetobject" object="true" />
+
+      <!--ReenFace2 params-->
+      <param name="rf2_targetobject" object="true" />
+
+      <!--Reen/Dal2 params-->
+      <param name="rd2_targetobject" object="true" />
+
+      <!--DalLeaves params-->
+      <param name="dl_targetobject" object="true" />
+    </params>
+  </director>
+
+  <!-- The environment is automatically deduced from the reference object. -->
+  <environments>
+    <environment_implicit name="scene" zone="@auto:sequenceobject" />
+  </environments>
+
+  <!-- The scene consists of a single sequence of a single shot. -->
+  <presentation>
+    <actions>
+      <!--first sequence starts at 0 - ends on event-->
+      <sequence name="BehindChairSequence" start="0">
+        <shot name="BehindChair" environment="scene" duration="onevent:BehindChairEnd">
+          <camera_orbit reference="bc_targetobject" x="0.5" y="-1.0" z="0" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="255" distance="4.3" elevation="-0.4">
+              <!--TODO @Owen @Anyone improve parameter attribute usage. Having the above for floats but the below nodes for parameters isn't great-->
+              <!--
+              <distance>
+                <value var="bc_diststart"/>
+              </distance>
+              <elevation>
+                <value var="bc_elevationstart"/>
+              </elevation>-->
+            </begin>
+            <end angle="90" distance="4.9" elevation="25" time="120000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <!--Following sequences start on an event and end on an event-->
+      <sequence name="ReenDal1Sequence" start="onevent:ReenDal1Start">
+        <shot name="ReenDal1" environment="scene" duration="onevent:ReenDal1End">
+          <camera_orbit reference="rd1_targetobject" x="-0.5" y="-0.4" z="-2.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="40" distance="5.7" elevation="0.2"/>
+            <end angle="45" distance="5.0" elevation="0.2" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenFace1Sequence" start="onevent:ReenFace1Start">
+        <shot name="ReenFace1" environment="scene" duration="onevent:ReenFace1End">
+          <camera_orbit reference="rf1_targetobject" x="-0.5" y="-0.5" z="-4.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="70" distance="3.5" elevation="-0.8"/>
+            <end angle="72" distance="3.3" elevation="-0.7" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="DalSideSequence" start="onevent:DalSideStart">
+        <shot name="DalSide" environment="scene" duration="onevent:DalSideEnd">
+          <camera_orbit reference="ds_targetobject" x="-0.1" y="-0.5" z="-4.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="95" distance="6.0" elevation="0.4"/>
+            <end angle="90" distance="5.9" elevation="0.4" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenFace2Sequence" start="onevent:ReenFace2Start">
+        <shot name="ReenFace2" environment="scene" duration="onevent:ReenFace2End">
+          <camera_orbit reference="rf2_targetobject" x="-0.5" y="-0.5" z="-4.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="72" distance="3.9" elevation="-0.2"/>
+            <end angle="74" distance="3.3" elevation="-0.2" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="ReenDal2Sequence" start="onevent:ReenDal2Start">
+        <shot name="ReenDal2" environment="scene" duration="onevent:ReenDal2End">
+          <camera_orbit reference="rd2_targetobject" x="-0.5" y="-0.4" z="-0.5" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="-15" distance="4.6" elevation="0.2"/>
+            <end angle="-20" distance="4.3" elevation="0.2" time="20000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+
+      <sequence name="DalLeavesSequence" start="onevent:DalLeavesStart">
+        <shot name="DalLeaves" environment="scene" duration="onevent:DalLeavesEnd">
+          <camera_orbit reference="dl_targetobject" x="-0.8" y="0.5" z="-0.2" orient_to="object" cycle="repeat" startangle="0" stopangle="360">
+            <begin angle="250" distance="1.9" elevation="0.2"/>
+            <end angle="350" distance="1.9" elevation="0.0" time="120000"/>
+          </camera_orbit>
+        </shot>
+      </sequence>
+    </actions>
+  </presentation>
+
+</cutscene>
+
