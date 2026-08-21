@@ -1,56 +1,49 @@
-# X4: Foundations — ArtByunex Working Assets
+# Kyle's Legacy — v0.9.51
 
-Рабочий архив файлов X4: Foundations, используемый для анализа и разработки мода Kyle's Legacy.
+## Статус
+**Testing**
 
-Структура каталогов максимально сохранена в соответствии с оригинальной структурой игры.
+### Timelines — Quettanaut
 
-## Основные каталоги
+v0.9.50 не дал Саппоро. После повторной проверки оригинального
+`ego_dlc_timelines/md/story_research_abandoned_ships.xml` изменён механизм запуска.
 
-- `assets/` — игровые assets
-- `assets/interiors/` — интерьеры
-- `assets/interiors/rooms/` — комнаты
-- `assets/interiors/rooms/macros/` — macros комнат
-- `assets/interiors/rooms/components/` — components комнат
-- `libraries/` — игровые библиотеки и character macros
-- `index/` — индексы macros и components
-- `md/` — MD-файлы и игровые определения
-- `ego_dls_terran/` — файлы DLC Terran
-- `ego_dlc_mini_02/` — файлы DLC mini_02
-- `kyles_legacy/` — файлы нашего мода
+Теперь мод **не копирует и не diff-ит оригинальные действия** и не создаёт корабли.
 
-## Kyle's Legacy
+После установки:
+- `story_timelines_quettanaut = 1`
+- необходимые рейтинги остаются как в предыдущей рабочей версии.
 
-Текущая рабочая версия мода:
+Затем мод напрямую сигнализирует оригинальные Egosoft-cue:
+- `Cutlass_Setup`
+- `Odachi_Setup`
+- `Sapporo_Setup`
+- `FreedomsReach_Setup`
+- `MooKyesRevenge_Setup`
+- `NopileosFortune_Setup`
+- `TharkasCascadeXV_Setup`
+- `AntigoneMemorial_Setup`
+- `CEODoubt_Setup`
 
-`kyles_legacy_v0.9.8`
+Таким образом создание кораблей и вся последующая логика остаются **100% в оригинальном
+`Story_Research_Abandoned_Ships`**.
 
-Основные персонажи:
+### Почему это отличается от v0.9.50
 
-- John Brennan — игрок
-- Julian Brennan — сюжетный NPC / советник
-- Ella Brennan — будущий персонаж
+В v0.9.50 мы пытались добавить собственное событие в условия оригинальных cue.
+Тест показал, что такой способ не сработал.
 
-## Важные файлы
+В v0.9.51 сигнал отправляется непосредственно в сами оригинальные setup-cue после
+того, как состояние Quettanaut уже установлено.
 
-Особое внимание при анализе следует уделять:
+### Тест
 
-- `index/macros.xml`
-- `index/components.xml`
-- `libraries/character_macros.xml`
-- character macros
-- interior macros
-- room macros
-- corridor/interior components
-- elevator/room teleport definitions
-- файлам DLC `ego_dls_terran`
-- файлам DLC `ego_dlc_mini_02`
+Только новая игра.
 
-## Важно
+1. Вера Хатиква — активна.
+2. Президентский рубеж — активен.
+3. Туманы Артемиды — Саппоро на оригинальной позиции.
+4. При входе в live view Саппоро должен запускать оригинальную сцену с Кха'аком.
+5. Затем проверить остальные корабли.
 
-Файлы в репозитории предназначены для анализа структуры X4: Foundations и разработки/тестирования собственного мода.
-
-Не изменять оригинальную структуру каталогов без необходимости.
-## Repository purpose
-
-This repository is a working reference database for X4: Foundations mod development.
-The directory structure intentionally mirrors the original game/DLC structure.
+`story_timelines_grandmother` не устанавливается.
