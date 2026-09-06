@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<components>
+	<component name="torus_turretbase_v2" class="defencemodule">
+		<source geometry="extensions\ego_dlc_terran\assets\structures\landmarks\torus_turretbase_v2_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="defencemodule">
+				<offset/>
+			</connection>
+			<connection name="Connection03" tags="part  ">
+				<offset>
+					<position x="0" y="0.3674233" z="-0.1621491"/>
+					<quaternion qx="-0.7071068" qy="-0" qz="-0" qw="-0.7071067"/>
+				</offset>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="asteroids.ast_niv_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.292021" y="3.563054E-05" z="2.024074"/>
+							<center x="-0.3541062" y="-0.5131884" z="2.473593E-06"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part geometryinvisible nocollision  ">
+				<offset/>
+				<parts>
+					<part name="part_invisible">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="dummy.transparent"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="50" y="50" z="50"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<pivot>
+							<offset>
+								<position x="0" y="-50" z="0"/>
+							</offset>
+						</pivot>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection001" group="group02" tags="turret medium standard missile hittable  combat">
+				<offset>
+					<position x="0" y="0.3674234" z="1.161764"/>
+				</offset>
+			</connection>
+			<connection name="Connection002" group="group02" tags="noshield ">
+				<offset>
+					<position x="0" y="0.3674234" z="-0.5571144"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

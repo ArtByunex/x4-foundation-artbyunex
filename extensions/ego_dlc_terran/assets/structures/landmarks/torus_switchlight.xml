@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<components>
+	<component name="torus_switchlight" class="object">
+		<source geometry="extensions\ego_dlc_terran\assets\structures\landmarks\torus_switchlight_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="object">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation detailxxs  ">
+				<offset/>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="20" startsound="1"/>
+					<animation name="active" start="20" end="20"/>
+					<animation name="deactivating" start="20" end="40"/>
+				</animations>
+				<parts>
+					<part name="part_lightswitch001">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_01_noglow"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.5" y="2.5" z="2.5"/>
+							<center x="0" y="0.105957" z="0"/>
+						</size>
+						<size_raw>
+							<max x="2.5" y="2.5" z="2.5"/>
+							<center x="0" y="0.105957" z="0"/>
+						</size_raw>
+						<lights>
+							<spot name="XUSpotTriggered001" angle="120" gradientindex="1" range="491.6" r="255" g="255" b="232" lighteffect="1" trigger="5" intensity="0" specularintensity="1">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="20" value="1.2" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="40" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="0" y="-2.579702" z="0"/>
+								</offset>
+							</spot>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+		</connections>
+	</component>
+</components>
