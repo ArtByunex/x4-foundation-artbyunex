@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<components>
+	<component name="landmarks_par_monument_core_01" class="destructible">
+		<properties>
+			<hull max="800"/>
+		</properties>
+		<source geometry="assets\structures\landmarks\landmarks_par_monument_core_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni079" shadow="0" r="190" g="234" b="236" range="20" shadowrange="20" lighteffect="1" trigger="1" intensity="4" specularintensity="1">
+						<animations>
+							<animation name="loop" start="0" end="100"/>
+						</animations>
+						<lightanimations/>
+						<offset>
+							<position x="-0.4636491" y="-1.05957" z="7.456803E-02"/>
+						</offset>
+					</omni>
+				</lights>
+				<sounds>
+					<sound name="XU SoundEmitter01" ref="monument_energy_buzz">
+						<offset/>
+					</sound>
+				</sounds>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation detail_xl nocollision forceoutline ">
+				<offset>
+					<quaternion qx="0.5213339" qy="0.4777143" qz="0.4777144" qw="-0.5213338"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="0" end="60"/>
+				</animations>
+				<parts>
+					<part name="Plane01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.energybeam_fx_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.416984" y="2.959197" z="33.70389"/>
+							<center x="1.192093E-07" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="3.416985" y="2.959197" z="33.70389"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="3">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="5"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="3"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="2"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part nocollision forceoutline ">
+				<offset>
+					<position x="6.644447E-13" y="1.525879E-05" z="0"/>
+					<quaternion qx="1.053673E-08" qy="1.053673E-08" qz="-0.7071066" qw="-0.7071069"/>
+				</offset>
+				<parts>
+					<part name="Object01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1interiors.p1_glass_interior_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.032715" y="2.022918" z="4.076504"/>
+							<center x="-2.621063" y="-0.960479" z="-7.302958E-21"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision_jolt forceoutline  ">
+				<offset>
+					<position x="6.644447E-13" y="1.525879E-05" z="0"/>
+					<quaternion qx="1.053673E-08" qy="1.053673E-08" qz="-0.7071066" qw="-0.7071069"/>
+				</offset>
+				<parts>
+					<part name="part_explosive_center_a_glass" wreck="part_explosive_center_a_glass_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+									<material id="2" ref="generic.generic_p1_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="16.17337" y="5.242095" z="5.281248"/>
+							<center x="2.384188E-07" y="0.2539673" z="-7.302958E-21"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="collisionbox collisiononly ">
+				<offset>
+					<position x="8.097649E-02" y="0.3097243" z="0"/>
+				</offset>
+				<parts>
+					<part name="part_explosive_center_a_glass_collisionbox">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="5.403428" y="16.30305" z="5.429705"/>
+							<center x="0" y="4.768372E-07" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-04-10 11:01:51-->
+<components>
+  <component name="landmarks_kha_tetrahedron_02" class="defencemodule">
+    <source geometry="assets\structures\landmarks\landmarks_kha_tetrahedron_02_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="ego_light_01_01" shadow="1" r="212" g="85" b="255" intensity="2.780169" specularintensity="1" range="150" shadowrange="150" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="186.1075" y="-183.4095" z="101.4808" />
+            </offset>
+          </omni>
+          <omni name="ego_light_01_02" shadow="1" r="212" g="85" b="255" intensity="2.780169" specularintensity="1" range="150" shadowrange="150" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="8.019291" y="-166.292" z="-167.3936" />
+            </offset>
+          </omni>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="defencemodule" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_aimtarget_01" tags="aimtarget " />
+      <connection name="con_shield_m_01" group="group_turret_top_01" tags="hittable medium shield standard ">
+        <offset>
+          <position x="-20.98903" y="442.8517" z="23.37456" />
+          <quaternion qx="0.2575422" qy="-0.7596484" qz="-0.3841645" qw="-0.4571913" />
+        </offset>
+      </connection>
+      <connection name="con_shield_m_02" group="group_turret_top_01" tags="hittable medium shield standard ">
+        <offset>
+          <position x="7.332918" y="441.9736" z="-22.67238" />
+          <quaternion qx="0.4614673" qy="0.0161155" qz="0.03095592" qw="-0.8864705" />
+        </offset>
+      </connection>
+      <connection name="con_shield_m_03" group="group_turret_top_01" tags="hittable medium shield standard ">
+        <offset>
+          <position x="33.27229" y="441.4509" z="25.79249" />
+          <quaternion qx="0.1698926" qy="0.7839206" qz="0.4334505" qw="-0.4107624" />
+        </offset>
+      </connection>
+      <connection name="con_turret_m_01" group="group_turret_top_01" tags="combat hittable medium missile standard turret ">
+        <offset>
+          <position x="6.667995" y="439.4296" z="35.98986" />
+          <quaternion qx="-0.5735766" qy="1.684e-07" qz="3.721e-07" qw="-0.8191519" />
+        </offset>
+      </connection>
+      <connection name="con_turret_m_02" group="group_turret_top_01" tags="combat hittable medium missile standard turret ">
+        <offset>
+          <position x="-15.00587" y="438.594" z="-3.845978" />
+          <quaternion qx="-0.2867885" qy="0.7094067" qz="-0.4967316" qw="-0.4095757" />
+        </offset>
+      </connection>
+      <connection name="con_turret_m_03" group="group_turret_top_01" tags="combat hittable medium missile standard turret ">
+        <offset>
+          <position x="30.06894" y="438.373" z="-2.714528" />
+          <quaternion qx="-0.2867878" qy="-0.7094063" qz="0.496732" qw="-0.4095764" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForanim_main" tags="animation detail_l forceoutline nocollision part textureanimation ">
+        <animations>
+          <animation name="loop_random" start="1" end="100" />
+        </animations>
+        <parts>
+          <part name="anim_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_gradientcolour_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="225.1792" y="481.8141" z="196.9429" />
+              <center x="2.920609" y="-185.5536" z="21.46912" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="20" value="-0.22" />
+                  <key frame="21" value="0" />
+                  <key frame="40" value="-0.22" />
+                  <key frame="100" value="-0.22" />
+                </uv_property>
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="20" value="0" />
+                  <key frame="21" value="0" />
+                  <key frame="40" value="0" />
+                  <key frame="100" value="0" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_main" tags="detail_m forceoutline nocollision part ">
+        <parts>
+          <part name="detail_m_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01_aged" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="264.0956" y="481.9642" z="258.5316" />
+              <center x="7.023319" y="-185.7037" z="-40.11938" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_s_main" tags="detail_s forceoutline nocollision part ">
+        <parts>
+          <part name="detail_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hullpattern_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01_aged" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="194.0275" y="341.0091" z="178.5764" />
+              <center x="-5.594227" y="-456.971" z="-14.02313" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_main" tags="khaak_hive part ">
+        <parts>
+          <part name="part_main" wreck="part_main_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hullpattern_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01_aged" />
+                  <material id="3" ref="p2fx.fx_p2_gradientcolour_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hullpattern_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01_aged" />
+                  <material id="3" ref="p2fx.fx_p2_gradientcolour_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hullpattern_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01_aged" />
+                  <material id="3" ref="p2fx.fx_p2_gradientcolour_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hullpattern_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="389.6301" y="646.226" z="344.5053" />
+              <center x="6.890076" y="-172.3156" z="-97.00806" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

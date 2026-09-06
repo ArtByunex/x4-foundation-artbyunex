@@ -1,0 +1,416 @@
+<?xml version="1.0"?>
+<components>
+	<component name="landmarks_tel_spacesuit_vertical_top_01" class="destructible">
+		<properties>
+			<hull max="0"/>
+		</properties>
+		<source geometry="assets\structures\landmarks\landmarks_tel_spacesuit_vertical_top_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="91" b="0" range="20" shadowrange="20" lighteffect="1" trigger="1" intensity="1" specularintensity="1">
+						<animations>
+							<animation name="fan_active" start="0" end="300"/>
+							<animation name="fan_deactivating" start="300" end="330"/>
+							<animation name="fan_deactivated" start="330" end="330"/>
+							<animation name="fan_activating" start="330" end="360"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="300" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="330" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="360" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+						</lightanimations>
+						<offset/>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part nocollision_jolt forceoutline  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.2324" y="4.084448" z="12.2324"/>
+							<center x="0" y="1.584448" z="-2.069473E-04"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation detail_xxl nocollision forceoutline ">
+				<offset>
+					<position x="7.702565E-08" y="3.89658" z="-2.076527E-04"/>
+				</offset>
+				<animations>
+					<animation name="fan_active" start="0" end="300" startsound="1"/>
+					<animation name="fan_deactivating" start="300" end="330"/>
+					<animation name="fan_deactivated" start="330" end="330"/>
+					<animation name="fan_activating" start="330" end="360"/>
+				</animations>
+				<parts>
+					<part name="anim_fan">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.703428" y="1.050199" z="9.703427"/>
+							<center x="-7.702565E-08" y="2.384186E-06" z="-2.48343E-07"/>
+						</size>
+						<size_raw>
+							<max x="9.703427" y="1.050199" z="9.703426"/>
+							<center x="-7.702565E-08" y="2.384186E-06" z="2.284942E-07"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter01" ref="anim_fan_01">
+								<offset>
+									<position x="-7.702565E-08" y="-0.3076377" z="2.076527E-04"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part detail_s nocollision forceoutline ">
+				<offset/>
+				<parts>
+					<part name="detail_s_wall_fan">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.09706" y="0.7598237" z="12.09706"/>
+							<center x="0" y="1.771625" z="-2.064705E-04"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="7.674753E-04" y="1.542139E-02" z="-11.91903"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_01">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="-5.937181E-09" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-4.560507" y="1.542139E-02" z="-11.01204"/>
+					<quaternion qx="-0" qy="-0.1950904" qz="-0" qw="-0.9807853"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_02">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-8.427485" y="1.542139E-02" z="-8.428572"/>
+					<quaternion qx="-0" qy="-0.3826834" qz="-0" qw="-0.9238796"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_03">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-10.98262" y="1.542139E-02" z="-4.631546"/>
+					<quaternion qx="-0" qy="-0.5555702" qz="-0" qw="-0.8314697"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_04">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-10.95288" y="1.542139E-02" z="4.703335"/>
+					<quaternion qx="-0" qy="-0.8314696" qz="-0" qw="-0.5555703"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_05">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-8.428574" y="1.542139E-02" z="8.427485"/>
+					<quaternion qx="-0" qy="-0.9238795" qz="-0" qw="-0.3826835"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_06">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection10" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-4.561928" y="1.542139E-02" z="11.01146"/>
+					<quaternion qx="-0" qy="-0.9807853" qz="-0" qw="-0.1950905"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_07">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792375"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection11" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-7.701159E-04" y="1.542139E-02" z="11.91903"/>
+					<quaternion qx="-0" qy="-1" qz="-0" qw="-1.947072E-07"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_08">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="2.392335E-08" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection12" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="4.560505" y="1.542139E-02" z="11.01205"/>
+					<quaternion qx="-0" qy="-0.9807853" qz="-0" qw="0.1950901"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_09">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection13" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="8.427486" y="1.542139E-02" z="8.428576"/>
+					<quaternion qx="-0" qy="-0.9238796" qz="-0" qw="0.3826832"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_10">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection14" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="10.99475" y="1.542139E-02" z="4.602278"/>
+					<quaternion qx="-0" qy="0.8314698" qz="-0" qw="-0.55557"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_11">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection15" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="11.03298" y="1.542139E-02" z="-4.509962"/>
+					<quaternion qx="-0" qy="0.5555705" qz="-0" qw="-0.8314694"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_12">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection16" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="8.428577" y="1.542139E-02" z="-8.427486"/>
+					<quaternion qx="-0" qy="0.3826835" qz="-0" qw="-0.9238796"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_13">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection17" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="4.561932" y="1.542139E-02" z="-11.01146"/>
+					<quaternion qx="-0" qy="0.1950904" qz="-0" qw="-0.9807853"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_14">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection18" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="-11.91903" y="1.542139E-02" z="-7.667542E-04"/>
+					<quaternion qx="-0" qy="-0.7071068" qz="-0" qw="-0.7071067"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_15">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection19" tags="collisiononly collisionbox ">
+				<offset>
+					<position x="11.91903" y="1.542139E-02" z="7.696152E-04"/>
+					<quaternion qx="-0" qy="0.7071069" qz="-0" qw="-0.7071066"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_box_16">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="2.812966" y="2.825" z="0.2792374"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection20" tags="collisiononly collisioncylinder_[z]  ">
+				<offset>
+					<position x="0" y="1.858541" z="0"/>
+				</offset>
+				<parts>
+					<part name="part_main_collision_cylinder_01">
+						<lods>
+							<lod index="0"/>
+						</lods>
+						<size>
+							<max x="12.52229" y="1.058842" z="12.33205"/>
+							<center x="0" y="1.058842" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>
