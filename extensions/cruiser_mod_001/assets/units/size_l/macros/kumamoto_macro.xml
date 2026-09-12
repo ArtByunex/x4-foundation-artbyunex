@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Lino (192.168.3.72) at 27.11.2020_20-02-41-->
+<macros>
+  <macro name="kumamoto_macro" class="ship_l">
+    <component ref="kumamoto" />
+    <properties>
+      <identification name="{999116,2}" basename="{999116,1}" makerrace="terran" description="{999116,3}" icon="ship_l_cruiser_06" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+	  <jerk>
+        <forward accel="0.3" decel="0.8" ratio="3" />
+        <forward_boost accel="0.3" ratio="3" />
+        <forward_travel accel="0.4" decel="0.9" ratio="3" />
+        <strafe value="0.35" />
+        <angular value="0.2" />
+      </jerk>
+      <explosiondamage value="10000" />
+      <storage missile="240" unit="20" />
+      <hull max="80000" />
+      <secrecy level="2" />
+	  <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.9" />
+        <point position="1.6" value="0.75" />
+        <point position="2.1" value="0.6" />
+        <point position="2.4" value="0.4" />
+        <point position="2.7" value="0.25" />
+      </steeringcurve>
+      <purpose primary="fight" />
+      <people capacity="60" />
+      <physics mass="214.028">
+        <inertia pitch="210.346" yaw="210.346" roll="204.277" />
+        <drag forward="65.406" reverse="301.623" horizontal="71.355" vertical="71.355" pitch="155.406" yaw="155.406" roll="150.406" />
+		<accfactors reverse="0.95" horizontal="1.01" vertical="1.01" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="gunboat" />
+    </properties>
+    <connections>
+       <connection ref="con_cockpit">
+        <macro ref="bridge_ter_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_01">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_02">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_tc_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_four_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_kumamoto_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Lino (192.168.3.72) at 27.11.2020_20-02-41-->
+<macros>
+  <macro name="scabbard_macro" class="ship_l">
+    <component ref="scabbard" />
+    <properties>
+      <identification name="{999111,2}" basename="{999111,1}" makerrace="terran" description="{999111,3}" icon="ship_l_cruiser_07" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+	  <jerk>
+        <forward accel="0.4" decel="0.8" ratio="3" />
+        <forward_boost accel="0.3" ratio="3" />
+        <forward_travel accel="0.4" decel="0.9" ratio="3" />
+        <strafe value="0.3" />
+        <angular value="0.2" />
+      </jerk>
+      <explosiondamage value="10000" />
+      <storage missile="80" unit="10" />
+      <hull max="58000" />
+      <secrecy level="2" />
+	  <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.95" />
+        <point position="1.65" value="0.85" />
+        <point position="2.1" value="0.7" />
+        <point position="2.45" value="0.45" />
+        <point position="2.8" value="0.2" />
+      </steeringcurve>
+      <purpose primary="fight" />
+      <people capacity="80" />
+      <physics mass="140.028">
+        <inertia pitch="150.346" yaw="150.346" roll="135.277" />
+        <drag forward="60.406" reverse="250.623" horizontal="51.355" vertical="51.355" pitch="95.406" yaw="95.406" roll="75.406" />
+		<accfactors reverse="0.95" horizontal="1.0" vertical="1.0" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="corvette" />
+    </properties>
+    <connections>
+       <connection ref="con_cockpit">
+        <macro ref="bridge_ter_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_01">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_02">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_tc_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_four_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_scabbard_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<macros>
+  <macro name="yamagata_macro" class="ship_l">
+    <component ref="yamagata" />
+    <properties>
+      <identification name="{999102,2}" basename="{999102,1}" makerrace="terran" description="{999102,3}" icon="ship_l_cruiser_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+	  <jerk>
+        <forward accel="0.3" decel="0.8" ratio="3" />
+        <forward_boost accel="0.3" ratio="3" />
+        <forward_travel accel="0.4" decel="0.85" ratio="3" />
+        <strafe value="0.3" />
+        <angular value="0.25" />
+      </jerk>
+      <explosiondamage value="10000" />
+      <storage missile="350" unit="10" />
+      <hull max="180000" />
+      <secrecy level="2" />
+	  <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.9" />
+        <point position="1.5" value="0.8" />
+        <point position="2.0" value="0.65" />
+        <point position="2.3" value="0.45" />
+        <point position="2.75" value="0.2" />
+      </steeringcurve>
+      <purpose primary="fight" />
+      <people capacity="170" />
+      <physics mass="380.028">
+        <inertia pitch="425.311" yaw="425.311" roll="408.249" />
+        <drag forward="162.108" reverse="532.433" horizontal="149.232" vertical="149.232" pitch="310.73" yaw="310.73" roll="295.73" />
+		<accfactors reverse="0.85" horizontal="1.1" vertical="1.1" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="destroyer" />
+    </properties>
+    <connections>
+       <connection ref="con_cockpit">
+        <macro ref="bridge_ter_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_03">
+        <macro ref="dockarea_arg_s_ship_03_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_tc_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_eight_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_yamagata_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

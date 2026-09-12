@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <macro name="aomori_macro" class="ship_l">
+    <component ref="aomori" />
+    <properties>
+      <identification name="{999112,2}" basename="{999112,1}" makerrace="terran" description="{999112,3}" icon="ship_l_trade_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+	  <jerk>
+        <forward accel="0.2" decel="0.7" ratio="4" />
+        <forward_boost accel="0.2" ratio="3" />
+        <forward_travel accel="0.3" decel="0.8" ratio="4" />
+        <strafe value="0.5" />
+        <angular value="0.35" />
+      </jerk>
+      <explosiondamage value="8000" />
+      <storage missile="70" unit="12" />
+      <hull max="49000" />
+      <secrecy level="1" />
+	  <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.85" />
+        <point position="1.6" value="0.7" />
+        <point position="2.1" value="0.5" />
+        <point position="2.4" value="0.4" />
+        <point position="2.7" value="0.28" />
+      </steeringcurve>
+      <purpose primary="trade" />
+      <people capacity="40" />
+      <physics mass="190.66">
+        <inertia pitch="367.408" yaw="357.408" roll="349.927" />
+        <drag forward="110.245" reverse="286.596" horizontal="125.535" vertical="125.535" pitch="232.532" yaw="232.532" roll="212.532" />
+		<accfactors reverse="0.9" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="freighter" />
+    </properties>
+    <connections>
+       <connection ref="con_cockpit">
+        <macro ref="bridge_ter_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_01">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dockarea_arg_s_ship_02">
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_tc_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_four_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_aomori_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
