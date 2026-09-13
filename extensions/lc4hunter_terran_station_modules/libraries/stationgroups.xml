@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+<!-- Adds the new stations to the referring stationgroups -->
+<!-- Terran Stations -->
+	<add sel="/groups/group[@name='shipyard_ter']">
+        <select constructionplan="ter_shipyard_lc4_01" weight="35"/>		
+	</add>
+	<add sel="/groups/group[@name='shipyard_ter']">		
+        <select constructionplan="ter_shipyard_lc4_02" weight="30"/>
+	</add>
+	<add sel="/groups/group[@name='wharf_ter']">
+        <select constructionplan="ter_wharf_lc4_01" weight="40"/>
+	</add>
+	<add sel="/groups/group[@name='equipmentdock_ter']">
+        <select constructionplan="ter_equipmentdock_lc4_01" weight="50"/>
+	</add>
+
+<!-- Pioneer Stations -->
+	<add sel="/groups/group[@name='shipyard_pio']">
+        <select constructionplan="pio_shipyard_lc4_01" weight="50"/>
+	</add>
+	<add sel="/groups/group[@name='wharf_pio']">
+        <select constructionplan="pio_wharf_lc4_01" weight="30"/>
+	</add>
+	<add sel="/groups/group[@name='wharf_pio']">
+        <select constructionplan="pio_wharf_lc4_02" weight="30"/>
+	</add>
+	<add sel="/groups/group[@name='equipmentdock_pio']">
+        <select constructionplan="pio_equipmentdock_lc4_01" weight="50"/>
+	</add>
+
+<!-- Replaces the weight in a group by another value in the referring stationroups -->
+<!-- Terran Stations -->
+	<replace sel="/groups/group[@name='shipyard_ter']/select[@constructionplan='ter_shipyard']">
+        <select constructionplan="ter_shipyard" weight="35"/>
+	</replace>
+	<replace sel="/groups/group[@name='wharf_ter']/select[@constructionplan='ter_wharf']">
+        <select constructionplan="ter_wharf" weight="60"/>
+	</replace>
+	<replace sel="/groups/group[@name='equipmentdock_ter']/select[@constructionplan='ter_equipmentdock']">
+        <select constructionplan="ter_equipmentdock" weight="50"/>
+	</replace>
+	
+<!-- Pioneer Stations -->
+	<replace sel="/groups/group[@name='shipyard_pio']/select[@constructionplan='pio_shipyard']">
+        <select constructionplan="pio_shipyard" weight="50"/>
+	</replace>
+	<replace sel="/groups/group[@name='wharf_pio']/select[@constructionplan='pio_wharf']">
+        <select constructionplan="pio_wharf" weight="40"/>
+	</replace>
+	<replace sel="/groups/group[@name='equipmentdock_pio']/select[@constructionplan='pio_equipmentdock']">
+        <select constructionplan="pio_equipmentdock" weight="50"/>
+	</replace>
+</diff>

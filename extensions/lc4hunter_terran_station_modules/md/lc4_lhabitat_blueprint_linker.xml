@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Lc4_LHabitat_Blueprint_Linker" xsi:noNamespaceSchemaLocation="http://utnas/~unitrader/XRebirthxsds/md.xsd">
+  <cues>
+    <cue name="Root">
+      <cues>
+        <cue name="DLC_Check_Ter_On_Install" onfail="cancel">
+          <conditions>
+            <cue_is_complete cue="md.Setup_DLC_Terran.Start"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="DLC_Check_Ter_installed"/>
+            <cancel_cue cue="DLC_Check_Ter_Running_Game"/>
+          </actions>
+        </cue>
+        <cue name="DLC_Check_Ter_Running_Game">
+          <conditions>
+            <event_cue_completed cue="md.Setup_DLC_Terran.Start"/>
+          </conditions>
+          <actions>
+            <signal_cue cue="DLC_Check_Ter_installed"/>
+            <!-- cancel_cue cue="DLC_Check_Ter_On_Install"/> should be cancelled instantly -->
+          </actions>
+        </cue>
+        <cue name="DLC_Check_Ter_installed">
+          <conditions>
+            <event_cue_signalled/>
+          </conditions>
+          <cues>
+            <cue name="Blueprint_Ter_Hab_On_Install" onfail="cancel">
+              <conditions>
+                <check_value value="player.blueprints.{macro.hab_ter_l_01_macro.ware}.any.exists"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Blueprint_Ter_Hab_Add"/>
+                <cancel_cue cue="Blueprint_Ter_Hab_Running_Game"/>
+              </actions>
+            </cue>
+            <cue name="Blueprint_Ter_Hab_Running_Game">
+              <conditions>
+                <event_player_blueprint_added macro="macro.hab_ter_l_01_macro"/>
+              </conditions>
+              <actions>
+                <signal_cue cue="Blueprint_Ter_Hab_Add"/>
+                <!-- cancel_cue cue="Blueprint_Ter_Hab_On_Install"/> should be cancelled instantly -->
+              </actions>
+            </cue>
+            <cue name="Blueprint_Ter_Hab_Add">
+              <conditions>
+                <event_cue_signalled/>
+              </conditions>
+              <actions>
+                <add_blueprints macros="macro.hab_ter_l_lc4_01_macro"/>
+                <!-- <show_help custom="'LC4 Event ausgelöst: %1; %2 hinzugefügt'.[event.name,ware.module_ter_hab_l_lc4_01.name]"/> -->
+                <!-- <debug_text filter="error" text="'LC4 Event ausgelöst: %1; %2 hinzugefügt'.[event.name,ware.module_ter_hab_l_lc4_01.name]"/> -->
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>
