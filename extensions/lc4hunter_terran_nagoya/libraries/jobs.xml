@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="diff.xsd">
+	<add sel="/jobs">
+<!-- Nagoya Patrol on Mars with 2 Osakas and a few smaller vessels -->
+		<job id="terran_battleship_patrol_xl_mars" name="{20204,5201}">
+			<modifiers commandeerable="false"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.zone"/>
+				</order>
+			</orders>
+			<category faction="terran" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="1"/>
+			<location class="zone" macro="zone005_cluster_101_sector001_macro" faction="terran" relation="self" comparison="exact"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="terran" tags="[military, battleship, noatf]" size="ship_xl"/>
+				<loadout ref="terran_nagoya_ai_loadouts"/>
+				<owner exact="terran" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="terran_destroyer_l_noescort_lc4"/>
+				<subordinate job="terran_escort_m_carrier"/>
+			</subordinates>
+		</job>
+<!-- Nagoya Patrol with 2 Osakas and a few smaller vessels (replaces the asteroid belt patrol)-->
+		<job id="terran_battleship_patrol_xl_lc4_mobile_pack" name="{20204,5201}">
+			<modifiers commandeerable="true"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.zone"/>
+				</order>
+			</orders>
+			<category faction="terran" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="2" maxgalaxy="4" sector="2"/>
+			<location class="galaxy" matchextension="false" macro="xu_ep2_universe_macro" faction="terran" relation="self" comparison="exact"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="terran" tags="[military, battleship, noatf]" size="ship_xl"/>
+				<loadout ref="terran_nagoya_ai_loadouts"/>
+				<owner exact="terran" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="terran_destroyer_l_noescort_lc4"/>
+				<subordinate job="terran_escort_m_carrier"/>
+			</subordinates>
+		</job>
+		<job id="terran_battleship_patrol_xl_lc4_mobile_pack_phase2" name="{20204,5201}" startactive="false">
+			<modifiers commandeerable="true"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.zone"/>
+				</order>
+			</orders>
+			<category faction="terran" tags="[factionlogic, military, battleship, fleetphase_2]" size="ship_xl"/>
+			<quota galaxy="1" maxgalaxy="2" sector="1"/>
+			<location class="galaxy" matchextension="false" macro="xu_ep2_universe_macro" faction="terran" relation="self" comparison="exact"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="terran" tags="[military, battleship, noatf]" size="ship_xl"/>
+				<loadout ref="terran_nagoya_ai_loadouts"/>
+				<owner exact="terran" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="terran_destroyer_l_noescort_lc4"/>
+				<subordinate job="terran_escort_m_carrier"/>
+			</subordinates>
+		</job>
+<!-- Nagoya Patrol -->
+		<job id="terran_battleship_patrol_xl_lc4_pioneers_pack" name="{20204,5201}">
+			<modifiers commandeerable="false"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.zone"/>
+				</order>
+			</orders>
+			<category faction="pioneers" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="1" maxgalaxy="2" sector="1"/>
+			<location class="galaxy" matchextension="false" macro="xu_ep2_universe_macro" faction="pioneers" relation="self" comparison="exact"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="pioneers" tags="[military, battleship]" size="ship_xl"/>
+				<loadout ref="terran_nagoya_ai_loadouts"/>
+				<owner exact="pioneers" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="pioneers_corvette_escort_m"/>
+			</subordinates>
+		</job>
+		<job id="terran_battleship_patrol_xl_lc4_pioneers_pack_phase2" name="{20204,5201}" startactive="false">
+			<modifiers commandeerable="false"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.zone"/>
+				</order>
+			</orders>
+			<category faction="pioneers" tags="[factionlogic, military, battleship, fleetphase_2]" size="ship_xl"/>
+			<quota galaxy="1" maxgalaxy="1" sector="1"/>
+			<location class="galaxy" matchextension="false" macro="xu_ep2_universe_macro" faction="pioneers" relation="self" comparison="exact"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="pioneers" tags="[military, battleship]" size="ship_xl"/>
+				<loadout ref="terran_nagoya_ai_loadouts"/>
+				<owner exact="pioneers" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="pioneers_corvette_escort_m"/>
+			</subordinates>
+		</job>
+<!-- Escort without subordinates for Nagoya -->
+		<job id="terran_destroyer_l_noescort_lc4" name="{20204,3301}" startactive="false">
+			<orders>
+				<order order="Escort" default="true">
+					<param name="formation" value="formationshape.xshapeforward"/>
+					<param name="overrideformationskill" value="true"/>
+				</order>
+			</orders>
+			<category faction="terran" tags="[military, destroyer]" size="ship_l"/>
+			<quota wing="2" variation="1"/>
+			<location class="galaxy" macro="xu_ep2_universe_macro"/>
+			<environment buildatshipyard="true"/>
+			<modifiers subordinate="true"/>
+			<ship>
+				<select faction="terran" tags="[military, destroyer, noatf]" size="ship_l"/>
+				<loadout>
+					<level min="0" max="0.7"/>
+				</loadout>
+				<owner exact="terran" overridenpc="true"/>
+			</ship>
+		</job>
+	</add>
+</diff>

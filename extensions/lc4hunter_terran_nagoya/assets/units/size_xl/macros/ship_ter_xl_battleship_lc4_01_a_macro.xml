@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <macro name="ship_ter_xl_battleship_lc4_01_a_macro" class="ship_xl" alias="ship_ter_xl_battleship_lc4_01_2_macro">
+    <component ref="ship_ter_xl_battleship_lc4_01" />
+    <properties>
+       <identification name="{20101,62801}" basename="{20101,62801}" makerrace="terran" description="{996002,2}" icon="ship_xl_battleship_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk2" default="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" compatible="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <jerk>
+        <forward accel="0.3" decel="0.7" ratio="3" />
+        <forward_boost accel="0.3" ratio="3" />
+        <forward_travel accel="0.5" decel="0.8" ratio="2.5" />
+        <strafe value="0.3" />
+        <angular value="0.15" />
+      </jerk>
+      <explosiondamage value="1500" shield="7500" shielddisruption="10" />
+      <storage missile="860" unit="15" />
+      <hull max="295000" />
+      <secrecy level="2" />
+      <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.9" />
+        <point position="1.6" value="0.8" />
+        <point position="2.1" value="0.45" />
+        <point position="2.4" value="0.3" />
+        <point position="2.7" value="0.25" />
+      </steeringcurve>
+      <purpose primary="fight" />
+      <people capacity="485" />
+      <physics mass="649.202">
+        <inertia pitch="485.311" yaw="485.311" roll="388.249" />
+        <drag forward="496.554" reverse="1466.217" horizontal="229.232" vertical="229.232" pitch="617.73" yaw="617.73" roll="617.73" />
+      </physics>
+      <thruster tags="extralarge" />
+	  		<loadouts>
+				<loadout id="default">
+					<macros>
+						<engine macro="engine_ter_xl_allround_01_mk1_macro" path="../con_engine_xl_engine_1"/>
+						<engine macro="engine_ter_xl_allround_01_mk1_macro" path="../con_engine_xl_engine_2"/>
+						<engine macro="engine_ter_xl_allround_01_mk1_macro" path="../con_engine_xl_engine_3"/>
+						<engine macro="engine_ter_xl_allround_01_mk1_macro" path="../con_engine_xl_engine_4"/>						
+						<shield macro="shield_ter_xl_standard_01_mk2_macro" path="../con_shieldgen_xl_1" optional="1"/>
+						<shield macro="shield_ter_xl_standard_01_mk2_macro" path="../con_shieldgen_xl_2" optional="1"/>
+						<shield macro="shield_ter_xl_standard_01_mk2_macro" path="../con_shieldgen_xl_3" optional="1"/>
+					</macros>
+					<groups>
+<!-- turrets -->
+						<turrets macro="turret_ter_l_gatling_01_mk1_macro" path=".." group="top-front-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_l_laser_01_mk1_macro" path=".." group="top-rear-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_l_gatling_01_mk1_macro" path=".." group="bottom-front-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_l_laser_01_mk1_macro" path=".." group="bottom-rear-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_l_beam_01_mk1_macro" path=".." group="side-front-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_l_beam_01_mk1_macro" path=".." group="side-rear-bat" exact="2" optional="1"/>
+						<turrets macro="turret_ter_m_laser_02_mk1_macro" path=".." group="front-mbat" exact="4" optional="1"/>
+						<turrets macro="turret_ter_m_gatling_02_mk1_macro" path=".." group="top-front-mbat" exact="4" optional="1"/>
+						<turrets macro="turret_ter_m_beam_02_mk1_macro" path=".." group="middle-mbat" exact="4" optional="1"/>
+						<turrets macro="turret_ter_m_laser_02_mk1_macro" path=".." group="top-rear-mbat" exact="4" optional="1"/>						
+						<turrets macro="turret_ter_m_gatling_02_mk1_macro" path=".." group="bottom-front-mbat" exact="4" optional="1"/>
+						<turrets macro="turret_ter_m_laser_02_mk1_macro" path=".." group="bottom-rear-mbat" exact="4" optional="1"/>
+						<turrets macro="turret_ter_m_gatling_02_mk1_macro" path=".." group="side-mbat" exact="4" optional="1"/>
+<!-- shields -->
+						<shields macro="shield_ter_m_standard_01_mk3_macro" path=".." group="engine" exact="8" optional="1"/>							
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="top-front-bat" exact="4" optional="1"/>						
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="top-rear-bat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="bottom-front-bat" exact="4" optional="1"/>						
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="bottom-rear-bat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="side-front-bat" exact="4" optional="1"/>						
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="side-rear-bat" exact="4" optional="1"/>						
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="front-mbat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="top-front-mbat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="middle-mbat" exact="4" optional="1"/>					
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="top-rear-mbat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="bottom-front-mbat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="bottom-rear-mbat" exact="4" optional="1"/>
+						<shields macro="shield_ter_m_standard_02_mk3_macro" path=".." group="side-mbat" exact="4" optional="1"/>
+					</groups>
+					<ammunition>
+						<ammunition macro="countermeasure_flares_01_macro" min="20" max="40" optional="1"/>
+						<unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="7"/>
+						<unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="8"/>
+						</ammunition>
+					<virtualmacros>
+						<thruster macro="thruster_gen_xl_allround_01_mk3_macro"/>
+					</virtualmacros>
+					<crew>
+					  <crew role="service" min="315" max="397"/>
+					  <crew role="marine" min="43" max="88"/>
+					</crew>
+				</loadout>
+			</loadouts>	  
+      <ship type="battleship" />
+    </properties>
+    <connections>
+      <connection ref="con_cockpit">
+        <macro ref="bridge_ter_xl_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_lc4_s_ship_01">
+        <macro ref="dockarea_ter_xl_battleship_lc4_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dockarea_lc4_s_ship_02">
+        <macro ref="dockarea_ter_xl_battleship_lc4_01_macro" connection="Connection01" />		
+      </connection>
+      <connection ref="con_dockarea_ter_xl_battleship_lc4_02">
+        <macro ref="dockarea_ter_xl_battleship_lc4_02_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+      </connection>
+	  <connection ref="con_shipstorage01">
+        <macro ref="shipstorage_ter_xl_battleship_lc4_macro" connection="object" />
+      </connection>
+      <connection ref="con_shipstorage02">
+        <macro ref="shipstorage_gen_xs_01_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_ter_xl_battleship_lc4_01_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
