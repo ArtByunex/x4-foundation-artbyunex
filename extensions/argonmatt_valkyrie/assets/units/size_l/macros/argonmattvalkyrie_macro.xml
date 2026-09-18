@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- argonmattvalkyrie_macro.xml - Created by Argon_Matt -->
+
+<macros>
+  <macro name="argonmattvalkyrie_macro" class="ship_l">
+    <component ref="argonmattvalkyrie" />
+
+    <!-- PROPERTIES -->
+    <properties>
+      <identification name="{20101,66201}" basename="{20101,66201}" makerrace="terran" description="{999829,3}" icon="ship_l_fight_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <explosiondamage value="650" shield="2700" />
+      <storage missile="160" unit="8" />
+      <hull max="85000" />
+      <secrecy level="2" />
+      <purpose primary="fight" />
+      <people capacity="26" />
+      <physics mass="100">
+        <inertia pitch="100" yaw="100" roll="100" />
+        <drag forward="25" reverse="90" horizontal="50" vertical="35" pitch="35" yaw="35" roll="35" />
+      </physics>
+      <thruster tags="large" /> 
+      <ship type="frigate" /> 
+    </properties> 
+    <connections> 
+      <!-- COCKPIT CONNECTION FOR BRIDGE -->
+      <connection ref="cockpit"> 
+        <macro ref="bridge_ter_l_01_macro" connection="con_cockpit" /> 
+      </connection> 
+      <!-- XS HATCH + S AND M DOCKING BAYS -->
+      <connection ref="dock_xs"> 
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" /> 
+      </connection> 
+      <connection ref="dockarea"> 
+        <macro ref="dockarea_arg_s_ship_01_macro" connection="Connection01" /> 
+      </connection> 
+      <!-- XS, S AND M SHIP STORAGE -->
+      <connection ref="shipstorage_xs">
+        <macro ref="shipstorage_gen_xs_01_macro" connection="object" />
+      </connection>
+      <connection ref="shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_frigate_01_macro" connection="object" />
+      </connection>
+      <connection ref="shipstorage_s_02">
+        <macro ref="shipstorage_gen_s_frigate_01_macro" connection="object" />
+      </connection>
+      <connection ref="shipstorage_s_03">
+        <macro ref="shipstorage_gen_s_frigate_01_macro" connection="object" />
+      </connection>
+
+      <!-- GENERIC STORAGE -->
+      <connection ref="storage">
+        <macro ref="storage_argonmattvalkyrie_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
