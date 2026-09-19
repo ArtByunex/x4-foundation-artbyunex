@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<diff>
+ 	<add sel="//jobs">
+		
+		<!-- GODREALM OF THE PARANID-->
+		<!-- Add PAR Agamemnon patrol job-->
+		<job id="paranid_argonmattagamemnon_xl_sector_exp" name="{999830,3}" comment="each sector, expansion">
+			<modifiers commandeerable="true"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.sector"/>
+				</order>
+			</orders>
+			<category faction="paranid" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="3" sector="1"/>
+			 <location class="galaxy" macro="xu_ep2_universe_macro" faction="paranid" relation="self" comparison="exact" matchextension="false"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="paranid" tags="[battleship]" size="ship_xl"/>
+				<loadout>
+					<level exact="1"/>
+				</loadout>
+				<owner exact="paranid" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="paranid_frigate_escort_m"/>
+			</subordinates>
+		  </job>
+	</add>
+		<!-- HOLY ORDER OF THE PONTIFEX-->
+		<!-- Add HOP Agamemnon patrol job-->
+	<add sel="//jobs">
+		<job id="holyorder_argonmattagamemnon_xl_sector_exp" name="{999830,4}" comment="each sector, expansion">
+			<modifiers commandeerable="true"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.sector"/>
+				</order>
+			</orders>
+			<category faction="holyorder" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="3" sector="1"/>
+			 <location class="galaxy" macro="xu_ep2_universe_macro" faction="holyorder" relation="self" comparison="exact" matchextension="false"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="holyorder" tags="[battleship]" size="ship_xl"/>
+				<loadout>
+					<level exact="1"/>
+				</loadout>
+				<owner exact="holyorder" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="holyorder_frigate_escort_m"/>
+			</subordinates>
+		  </job>
+	</add>
+
+		<!-- TRINITY -->
+		<!-- Add Trinity Agamemnon patrol job-->
+
+<!-- This job does not start active. It is enabled when the Godrealm and the Holy Order are united into the Trinity. 
+Check the MD file for the relevant paranid story event for the deactivation of the old jobs and the activation of the TRI job -->
+
+	<add sel="//jobs">
+		<job id="trinity_argonmattagamemnon_xl_sector_exp" name="{999830,5}" comment="each sector, expansion" startactive="false"> 
+			<modifiers commandeerable="true"/>
+			<orders>
+				<order order="Patrol" default="true">
+					<param name="range" value="class.sector"/>
+				</order>
+			</orders>
+			<category faction="trinity" tags="[factionlogic, military, battleship]" size="ship_xl"/>
+			<quota galaxy="3" sector="1"/>
+			 <location class="galaxy" macro="xu_ep2_universe_macro" faction="trinity" relation="self" comparison="exact" matchextension="false"/>
+			<environment buildatshipyard="true"/>
+			<ship>
+				<select faction="trinity" tags="[battleship]" size="ship_xl"/>
+				<loadout>
+					<level exact="1"/>
+				</loadout>
+				<owner exact="trinity" overridenpc="true"/>
+			</ship>
+			<subordinates>
+				<subordinate job="trinity_frigate_escort_m"/>
+			</subordinates>
+		  </job>
+	</add>
+
+</diff>
