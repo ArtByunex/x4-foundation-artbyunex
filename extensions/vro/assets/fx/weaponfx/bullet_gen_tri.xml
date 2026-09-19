@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<components>
+	<component name="bullet_gen_tri" class="bullet">
+    <source geometry="assets\fx\weaponFx\bullet_par_l_plasma_01_mk1_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="xu_omni_01001" shadow="0" r="255" g="157" b="235" intensity="2" specularintensity="1" range="100" shadowrange="100" lighteffect="1" trigger="0">
+            <offset>
+              <position x="0" y="0" z="30" />
+            </offset>
+          </omni>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="Connection_Laser01" tags="laser " />
+      <connection name="position" tags="position" value="1" />
+      <connection name="Connection01001" tags="animation part ">
+        <animations>
+          <animation name="loop" start="1" end="51" />
+        </animations>
+        <parts>
+          <part name="bullet_l_par">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="effects.bullets_fx_master_noscaling" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="12.97651" y="14.05243" z="66.25023" />
+              <center x="-0.1377382" y="0.09442616" z="-1.476616" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection02001" tags="nocollision part " parent="bullet_l_par">
+        <offset>
+          <position x="0" y="0" z="30" />
+        </offset>
+        <parts>
+          <part name="bullet_l_par_distortion">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.p1_bullet_distortion_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="50.12649" y="50.12649" z="0.01939106" />
+              <center x="0" y="0" z="-0.01937866" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection03001" tags="animation iklink part textureanimation " parent="bullet_l_par">
+        <offset>
+          <position x="0" y="0" z="30" />
+          <quaternion qx="0" qy="0" qz="0.01796146" qw="-0.9998387" />
+        </offset>
+        <animations>
+          <animation name="loop" start="1" end="51" />
+        </animations>
+        <parts>
+          <part name="bullet_l_par_shockwave">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="effects.bullets_fx_master_multilayer_noscaling" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="46.4283" y="46.42829" z="46.4283" />
+              <center x="0" y="1.14441e-05" z="3.8147e-06" />
+            </size>
+            <offset>
+              <position x="0" y="0" z="-3.8147e-06" />
+            </offset>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="2">
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="51" value="4" />
+                </uv_property>
+              </uv_animation>
+              <uv_animation rotaroundcenter="1" mapchannel="3">
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="51" value="-2" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection04001" tags="animation part textureanimation " parent="bullet_l_par">
+        <animations>
+          <animation name="loop" start="1" end="51" />
+        </animations>
+        <parts>
+          <part name="bullet_l_par_swirl">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.beam_fx_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="19.89794" y="20.57599" z="32.27064" />
+              <center x="-0.956337" y="0.09972" z="1.865856" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="51" value="-1" />
+                </uv_property>
+              </uv_animation>
+              <uv_animation rotaroundcenter="1" mapchannel="2">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="51" value="1.5" />
+                </uv_property>
+              </uv_animation>
+              <uv_animation rotaroundcenter="1" mapchannel="3">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="51" value="2" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

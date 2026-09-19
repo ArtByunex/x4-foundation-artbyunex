@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<diff>
+	<replace sel="/mdscript/cues/cue[1]/cues/cue[1]/actions/set_spacesuit_oxygen">
+  <set_spacesuit_oxygen object="player.ship" percent="50"/>
+  </replace>
+
+  <replace sel="/mdscript/cues/cue[1]/cues/cue[1]/actions/create_ship[@name='$PickupShip']">
+    <create_ship name="$PickupShip" macro="ship_spl_s_scout_01_a_macro" sector="$FiresOfSector">
+      <owner exact="faction.freesplit" overridenpc="true"/>
+      <pilot macro="character_rescue_split_gamestart1_macro">
+        <select faction="faction.freesplit"/>
+        <page exact="10406"/>
+        <skills>
+          <skill type="piloting" exact="12"/>
+          <skill type="morale" exact="12"/>
+          <skill type="engineering" exact="6"/>
+          <skill type="management" exact="3"/>
+          <skill type="boarding" exact="4"/>
+        </skills>
+      </pilot>
+      <loadout loadout="$JaguarLoadout"/>
+      <!-- Original absolute position
+      <position x="272763.563" z="157692.406"/>-->
+      <position x="$Battlefield.x - 10237" y="$Battlefield.y + 5000" z="$Battlefield.z - 25308"/>
+      <rotation yaw="0.deg" pitch="0deg" roll="0deg"/>
+    </create_ship>
+  
+  </replace>
+
+</diff>

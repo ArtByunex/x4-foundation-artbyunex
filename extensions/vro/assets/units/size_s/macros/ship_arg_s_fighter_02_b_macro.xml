@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Matthias (192.168.3.144) at 22.01.2019_13-41-00 ELITE-->
+<diff> 
+  <replace sel="//macros">
+  
+<macros>
+  <macro name="ship_arg_s_fighter_02_b_macro" class="ship_s">
+    <component ref="ship_arg_s_fighter_02" />
+    <properties>
+      <identification name="{20101,11903}" basename="{20101,11901}" description="{20101,11913}" variation="{20111,1201}" shortvariation="{20111,1203}" icon="ship_s_fight_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <jerk>
+        <forward accel="0.4" decel="0.3" ratio="3" />
+        <forward_boost accel="0.4" ratio="3" />
+        <forward_travel accel="0.4" decel="0.9" ratio="3" />
+        <strafe value="0.9" />
+        <angular value="0.9" />
+      </jerk>
+      <storage missile="0" />
+      <hull max="4200" />
+      <secrecy level="2" />
+      <glow engine="1" />
+      <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.3" value="0.65" />
+        <point position="1.6" value="0.45" />
+        <point position="2" value="0.32" />
+        <point position="2.25" value="0.2" />
+        <point position="2.7" value="0.16" />
+      </steeringcurve>
+      <purpose primary="fight" />
+      <people capacity="1" />
+      <sounds>
+        <shipdetail ref="shipdetail_ship_02" />
+      </sounds>
+      <physics mass="3.8">
+        <inertia pitch="0.9" yaw="0.9" roll="0.7" />
+        <drag forward="1.15" reverse="8.6" horizontal="4.7" vertical="4.7" pitch="3.1" yaw="3.1" roll="3.1" />
+      </physics>
+      <thruster tags="small" />
+      <ship type="interceptor" />
+      <sound_occlusion inside="0.5" />
+      <modifiers>
+        <weapon heat="0.7" />
+      </modifiers>
+    </properties>
+    <connections>
+      <connection ref="con_cockpit">
+        <macro ref="cockpit_gen_virtual_01_macro" connection="ship" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_xs_01">
+        <macro ref="shipstorage_gen_xs_01_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_arg_s_fighter_02_b_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
+ </replace>
+</diff>
+<!-- 
+<macros>
+  <macro name="ship_arg_s_fighter_02_b_macro" class="ship_s">
+    <component ref="ship_arg_s_fighter_02" />
+    <properties>
+      <identification name="{20101,11903}" basename="{20101,11901}" description="{20101,11913}" variation="{20111,1201}" shortvariation="{20111,1203}" icon="ship_s_fight_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" default="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <storage missile="20" />
+      <hull max="2200" />
+      <secrecy level="2" />
+      <purpose primary="fight" />
+      <people capacity="1" />
+      <sounds>
+        <shipdetail ref="shipdetail_ship_02" />
+      </sounds>
+      <physics mass="4.526">
+        <inertia pitch="0.492" yaw="0.492" roll="0.393" />
+        <drag forward="2.382" reverse="9.526" horizontal="4.057" vertical="4.057" pitch="2.821" yaw="2.821" roll="2.821" />
+      </physics>
+      <thruster tags="small" />
+      <ship type="interceptor" />
+      <sound_occlusion inside="0.5" />
+    </properties>
+    <connections>
+      <connection ref="con_cockpit">
+        <macro ref="cockpit_gen_virtual_01_macro" connection="ship" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_xs_01">
+        <macro ref="shipstorage_gen_xs_01_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_arg_s_fighter_02_b_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros> -->

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <replace sel="//macros">
+    <macros>
+      <macro name="ship_ter_m_corvette_01_a_macro" class="ship_m">
+        <component ref="ship_ter_m_corvette_01" />
+        <properties>
+          <identification name="{20101,60801}" basename="{20101,60801}" makerrace="terran" description="{20101,60811}" icon="ship_m_fight_01" />
+          <software>
+            <software ware="software_dockmk2" compatible="1" />
+            <software ware="software_flightassistmk1" default="1" />
+            <software ware="software_scannerlongrangemk1" default="1" />
+            <software ware="software_scannerlongrangemk2" compatible="1" />
+            <software ware="software_scannerobjectmk1" default="1" />
+            <software ware="software_scannerobjectmk2" compatible="1" />
+            <software ware="software_targetmk1" default="1" />
+            <software ware="software_trademk1" compatible="1" />
+          </software>
+          <jerk>
+            <forward accel="0.4" decel="0.8" ratio="3" />
+            <forward_boost accel="0.7" ratio="2" />
+            <forward_travel accel="0.3" decel="0.9" ratio="3" />
+            <strafe value="0.7" />
+            <angular value="0.5" />
+          </jerk>
+          <explosiondamage value="5000" />
+          <storage missile="0" />
+          <hull max="49000" />
+          <secrecy level="2" />
+      <glow engine="1" />
+          <purpose primary="fight" />
+          <people capacity="6" />
+          <sounds>
+            <shipdetail ref="enginedetail_ship_terran_m_03" />
+          </sounds>
+          <physics mass="29.28">
+            <inertia pitch="9.4" yaw="9.4" roll="9.01" />
+            <drag forward="11.5" reverse="16.203" horizontal="15.622" vertical="15.622" pitch="18" yaw="18" roll="18" />
+            <accfactors reverse="0.9" horizontal="1.45" vertical="1.45" />
+          </physics>
+          <thruster tags="medium" />
+          <ship type="corvette" prestige="20" />
+          <sound_occlusion inside="0.4" />
+          <modifiers>
+            <shield capacity="1.15" />
+            <weapon heat="0.8" />
+          </modifiers>
+        </properties>
+        <connections>
+          <connection ref="con_cockpit">
+            <macro ref="cockpit_gen_virtual_01_macro" connection="ship" />
+          </connection>
+          <connection ref="con_dock_xs">
+            <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+          </connection>
+          <connection ref="con_shipstorage_xs_01">
+            <macro ref="shipstorage_gen_xs_01_macro" connection="object" />
+          </connection>
+          <connection ref="con_storage01">
+            <macro ref="storage_ter_m_corvette_01_a_macro" connection="ShipConnection" />
+          </connection>
+        </connections>
+      </macro>
+    </macros>
+  </replace>
+</diff>

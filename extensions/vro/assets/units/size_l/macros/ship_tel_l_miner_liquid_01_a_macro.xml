@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: nick (192.168.3.120) at 27.11.2018_14-44-57-->
+<diff> 
+<replace sel="//macros">
+
+<macros>
+  <macro name="ship_tel_l_miner_liquid_01_a_macro" class="ship_l">
+    <component ref="ship_tel_l_miner_liquid_01" />
+    <properties>
+      <identification name="{20101,20904}" basename="{20101,20901}" description="{20101,20914}" variation="{20111,3201} {20111,1101}" shortvariation="{20111,3201} {20111,1103}" icon="ship_l_mine_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" compatible="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <jerk>
+        <forward accel="0.2" decel="0.8" ratio="3" />
+        <forward_boost accel="0.2" ratio="3" />
+        <forward_travel accel="0.4" decel="0.9" ratio="3" />
+        <strafe value="0.4" />
+        <angular value="0.25" />
+      </jerk>
+      <explosiondamage value="1000" shield="6000" />
+      <storage missile="65" unit="20" />
+      <hull max="73000" />
+      <secrecy level="1" />
+      <steeringcurve>
+        <point position="1.01" value="1" />
+        <point position="1.2" value="0.9" />
+        <point position="1.6" value="0.8" />
+        <point position="2.1" value="0.45" />
+        <point position="2.4" value="0.28" />
+        <point position="2.7" value="0.2" />
+      </steeringcurve>
+      <purpose primary="mine" />
+      <people capacity="52" />
+      <physics mass="235.019">
+        <inertia pitch="214" yaw="214" roll="171" />
+        <drag forward="75" reverse="431" horizontal="115" vertical="115" pitch="167" yaw="167" roll="167" />
+        <accfactors reverse="0.85" horizontal="1.15" vertical="1.15" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="largeminer" />
+    </properties>
+    <connections>
+      <connection ref="con_cockpit">
+        <macro ref="bridge_tel_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_tel_l_transporter_01">
+        <macro ref="dockarea_tel_l_transporter_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_cap5_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_tel_l_miner_liquid_01_a_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
+</replace>
+</diff>
+<!-- 
+<macros>
+  <macro name="ship_tel_l_miner_liquid_01_a_macro" class="ship_l">
+    <component ref="ship_tel_l_miner_liquid_01" />
+    <properties>
+      <identification name="{20101,20904}" basename="{20101,20901}" description="{20101,20914}" variation="{20111,3201} {20111,1101}" shortvariation="{20111,3201} {20111,1103}" icon="ship_l_mine_01" />
+      <software>
+        <software ware="software_dockmk2" compatible="1" />
+        <software ware="software_flightassistmk1" default="1" />
+        <software ware="software_scannerlongrangemk1" default="1" />
+        <software ware="software_scannerlongrangemk2" compatible="1" />
+        <software ware="software_scannerobjectmk1" default="1" />
+        <software ware="software_scannerobjectmk2" compatible="1" />
+        <software ware="software_targetmk1" compatible="1" />
+        <software ware="software_trademk1" compatible="1" />
+      </software>
+      <explosiondamage value="8000" />
+      <storage missile="30" unit="10" />
+      <hull max="30000" />
+      <secrecy level="1" />
+      <gatherrate gas="8" />
+      <purpose primary="mine" />
+      <people capacity="52" />
+      <physics mass="235.019">
+        <inertia pitch="164.773" yaw="164.773" roll="131.818" />
+        <drag forward="83.741" reverse="478.521" horizontal="104.731" vertical="104.731" pitch="151.607" yaw="151.607" roll="151.607" />
+      </physics>
+      <thruster tags="large" />
+      <ship type="largeminer" />
+    </properties>
+    <connections>
+      <connection ref="con_cockpit">
+        <macro ref="bridge_tel_l_01_macro" connection="con_cockpit" />
+      </connection>
+      <connection ref="con_dockarea_tel_l_transporter_01">
+        <macro ref="dockarea_tel_l_transporter_01_macro" connection="Connection01" />
+      </connection>
+      <connection ref="con_dock_xs">
+        <macro ref="dock_gen_xs_ship_01_macro" connection="Connection_component" />
+      </connection>
+      <connection ref="con_shipstorage_s_01">
+        <macro ref="shipstorage_gen_s_01_macro" connection="object" />
+      </connection>
+      <connection ref="con_storage01">
+        <macro ref="storage_tel_l_miner_liquid_01_a_macro" connection="ShipConnection" />
+      </connection>
+    </connections>
+  </macro>
+</macros> -->
