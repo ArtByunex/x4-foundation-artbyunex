@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Michael (192.168.3.145) at 14.10.2014_17-55-08-->
+<macros>
+  <macro name="missile_player_guided_light_macro" class="missile">
+    <component ref="missile_player_guided" />
+    <properties>
+      <identification name="{20201,15503}" description="{20201,15502}" unique="0" />
+      <ammunition value="1" />
+      <missile amount="1" lifetime="12" guided="1" icon="player_weapons_secondary_starflash" retarget="1" selfdestruct="1" />
+      <explosiondamage value="9000" />
+      <reload rate="0.8" />
+      <hull max="100" />
+      <effects>
+        <activation ref="weaponchange_guided" />
+        <explosion ref="missile_player_guided_explosion" />
+        <launch ref="missile_player_guided_muzzle" />
+      </effects>
+      <weapon system="missile" />
+    </properties>
+    <connections>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_player_guided_l_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

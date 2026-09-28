@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<components>
+	<component name="mg_player_bullet" class="bullet">
+		<source geometry="assets\fx\weaponfx\mg_player_bullet_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="129" b="90" range="150" shadowrange="150" lighteffect="1" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="0" z="40"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="bullet">
+				<offset/>
+			</connection>
+			<connection name="Connection02" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_bull">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.mg_bullet_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.882982" y="5.882982" z="113.5306"/>
+							<center x="-1.284122E-03" y="1.192093E-06" z="-41.6424"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision  ">
+				<offset>
+					<position x="-2.980232E-08" y="-0.9270095" z="-3.444004"/>
+				</offset>
+				<parts>
+					<part name="fx_haze">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.mg_blob_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="35.39854" y="37.27385" z="31.32034"/>
+							<center x="2.980232E-08" y="-1.192093E-07" z="33.58919"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection01" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

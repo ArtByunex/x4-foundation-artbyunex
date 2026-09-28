@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_xen_def_turret_m_bb" class="turret">
+		<source geometry="assets\props\WeaponSystems\props_wps_xen_def_turret_m_bb_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection01" tags="part animation detail_l  ">
+				<offset/>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="40"/>
+					<animation name="turret_active" start="40" end="40"/>
+					<animation name="turret_deactivating" start="40" end="80"/>
+				</animations>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_04"/>
+									<material id="2" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.978174" y="4.995904" z="15.76654"/>
+							<center x="2.698135E-02" y="2.132893" z="4.828388"/>
+						</size>
+						<size_raw>
+							<max x="9.951193" y="2.863011" z="10.93815"/>
+							<center x="2.698183E-02" y="2.132893" z="4.828389"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part detail_s animation iklink nocollision forceoutline  " parent="part_main">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="-4.732486" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_rotator01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_04"/>
+									<material id="2" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.131174" y="4.957214" z="7.131174"/>
+							<center x="-2.768421E-02" y="6.659249" z="1.600123"/>
+						</size>
+						<size_raw>
+							<max x="7.158858" y="1.702035" z="5.531051"/>
+							<center x="-2.768445E-02" y="4.293007" z="1.600123"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part detail_l animation iklink nocollision forceoutline  " parent="anim_rotator01">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-15.0 "/>
+							<max value="55.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="0" y="11.08347" z="1.635678"/>
+					<quaternion qx="-8.715577E-02" qy="-0" qz="-0" qw="0.9961947"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_gun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_04"/>
+									<material id="2" ref="generic.generic_engines_01"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.18307" y="15.72708" z="17.51309"/>
+							<center x="0.052495" y="11.17109" z="4.054265"/>
+						</size>
+						<size_raw>
+							<max x="10.13057" y="5.429721" z="11.58058"/>
+							<center x="0.052495" y="8.193067" z="3.840695"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser01" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="1.608121E-02" y="2.300788" z="21.84191"/>
+				</offset>
+			</connection>
+			<connection name="Connection04" tags="part  ">
+				<offset>
+					<position x="0" y="0" z="51.48732"/>
+				</offset>
+				<parts/>
+			</connection>
+			<connection name="Connection05" tags="part  ">
+				<offset/>
+				<parts/>
+			</connection>
+			<connection name="connection_component01" tags="component turret_medium_xe">
+				<offset>
+					<quaternion qx="-1" qy="4.371138E-08" qz="-4.37114E-08" qw="1.509958E-07"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

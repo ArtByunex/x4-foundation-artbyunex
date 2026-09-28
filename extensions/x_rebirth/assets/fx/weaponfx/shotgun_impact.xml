@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shotgun_impact" class="effectobject">
+		<source geometry="assets\fx\weaponfx\shotgun_impact_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights></lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="effectobject">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="0" y="-3.72529E-09" z="0"></position>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="3"></animation>
+				</animations>
+				<parts>
+					<part name="anim_flash">
+						<size>
+							<max x="1.377945" y="1.377945" z="4.249059"></max>
+							<center x="0" y="2.421439E-07" z="4.249059"></center>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation  ">
+				<offset></offset>
+				<animations>
+					<animation name="playonce" start="1" end="3"></animation>
+				</animations>
+				<parts>
+					<part name="anim_fire">
+						<size>
+							<max x="1.116133" y="1.116133" z="1.617774"></max>
+							<center x="0" y="4.768372E-07" z="1.617774"></center>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation textureanimation  ">
+				<offset>
+					<position x="0" y="0" z="4"></position>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="10"></animation>
+				</animations>
+				<parts>
+					<part name="anim_nova01">
+						<size>
+							<max x="3.609223" y="3.609223" z="5.88017E-07"></max>
+							<center x="0" y="0" z="1.525879E-05"></center>
+						</size>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"></key>
+									<key frame="10" value="0.1"></key>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

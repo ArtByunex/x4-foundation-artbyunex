@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Benedikt (192.168.3.113) at 06.11.2012_11-32-41-->
+<macros>
+  <macro name="missile_turret_df_mk1_macro" class="missile">
+    <component ref="missile_dumbfire" />
+    <properties>
+      <ammunition value="5" reload="7" />
+      <missile amount="1" lifetime="8" range="2500" selfdestruct="1" />
+      <explosiondamage value="8000" />
+      <reload rate="3" />
+      <hull max="10000" />
+      <effects>
+        <explosion ref="missile_dumbfire_explosion" />
+        <launch ref="missile_dumbfire_muzzle" />
+      </effects>
+    </properties>
+    <connections>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_turret_dumbfire_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

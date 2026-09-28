@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<components>
+	<component name="mg_player_muzzle_sparkles_01" class="destructible">
+		<properties>
+			<hull max="200000"/>
+		</properties>
+		<source geometry="assets\fx\weaponfx\mg_player_muzzle_sparkles_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation  ">
+				<offset/>
+				<animations>
+					<animation name="playonce" start="1" end="8"/>
+				</animations>
+				<parts>
+					<part name="anim_sparkles">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_muzzle_sparkles_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.084434E-09" y="2.092063" z="3.672198"/>
+							<center x="2.06124E-12" y="7.086539E-02" z="2.084005"/>
+						</size>
+						<size_raw>
+							<max x="2.080119E-09" y="1.943722" z="0.6901987"/>
+							<center x="2.061351E-12" y="7.086542E-02" z="2.084005"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="8" value="-0.17" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

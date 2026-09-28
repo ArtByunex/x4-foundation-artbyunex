@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_rocketlauncher_player_02" class="destructible">
+		<properties>
+			<hull max="0"/>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_rocketlauncher_player_02_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_rocketlauncher02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="2" ref="player.player_trims"/>
+									<material id="3" ref="player.player_tech"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.769547" y="3.140152" z="5.080791"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<pivot>
+							<offset>
+								<position x="-0.1616893" y="0.1525698" z="-0.2652137"/>
+							</offset>
+						</pivot>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="ShipConnection" tags="component  weapon_missile" parent="part_rocketlauncher02">
+				<offset>
+					<position x="0.6523991" y="-1.844624" z="4.153303"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_01" tags="rocket">
+				<offset>
+					<position x="-0.4821885" y="-2.01035" z="3.579843"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

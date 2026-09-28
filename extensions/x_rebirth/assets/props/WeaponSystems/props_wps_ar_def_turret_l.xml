@@ -1,0 +1,1852 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_ar_def_turret_l" class="turret">
+		<source geometry="assets\props\WeaponSystems\props_wps_ar_def_turret_l_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni02" shadow="0" r="255" g="153" b="32" range="50" shadowrange="50" lighteffect="1" trigger="1" intensity="0.01">
+						<animations>
+							<animation name="turretloop_inactive" start="0" end="1"/>
+							<animation name="turretloop_activating" start="1" end="195"/>
+							<animation name="turretloop_active" start="195" end="225"/>
+							<animation name="turretloop_firing" start="500" end="600"/>
+							<animation name="turretloop_deactivating" start="1100" end="1300"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="195" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="224" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="225" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1100" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1101" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1299" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1300" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="51.45316" y="28.49077" z="-24.99435"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni01" shadow="0" r="255" g="153" b="32" range="50" shadowrange="50" lighteffect="1" trigger="1" intensity="0.01">
+						<animations>
+							<animation name="turretloop_inactive" start="0" end="1"/>
+							<animation name="turretloop_activating" start="1" end="195"/>
+							<animation name="turretloop_active" start="195" end="225"/>
+							<animation name="turretloop_firing" start="500" end="600"/>
+							<animation name="turretloop_deactivating" start="1100" end="1300"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="195" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="224" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="225" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1100" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1101" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1299" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="1300" value="0.01" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="-51.45316" y="28.49077" z="-24.59697"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni03" shadow="0" r="255" g="255" b="255" range="25" shadowrange="25" lighteffect="1" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="-69.95726" y="26.51258" z="28.60442"/>
+							<quaternion qx="0.1443869" qy="-0.6922085" qz="-0.1443868" qw="-0.6922083"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni04" shadow="0" r="255" g="255" b="255" range="25" shadowrange="25" lighteffect="1" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="69.95726" y="26.51258" z="28.60442"/>
+							<quaternion qx="0.1443869" qy="-0.6922085" qz="-0.1443868" qw="-0.6922083"/>
+						</offset>
+					</omni>
+					<box name="XU BoxLight01" shadow="0" r="255" g="255" b="255" lighteffect="1" trigger="1" intensity="0.5">
+						<size x="100" y="20" z="20"/>
+						<lightanimations/>
+						<offset>
+							<position x="-1.029434" y="13.27484" z="138.0935"/>
+							<quaternion qx="-3.822263E-08" qy="-0.8623727" qz="-0.506274" qw="6.510733E-08"/>
+						</offset>
+					</box>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="0" y="13.36999" z="19.91936"/>
+				</offset>
+				<animations>
+					<animation name="turretloop_inactive" start="0" end="1"/>
+					<animation name="turretloop_activating" start="1" end="195" startsound="1"/>
+					<animation name="turretloop_active" start="195" end="225"/>
+					<animation name="turretloop_firing" start="500" end="600"/>
+					<animation name="turretloop_deactivating" start="1100" end="1300"/>
+				</animations>
+				<parts>
+					<part name="part_base" wreck="part_base_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="2" ref="generic.generic_techtrims_01"/>
+									<material id="3" ref="argon.ar_windows_02"/>
+									<material id="4" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="2" ref="generic.generic_techtrims_01"/>
+									<material id="3" ref="argon.ar_windows_02"/>
+									<material id="4" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="2" ref="generic.generic_techtrims_01"/>
+									<material id="3" ref="argon.ar_windows_02"/>
+									<material id="4" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="76.68991" y="15.11972" z="125.2349"/>
+							<center x="0" y="2.301436" z="-8.418331"/>
+						</size>
+						<size_raw>
+							<max x="76.68992" y="12.81828" z="133.6532"/>
+							<center x="-3.814697E-06" y="2.301436" z="-8.418331"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter Activating01" ref="anim_turret_l_activating">
+								<offset>
+									<position x="0" y="14.66054" z="25.84706"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation detail_s iklink  " parent="part_base">
+				<offset>
+					<position x="-54.05262" y="3.9944" z="-93.3123"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_tube01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="20.5994" y="6.831631" z="20.28645"/>
+							<center x="0" y="1.597448" z="0"/>
+						</size>
+						<size_raw>
+							<max x="20.5994" y="5.234185" z="20.28645"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation detail_s iklink  " parent="detail_s_tube01">
+				<offset>
+					<position x="0" y="8.772461" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_tube01_top">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="20.5994" y="6.850891" z="20.28645"/>
+							<center x="0" y="3.275402" z="0"/>
+						</size>
+						<size_raw>
+							<max x="20.5994" y="3.575488" z="20.28645"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part animation detail_s iklink forceoutline nocollision  " parent="detail_s_tube01_top">
+				<offset>
+					<position x="0" y="-5.39854" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_tube01_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_windows_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.61328" y="5.136406" z="19.5946"/>
+							<center x="-3.814697E-06" y="3.452761" z="0"/>
+						</size>
+						<size_raw>
+							<max x="19.61328" y="1.683646" z="19.31531"/>
+							<center x="-3.814697E-06" y="0.1773586" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part animation detail_s iklink  " parent="part_base">
+				<offset>
+					<position x="15.48081" y="9.381943" z="80.05035"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_valve01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="11.71239" y="17.26987" z="27.08145"/>
+							<center x="-9.536743E-07" y="11.16282" z="-8.447754"/>
+						</size>
+						<size_raw>
+							<max x="11.71239" y="6.107052" z="35.52921"/>
+							<center x="-9.536743E-07" y="0.6194096" z="-15.9629"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="part animation detail_s iklink  " parent="part_base">
+				<offset>
+					<position x="0" y="10.55469" z="-62.9179"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_valve03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.78983" y="8.18752" z="37.20071"/>
+							<center x="0" y="-1.68589" z="-27.87592"/>
+						</size>
+						<size_raw>
+							<max x="22.78983" y="9.873411" z="48.326"/>
+							<center x="0" y="-1.68589" z="-19.5006"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part animation detail_s iklink  " parent="part_base">
+				<offset>
+					<position x="-15.48081" y="9.381943" z="80.05035"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_valve02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="11.7124" y="17.26987" z="27.08145"/>
+							<center x="0" y="11.16282" z="-8.447746"/>
+						</size>
+						<size_raw>
+							<max x="11.7124" y="6.107048" z="35.5292"/>
+							<center x="-9.536743E-07" y="0.6194115" z="-15.96289"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="50" y="7.784264" z="-20.47892"/>
+				</offset>
+				<parts>
+					<part name="part_branch03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.21281" y="19.04" z="6.356035"/>
+							<center x="-16.65195" y="0.9791737" z="0.5828218"/>
+						</size>
+						<size_raw>
+							<max x="17.46159" y="18.06083" z="5.773209"/>
+							<center x="-5.950371" y="-6.311564" z="0.5828202"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="63" y="7.221901" z="-19.80429"/>
+				</offset>
+				<parts>
+					<part name="part_foot01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="35.54319" y="7.108195" z="10.39107"/>
+							<center x="-11.989" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="23.55419" y="7.108197" z="10.39107"/>
+							<center x="0" y="0" z="-1.430511E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection10" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="-63" y="7.221901" z="-19.80429"/>
+				</offset>
+				<parts>
+					<part name="part_foot02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="35.54303" y="7.108191" z="10.39107"/>
+							<center x="11.98884" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="23.55419" y="7.108191" z="10.39107"/>
+							<center x="0" y="0" z="-4.768372E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection11" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="-50" y="7.784264" z="-20.47892"/>
+				</offset>
+				<parts>
+					<part name="part_branch02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.1653" y="19.64299" z="6.356013"/>
+							<center x="16.46338" y="0.9170704" z="0.5828152"/>
+						</size>
+						<size_raw>
+							<max x="5.701923" y="18.72592" z="5.773198"/>
+							<center x="5.512672" y="-6.622904" z="0.5828152"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection12" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="1.272367E-07" y="3.060398" z="16.86685"/>
+				</offset>
+				<parts>
+					<part name="part_branch01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.488142" y="15.62823" z="15.2005"/>
+							<center x="8.264377E-07" y="8.522655" z="-9.455994"/>
+						</size>
+						<size_raw>
+							<max x="9.488141" y="7.105566" z="23.78319"/>
+							<center x="8.264377E-07" y="-0.7980337" z="-9.019341"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection13" tags="part iklink  " parent="part_base">
+				<offset>
+					<position x="-0.0296393" y="2.498032" z="29.26935"/>
+				</offset>
+				<parts>
+					<part name="part_foot03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="13.4698" y="9.470126" z="27.48936"/>
+							<center x="1.009554E-06" y="2.361933" z="-3.935169"/>
+						</size>
+						<size_raw>
+							<max x="13.4698" y="7.108198" z="23.55419"/>
+							<center x="5.327165E-07" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection14" tags="part animation textureanimation iklink nocollision  " parent="part_base">
+				<offset>
+					<position x="-63.69555" y="10.48206" z="38.63376"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke07">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume_near"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="27.34709" y="27.15529" z="32.24927"/>
+							<center x="9.67075" y="8.64469" z="0.7724686"/>
+						</size>
+						<size_raw>
+							<max x="17.67634" y="18.5106" z="31.47678"/>
+							<center x="9.670753" y="8.644693" z="0.7724724"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection15" tags="part animation textureanimation iklink nocollision  " parent="part_base">
+				<offset>
+					<position x="62.93217" y="10.48206" z="38.63376"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke08">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume_near"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="27.3471" y="35.46119" z="32.24926"/>
+							<center x="-9.67075" y="0.3387966" z="-0.7724915"/>
+						</size>
+						<size_raw>
+							<max x="37.01785" y="35.12239" z="33.02176"/>
+							<center x="-9.670746" y="0.3387966" z="-0.7724915"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="55" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection16" tags="part iklink animation  " parent="part_base">
+				<offset>
+					<position x="-1.43051E-06" y="-12.30392" z="-2.190319"/>
+				</offset>
+				<animations>
+					<animation name="turretloop_inactive" start="0" end="1"/>
+					<animation name="turretloop_activating" start="1" end="195"/>
+					<animation name="turretloop_active" start="195" end="225" startsound="1"/>
+					<animation name="turretloop_firing" start="500" end="600"/>
+					<animation name="turretloop_deactivating" start="1100" end="1300"/>
+				</animations>
+				<parts>
+					<part name="part_rotatorbase">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="18.19064" y="25.37941" z="26.20214"/>
+							<center x="3.337858E-06" y="17.55306" z="-8.27566"/>
+						</size>
+						<size_raw>
+							<max x="18.19063" y="7.826349" z="17.92648"/>
+							<center x="3.337858E-06" y="-0.4254494" z="0"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter Active01" ref="anim_turret_l_active">
+								<offset>
+									<position x="1.43051E-06" y="26.96446" z="8.46207"/>
+									<quaternion qx="-0" qy="-1" qz="-0" qw="7.54979E-08"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection17" tags="part iklink animation detail_s nocollision forceoutline   " parent="part_rotatorbase">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="2.807917E-07" y="5.00005" z="-1.177727"/>
+				</offset>
+				<animations>
+					<animation name="turretloop_inactive" start="0" end="1"/>
+					<animation name="turretloop_activating" start="1" end="195"/>
+					<animation name="turretloop_active" start="195" end="225"/>
+					<animation name="turretloop_firing" start="500" end="600"/>
+					<animation name="turretloop_deactivating" start="1100" end="1300" startsound="1"/>
+				</animations>
+				<parts>
+					<part name="detail_s_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.987" y="21.22728" z="19.43215"/>
+							<center x="1.149718E-06" y="17.97852" z="-8.27566"/>
+						</size>
+						<size_raw>
+							<max x="10.987" y="3.248758" z="11.1565"/>
+							<center x="6.728808E-07" y="9.536743E-07" z="0"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter Deactivating01" ref="anim_turret_l_deactivating">
+								<offset>
+									<position x="1.149718E-06" y="21.93654" z="-12.2536"/>
+									<quaternion qx="-0" qy="-1" qz="-0" qw="7.54979E-08"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection18" tags="part iklink  " parent="detail_s_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-10.0 "/>
+							<max value="35.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="-7.558812E-06" y="5.999935" z="0.1048622"/>
+				</offset>
+				<parts>
+					<part name="part_turret">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+									<material id="2" ref="generic.generic_alphatrims_01"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+									<material id="2" ref="generic.generic_alphatrims_01"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+									<material id="2" ref="generic.generic_alphatrims_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="36.36113" y="33.05058" z="80.16454"/>
+							<center x="1.079136E-06" y="21.50416" z="-4.21204"/>
+						</size>
+						<size_raw>
+							<max x="36.36112" y="11.54642" z="67.82526"/>
+							<center x="2.986485E-06" y="4.03512" z="4.06362"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser02" tags="laser" parent="part_turret">
+				<offset>
+					<position x="-16.08024" y="-1.475521" z="77.8531"/>
+				</offset>
+			</connection>
+			<connection name="connection_laser01" tags="laser" parent="part_turret">
+				<offset>
+					<position x="16.20738" y="-1.475521" z="77.8531"/>
+				</offset>
+			</connection>
+			<connection name="Connection19" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="-8.398838E-06" y="12.43762" z="13.74133"/>
+				</offset>
+				<parts>
+					<part name="detail_s_sidepart01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="34.42811" y="21.60192" z="18.359"/>
+							<center x="-8.891002E-07" y="17.46904" z="-6.642303"/>
+						</size>
+						<size_raw>
+							<max x="34.4281" y="4.132873" z="11.7167"/>
+							<center x="-8.891002E-07" y="1.907349E-06" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection20" tags="part detail_s iklink nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="29.81318" y="6.983523" z="-35.66426"/>
+				</offset>
+				<parts>
+					<part name="part_detail_s_tubes02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_windows_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.980629" y="24.81149" z="19.38646"/>
+							<center x="1.919514" y="20.37425" z="-15.03161"/>
+						</size>
+						<size_raw>
+							<max x="5.061102" y="4.437243" z="16.70432"/>
+							<center x="0.4946175" y="0.9678669" z="-6.174732"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection21" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes02">
+				<offset>
+					<position x="17.71233" y="31.92806" z="-21.09043"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke05">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.58514" y="45.40014" z="25.43007"/>
+							<center x="2.959858" y="13.08763" z="-11.29729"/>
+						</size>
+						<size_raw>
+							<max x="19.62527" y="32.3125" z="19.01361"/>
+							<center x="1.534962" y="-6.31876" z="-2.440414"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection22" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes02">
+				<offset>
+					<position x="22.78493" y="34.52134" z="-8.256516"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke06">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.3796" y="43.46583" z="28.19155"/>
+							<center x="1.700371" y="11.88884" z="-11.10068"/>
+						</size>
+						<size_raw>
+							<max x="20.67921" y="31.57698" z="21.57847"/>
+							<center x="0.2754822" y="-7.517544" z="-2.243795"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection23" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes02">
+				<offset>
+					<position x="20.02775" y="33.58278" z="-14.45627"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke04">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="20.0076" y="45.40437" z="28.19155"/>
+							<center x="0.8533554" y="13.07862" z="-11.10068"/>
+						</size>
+						<size_raw>
+							<max x="19.15424" y="32.32574" z="21.57847"/>
+							<center x="-0.5715485" y="-6.327755" z="-2.243797"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection24" tags="part detail_s iklink nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="-30.37309" y="6.941981" z="-35.76393"/>
+				</offset>
+				<parts>
+					<part name="part_detail_s_tubes01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_windows_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.461315" y="24.62411" z="19.27314"/>
+							<center x="-1.22114" y="20.34991" z="-14.91828"/>
+						</size>
+						<size_raw>
+							<max x="5.681661" y="4.27419" z="16.63208"/>
+							<center x="-0.220747" y="1.051025" z="-6.138613"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection25" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes01">
+				<offset>
+					<position x="-20.41035" y="35.58126" z="-8.311232"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="21.95509" y="43.35833" z="28.11436"/>
+							<center x="-1.275879" y="11.78134" z="-11.02348"/>
+						</size>
+						<size_raw>
+							<max x="21.23018" y="31.57698" z="21.57847"/>
+							<center x="-0.275486" y="-7.517548" z="-2.243799"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="130" value="-0"/>
+									<key frame="185" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection26" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes01">
+				<offset>
+					<position x="-19.00365" y="33.83932" z="-14.51099"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.58309" y="45.29688" z="28.11436"/>
+							<center x="-0.4288483" y="12.97113" z="-11.02348"/>
+						</size>
+						<size_raw>
+							<max x="18.01115" y="32.32573" z="21.57847"/>
+							<center x="0.5715408" y="-6.327751" z="-2.243801"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-1"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="135" value="-0"/>
+									<key frame="190" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection27" tags="part animation textureanimation iklink nocollision  " parent="part_detail_s_tubes01">
+				<offset>
+					<position x="-17.58754" y="32.1846" z="-21.14512"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="smoke03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.16063" y="45.29263" z="25.35288"/>
+							<center x="-2.535358" y="12.98012" z="-11.22009"/>
+						</size>
+						<size_raw>
+							<max x="22.69521" y="32.3125" z="19.01361"/>
+							<center x="-1.534966" y="-6.318756" z="-2.440411"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="140" value="-0"/>
+									<key frame="195" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection28" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="2.135158E-05" y="18.51243" z="2.760525"/>
+				</offset>
+				<parts>
+					<part name="detail_s_cover01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="34.66396" y="21.28908" z="43.8598"/>
+							<center x="-3.303285E-05" y="16.87271" z="-41.71822"/>
+						</size>
+						<size_raw>
+							<max x="34.66396" y="4.416362" z="52.44794"/>
+							<center x="-2.34961E-05" y="-0.6408615" z="-25.15318"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection29" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="1.43219E-05" y="5.771848" z="-47.27068"/>
+				</offset>
+				<parts>
+					<part name="detail_s_tube02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_windows_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="28.24389" y="21.15516" z="23.18877"/>
+							<center x="-9.775838E-06" y="17.46904" z="-14.80164"/>
+						</size>
+						<size_raw>
+							<max x="28.24389" y="3.686122" z="8.387115"/>
+							<center x="-2.146444E-06" y="0" z="3.814697E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection30" tags="part iklink nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="-1.554818E-06" y="-1.475539" z="55.35686"/>
+				</offset>
+				<parts>
+					<part name="part_guntube01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="23.59053" y="24.78159" z="22.01476"/>
+							<center x="6.755325E-06" y="17.46904" z="-6.642303"/>
+						</size>
+						<size_raw>
+							<max x="23.59052" y="7.312552" z="15.37246"/>
+							<center x="2.940627E-06" y="1.907349E-06" z="-7.629395E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection31" tags="part iklink detail_s nocollision forceoutline   " parent="part_guntube01">
+				<offset>
+					<position x="2.080068E-02" y="9.536743E-07" z="10.52867"/>
+				</offset>
+				<parts>
+					<part name="detail_s_guntube01_inner">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.34216" y="20.57729" z="10.27077"/>
+							<center x="3.308058E-06" y="17.46904" z="-6.642311"/>
+						</size>
+						<size_raw>
+							<max x="19.34215" y="3.108247" z="3.628464"/>
+							<center x="1.400709E-06" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection32" tags="part iklink animation detail_s  " parent="part_guntube01">
+				<offset>
+					<position x="-16.1799" y="4.768372E-06" z="10.72072"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_gun02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_techtrims_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.226404" y="22.6942" z="10.38624"/>
+							<center x="-3.814697E-06" y="17.47258" z="-6.74646"/>
+						</size>
+						<size_raw>
+							<max x="5.190304" y="5.221614" z="3.848088"/>
+							<center x="3.814697E-06" y="0" z="-0.1041565"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection33" tags="part detail_s iklink textureanimation animation " parent="detail_s_gun02">
+				<animations/>
+				<parts>
+					<part name="anim_gun02_red">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.116493" y="23.58408" z="10.55347"/>
+							<center x="0" y="17.47319" z="-6.642303"/>
+						</size>
+						<size_raw>
+							<max x="6.074248" y="6.110889" z="3.911162"/>
+							<center x="1.907349E-06" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="5.000001E-02" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="195" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="500" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="502" value="0.9" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="600" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1100" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1140" value="5.000001E-02" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+						<lights>
+							<omni name="XU Omni05" shadow="0" r="0" g="177" b="255" range="25" shadowrange="25" lighteffect="1" trigger="1" intensity="0">
+								<animations>
+									<animation name="turretloop_inactive" start="0" end="1"/>
+									<animation name="turretloop_activating" start="1" end="195"/>
+									<animation name="turretloop_active" start="195" end="225"/>
+									<animation name="turretloop_firing" start="500" end="600"/>
+									<animation name="turretloop_deactivating" start="1100" end="1300"/>
+								</animations>
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="195" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="500" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="502" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="600" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1100" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1140" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1300" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="7.028389E-02" y="-4.867554E-02" z="5.149368"/>
+									<quaternion qx="-5.264583E-07" qy="1.919421E-07" qz="-0.7901543" qw="-0.6129079"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection34" tags="part iklink animation detail_s  " parent="part_guntube01">
+				<offset>
+					<position x="16.20737" y="2.002716E-05" z="10.72067"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_gun01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_techtrims_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.227868" y="22.69343" z="10.38624"/>
+							<center x="-1.907349E-06" y="17.47181" z="-6.746468"/>
+						</size>
+						<size_raw>
+							<max x="5.190304" y="5.221614" z="3.848088"/>
+							<center x="3.814697E-06" y="0" z="-0.1041565"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection35" tags="part detail_s iklink textureanimation animation " parent="detail_s_gun01">
+				<animations/>
+				<parts>
+					<part name="anim_gun01_red">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.118207" y="23.58318" z="10.55347"/>
+							<center x="5.722046E-06" y="17.47229" z="-6.642311"/>
+						</size>
+						<size_raw>
+							<max x="6.074248" y="6.110889" z="3.911162"/>
+							<center x="1.907349E-06" y="-9.536743E-07" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="5.000001E-02" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="195" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="500" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="502" value="0.9" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="600" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1100" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1140" value="5.000001E-02" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+						<lights>
+							<omni name="XU Omni06" shadow="0" r="0" g="177" b="255" range="25" shadowrange="25" lighteffect="1" trigger="1" intensity="0">
+								<animations>
+									<animation name="turretloop_inactive" start="0" end="1"/>
+									<animation name="turretloop_activating" start="1" end="195"/>
+									<animation name="turretloop_active" start="195" end="225"/>
+									<animation name="turretloop_firing" start="500" end="600"/>
+									<animation name="turretloop_deactivating" start="1100" end="1300"/>
+								</animations>
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="195" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="500" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="502" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="600" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1100" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1140" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1300" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="4.920006E-02" y="4.568863E-02" z="5.149429"/>
+									<quaternion qx="-6.166622E-07" qy="1.125873E-07" qz="-0.762459" qw="-0.6470366"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection36" tags="part iklink  " parent="part_turret">
+				<offset>
+					<position x="-25.91393" y="7.031186" z="-10.22108"/>
+				</offset>
+				<parts>
+					<part name="part_sidepart02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="13.19228" y="28.63502" z="26.77325"/>
+							<center x="-2.366072" y="17.46904" z="-8.275656"/>
+						</size>
+						<size_raw>
+							<max x="10.82622" y="11.16598" z="18.49759"/>
+							<center x="-1.907349E-06" y="1.907349E-06" z="1.907349E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection37" tags="part iklink detail_s nocollision forceoutline  " parent="part_sidepart02">
+				<offset>
+					<position x="-3.475803" y="9.630564" z="-4.484607"/>
+				</offset>
+				<parts>
+					<part name="detail_s_sidepart04">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.42224" y="27.12802" z="29.1209"/>
+							<center x="-4.504725" y="10.13612" z="-20.68889"/>
+						</size>
+						<size_raw>
+							<max x="10.19484" y="16.9919" z="36.52519"/>
+							<center x="-2.138662" y="-8.169266" z="-18.26259"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection38" tags="part iklink  " parent="part_turret">
+				<offset>
+					<position x="25.96065" y="7.031217" z="-10.22106"/>
+				</offset>
+				<parts>
+					<part name="part_sidepart03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="13.20349" y="28.63502" z="26.77325"/>
+							<center x="2.377249" y="17.46904" z="-8.275666"/>
+						</size>
+						<size_raw>
+							<max x="10.82623" y="11.16598" z="18.49759"/>
+							<center x="0" y="0" z="-1.430511E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection39" tags="part iklink detail_s nocollision forceoutline  " parent="part_sidepart03">
+				<offset>
+					<position x="2.899527" y="9.630571" z="-4.484606"/>
+				</offset>
+				<parts>
+					<part name="detail_s_sidepart05">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.43345" y="27.12802" z="29.12091"/>
+							<center x="4.515882" y="10.13612" z="-20.68892"/>
+						</size>
+						<size_raw>
+							<max x="5.917545" y="16.99189" z="36.52522"/>
+							<center x="2.138647" y="-8.169266" z="-18.26261"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection40" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="1.972036E-05" y="13.59478" z="46.71317"/>
+				</offset>
+				<parts>
+					<part name="detail_s_cover02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="29.77496" y="24.32904" z="42.53207"/>
+							<center x="-8.490861E-06" y="18.22969" z="-15.33731"/>
+						</size>
+						<size_raw>
+							<max x="29.77496" y="6.099339" z="27.19476"/>
+							<center x="-5.629838E-06" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection41" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="9.879192E-02" y="17.90067" z="-2.080826"/>
+				</offset>
+				<parts>
+					<part name="detail_s_aim01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.24675" y="23.50805" z="18.68715"/>
+							<center x="1.296401E-06" y="19.52365" z="-8.27566"/>
+						</size>
+						<size_raw>
+							<max x="22.24675" y="3.984391" z="10.41149"/>
+							<center x="2.250075E-06" y="0" z="0"/>
+						</size_raw>
+						<lights>
+							<box name="XU BoxLight03" shadow="0" r="255" g="0" b="0" lighteffect="1" trigger="1" intensity="0">
+								<size x="200" y="100" z="100"/>
+								<animations>
+									<animation name="turretloop_inactive" start="0" end="1"/>
+									<animation name="turretloop_activating" start="1" end="195"/>
+									<animation name="turretloop_active" start="195" end="225"/>
+									<animation name="turretloop_firing" start="500" end="600"/>
+									<animation name="turretloop_deactivating" start="1100" end="1300"/>
+								</animations>
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="173" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="174" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="178" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="195" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="500" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="502" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="564" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="566" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="568" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="572" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="600" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1100" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1102" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1300" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="18.4459" y="0.7579041" z="76.66897"/>
+									<quaternion qx="-0" qy="-0.7071066" qz="-0" qw="-0.7071069"/>
+								</offset>
+							</box>
+							<box name="XU BoxLight02" shadow="0" r="255" g="0" b="0" lighteffect="1" trigger="1" intensity="0">
+								<size x="200" y="100" z="100"/>
+								<animations>
+									<animation name="turretloop_inactive" start="0" end="1"/>
+									<animation name="turretloop_activating" start="1" end="195"/>
+									<animation name="turretloop_active" start="195" end="225"/>
+									<animation name="turretloop_firing" start="500" end="600"/>
+									<animation name="turretloop_deactivating" start="1100" end="1300"/>
+								</animations>
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="173" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="174" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="178" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="180" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="195" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="500" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="502" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="564" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="566" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="568" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="572" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="600" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1100" value="0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1102" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="1300" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-18.6435" y="0.7579041" z="76.66895"/>
+									<quaternion qx="-0" qy="-0.7071066" qz="-0" qw="-0.7071069"/>
+								</offset>
+							</box>
+						</lights>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection42" tags="part iklink detail_s nocollision  " parent="detail_s_aim01">
+				<offset>
+					<position x="-1.093592E-02" y="0.7579193" z="4.779999"/>
+				</offset>
+				<parts>
+					<part name="laser01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.laser"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.06696" y="20.23193" z="233.0479"/>
+							<center x="5.275756E-05" y="19.52366" z="216.4966"/>
+						</size>
+						<size_raw>
+							<max x="19.06695" y="0.7082681" z="0"/>
+							<center x="3.054738E-07" y="3.814697E-06" z="2.084648"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection43" tags="part detail_s iklink textureanimation animation " parent="part_turret">
+				<animations/>
+				<parts>
+					<part name="detail_s_guntube03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.019833" y="19.48886" z="9.792189"/>
+							<center x="5.996853E-05" y="21.32471" z="55.86901"/>
+						</size>
+						<size_raw>
+							<max x="2.019826" y="1.835856" z="62.62817"/>
+							<center x="6.020694E-05" y="3.85568" z="64.14468"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="195" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="500" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="502" value="0.85" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="600" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1100" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1140" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection44" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="-27.2807" y="-0.6713705" z="28.52013"/>
+				</offset>
+				<parts>
+					<part name="detail_s_battery01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.68001" y="25.51521" z="18.76865"/>
+							<center x="-3.789839" y="13.02094" z="8.99287"/>
+						</size>
+						<size_raw>
+							<max x="5.485332" y="12.49426" z="6.146504E-06"/>
+							<center x="-0.2975788" y="-6.247124" z="13.88076"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection45" tags="part detail_s iklink textureanimation animation nocollision forceoutline   " parent="detail_s_battery01">
+				<offset>
+					<position x="-0.9740353" y="-10.2627" z="13.25764"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_battery01_red">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.804877" y="25.2906" z="16.74421"/>
+							<center x="-3.690943" y="23.05903" z="-4.887882"/>
+						</size>
+						<size_raw>
+							<max x="4.113932" y="2.23156" z="11.85632"/>
+							<center x="1.907349E-06" y="-4.768372E-07" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="195" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="500" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="502" value="0.85" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="600" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1100" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1140" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection46" tags="part iklink detail_s nocollision forceoutline  " parent="part_turret">
+				<offset>
+					<position x="27.2807" y="-0.6713781" z="28.5201"/>
+				</offset>
+				<parts>
+					<part name="detail_s_battery02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_hulls_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.680008" y="25.51523" z="18.76866"/>
+							<center x="3.789862" y="13.02098" z="8.99287"/>
+						</size>
+						<size_raw>
+							<max x="4.890148" y="12.49426" z="3.604285E-06"/>
+							<center x="0.2976189" y="-6.24712" z="13.88076"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection47" tags="part detail_s iklink textureanimation animation nocollision forceoutline  " parent="detail_s_battery02">
+				<offset>
+					<position x="0.9740658" y="-10.2627" z="13.25764"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="detail_s_battery02_red">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.804877" y="25.29062" z="16.74421"/>
+							<center x="3.690924" y="23.05906" z="-4.88789"/>
+						</size>
+						<size_raw>
+							<max x="4.113949" y="2.23156" z="11.85632"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="195" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="500" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="502" value="0.85" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="600" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1100" value="0.52" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="1140" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection48" tags="part nocollision animation iklink  " parent="part_base">
+				<offset>
+					<position x="52.57292" y="9.765408" z="-45.02968"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="fx_anim_lightcone01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.yellow_cone"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="30.73875" y="0.1076183" z="40.38725"/>
+							<center x="-3.814697E-06" y="-9.994507E-03" z="0"/>
+						</size>
+						<size_raw>
+							<max x="3.911722" y="0.117612" z="1.302153"/>
+							<center x="0" y="-9.994507E-03" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection49" tags="part nocollision animation iklink  " parent="part_base">
+				<offset>
+					<position x="-51.41521" y="10.19695" z="-45.02969"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="fx_anim_lightcone02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.yellow_cone"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="30.73866" y="0.1076183" z="40.38728"/>
+							<center x="0" y="-9.994507E-03" z="0"/>
+						</size>
+						<size_raw>
+							<max x="3.911721" y="0.1176123" z="1.302154"/>
+							<center x="0" y="-9.994507E-03" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection50" tags="part  ">
+				<offset>
+					<position x="0" y="13.36999" z="362.282"/>
+				</offset>
+				<parts/>
+			</connection>
+			<connection name="connection_component01" tags="component turret_big">
+				<offset>
+					<quaternion qx="-1" qy="-0" qz="-0" qw="-7.54979E-08"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<components>
+	<component name="taglauncher_player_bullet" class="missile">
+		<source geometry="assets\fx\weaponfx\taglauncher_player_bullet_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="62" b="54" range="4" shadowrange="4" lighteffect="1" lenseffect="taglauncher" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="-0.0230395" z="-1.232754"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="missile">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="Cylinder01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_white"/>
+									<material id="2" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.1955577" y="0.1734284" z="1.192331"/>
+							<center x="1.043081E-07" y="-3.72529E-08" z="-1.192093E-07"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="shipConnection" tags="laser" parent="Cylinder01"/>
+			<connection name="Connection02" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_light">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_white"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.593916E-02" y="6.593916E-02" z="0.1178787"/>
+							<center x="1.005828E-07" y="-2.670025E-02" z="-1.02957"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="engine" tags="engine ">
+				<offset>
+					<position x="0" y="0" z="-0.4720583"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<components>
+	<component name="mg_impact" class="effectobject">
+		<source geometry="assets\fx\weaponfx\mg_impact_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="247" g="143" b="34" range="40" shadowrange="40" lighteffect="1" trigger="1" intensity="10">
+						<animations>
+							<animation name="playonce" start="1" end="5"></animation>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="linear_float">
+								<key frame="1" value="10"></key>
+								<key frame="2" value="5"></key>
+								<key frame="5" value="0"></key>
+							</lightanimation>
+							<lightanimation name="range" controller="bezier_float">
+								<key frame="0" value="40" in_tangent_type="auto" out_tangent_type="auto"></key>
+								<key frame="1" value="40" in_tangent_type="auto" out_tangent_type="auto"></key>
+								<key frame="2" value="20" in_tangent_type="auto" out_tangent_type="auto"></key>
+								<key frame="5" value="20" in_tangent_type="auto" out_tangent_type="auto"></key>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="2.412501"></position>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="effectobject">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset></offset>
+				<animations>
+					<animation name="playonce" start="1" end="5"></animation>
+				</animations>
+				<parts>
+					<part name="anim_fire">
+						<size>
+							<max x="8.595239" y="7.522385" z="7.881391"></max>
+							<center x="0" y="-9.536743E-07" z="6.394774"></center>
+						</size>
+						<size_raw>
+							<max x="8.595239" y="7.522385" z="1.486616"></max>
+							<center x="0" y="-9.536743E-07" z="6.394774"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

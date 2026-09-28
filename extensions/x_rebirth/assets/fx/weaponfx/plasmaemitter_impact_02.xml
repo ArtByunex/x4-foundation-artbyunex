@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<components>
+	<component name="plasmaemitter_impact_02" class="effectobject">
+		<source geometry="assets\fx\weaponfx\plasmaemitter_impact_02_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="89" g="161" b="255" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="5">
+						<animations>
+							<animation name="playonce" start="1" end="30"></animation>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="linear_float">
+								<key frame="0" value="5"></key>
+								<key frame="2" value="2.5"></key>
+								<key frame="30" value="0"></key>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="50"></position>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="effectobject">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation detail_s  ">
+				<offset>
+					<quaternion qx="-0.6927934" qy="0.4712689" qz="-0.2936408" qw="0.4601282"></quaternion>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="20"></animation>
+				</animations>
+				<parts>
+					<part name="anim_sparkles">
+						<size>
+							<max x="33.24879" y="27.37978" z="43.34798"></max>
+							<center x="1.284351" y="0.9655304" z="17.12737"></center>
+						</size>
+						<size_raw>
+							<max x="33.82108" y="38.2326" z="47.01034"></max>
+							<center x="1.284351" y="0.9655342" z="17.12737"></center>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"></key>
+									<key frame="20" value="-0.3"></key>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation  ">
+				<offset></offset>
+				<animations>
+					<animation name="playonce" start="1" end="6"></animation>
+				</animations>
+				<parts>
+					<part name="anim_fire">
+						<size>
+							<max x="54.20152" y="52.82388" z="54.12167"></max>
+							<center x="0" y="1.525879E-05" z="43.91305"></center>
+						</size>
+						<size_raw>
+							<max x="54.20152" y="52.82386" z="10.20863"></max>
+							<center x="0" y="1.525879E-05" z="43.91305"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

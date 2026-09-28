@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_taglauncher_player" class="destructible">
+		<properties>
+			<hull max="0"></hull>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_taglauncher_player_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="destructible">
+				<offset></offset>
+			</connection>
+			<connection name="Connection02" tags="part  ">
+				<offset></offset>
+				<parts>
+					<part name="taglauncher">
+						<size>
+							<max x="0.9352008" y="0.3470576" z="2.134817"></max>
+							<center x="2.980232E-08" y="-5.960464E-07" z="5.960464E-07"></center>
+						</size>
+					</part>
+				</parts>
+				<waypoints></waypoints>
+			</connection>
+			<connection name="Connection01" tags="rocket" parent="taglauncher">
+				<offset>
+					<position x="-0.1993677" y="-0.1170813" z="2.165481"></position>
+				</offset>
+			</connection>
+			<connection name="ShipConnection" tags="tagger_slot component  weapon_tag">
+				<offset>
+					<position x="2.086163E-07" y="3.278255E-07" z="-1.311302E-06"></position>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

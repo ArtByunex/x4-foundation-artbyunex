@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_xen_def_turret_s_mg" class="turret">
+		<source geometry="assets\props\WeaponSystems\props_wps_xen_def_turret_s_mg_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection01" tags="part animation detail_m    ">
+				<offset>
+					<position x="6.701948E-02" y="0" z="-0.5161984"/>
+				</offset>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="40"/>
+					<animation name="turret_active" start="40" end="40"/>
+					<animation name="turret_deactivating" start="40" end="80"/>
+				</animations>
+				<parts>
+					<part name="anim_main" wreck="anim_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_alphatrims_01"/>
+									<material id="2" ref="generic.generic_engines_01"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.000004" y="2.502714" z="9.170916"/>
+							<center x="-2.875924E-06" y="1.270326" z="2.384186E-07"/>
+						</size>
+						<size_raw>
+							<max x="6.000007" y="1.232388" z="9.170916"/>
+							<center x="-2.875924E-06" y="1.270326" z="2.384186E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part detail_s animation iklink nocollision forceoutline  " parent="anim_main">
+				<offset>
+					<position x="0" y="3.049929" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_door_02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.780485" y="0.4681065" z="6.079944"/>
+							<center x="-2.875924E-06" y="0.2156236" z="6.079944"/>
+						</size>
+						<size_raw>
+							<max x="4.780488" y="0.1953959" z="7.788394E-07"/>
+							<center x="-2.875924E-06" y="0.2441671" z="3.106411"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part detail_s animation iklink nocollision forceoutline  " parent="anim_main">
+				<offset>
+					<position x="0" y="3.049929" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_door_01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.780485" y="0.4681065" z="6.143703"/>
+							<center x="-2.875924E-06" y="0.2156236" z="-6.143703"/>
+						</size>
+						<size_raw>
+							<max x="4.780488" y="0.1953959" z="6.153111"/>
+							<center x="-2.875924E-06" y="0.2441671" z="-3.076555"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part detail_s animation iklink nocollision forceoutline   " parent="anim_main">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="-15.92406" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_alphatrims_01"/>
+									<material id="2" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.666035" y="16.56543" z="4.474392"/>
+							<center x="0.1916427" y="12.78675" z="2.384186E-07"/>
+						</size>
+						<size_raw>
+							<max x="4.474392" y="3.778676" z="4.474392"/>
+							<center x="0.191643" y="3.084275" z="1.192093E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part detail_s animation iklink nocollision forceoutline  " parent="anim_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-20.0 "/>
+							<max value="90.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="0" y="7.691414" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_gun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_alphatrims_01"/>
+									<material id="2" ref="generic.generic_engines_01"/>
+									<material id="3" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.105939" y="15.96665" z="8.869858"/>
+							<center x="-1.649679" y="9.977108" z="2.144087"/>
+						</size>
+						<size_raw>
+							<max x="4.755618" y="5.989543" z="6.538807"/>
+							<center x="-1.649679" y="2.512201" z="-1.12382"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser02" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="-1.525609" y="11.72772" z="2.104421"/>
+					<quaternion qx="-0.7071068" qy="-0" qz="-6.181724E-08" qw="0.7071068"/>
+				</offset>
+			</connection>
+			<connection name="connection_laser01" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="-1.525609" y="11.72772" z="-2.059106"/>
+					<quaternion qx="-0.7071068" qy="-0" qz="-6.181724E-08" qw="0.7071068"/>
+				</offset>
+			</connection>
+			<connection name="Connection06" tags="part animation  ">
+				<offset>
+					<position x="6.701948E-02" y="0" z="28.59302"/>
+				</offset>
+				<animations/>
+				<parts/>
+			</connection>
+			<connection name="Connection07" tags="part  ">
+				<offset>
+					<position x="6.701946E-02" y="0" z="-0.5161984"/>
+				</offset>
+				<parts/>
+			</connection>
+			<connection name="connection_component01" tags="component turret_small_xe">
+				<offset>
+					<quaternion qx="-1" qy="4.371138E-08" qz="-4.37114E-08" qw="1.509958E-07"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

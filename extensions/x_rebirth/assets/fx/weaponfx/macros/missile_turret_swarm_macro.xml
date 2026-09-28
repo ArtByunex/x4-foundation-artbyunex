@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Michael (192.168.3.145) at 14.10.2014_17-55-06-->
+<macros>
+  <macro name="missile_turret_swarm_macro" class="missile">
+    <component ref="missile_swarm" />
+    <properties>
+      <identification name="{20201,4001}" description="{20201,4002}" />
+      <ammunition value="1" reload="12" />
+      <missile amount="8" lifetime="16" range="3600" swarm="1" distribute="1" guided="1" retarget="1" selfdestruct="1" />
+      <explosiondamage value="4000" />
+      <reload rate="1" />
+      <hull max="100" />
+      <effects>
+        <explosion ref="missile_swarm_explosion" />
+        <launch ref="missile_swarm_muzzle" />
+      </effects>
+      <weapon system="turret_missile" />
+    </properties>
+    <connections>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_turret_swarm_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_mg" class="destructible">
+		<properties>
+			<hull max="0"></hull>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_mg_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+					<omni name="XU Omni02" shadow="0" r="255" g="255" b="255" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="1">
+						<lightanimations></lightanimations>
+						<offset>
+							<position x="-37.6931" y="14.64342" z="-13.1947"></position>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="destructible">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset>
+					<position x="0" y="0" z="-3.518462E-04"></position>
+				</offset>
+				<parts>
+					<part name="anim_main">
+						<size>
+							<max x="1.305818" y="0.9699445" z="0.8148746"></max>
+							<center x="-0.1681212" y="-1.337528E-04" z="0.9274535"></center>
+						</size>
+					</part>
+				</parts>
+				<waypoints></waypoints>
+			</connection>
+			<connection name="Connection02" tags="part  " parent="anim_main">
+				<offset>
+					<position x="1.390364E-03" y="-4.399701E-03" z="2.589562"></position>
+				</offset>
+				<parts>
+					<part name="barrel">
+						<size>
+							<max x="0.4621104" y="0.4622087" z="0.1692843"></max>
+							<center x="-3.837049E-07" y="-4.926696E-07" z="1.729172"></center>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="ShipConnection" tags="weapon_small  component">
+				<offset></offset>
+			</connection>
+			<connection name="laserConnection04" tags="laser ">
+				<offset>
+					<position x="4.460875E-03" y="0.2651566" z="6.204321"></position>
+					<quaternion qx="2.272881E-08" qy="4.470349E-08" qz="1" qw="-8.937661E-08"></quaternion>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

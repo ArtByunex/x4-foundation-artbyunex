@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_sp_def_turret_m_mg" class="turret">
+		<source geometry="assets\props\WeaponSystems\props_wps_sp_def_turret_m_mg_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection01" tags="part animation detail_s  ">
+				<offset>
+					<position x="0" y="-1.082844" z="5.98957E-08"/>
+				</offset>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="15"/>
+					<animation name="turret_active" start="15" end="15"/>
+					<animation name="turret_deactivating" start="20" end="35"/>
+				</animations>
+				<parts>
+					<part name="anim_main" wreck="anim_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+									<material id="2" ref="split.sp_hulls_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.31898" y="3.1748" z="22.24454"/>
+							<center x="0" y="3.12539" z="-2.157415"/>
+						</size>
+						<size_raw>
+							<max x="19.31898" y="0.04941" z="24.40196"/>
+							<center x="0" y="3.12539" z="-2.157415"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation iklink nocollision forceoutline  " parent="anim_main">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="-2.803866" z="5.568425"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+									<material id="2" ref="split.sp_hulls_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="14.54068" y="10.60797" z="19.49165"/>
+							<center x="0" y="16.90816" z="-7.542766"/>
+						</size>
+						<size_raw>
+							<max x="14.54068" y="6.30019" z="27.03442"/>
+							<center x="0" y="15.73797" z="-7.542766"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation iklink nocollision forceoutline   " parent="anim_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-40.0 "/>
+							<max value="30.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="3.206626E-07" y="15.48899" z="1.76748"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_gun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_tech_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.27616" y="8.863194" z="10.00505"/>
+							<center x="-3.206626E-07" y="6.029568" z="7.629137"/>
+						</size>
+						<size_raw>
+							<max x="1.27616" y="2.833625" z="0.8754854"/>
+							<center x="-3.206626E-07" y="-2.362442E-02" z="8.379351"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser01" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="-3.208406E-07" y="1.434383" z="17.63439"/>
+				</offset>
+			</connection>
+			<connection name="connection_laser02" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="-3.208406E-07" y="-1.497674" z="17.63439"/>
+				</offset>
+			</connection>
+			<connection name="Connection04" tags="part animation  ">
+				<offset>
+					<position x="0" y="-1.082844" z="62.42523"/>
+				</offset>
+				<animations/>
+				<parts/>
+			</connection>
+			<connection name="Connection05" tags="part animation  ">
+				<offset>
+					<position x="-6.136703E-02" y="0" z="-2.125902"/>
+				</offset>
+				<animations/>
+				<parts/>
+			</connection>
+			<connection name="connection_component01" tags="component turret_medium_sp ">
+				<offset>
+					<quaternion qx="-1" qy="4.371138E-08" qz="-4.37114E-08" qw="1.509958E-07"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

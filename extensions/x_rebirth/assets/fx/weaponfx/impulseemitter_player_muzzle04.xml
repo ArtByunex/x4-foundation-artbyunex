@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<components>
+	<component name="impulseemitter_player_muzzle04" class="effectobject">
+		<source geometry="assets\fx\weaponfx\impulseemitter_player_muzzle04_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation  ">
+				<offset>
+					<position x="0" y="0.175546" z="5.519787"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_wave">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_muzzle_wave_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.084462E-07" y="1.28528" z="4.101027"/>
+							<center x="1.181387E-08" y="-0.1588453" z="-0.5785866"/>
+						</size>
+						<size_raw>
+							<max x="9.663232E-08" y="1.444126" z="4.679614"/>
+							<center x="1.181387E-08" y="-0.1588453" z="-0.5785866"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="30" value="-0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="30" value="0.5"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation  ">
+				<offset>
+					<position x="0" y="2.37364E-08" z="6.50588"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="15"/>
+				</animations>
+				<parts>
+					<part name="anim_sparkles">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_muzzle_sparkles_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.4989154" y="0.4787697" z="5.314803"/>
+							<center x="1.985306E-02" y="2.349511E-02" z="-0.3256745"/>
+						</size>
+						<size_raw>
+							<max x="0.4790623" y="0.4552746" z="5.640477"/>
+							<center x="1.985306E-02" y="2.349513E-02" z="-0.3256745"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="15" value="-0.12"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection Laser01" tags="laser">
+				<offset>
+					<position x="-3.464038E-10" y="0" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

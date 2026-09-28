@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<components>
+	<component name="plasmaemitter_player_muzzle" class="effectobject">
+		<source geometry="assets\fx\weaponfx\plasmaemitter_player_muzzle_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="-1.136868E-13" y="0" z="0"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="5"/>
+				</animations>
+				<parts>
+					<part name="anim_haze">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_blob"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.562531" y="1.621758" z="9.691566"/>
+							<center x="-4.291534E-06" y="-2.264977E-06" z="9.702645"/>
+						</size>
+						<size_raw>
+							<max x="2.562535" y="1.62176" z="1.107956"/>
+							<center x="-4.172325E-06" y="-2.264977E-06" z="10.25108"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part iklink  " parent="anim_haze">
+				<parts>
+					<part name="part_core">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_blob"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.6226776" y="0.3940803" z="9.697054"/>
+							<center x="-4.529953E-06" y="-1.966953E-06" z="9.697157"/>
+						</size>
+						<size_raw>
+							<max x="0.6226821" y="0.3940823" z="1.020941"/>
+							<center x="-4.529953E-06" y="-1.966953E-06" z="10.20758"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection Laser01" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

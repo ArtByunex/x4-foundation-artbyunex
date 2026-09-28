@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shotgun_player_muzzle_02" class="effectobject">
+		<source geometry="assets\fx\weaponfx\shotgun_player_muzzle_02_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="playonce" start="1" end="5"/>
+				</animations>
+				<parts>
+					<part name="anim_muzzle">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_blob"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.623" y="6.695956E-02" z="20.86049"/>
+							<center x="-4.521132E-02" y="-0.1004528" z="15.17736"/>
+						</size>
+						<size_raw>
+							<max x="3.668211" y="0.1674124" z="5.683127"/>
+							<center x="-4.521143E-02" y="-0.1171995" z="15.17736"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation  ">
+				<offset>
+					<position x="0" y="0" z="6.905422"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_smoke">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_smoke_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.641004" y="0" z="10.0758"/>
+							<center x="0" y="0.00005" z="-9.536743E-07"/>
+						</size>
+						<size_raw>
+							<max x="3.213668" y="0" z="10.0758"/>
+							<center x="0" y="0" z="-4.768372E-07"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="30" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="7" value="0.2"/>
+									<key frame="30" value="0.25"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation textureanimation  ">
+				<offset>
+					<position x="-0.3547997" y="-0.1552129" z="0"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_smoke_streaks">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_smoke"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.155191" y="2.420317E-02" z="11.85654"/>
+							<center x="0.2865261" y="2.394292E-02" z="10.65461"/>
+						</size>
+						<size_raw>
+							<max x="0.9343325" y="2.602525E-04" z="1.201935"/>
+							<center x="0.1432632" y="2.394292E-02" z="10.65461"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="30" value="-0.4"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part animation textureanimation  ">
+				<offset>
+					<position x="-0.3636377" y="0" z="-0.9432477"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_streak">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_smoke"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.663928" y="0" z="25.52268"/>
+							<center x="5.960464E-08" y="0.00005" z="24.54299"/>
+						</size>
+						<size_raw>
+							<max x="2.663928" y="0" z="0.9796848"/>
+							<center x="5.960464E-08" y="0" z="24.543"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="7" value="0"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="7" value="-0.25" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

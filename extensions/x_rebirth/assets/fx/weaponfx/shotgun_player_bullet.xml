@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shotgun_player_bullet" class="bullet">
+		<source geometry="assets\fx\weaponfx\shotgun_player_bullet_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="bullet">
+				<offset/>
+			</connection>
+			<connection name="Connection02" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="playonce" start="0" end="2"/>
+				</animations>
+				<parts>
+					<part name="anim_shotgun_bullet">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="particles.explosion_master_01_geometry"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.870131" y="1.841719" z="12.39423"/>
+							<center x="-9.536743E-07" y="0" z="-12.00504"/>
+						</size>
+						<size_raw>
+							<max x="1.870131" y="1.841719" z="0.9759706"/>
+							<center x="-1.013279E-06" y="5.960464E-08" z="-0.4802014"/>
+						</size_raw>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="181" g="254" b="186" range="70" shadowrange="70" lighteffect="1" trigger="1" intensity="0.2">
+								<lightanimations/>
+								<offset/>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="playonce" start="0" end="2"/>
+				</animations>
+				<parts>
+					<part name="anim_trails">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="particles.explosion_master_01_geometry"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.425394" y="2.425394" z="83.70535"/>
+							<center x="-4.768372E-07" y="0" z="-83.71523"/>
+						</size>
+						<size_raw>
+							<max x="2.425395" y="2.425394" z="4.783445"/>
+							<center x="-5.960464E-07" y="1.192093E-07" z="-2.396658"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection01" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

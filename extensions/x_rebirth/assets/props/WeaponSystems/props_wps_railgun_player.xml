@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_railgun_player" class="destructible">
+		<properties>
+			<hull max="0"/>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_railgun_player_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection02" tags="part  ">
+				<offset>
+					<position x="0" y="0.3762572" z="3.34017"/>
+				</offset>
+				<parts>
+					<part name="part_railgun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="player.player_tech"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.031139" y="0.7399204" z="3.997661"/>
+							<center x="0.1733291" y="-0.3462171" z="0.4430275"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="ShipConnection01" tags="component  weapon_beam">
+				<offset>
+					<position x="2.49535E-07" y="-2.531064E-02" z="-2.861023E-06"/>
+				</offset>
+			</connection>
+			<connection name="Connection01" tags="laser ">
+				<offset>
+					<position x="0.7091279" y="4.591298E-02" z="8.433"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

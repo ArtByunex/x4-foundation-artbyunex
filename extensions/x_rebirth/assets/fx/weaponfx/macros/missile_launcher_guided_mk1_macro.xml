@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Benedikt (192.168.3.113) at 02.11.2012_13-16-51-->
+<macros>
+  <macro name="missile_launcher_guided_mk1_macro" class="missile">
+    <component ref="missile_guided" />
+    <properties>
+      <identification name="Guided Missile" />
+      <ammunition value="1" reload="50" />
+      <missile amount="1" lifetime="20" range="5000" guided="1" retarget="1" selfdestruct="1" />
+      <explosiondamage value="12000" />
+      <reload rate="1" />
+      <hull max="1000" />
+      <effects>
+        <explosion ref="missile_guided_explosion" />
+        <launch ref="missile_guided_muzzle" />
+      </effects>
+    </properties>
+    <connections>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_launcher_guided_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

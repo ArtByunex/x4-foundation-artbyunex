@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<components>
+	<component name="impulseemitter_mk3_player_muzzle_core" class="effectobject">
+		<source geometry="assets\fx\weaponfx\impulseemitter_mk3_player_muzzle_core_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="-1.136868E-13" y="0" z="-0.8193362"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="8"/>
+				</animations>
+				<parts>
+					<part name="anim_bullet">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_blob"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.026867E-02" y="0.9555551" z="5.872433"/>
+							<center x="1.026621E-02" y="-5.829334E-05" z="5.783562"/>
+						</size>
+						<size_raw>
+							<max x="2.46254E-06" y="0.9556134" z="8.887196E-02"/>
+							<center x="1.026621E-02" y="-5.829334E-05" z="5.783562"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation iklink  " parent="anim_bullet">
+				<offset>
+					<position x="0" y="0" z="0.7104597"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_glow">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.shotgun_muzzle_blob"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.68752E-06" y="5.138851" z="15.16849"/>
+							<center x="1.126428E-06" y="4.768372E-07" z="13.08852"/>
+						</size>
+						<size_raw>
+							<max x="1.561092E-06" y="5.13885" z="2.07996"/>
+							<center x="1.126428E-06" y="4.768372E-07" z="13.08852"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection Laser01" tags="laser">
+				<offset>
+					<position x="-3.464038E-10" y="0" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

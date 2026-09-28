@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<components>
+	<component name="missile_player_dumbfire" class="missile">
+		<source geometry="assets\fx\weaponfx\missile_player_dumbfire_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="181" g="255" b="255" range="50" shadowrange="50" lighteffect="1" lenseffect="missile_player_guided" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="0" z="-1.864376"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="missile">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="generic.generic_engines_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.2788935" y="0.2788935" z="1.975303"/>
+							<center x="0" y="0" z="0.6056238"/>
+						</size>
+						<trailemitters>
+							<emitter name="trail_missile_player_dumbfire" type="trail_missile_player_dumbfire">
+								<offset>
+									<position x="3.316434E-10" y="3.316434E-10" z="-1.247724"/>
+								</offset>
+							</emitter>
+						</trailemitters>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part nocollision animation  ">
+				<offset>
+					<position x="0" y="0" z="-2.751141"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="500"/>
+				</animations>
+				<parts>
+					<part name="anim_booster">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.booster"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.4209817" y="0.4209816" z="5.759657"/>
+							<center x="0" y="-1.788139E-07" z="-4.377012"/>
+						</size>
+						<size_raw>
+							<max x="0.4209817" y="0.4209818" z="10.13667"/>
+							<center x="0" y="-1.639128E-07" z="-4.377012"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="500" value="-50"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_hitbox">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="lensflares.vertexcolor_basis"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.5" y="2.5" z="5"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<pivot>
+							<offset>
+								<position x="0" y="-2.5" z="0"/>
+							</offset>
+						</pivot>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_engine01" tags="engine ">
+				<offset/>
+			</connection>
+			<connection name="connection_laser01" tags="laser ">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

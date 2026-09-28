@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_wardrone_bomblauncher" class="destructible">
+		<properties>
+			<hull max="0"></hull>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_wardrone_bomblauncher_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights></lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="destructible">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset></offset>
+				<parts>
+					<part name="part_classCube">
+						<size>
+							<max x="9.055901E-02" y="4.919127E-02" z="7.317245E-02"></max>
+							<center x="0" y="0" z="0"></center>
+						</size>
+					</part>
+				</parts>
+				<waypoints></waypoints>
+			</connection>
+			<connection name="laserConnection04" tags="laser iklink" parent="part_classCube">
+				<offset>
+					<position x="4.460953E-03" y="0" z="2.473391"></position>
+					<quaternion qx="-2.272881E-08" qy="-3.725291E-08" qz="-1" qw="8.937661E-08"></quaternion>
+				</offset>
+			</connection>
+			<connection name="ShipConnection" tags="weapon_small  component">
+				<offset></offset>
+			</connection>
+		</connections>
+	</component>
+</components>

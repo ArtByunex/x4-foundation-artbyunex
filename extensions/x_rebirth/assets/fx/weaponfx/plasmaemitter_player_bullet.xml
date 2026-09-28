@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<components>
+	<component name="plasmaemitter_player_bullet" class="bullet">
+		<source geometry="assets\fx\weaponfx\plasmaemitter_player_bullet_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="107" g="201" b="255" range="80" shadowrange="80" lighteffect="1" trigger="1" intensity="0.5">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="0" z="9.491652"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="bullet">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="playonce" start="1" end="150"/>
+				</animations>
+				<parts>
+					<part name="anim_core">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.blueglow"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.08222" y="26.9863" z="26.98629"/>
+							<center x="0" y="9.536743E-07" z="0"/>
+						</size>
+						<size_raw>
+							<max x="1.908219" y="1.908219" z="1.908219"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="component_component_component_Connection01" tags="laser component ">
+				<offset>
+					<position x="2.459503E-08" y="1.937733E-08" z="-2.109496E-08"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

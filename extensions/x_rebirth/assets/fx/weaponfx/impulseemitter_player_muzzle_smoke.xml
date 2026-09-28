@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<components>
+	<component name="impulseemitter_player_muzzle_smoke" class="effectobject">
+		<source geometry="assets\fx\weaponfx\impulseemitter_player_muzzle_smoke_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation  ">
+				<offset>
+					<position x="9.830853E-02" y="0.3083339" z="5.19186"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="60"/>
+				</animations>
+				<parts>
+					<part name="anim_smoke_01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_muzzle_smoke_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.830995E-02" y="1.390021" z="6.067394"/>
+							<center x="0" y="1.192093E-07" z="0"/>
+						</size>
+						<size_raw>
+							<max x="9.830994E-02" y="1.390021" z="6.067394"/>
+							<center x="0" y="1.192093E-07" z="0"/>
+						</size_raw>
+						<pivot>
+							<offset>
+								<position x="-9.830853E-02" y="0.4286878" z="-5.19186"/>
+							</offset>
+						</pivot>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="60" value="0.5"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection Laser01" tags="laser">
+				<offset>
+					<position x="-3.464038E-10" y="0" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

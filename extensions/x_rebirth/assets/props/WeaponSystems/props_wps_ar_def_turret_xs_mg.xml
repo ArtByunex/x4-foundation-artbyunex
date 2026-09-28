@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_ar_def_turret_xs_mg" class="turret">
+		<source geometry="assets\props\WeaponSystems\props_wps_ar_def_turret_xs_mg_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="turret">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="15"/>
+					<animation name="turret_active" start="15" end="15"/>
+					<animation name="turret_deactivating" start="20" end="35"/>
+				</animations>
+				<parts>
+					<part name="anim_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.500001" y="2.27051" z="7.500001"/>
+							<center x="0" y="0.2235799" z="0"/>
+						</size>
+						<size_raw>
+							<max x="7.500001" y="2.04693" z="7.500001"/>
+							<center x="0" y="0.22358" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation iklink  " parent="anim_main">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="-1.572849" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.781345" y="3.144155" z="5.960005"/>
+							<center x="4.915237E-03" y="5.630455" z="-0.2766442"/>
+						</size>
+						<size_raw>
+							<max x="4.77643" y="2.4863" z="6.236649"/>
+							<center x="4.915476E-03" y="5.630455" z="-0.2766442"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation iklink  " parent="anim_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-30.0 "/>
+							<max value="30.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="0" y="6.953278" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_gun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.4943907" y="0.4281549" z="3.95366"/>
+							<center x="-8.046627E-07" y="-1.042271E-02" z="4.95735"/>
+						</size>
+						<size_raw>
+							<max x="0.4943915" y="0.4385777" z="1.00369"/>
+							<center x="-8.046627E-07" y="-1.042271E-02" z="4.95735"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser01" tags="laser " parent="anim_gun">
+				<offset>
+					<position x="-6.744671E-02" y="-3.539944E-02" z="8.911011"/>
+				</offset>
+			</connection>
+			<connection name="connection_component01" tags="component  turret_small">
+				<offset>
+					<quaternion qx="-1" qy="4.371138E-08" qz="-4.37114E-08" qw="1.509958E-07"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<components>
+	<component name="bomb_player_limpet_mine" class="bomb">
+		<source geometry="assets\fx\weaponfx\bomb_player_limpet_mine_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights></lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="bomb">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset></offset>
+				<animations>
+					<animation name="mode_inactive" start="1" end="1"></animation>
+					<animation name="mode_activating" start="1" end="20"></animation>
+					<animation name="mode_active" start="20" end="40"></animation>
+					<animation name="mode_deactivating" start="40" end="60"></animation>
+				</animations>
+				<parts>
+					<part name="anim_body">
+						<size>
+							<max x="0.3450294" y="0.3450294" z="0.9161509"></max>
+							<center x="0" y="0" z="0"></center>
+						</size>
+						<size_raw>
+							<max x="0.3450294" y="0.3450294" z="0.9161509"></max>
+							<center x="0" y="0" z="0"></center>
+						</size_raw>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="255" g="0" b="0" range="20" shadowrange="20" lighteffect="1" trigger="1" intensity="0.25">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="20" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="28" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="30" value="2" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="32" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="40" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+										<key frame="60" value="0.25" in_tangent_type="auto" out_tangent_type="auto"></key>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="0" y="0" z="-1.808633"></position>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+				<waypoints></waypoints>
+			</connection>
+			<connection name="Connection02" tags="part iklink detail_s  " parent="anim_body">
+				<offset>
+					<position x="-0.2335863" y="0.2352691" z="-0.1882443"></position>
+				</offset>
+				<parts>
+					<part name="detail_s_grip_a">
+						<size>
+							<max x="0.6124412" y="0.6124413" z="0.6874226"></max>
+							<center x="-0.3621128" y="0.362689" z="0.6640436"></center>
+						</size>
+						<size_raw>
+							<max x="0.1211167" y="0.2497523" z="2.802992E-03"></max>
+							<center x="6.460585E-02" y="-6.641009E-02" z="0.6616685"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part iklink detail_s  " parent="anim_body">
+				<offset>
+					<position x="0.2170858" y="0.226903" z="-0.1825166"></position>
+				</offset>
+				<parts>
+					<part name="detail_s_grip_b">
+						<size>
+							<max x="0.604426" y="0.604426" z="0.6912905"></max>
+							<center x="0.3720729" y="0.3606594" z="0.6509683"></center>
+						</size>
+						<size_raw>
+							<max x="0.2323531" y="0.2437667" z="2.92489E-03"></max>
+							<center x="-4.901086E-02" y="-5.804402E-02" z="0.6559407"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part iklink detail_s  " parent="anim_body">
+				<offset>
+					<position x="0.2429414" y="-0.2338257" z="-0.1848936"></position>
+				</offset>
+				<parts>
+					<part name="detail_s_grip_c">
+						<size>
+							<max x="0.6149552" y="0.6149553" z="0.6816647"></max>
+							<center x="0.3519864" y="-0.363049" z="0.6687468"></center>
+						</size>
+						<size_raw>
+							<max x="0.2629688" y="0.1147784" z="5.475967E-04"></max>
+							<center x="-7.724632E-02" y="6.856394E-02" z="0.6583178"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part iklink detail_s  " parent="anim_body">
+				<offset>
+					<position x="-0.2459469" y="-0.2403979" z="-0.1846294"></position>
+				</offset>
+				<parts>
+					<part name="detail_s_grip_d">
+						<size>
+							<max x="0.61584" y="0.6158398" z="0.6804911"></max>
+							<center x="-0.3579113" y="-0.3549811" z="0.6703396"></center>
+						</size>
+						<size_raw>
+							<max x="0.108756" y="0.1105864" z="8.121474E-04"></max>
+							<center x="7.458635E-02" y="7.513621E-02" z="0.6580535"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="part animation iklink  " parent="anim_body">
+				<offset>
+					<position x="0" y="0" z="-0.6932182"></position>
+				</offset>
+				<animations></animations>
+				<parts>
+					<part name="anim_light">
+						<size>
+							<max x="1.375551" y="1.375551" z="0.5747463"></max>
+							<center x="0" y="0" z="5.960464E-08"></center>
+						</size>
+						<size_raw>
+							<max x="0.6877757" y="0.6877757" z="0.2873731"></max>
+							<center x="0" y="-2.980232E-08" z="5.960464E-08"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_bomb01" tags="drop  bomb">
+				<offset></offset>
+			</connection>
+			<connection name="Connection_engine01" tags="engine ">
+				<offset></offset>
+			</connection>
+		</connections>
+	</component>
+</components>

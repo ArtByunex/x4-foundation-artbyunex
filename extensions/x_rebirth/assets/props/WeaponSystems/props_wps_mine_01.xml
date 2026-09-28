@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_mine_01" class="mine">
+		<source geometry="assets\props\WeaponSystems\props_wps_mine_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="mine">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="mode_inactive" start="0" end="0"/>
+					<animation name="mode_activating" start="0" end="5"/>
+					<animation name="mode_active" start="5" end="95" startsound="1"/>
+					<animation name="mode_deactivating" start="95" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.0042" y="14.89064" z="10.00419"/>
+							<center x="2.098083E-05" y="0" z="-9.536743E-06"/>
+						</size>
+						<size_raw>
+							<max x="9.99546" y="14.89064" z="9.995489"/>
+							<center x="2.193451E-05" y="0" z="-8.106232E-06"/>
+						</size_raw>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="255" g="52" b="52" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="0.5">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0.5"/>
+										<key frame="5" value="0.5"/>
+										<key frame="10" value="0"/>
+										<key frame="18" value="0.5"/>
+										<key frame="22" value="0"/>
+										<key frame="31" value="0.5"/>
+										<key frame="35" value="0"/>
+										<key frame="44" value="0.5"/>
+										<key frame="48" value="0"/>
+										<key frame="56" value="0.5"/>
+										<key frame="60" value="0"/>
+										<key frame="69" value="0.5"/>
+										<key frame="73" value="0"/>
+										<key frame="82" value="0.5"/>
+										<key frame="86" value="0"/>
+										<key frame="95" value="0.5"/>
+										<key frame="100" value="0.5"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="0" y="21.43385" z="0"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni02" shadow="0" r="255" g="52" b="52" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="0.5">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0.5"/>
+										<key frame="5" value="0.5"/>
+										<key frame="10" value="0"/>
+										<key frame="18" value="0.5"/>
+										<key frame="22" value="0"/>
+										<key frame="31" value="0.5"/>
+										<key frame="35" value="0"/>
+										<key frame="44" value="0.5"/>
+										<key frame="48" value="0"/>
+										<key frame="56" value="0.5"/>
+										<key frame="60" value="0"/>
+										<key frame="69" value="0.5"/>
+										<key frame="73" value="0"/>
+										<key frame="82" value="0.5"/>
+										<key frame="86" value="0"/>
+										<key frame="95" value="0.5"/>
+										<key frame="100" value="0.5"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="0" y="-20.66326" z="0"/>
+								</offset>
+							</omni>
+						</lights>
+						<sounds>
+							<sound name="XU SoundEmitter Alarm01" ref="anim_mine_active">
+								<offset/>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part detail_s iklink  " parent="anim_main">
+				<parts>
+					<part name="detail_s_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.45837" y="25.07023" z="12.45839"/>
+							<center x="0" y="0.7145462" z="1.907349E-06"/>
+						</size>
+						<size_raw>
+							<max x="12.45837" y="24.35569" z="12.45839"/>
+							<center x="0" y="0.7145462" z="2.384186E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part detail_xs iklink  " parent="anim_main">
+				<parts>
+					<part name="detail_xs_alpha">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.619084" y="16.60969" z="9.692003"/>
+							<center x="-0.7711401" y="-0.0520196" z="0.8444538"/>
+						</size>
+						<size_raw>
+							<max x="8.441823" y="16.66171" z="8.442228"/>
+							<center x="1.869202E-04" y="-0.0520196" z="1.027892"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part detail_s iklink  " parent="anim_main">
+				<offset>
+					<position x="-9" y="0" z="0"/>
+					<quaternion qx="-0" qy="-0" qz="0.7071068" qw="0.7071067"/>
+				</offset>
+				<parts>
+					<part name="anim_antennas01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.002905" y="21.07845" z="22.17703"/>
+							<center x="4.54326" y="-7.645289" z="-2.642962"/>
+						</size>
+						<size_raw>
+							<max x="16.6482" y="3.376647" z="0.2802086"/>
+							<center x="1.009518" y="-8.004122" z="-1.285735E-02"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part detail_s iklink  " parent="anim_main">
+				<offset>
+					<position x="0" y="0" z="9"/>
+					<quaternion qx="0.7071066" qy="-0" qz="-0" qw="0.7071069"/>
+				</offset>
+				<parts>
+					<part name="anim_antennas04">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.17705" y="21.07848" z="9.002916"/>
+							<center x="-2.642967" y="-7.645303" z="-4.543258"/>
+						</size>
+						<size_raw>
+							<max x="0.2802114" y="3.376647" z="0.5527639"/>
+							<center x="-1.286104E-02" y="-8.047728" z="-1.009519"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="part detail_s iklink  " parent="anim_main">
+				<offset>
+					<position x="9" y="0" z="0"/>
+					<quaternion qx="-0" qy="-0" qz="-0.7071067" qw="0.7071068"/>
+				</offset>
+				<parts>
+					<part name="anim_antennas03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="9.002906" y="21.07846" z="22.17703"/>
+							<center x="-4.543262" y="-7.645289" z="2.642963"/>
+						</size>
+						<size_raw>
+							<max x="0.5529294" y="3.376647" z="0.2544885"/>
+							<center x="-1.009516" y="-8.047633" z="1.286209E-02"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part detail_s iklink  " parent="anim_main">
+				<offset>
+					<position x="0" y="0" z="-9"/>
+					<quaternion qx="-0.7071068" qy="-0" qz="-0" qw="0.7071068"/>
+				</offset>
+				<parts>
+					<part name="anim_antennas02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.17705" y="21.07848" z="9.002919"/>
+							<center x="2.642967" y="-7.645296" z="4.543259"/>
+						</size>
+						<size_raw>
+							<max x="0.2544952" y="3.376651" z="16.64822"/>
+							<center x="1.285504E-02" y="-8.076219" z="1.009517"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part detail_xs iklink  " parent="anim_main">
+				<offset>
+					<quaternion qx="-0" qy="1.358396E-02" qz="-0" qw="0.9999077"/>
+				</offset>
+				<parts>
+					<part name="detail_xs_flap01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="13.64775" y="10.34356" z="13.64773"/>
+							<center x="-1.907349E-06" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="13.03301" y="10.34356" z="13.03301"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="part detail_s iklink animation textureanimation nocollision  " parent="anim_main">
+				<offset>
+					<position x="3.413582E-02" y="0.243982" z="0.3993797"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="fx_lamps">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="lensflares.poslights_mine_01"/>
+									<material id="2" ref="lensflares.poslights_mine_01_add"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="57.0584" y="97.03162" z="57.0584"/>
+							<center x="5.722046E-06" y="-0.6453797" z="3.814697E-06"/>
+						</size>
+						<size_raw>
+							<max x="57.05839" y="97.677" z="57.0584"/>
+							<center x="9.536743E-06" y="-0.6453797" z="3.814697E-06"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="5" value="0"/>
+									<key frame="95" value="7"/>
+									<key frame="100" value="1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection10" tags="part detail_s animation iklink textureanimation nocollision  " parent="anim_main">
+				<offset>
+					<position x="-24.84732" y="0.3531267" z="5.722046E-06"/>
+					<quaternion qx="-0" qy="0.7071068" qz="-0" qw="0.7071067"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_poslight01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="lensflares.poslights_mine_01"/>
+									<material id="2" ref="lensflares.poslights_mine_01_add"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="42.45981" y="15.80648" z="42.54009"/>
+							<center x="24.79101" y="0.4922407" z="0.3612461"/>
+						</size>
+						<size_raw>
+							<max x="42.82106" y="15.31424" z="17.74907"/>
+							<center x="24.79101" y="0.4922407" z="0.3612461"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="5" value="0.812"/>
+									<key frame="95" value="0.812"/>
+									<key frame="100" value="0"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_engine01" tags="engine ">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

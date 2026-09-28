@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<components>
+	<component name="plasmaemitter_muzzle" class="effectobject">
+		<source geometry="assets\fx\weaponfx\plasmaemitter_muzzle_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="89" g="161" b="255" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="0.3">
+						<animations>
+							<animation name="playonce" start="1" end="3"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="0.3" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="3" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="14.1989"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="-1.136868E-13" y="0" z="0"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="3"/>
+				</animations>
+				<parts>
+					<part name="anim_bullet">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.bullets_master_01_geometry"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.65396" y="11.0745" z="38.55109"/>
+							<center x="-1.907349E-06" y="-2.861023E-06" z="22.9561"/>
+						</size>
+						<size_raw>
+							<max x="12.65396" y="11.0745" z="10.8602"/>
+							<center x="-1.430511E-06" y="-2.861023E-06" z="15.9864"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection Laser01" tags="laser">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

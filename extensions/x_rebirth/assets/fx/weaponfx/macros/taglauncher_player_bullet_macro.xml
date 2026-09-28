@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Michael (192.168.3.145) at 14.10.2014_17-55-04-->
+<macros>
+  <macro name="taglauncher_player_bullet_macro" class="missile">
+    <component ref="taglauncher_player_bullet" />
+    <properties>
+      <ammunition value="1" />
+      <missile lifetime="600" guided="1" icon="player_weapons_secondary_taglauncher" tagdart="1" />
+      <reload />
+      <effects>
+        <launch ref="taglauncher_player_muzzle" />
+      </effects>
+      <weapon system="missile" />
+    </properties>
+    <connections>
+      <connection ref="engine">
+        <macro ref="engine_special_tagdart_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

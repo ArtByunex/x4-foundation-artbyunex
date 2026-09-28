@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<components>
+	<component name="impulseemitter_player_impact" class="effectobject">
+		<source geometry="assets\fx\weaponfx\impulseemitter_player_impact_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="247" g="143" b="34" range="50" shadowrange="50" lighteffect="1" trigger="1" intensity="5">
+						<animations>
+							<animation name="playonce" start="1" end="10"></animation>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="1" value="5" in_tangent_type="auto" out_tangent_type="auto"></key>
+								<key frame="10" value="0.5" in_tangent_type="auto" out_tangent_type="auto"></key>
+								<key frame="45" value="0" in_tangent_type="auto" out_tangent_type="auto"></key>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="5.445288"></position>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="effectobject">
+				<offset></offset>
+			</connection>
+			<connection name="Connection01" tags="part animation  ">
+				<offset>
+					<position x="0" y="0" z="-4.840095E-04"></position>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="45"></animation>
+				</animations>
+				<parts>
+					<part name="anim_fire">
+						<size>
+							<max x="1.711231" y="1.71123" z="3.339739"></max>
+							<center x="0" y="-7.152557E-07" z="2.06191"></center>
+						</size>
+						<size_raw>
+							<max x="1.711231" y="1.711231" z="0.1298983"></max>
+							<center x="0" y="-7.152557E-07" z="2.765774"></center>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

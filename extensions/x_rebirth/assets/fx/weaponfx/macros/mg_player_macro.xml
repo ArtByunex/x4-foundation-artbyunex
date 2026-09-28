@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macros>
+  <macro name="mg_player_macro" class="bullet">
+    <component ref="mg_player_bullet" />
+    <properties>
+      <ai>
+        <type global="HeroWeaponSystem" local="beam" />
+      </ai>
+      <energy value="100" />
+      <ammunition value="1" reload="0" />
+      <reload rate="60" />
+      <bullet speed="1200" lifetime="10" amount="1" barrelamount="2"  angle="0.01" scale="1" attach="1" range="600"/>
+      <damage min="1" max="500" value="500" hull="0" shield="0" delay="0" rate="0" />
+      <effects>
+        <launch ref="mg_muzzle"/>
+        <impact ref="mg_impact" inside="mg_impact_inside" />
+      </effects>
+    </properties>
+  </macro>
+</macros>

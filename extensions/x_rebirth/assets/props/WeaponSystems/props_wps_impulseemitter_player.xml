@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_impulseemitter_player" class="destructible">
+		<properties>
+			<hull max="0"/>
+		</properties>
+		<source geometry="assets\props\WeaponSystems\props_wps_impulseemitter_player_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="destructible">
+				<offset/>
+			</connection>
+			<connection name="ShipConnection" tags="part  component weapon_impulse ">
+				<offset>
+					<position x="2.49535E-07" y="-2.531064E-02" z="-2.261062E-06"/>
+				</offset>
+				<parts>
+					<part name="part_impulseemitter">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="player.player_trims"/>
+									<material id="2" ref="player.player_tech"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.8048115" y="1.835206" z="1.336115"/>
+							<center x="-9.23872E-07" y="0.7164806" z="-3.767014E-05"/>
+						</size>
+						<offset>
+							<position x="-2.49535E-07" y="2.531064E-02" z="2.261062E-06"/>
+						</offset>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection01" tags="laser " parent="part_impulseemitter">
+				<offset>
+					<position x="-0.5" y="0.2634494" z="1.354777"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

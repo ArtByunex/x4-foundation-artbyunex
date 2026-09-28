@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Markus (192.168.3.144) at 17.11.2015_11-16-45-->
+<macros>
+  <macro name="missile_player_torpedo_02_macro" class="missile">
+    <component ref="missile_player_torpedo_02" />
+    <properties>
+      <identification name="{20201,4851}" description="{20201,4852}" unique="0" />
+      <ammunition value="1" />
+      <missile barrelamount="1" lifetime="60" icon="player_weapons_secondary_torpedo" selfdestruct="1" remotecontrol="1" />
+      <explosiondamage value="80000" shield="200000" />
+      <reload rate="0.2" />
+      <hull max="1000" />
+      <effects>
+        <activation ref="weaponchange_torpedo" />
+        <explosion ref="missile_player_torpedo_explosion" />
+        <launch ref="missile_player_torpedo_muzzle" />
+      </effects>
+    </properties>
+    <connections>
+      <connection ref="connection_cockpit01">
+        <macro ref="units_player_cockpit_6_macro" connection="Connection_cockpit" />
+      </connection>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_player_torpedo_02_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shotgun_impact_light" class="effectobject">
+		<source geometry="assets\fx\weaponfx\shotgun_impact_light_data"></source>
+		<layers>
+			<layer>
+				<waypoints></waypoints>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="163" g="254" b="142" range="5" shadowrange="5" lighteffect="1" trigger="1" intensity="1">
+						<animations>
+							<animation name="playonce" start="1" end="20"></animation>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="linear_float">
+								<key frame="0" value="1"></key>
+								<key frame="20" value="0"></key>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="2.768273"></position>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"></connection>
+			<connection name="position" tags="position" value="1" optional="1"></connection>
+			<connection name="space" tags="effectobject">
+				<offset></offset>
+			</connection>
+		</connections>
+	</component>
+</components>

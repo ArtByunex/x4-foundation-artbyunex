@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<components>
+	<component name="hept_impact" class="effectobject">
+		<source geometry="assets\fx\weaponfx\hept_impact_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="107" g="170" b="255" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="1">
+						<animations>
+							<animation name="loop" start="1" end="30"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="linear_float">
+								<key frame="0" value="1"/>
+								<key frame="2" value="0.7"/>
+								<key frame="4" value="0.9570565"/>
+								<key frame="5" value="0.746995"/>
+								<key frame="7" value="0.9"/>
+								<key frame="9" value="0.8"/>
+								<key frame="12" value="1"/>
+								<key frame="14" value="0.8392147"/>
+								<key frame="15" value="0.9550151"/>
+								<key frame="17" value="0.7550151"/>
+								<key frame="19" value="0.9"/>
+								<key frame="21" value="0.6999999"/>
+								<key frame="22" value="0.9"/>
+								<key frame="24" value="0.7626601"/>
+								<key frame="27" value="0.9570565"/>
+								<key frame="28" value="0.6999999"/>
+								<key frame="30" value="1"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="0" z="2.412501"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation detail_s  ">
+				<offset/>
+				<animations>
+					<animation name="loop" start="1" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_smoke">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_mk3_impact_smoke_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.445427" y="20.84968" z="19.87206"/>
+							<center x="0" y="-3.814697E-06" z="19.87209"/>
+						</size>
+						<size_raw>
+							<max x="8.445428" y="20.84968" z="2.650788E-05"/>
+							<center x="-4.768372E-07" y="-3.814697E-06" z="19.87209"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="loop" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_core">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.blueglow"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.29081" y="10.29081" z="7.916467"/>
+							<center x="0" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="8.286512" y="8.286512" z="6.374609"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation textureanimation detail_xs  ">
+				<offset/>
+				<animations>
+					<animation name="loop" start="1" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_shield">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_mk3_impact_shield_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.59329" y="12.59329" z="8.004639"/>
+							<center x="4.768372E-07" y="0" z="-4.768372E-07"/>
+						</size>
+						<size_raw>
+							<max x="12.59329" y="12.59329" z="8.004639"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

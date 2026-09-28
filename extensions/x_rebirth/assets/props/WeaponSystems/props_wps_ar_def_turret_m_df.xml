@@ -1,0 +1,556 @@
+<?xml version="1.0"?>
+<components>
+	<component name="props_wps_ar_def_turret_m_df" class="missileturret">
+		<source geometry="assets\props\WeaponSystems\props_wps_ar_def_turret_m_df_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="Connection01" tags="part detail_s animation  ">
+				<offset>
+					<position x="0" y="0.5864983" z="0"/>
+				</offset>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="60"/>
+					<animation name="turret_active" start="60" end="60"/>
+					<animation name="gun_firing" start="60" end="60"/>
+					<animation name="turret_deactivating" start="100" end="160"/>
+				</animations>
+				<parts>
+					<part name="anim_detail_s_socket" wreck="anim_detail_s_socket_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+									<material id="3" ref="environments.white"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="22.69851" y="5.325108" z="27.11959"/>
+							<center x="-1.907349E-06" y="4.527286" z="0.2294312"/>
+						</size>
+						<size_raw>
+							<max x="22.69851" y="0.797822" z="26.89015"/>
+							<center x="-9.536743E-07" y="4.527286" z="0.2294312"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part detail_s iklink nocollision forceoutline   " parent="anim_detail_s_socket">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="2.099032E-06" y="-21.9805" z="4.401989"/>
+				</offset>
+				<parts>
+					<part name="detail_s_socket">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="15.0407" y="21.64013" z="15.01237"/>
+							<center x="-1.810893E-02" y="21.06745" z="2.306843E-02"/>
+						</size>
+						<size_raw>
+							<max x="14.81327" y="0.5726897" z="14.66355"/>
+							<center x="3.171722E-02" y="10.37045" z="2.490091E-02"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part detail_s iklink nocollision forceoutline  " parent="detail_s_socket">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-90.0 "/>
+							<max value="0.0 "/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="-1.470199E-02" y="9.611423" z="2.489948E-02"/>
+				</offset>
+				<parts>
+					<part name="part_canon_control">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+									<material id="2" ref="argon.ar_unique_04"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.276811" y="13.52323" z="2.897126"/>
+							<center x="-1.349823E-02" y="10.7679" z="4.768372E-07"/>
+						</size>
+						<size_raw>
+							<max x="0.2470241" y="2.755331" z="2.897125"/>
+							<center x="8.568168E-08" y="0" z="4.768372E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part detail_s iklink nocollision forceoutline   " parent="part_canon_control">
+				<offset>
+					<position x="1.470308E-02" y="0.3770924" z="-1.22077"/>
+				</offset>
+				<parts>
+					<part name="detail_s_canon02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="8.950262" y="20.88789" z="11.57868"/>
+							<center x="2.149951" y="5.616654" z="4.486446"/>
+						</size>
+						<size_raw>
+							<max x="6.670487" y="15.27124" z="4.266872"/>
+							<center x="-3.326415" y="-4.156938" z="0.9330292"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="rocket_mount_12" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34552" z="0.8597431"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_01" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34552" z="2.857037"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_02" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34552" z="1.794393"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_03" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34552" z="0.7104998"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_04" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34551" z="-0.328989"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_05" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34551" z="-1.356947"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_06" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-1.76902" y="-12.34551" z="-2.446949"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_07" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-2.577911" y="-12.34552" z="1.300296"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_08" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-2.577911" y="-12.34551" z="0.260807"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_09" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-2.577911" y="-12.34551" z="-0.7671514"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_10" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-2.577911" y="-12.34551" z="-1.857152"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_11" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-2.577911" y="-12.34552" z="2.384189"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_24" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-5.242656" y="-12.34552" z="1.472811"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_13" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34551" z="-0.1588354"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_14" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34551" z="-1.186795"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_15" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34551" z="-2.276795"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_16" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34552" z="1.84799"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_17" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-3.396738" y="-12.34552" z="2.846062"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_18" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-4.456689" y="-12.34552" z="0.9147305"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_19" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-4.45669" y="-12.34551" z="-0.1132278"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_20" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-4.45669" y="-12.34551" z="-1.203228"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_21" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-4.45669" y="-12.34552" z="1.93331"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_22" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-5.242656" y="-12.34551" z="0.4448528"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_23" tags="rocket " parent="detail_s_canon02">
+				<offset>
+					<position x="-5.242656" y="-12.34551" z="-0.6451476"/>
+					<quaternion qx="0.7071072" qy="2.084492E-20" qz="-2.084491E-20" qw="0.7071064"/>
+				</offset>
+			</connection>
+			<connection name="Connection05" tags="part detail_s iklink nocollision forceoutline  " parent="part_canon_control">
+				<offset>
+					<position x="1.470308E-02" y="0.3770924" z="-1.22077"/>
+				</offset>
+				<parts>
+					<part name="detail_s_canon01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.869719" y="20.88787" z="11.07511"/>
+							<center x="-0.3772699" y="5.616648" z="4.989997"/>
+						</size>
+						<size_raw>
+							<max x="1.766438E-02" y="15.27122" z="4.266847"/>
+							<center x="3.326408" y="-4.196118" z="0.9330211"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="rocket_mount_25" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754914" y="-12.34552" z="1.794399"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_26" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754914" y="-12.34552" z="0.7105067"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_27" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754914" y="-12.34552" z="-0.3289821"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_28" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754914" y="-12.34552" z="-1.35694"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_29" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754913" y="-12.34552" z="-2.446941"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_30" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="1.754914" y="-12.34552" z="2.857044"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_31" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="2.581406" y="-12.34552" z="0.2608137"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_32" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="2.581405" y="-12.34552" z="-0.7671447"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_33" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="2.581405" y="-12.34552" z="-1.857145"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_34" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="2.581406" y="-12.34552" z="2.384195"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_35" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="2.581405" y="-12.34552" z="1.300303"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_36" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.412829" y="-12.34552" z="-0.1588295"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_37" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.412829" y="-12.34552" z="-1.186788"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_38" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.412829" y="-12.34552" z="-2.276788"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_39" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.41283" y="-12.34552" z="1.847997"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_40" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.41283" y="-12.34552" z="2.84607"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_41" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="3.41283" y="-12.34552" z="0.8597503"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_42" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="4.419432" y="-12.34552" z="-0.1132209"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_43" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="4.419432" y="-12.34552" z="-1.203222"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_44" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="4.419433" y="-12.34552" z="1.933316"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_45" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="4.419432" y="-12.34552" z="0.9147367"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_46" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="5.283694" y="-12.34552" z="-0.6451416"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_47" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="5.283694" y="-12.34552" z="1.472817"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="rocket_mount_48" tags="rocket " parent="detail_s_canon01">
+				<offset>
+					<position x="5.283694" y="-12.34552" z="0.444859"/>
+					<quaternion qx="0.707107" qy="-0" qz="-0" qw="0.7071065"/>
+				</offset>
+			</connection>
+			<connection name="Connection06" tags="part detail_s iklink nocollision forceoutline   part detail_s iklink nocollision forceoutline  " parent="anim_detail_s_socket">
+				<offset>
+					<position x="8.455999E-07" y="0.2135018" z="4.986109"/>
+				</offset>
+				<parts>
+					<part name="detail_s_plate01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.48847" y="0.7630924" z="14.94233"/>
+							<center x="10.48846" y="-0.1425318" z="3.814697E-06"/>
+						</size>
+						<size_raw>
+							<max x="6.899612E-06" y="5.759711E-02" z="14.94233"/>
+							<center x="7.471161" y="0.3390789" z="3.33786E-06"/>
+						</size_raw>
+					</part>
+					<part name="detail_s_plate02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.ar_unique_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="10.48847" y="0.7630924" z="14.94233"/>
+							<center x="-10.48846" y="-0.1425318" z="-7.152557E-06"/>
+						</size>
+						<size_raw>
+							<max x="14.94233" y="5.759711E-02" z="14.94233"/>
+							<center x="-7.471162" y="0.3390789" z="-3.814697E-06"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part animation detail_s iklink nocollision forceoutline  " parent="anim_detail_s_socket">
+				<offset>
+					<position x="-4.903564E-03" y="4.576502" z="6.763558"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_light02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.89731" y="5.866431" z="18.03664"/>
+							<center x="2.135988E-06" y="-2.5815" z="-9.536743E-07"/>
+						</size>
+						<size_raw>
+							<max x="19.89731" y="3.284931" z="18.03664"/>
+							<center x="2.286397E-07" y="0" z="-4.768372E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part animation detail_s iklink nocollision forceoutline  " parent="anim_detail_s_socket">
+				<offset>
+					<position x="-4.903564E-03" y="-0.5864983" z="6.763558"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_light01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_red"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.89731" y="5.866431" z="18.03664"/>
+							<center x="2.135988E-06" y="2.5815" z="-9.536743E-07"/>
+						</size>
+						<size_raw>
+							<max x="19.89731" y="3.284931" z="18.03664"/>
+							<center x="2.286397E-07" y="0" z="-4.768372E-07"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="part detail_s animation  ">
+				<offset>
+					<position x="0" y="0.5864983" z="68.37255"/>
+				</offset>
+				<animations/>
+				<parts/>
+			</connection>
+			<connection name="Connection10" tags="part  ">
+				<offset>
+					<position x="0" y="0.5864983" z="0"/>
+				</offset>
+				<parts/>
+			</connection>
+			<connection name="turret_connection" tags="component turret_missile_df ">
+				<offset>
+					<quaternion qx="-1" qy="4.371139E-08" qz="-1.192488E-08" qw="5.212531E-16"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

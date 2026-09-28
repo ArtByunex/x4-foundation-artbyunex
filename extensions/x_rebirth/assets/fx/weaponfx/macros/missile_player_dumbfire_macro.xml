@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Michael (192.168.3.145) at 14.10.2014_17-55-02-->
+<macros>
+  <macro name="missile_player_dumbfire_macro" class="missile">
+    <component ref="missile_player_dumbfire" />
+    <properties>
+      <identification name="{20201,3803}" description="{20201,3802}" />
+      <ammunition value="1" />
+      <missile amount="1" lifetime="4" icon="player_weapons_secondary_dumbfire" selfdestruct="1" />
+      <explosiondamage value="6000" />
+      <reload rate="2.5" />
+      <hull max="100" />
+      <effects>
+        <activation ref="weaponchange_unguided" />
+        <explosion ref="missile_player_dumbfire_explosion" />
+        <launch ref="missile_player_dumbfire_muzzle" />
+      </effects>
+      <weapon system="missile" />
+    </properties>
+    <connections>
+      <connection ref="connection_engine01">
+        <macro ref="engine_missile_player_dumbfire_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Markus (192.168.3.144) at 01.12.2015_10-37-54-->
+<macros>
+  <macro name="asteroid_turret_m_01_macro" class="station">
+    <component ref="asteroid_turret_m_01" />
+    <properties>
+      <identification name="{20001,801}" owner="xenon" description="{20001,802}" unique="0" />
+      <hull max="100000" />
+      <effects>
+        <explosion ref="explosion_asteroid_A_M" />
+        <longrangescan ref="scfx_result_good_01" />
+      </effects>
+      <secrecy level="6" />
+    </properties>
+    <connections>
+      <connection ref="ConnectionControlroom">
+        <macro ref="control_room_macro" connection="Connection01" />
+      </connection>
+      <connection ref="ConnectionFor_env_ast_niv_m_04_turretbase_macro">
+        <macro ref="env_ast_niv_m_04_turretbase_macro" connection="position" />
+      </connection>
+      <connection ref="ConnectionRadar">
+        <macro ref="radar_ship_m_fighter_01_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

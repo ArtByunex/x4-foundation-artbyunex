@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: Mike (192.168.3.146) at 15.10.2014_14-52-18-->
+<macros>
+  <macro name="bomb_player_limpet_mine_macro" class="bomb">
+    <component ref="bomb_player_limpet_mine" />
+    <properties>
+      <identification name="{20201,15801}" description="{20201,15802}" />
+      <ammunition value="1" reload="2" />
+      <missile lifetime="-1" range="-1" destructonhit="0" />
+      <explosiondamage value="50000" />
+      <reload />
+      <effects>
+        <explosion ref="missile_player_limpetmine_explosion" />
+        <launch ref="missile_player_torpedo_muzzle" />
+      </effects>
+      <detach macro="bomb_player_limpet_mine_collectable_macro" />
+    </properties>
+    <connections>
+      <connection ref="Connection_engine01">
+        <macro ref="engine_special_bomb_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

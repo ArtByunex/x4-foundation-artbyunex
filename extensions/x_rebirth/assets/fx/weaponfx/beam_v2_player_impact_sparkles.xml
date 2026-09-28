@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<components>
+	<component name="beam_v2_player_impact_sparkles" class="effectobject">
+		<source geometry="assets\fx\weaponfx\beam_v2_player_impact_sparkles_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0" optional="0"/>
+			<connection name="position" tags="position" value="1" optional="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation  ">
+				<offset>
+					<position x="-2.070709" y="0" z="0"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_sparkles">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="weapons.impulseemitter_muzzle_sparkles_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="38.80352" y="41.70736" z="38.07291"/>
+							<center x="-1.04546" y="-0.8055649" z="4.025864"/>
+						</size>
+						<size_raw>
+							<max x="39.84898" y="42.51292" z="34.04705"/>
+							<center x="-1.04546" y="-0.8055649" z="4.025866"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="30" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>
