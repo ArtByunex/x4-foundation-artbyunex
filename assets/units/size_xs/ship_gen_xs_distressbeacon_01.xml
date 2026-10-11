@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_gen_xs_distressbeacon_01" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_gen_xs_distressbeacon_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation nocollision  ">
+				<offset>
+					<position x="4.768372E-07" y="-5.480052E-08" z="-0.1206605"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="10"/>
+				</animations>
+				<parts>
+					<part name="anim_glow">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_lightcone_soft"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="65.61287" y="67.42894" z="20.15071"/>
+							<center x="-4.768372E-07" y="5.480052E-08" z="-2.384186E-07"/>
+						</size>
+						<size_raw>
+							<max x="11.34925" y="11.66338" z="3.485529"/>
+							<center x="0" y="5.480052E-08" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation nocollision detail_xl  ">
+				<offset>
+					<position x="0" y="0" z="0.6875088"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="10"/>
+				</animations>
+				<parts>
+					<part name="anim_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.9268185" y="1.310719" z="1.004164"/>
+							<center x="0" y="0" z="-5.960464E-08"/>
+						</size>
+						<size_raw>
+							<max x="0.9268185" y="1.310719" z="1.004164"/>
+							<center x="0" y="0" z="-5.960464E-08"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="10" value="1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="255" g="56" b="56" range="25" shadowrange="25" lighteffect="1" trigger="1" intensity="0" specularintensity="1">
+								<lightanimations>
+									<lightanimation name="intensity" controller="bezier_float">
+										<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="5" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="7" value="2" in_tangent_type="auto" out_tangent_type="auto"/>
+										<key frame="10" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="0" y="0" z="-0.859386"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part  ">
+				<offset>
+					<position x="0" y="0" z="0.1718772"/>
+				</offset>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.310719" y="1.310719" z="1.519795"/>
+							<center x="0" y="0" z="2.980232E-08"/>
+						</size>
+						<trailemitters>
+							<emitter name="trail_escapepod" type="trail_escapepod">
+								<offset>
+									<position x="0" y="0" z="-1.563927"/>
+								</offset>
+							</emitter>
+						</trailemitters>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="engine_connection" tags="engine standard">
+				<offset>
+					<position x="0" y="0" z="-1.509681"/>
+				</offset>
+			</connection>
+			<connection name="cockpit_connection" tags="cockpit ">
+				<offset>
+					<position x="0" y="0" z="1.779728"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

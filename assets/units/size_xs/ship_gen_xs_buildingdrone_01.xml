@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_gen_xs_buildingdrone_01" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_gen_xs_buildingdrone_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+				<effectemitters>
+					<emitter name="masstraffic_engine_close01" type="masstraffic_engine_close01">
+						<offset>
+							<position x="0" y="-1.555419E-02" z="-4.71087"/>
+							<quaternion qx="0.7071059" qy="5.604165E-07" qz="5.604152E-07" qw="-0.7071076"/>
+						</offset>
+					</emitter>
+					<emitter name="masstraffic_engine_far01" type="masstraffic_engine_far01">
+						<offset>
+							<quaternion qx="0.7071067" qy="-0" qz="-0" qw="-0.7071068"/>
+						</offset>
+					</emitter>
+				</effectemitters>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="nocollision part detail_xl animation speedscale_forward  ">
+				<offset>
+					<position x="-0.1910138" y="-6.189805E-02" z="-2.773552"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_thruster_flame_001">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.474479" y="1.737671" z="7.723023"/>
+							<center x="-5.960464E-07" y="4.280633E-02" z="-7.726291"/>
+						</size>
+						<size_raw>
+							<max x="1.474479" y="1.737671" z="0.7695727"/>
+							<center x="-5.960464E-07" y="4.280633E-02" z="-0.7728395"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.636482" y="7.754286" z="13.01769"/>
+							<center x="4.962206E-02" y="-1.116586E-02" z="1.280899"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation detail_xl nocollision forceoutline  ">
+				<offset>
+					<position x="0" y="-1.226413" z="6.565506"/>
+				</offset>
+				<animations>
+					<animation name="mode_inactive" start="0" end="0"/>
+					<animation name="mode_activating" start="0" end="60"/>
+					<animation name="mode_active" start="60" end="60"/>
+					<animation name="mode_deactivating" start="60" end="120"/>
+				</animations>
+				<parts>
+					<part name="detail_xl_arms">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.843372" y="0.7234771" z="4.44687"/>
+							<center x="0" y="0.115485" z="1.283184"/>
+						</size>
+						<size_raw>
+							<max x="2.843372" y="0.7234771" z="3.502405"/>
+							<center x="0" y="0.115485" z="0.3387184"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="test_weld_effect" tags="effectobject " parent="detail_xl_arms">
+				<offset>
+					<position x="2.19196" y="-0.1535785" z="4.011505"/>
+				</offset>
+			</connection>
+			<connection name="con_engine_01" tags="engine small standard">
+				<offset>
+					<position x="0" y="5.636633" z="-5.791053"/>
+				</offset>
+			</connection>
+			<connection name="con_shield_01" tags="small shield standard">
+				<offset>
+					<position x="0" y="5.636633" z="2.712231"/>
+				</offset>
+			</connection>
+			<connection name="con_cockpit" tags="cockpit cockpit_visible">
+				<offset>
+					<position x="0" y="5.636633" z="-1.438226"/>
+				</offset>
+			</connection>
+			<connection name="con_storage01" tags="storage ">
+				<offset>
+					<position x="0" y="5.636633" z="0.6194208"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

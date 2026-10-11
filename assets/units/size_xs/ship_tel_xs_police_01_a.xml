@@ -1,0 +1,421 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_tel_xs_police_01_a" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_tel_xs_police_01_a_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni04" shadow="0" r="0" g="0" b="0" range="150" shadowrange="150" lighteffect="1" trigger="1" intensity="0.5" specularintensity="1">
+						<animations>
+							<animation name="loop" start="1" end="30"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="13" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="19" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="28" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="30" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+							<lightanimation name="color" controller="bezier_color">
+								<key frame="0" r="0" g="0" b="0"/>
+								<key frame="13" r="0" g="0" b="0"/>
+								<key frame="19" r="0" g="252" b="255"/>
+								<key frame="28" r="0" g="252" b="255"/>
+								<key frame="30" r="0" g="0" b="0"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="2.683945" z="-3.479231"/>
+							<quaternion qx="4.371139E-08" qy="-1" qz="-4.371138E-08" qw="7.549791E-08"/>
+						</offset>
+					</omni>
+					<omni name="XU Omni05" shadow="0" r="0" g="0" b="0" range="150" shadowrange="150" lighteffect="1" trigger="1" intensity="0.5" specularintensity="1">
+						<animations>
+							<animation name="loop" start="1" end="30"/>
+						</animations>
+						<lightanimations>
+							<lightanimation name="intensity" controller="bezier_float">
+								<key frame="0" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="12" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="14" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+								<key frame="30" value="0.5" in_tangent_type="auto" out_tangent_type="auto"/>
+							</lightanimation>
+							<lightanimation name="color" controller="bezier_color">
+								<key frame="0" r="0" g="0" b="0"/>
+								<key frame="12" r="255" g="0" b="0"/>
+								<key frame="14" r="0" g="0" b="0"/>
+								<key frame="30" r="0" g="0" b="0"/>
+							</lightanimation>
+						</lightanimations>
+						<offset>
+							<position x="0" y="-2.531294" z="-3.500064"/>
+							<quaternion qx="4.371139E-08" qy="-1" qz="-4.371138E-08" qw="7.549791E-08"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part masstraffic  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.600206" y="1.806111" z="4.772961"/>
+							<center x="-4.127026E-04" y="-9.051681E-03" z="-1.864501"/>
+						</size>
+						<sounds>
+							<sound name="XU SoundEmitter01" ref="ship_mt_police_te_siren">
+								<offset/>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part masstraffic iklink nocollision   " parent="part_main">
+				<restrictions>
+					<restriction type="rotation_z"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="-1.780307E-02" z="2.45856"/>
+				</offset>
+				<parts>
+					<part name="detail_xs_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="6.849075" y="5.994536" z="4.895339"/>
+							<center x="-0.1556067" y="-0.582564" z="-2.304712"/>
+						</size>
+						<size_raw>
+							<max x="7.004682" y="6.5771" z="7.200051"/>
+							<center x="-0.1556067" y="-0.582564" z="-2.304712"/>
+						</size_raw>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="-3.261809" y="2.243212" z="-3.368706"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni02" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="3.301594" y="2.243212" z="-3.368706"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni03" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="0" y="-3.452704" z="-3.478264"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_weapon_prim01" tags="weapon extrasmall standard combat " parent="detail_xs_rotator">
+				<offset>
+					<position x="0" y="-1.957914" z="2.934889"/>
+				</offset>
+			</connection>
+			<connection name="Connection03" tags="part detail_s animation nocollision speeddependent  " parent="detail_xs_rotator">
+				<offset>
+					<position x="1.239777E-05" y="-3.653929" z="0.5263319"/>
+				</offset>
+				<parts>
+					<part name="anim_engine_flame03">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.048185" y="1.025637" z="8.0045"/>
+							<center x="-7.765293E-04" y="2.102566E-02" z="-7.832532"/>
+						</size>
+						<size_raw>
+							<max x="1.048949" y="1.00461" z="2.385087"/>
+							<center x="-7.703304E-04" y="2.102613E-02" z="-1.106559"/>
+						</size_raw>
+					</part>
+				</parts>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+			</connection>
+			<connection name="Connection04" tags="part detail_s animation nocollision speeddependent  " parent="detail_xs_rotator">
+				<offset>
+					<position x="3.195963" y="2.144099" z="0.5263319"/>
+				</offset>
+				<parts>
+					<part name="anim_engine_flame004">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.048184" y="1.025637" z="8.0045"/>
+							<center x="-7.765293E-04" y="2.102566E-02" z="-7.832532"/>
+						</size>
+						<size_raw>
+							<max x="1.048949" y="1.00461" z="2.385087"/>
+							<center x="-7.703304E-04" y="2.102613E-02" z="-1.106559"/>
+						</size_raw>
+					</part>
+				</parts>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+			</connection>
+			<connection name="Connection05" tags="part detail_s animation nocollision speeddependent  " parent="detail_xs_rotator">
+				<offset>
+					<position x="-3.525493" y="2.144099" z="0.5263319"/>
+				</offset>
+				<parts>
+					<part name="anim_engine_flame005">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.048184" y="1.025637" z="8.0045"/>
+							<center x="-7.765293E-04" y="2.102566E-02" z="-7.832532"/>
+						</size>
+						<size_raw>
+							<max x="1.048949" y="1.00461" z="2.385087"/>
+							<center x="-7.703304E-04" y="2.102613E-02" z="-1.106559"/>
+						</size_raw>
+					</part>
+				</parts>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+			</connection>
+			<connection name="Connection06" tags="part animation nocollision iklink  " parent="part_main">
+				<offset>
+					<position x="-5.659389E-02" y="0.1151605" z="-0.1300797"/>
+				</offset>
+				<animations>
+					<animation name="mode_inactive" start="1" end="1"/>
+					<animation name="mode_activating" start="1" end="5"/>
+					<animation name="mode_active" start="5" end="105" startsound="1"/>
+					<animation name="mode_deactivating" start="105" end="110"/>
+				</animations>
+				<parts>
+					<part name="anim_scanner">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.scanfx_base"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.9677374" y="0.9677374" z="0.9677373"/>
+							<center x="2.384186E-07" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="4.838686E-03" y="4.838687E-03" z="4.838686E-03"/>
+							<center x="0" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part animation nocollision iklink  " parent="anim_scanner">
+				<offset>
+					<position x="0" y="0" z="0.0583105"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_scanline01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.scanfx_base"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="255.566" y="255.566" z="442.7134"/>
+							<center x="1.430511E-05" y="-3.290176E-05" z="341.2691"/>
+						</size>
+						<size_raw>
+							<max x="1.34359" y="1.34359" z="0.5652404"/>
+							<center x="1.192093E-07" y="2.384186E-07" z="1.648327"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection08" tags="part animation nocollision iklink  " parent="anim_scanner">
+				<offset>
+					<position x="0" y="0" z="0.0583105"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_scanline02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.scanfx_base"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="207.2627" y="207.2628" z="246.6539"/>
+							<center x="-9.536743E-07" y="1.28746E-05" z="246.6019"/>
+						</size>
+						<size_raw>
+							<max x="0.6805093" y="0.8163446" z="0.0520458"/>
+							<center x="8.940697E-07" y="2.086163E-07" z="1.178107"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection09" tags="part animation textureanimation masstraffic nocollision   ">
+				<offset>
+					<position x="-1.252717E-02" y="1.221812E-02" z="-4.293633"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.gradient_blue"/>
+									<material id="2" ref="effects.gradient_red"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.404682" y="1.676497" z="2.036335"/>
+							<center x="3.989339E-03" y="-2.492189E-03" z="1.095546"/>
+						</size>
+						<size_raw>
+							<max x="0.404682" y="1.676497" z="2.036335"/>
+							<center x="3.989339E-03" y="-2.492189E-03" z="1.095546"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="30" value="1" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection10" tags="part nocollision animation iklink detail_s  " parent="anim_lights">
+				<offset>
+					<position x="1.252764E-02" y="0.802265" z="-1.220951"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_alarm_light_01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire_glow"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="50.22244" y="47.76582" z="50.22244"/>
+							<center x="-4.768372E-07" y="-5.26239" z="3.814697E-06"/>
+						</size>
+						<size_raw>
+							<max x="0.7457358" y="0.7092583" z="0.7457358"/>
+							<center x="2.980232E-08" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection11" tags="part nocollision animation iklink detail_s  " parent="anim_lights">
+				<offset>
+					<position x="1.252574E-02" y="0.6522106" z="-0.3136883"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_alarm_light_02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire_glow"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="39.33757" y="37.41338" z="39.33757"/>
+							<center x="1.430511E-06" y="2.94902" z="1.907349E-06"/>
+						</size>
+						<size_raw>
+							<max x="0.7457358" y="0.7092583" z="0.7457358"/>
+							<center x="2.980232E-08" y="0" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="0" y="1.39329" z="2.432426"/>
+				</offset>
+			</connection>
+			<connection name="connection_engine01" tags="engine  standard ">
+				<offset>
+					<position x="0" y="-0.5843258" z="-7.139143"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

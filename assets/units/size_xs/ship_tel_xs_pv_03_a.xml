@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_tel_xs_pv_03_a" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_tel_xs_pv_03_a_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part masstraffic ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="3.622941" y="1.817516" z="4.803101"/>
+							<center x="-6.626606E-03" y="8.069265E-02" z="-2.114804"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part detail_l masstraffic iklink  nocollision  " parent="part_main">
+				<restrictions>
+					<restriction>
+						<limits>
+							<min value="-10"/>
+							<max value="10"/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="0" y="-1.780307E-02" z="2.45856"/>
+				</offset>
+				<parts>
+					<part name="detail_xs_engines">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.636222" y="3.832831" z="3.228472"/>
+							<center x="-6.627083E-03" y="-0.659202" z="-0.8444881"/>
+						</size>
+						<size_raw>
+							<max x="4.642849" y="4.492033" z="4.07296"/>
+							<center x="-6.627083E-03" y="-0.659202" z="-0.8444881"/>
+						</size_raw>
+						<lights>
+							<omni name="XU Omni01" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="-3.070828" y="2.101136" z="-3.368706"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni02" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="3.069457" y="2.101136" z="-3.368706"/>
+								</offset>
+							</omni>
+							<omni name="XU Omni003" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="0.3" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="0" y="-3.264337" z="-3.893666"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+			</connection>
+			<connection name="speedscaleConnection01" tags="speeddependant " parent="detail_xs_engines">
+				<offset>
+					<position x="0.1731806" y="0.2543862" z="-8.836349"/>
+				</offset>
+			</connection>
+			<connection name="Connection03" tags="part detail_s animation nocollision  " parent="detail_xs_engines">
+				<offset>
+					<position x="-0.0892536" y="-0.4895366" z="-0.5670519"/>
+				</offset>
+				<parts>
+					<part name="anim_engine_flame01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.51216" y="3.830781" z="106.095"/>
+							<center x="-2.222329E-02" y="-0.1589468" z="-7.507734"/>
+						</size>
+						<size_raw>
+							<max x="4.534372" y="3.989727" z="2.903957"/>
+							<center x="-2.221733E-02" y="-0.1589466" z="-0.1115707"/>
+						</size_raw>
+					</part>
+				</parts>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="0" y="1.39329" z="2.432426"/>
+				</offset>
+			</connection>
+			<connection name="connection_engine01" tags="engine standard">
+				<offset>
+					<position x="0" y="-0.5843258" z="-7.139143"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_xen_xs_pv_03_a" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_xen_xs_pv_03_a_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni Engine01" shadow="0" r="255" g="0" b="0" range="20.5" shadowrange="20.5" lighteffect="1" trigger="1" intensity="1" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="-0.1579208" y="0" z="4.629069"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="p1effects.p1_gradient_colour"/>
+									<material id="3" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="p1effects.p1_gradient_colour"/>
+									<material id="3" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.402965" y="1.02342" z="4.773975"/>
+							<center x="0" y="0" z="-1.609659"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="nocollision part detail_xs animation speedscale_forward iklink " parent="part_main">
+				<offset>
+					<position x="3.323662E-02" y="-3.279161E-02" z="0.8122122"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_engine_flame">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.068938" y="0.8744362" z="2.938213"/>
+							<center x="1.192093E-07" y="-1.788139E-07" z="-2.945905"/>
+						</size>
+						<size_raw>
+							<max x="1.068938" y="0.8744364" z="0.1636974"/>
+							<center x="5.960464E-08" y="-1.788139E-07" z="-8.569503E-02"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision detail_l  ">
+				<offset>
+					<position x="-0.0115549" y="-2.223549E-02" z="3.172132"/>
+				</offset>
+				<parts>
+					<part name="fx_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.592557" y="0.193878" z="0.6851149"/>
+							<center x="-5.960464E-08" y="-5.587935E-09" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_engine_01" tags="engine small  standard ">
+				<offset>
+					<position x="-0.1281624" y="2.360254" z="-2.3353"/>
+				</offset>
+			</connection>
+			<connection name="con_shield_01" tags="small shield  standard ">
+				<offset>
+					<position x="-0.2559624" y="3.00166" z="0"/>
+				</offset>
+			</connection>
+			<connection name="speedscaleConnection01" tags="speeddependant ">
+				<offset>
+					<position x="-0.1343803" y="3.111839E-03" z="-2.143782"/>
+				</offset>
+			</connection>
+			<connection name="con_cockpit" tags="cockpit ">
+				<offset>
+					<position x="0" y="0.9145756" z="3.761904"/>
+				</offset>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget">
+				<offset>
+					<position x="0" y="0" z="0.8768243"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

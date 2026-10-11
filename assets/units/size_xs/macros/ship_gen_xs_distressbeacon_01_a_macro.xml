@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: AJ (192.168.3.51) on 2025-12-09 10:34:10-->
+<macros>
+  <macro name="ship_gen_xs_distressbeacon_01_a_macro" class="ship_xs">
+    <component ref="ship_gen_xs_distressbeacon_01" />
+    <properties>
+      <identification name="{20101,101401}" description="{20101,101411}" icon="ship_xs_distressdrone_01" />
+      <software>
+        <software ware="software_flightassistmk1" default="1" />
+      </software>
+      <jpm allow="0" />
+      <radar range="0" />
+      <hull max="250" />
+      <secrecy level="1" />
+      <purpose primary="fight" />
+      <people capacity="0" />
+      <physics mass="3.017">
+        <inertia pitch="0.17" yaw="0.17" roll="0.17" />
+        <drag forward="1.45" reverse="6.839" horizontal="1.506" vertical="1.506" pitch="0.607" yaw="0.607" roll="0.607" />
+      </physics>
+      <loadouts>
+        <loadout id="default">
+          <macros>
+            <engine macro="engine_gen_xs_escapepod_01_macro" path="../engine_connection" />
+          </macros>
+        </loadout>
+      </loadouts>
+      <ship type="distressdrone" />
+      <relation>
+        <attack>
+          <multiplier value="0" />
+        </attack>
+        <kill>
+          <multiplier value="0" />
+        </kill>
+      </relation>
+    </properties>
+    <connections>
+      <connection ref="cockpit_connection">
+        <macro ref="cockpit_gen_invisible_01_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_arg_xs_pv_05_b" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_arg_xs_pv_05_b_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="nocollision part detail_xs animation speedscale_forward  ">
+				<offset>
+					<position x="0" y="-0.3078773" z="0.7741461"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_engine_flame01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.013206" y="0.5736528" z="5.673116"/>
+							<center x="0" y="-0.2419643" z="-5.673116"/>
+						</size>
+						<size_raw>
+							<max x="2.013206" y="0.5736528" z="0.1846902"/>
+							<center x="0" y="-0.2419643" z="-0.1846902"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.557144" y="1.349876" z="9.096786"/>
+							<center x="0" y="-0.3116792" z="1.651713"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="speedscaleConnection01" tags="speeddependant " parent="part_main">
+				<offset>
+					<position x="-6.028175E-02" y="1.259016" z="-4.882743"/>
+				</offset>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="-0.3375645" y="0.199791" z="7.505362"/>
+				</offset>
+			</connection>
+			<connection name="con_engine_01" tags="engine small standard">
+				<offset>
+					<position x="-0.519949" y="2.670261" z="2.300838"/>
+				</offset>
+			</connection>
+			<connection name="con_shield_01" tags="small shield standard">
+				<offset>
+					<position x="-0.519949" y="2.606688" z="4.636137"/>
+				</offset>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget">
+				<offset>
+					<position x="0" y="0.110237" z="0.1272955"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

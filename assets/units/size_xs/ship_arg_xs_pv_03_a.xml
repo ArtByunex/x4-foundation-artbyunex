@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_arg_xs_pv_03_a" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_arg_xs_pv_03_a_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset>
+					<position x="0" y="0.1862831" z="-0.4859772"/>
+				</offset>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.132783" y="1.290807" z="10.32335"/>
+							<center x="3.765368E-02" y="-0.2420443" z="2.444418"/>
+						</size>
+						<lights>
+							<omni name="XU Omni Engine01" shadow="0" r="255" g="150" b="0" range="8.099999" shadowrange="8.099999" lighteffect="1" trigger="1" intensity="0.1" specularintensity="1">
+								<lightanimations/>
+								<offset>
+									<position x="0.1832561" y="-0.186283" z="-6.55547"/>
+								</offset>
+							</omni>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="speedscaleConnection01" tags="speeddependant " parent="part_main">
+				<offset>
+					<position x="0" y="1.259016" z="-4.882743"/>
+				</offset>
+			</connection>
+			<connection name="Connection02" tags="nocollision part detail_xs animation speedscale_forward  ">
+				<offset>
+					<position x="-0.171175" y="-0.151641" z="-7.260158"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_engine_flame01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.003543" y="0.8862671" z="6.699029"/>
+							<center x="0.2031615" y="4.577482E-02" z="-4.693564"/>
+						</size>
+						<size_raw>
+							<max x="2.003543" y="0.8862671" z="0.2180891"/>
+							<center x="0.2031614" y="4.577482E-02" z="-0.1528006"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="-0.3375645" y="0.199791" z="4.557139"/>
+				</offset>
+			</connection>
+			<connection name="con_engine_01" tags="engine small standard">
+				<offset>
+					<position x="0" y="2.670261" z="-0.6473849"/>
+				</offset>
+			</connection>
+			<connection name="con_shield_01" tags="small shield standard">
+				<offset>
+					<position x="0" y="2.606688" z="1.687914"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_tel_xs_pv_02_b" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_tel_xs_pv_02_b_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="114" g="255" b="214" range="30" shadowrange="30" lighteffect="1" trigger="1" intensity="1" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0.0732725" y="-0.6708227" z="-4.724152"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="p1teladi.tel_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.615014" y="4.150017" z="4.785876"/>
+							<center x="0" y="7.282662E-02" z="-1.962442"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part detail_s animation nocollision speeddependent  ">
+				<offset>
+					<position x="0.1306516" y="0.2869316" z="1.451484"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_engine_flame01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.lightcone_soft_masstraffic_fire"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.961044" y="1.967951" z="4.866424"/>
+							<center x="6.16014E-05" y="-1.758337E-06" z="-4.855376"/>
+						</size>
+						<size_raw>
+							<max x="1.961044" y="1.967951" z="1.278528"/>
+							<center x="6.15418E-05" y="-1.460314E-06" z="-1.267481"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="0" y="1.39329" z="2.432426"/>
+				</offset>
+			</connection>
+			<connection name="connection_engine01" tags="engine standard">
+				<offset>
+					<position x="0" y="-0.5843258" z="-7.139143"/>
+				</offset>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget">
+				<offset/>
+			</connection>
+		</connections>
+	</component>
+</components>

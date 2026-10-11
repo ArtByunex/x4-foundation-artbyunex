@@ -1,0 +1,280 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_gen_xs_cargodrone_pickup_01" class="ship_xs">
+		<source geometry="assets\units\size_xs\ship_gen_xs_cargodrone_pickup_01_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.386663" y="1.829697" z="15.41583"/>
+							<center x="-0.4234395" y="0" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation detail_xl nocollision forceoutline  ">
+				<offset>
+					<position x="-0.4533806" y="-0.3243718" z="-11.11233"/>
+				</offset>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="100"/>
+					<animation name="deactivating" start="100" end="200"/>
+					<animation name="active" start="100" end="100"/>
+				</animations>
+				<parts>
+					<part name="detail_xs_crane">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.130316" y="1.020593" z="11.79076"/>
+							<center x="0.3423507" y="1.06513" z="10.07855"/>
+						</size>
+						<size_raw>
+							<max x="1.130315" y="1.020593" z="1.712206"/>
+							<center x="0.3423504" y="1.065129" z="0"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection03" tags="part iklink detail_xl nocollision forceoutline  " parent="detail_xs_crane">
+				<offset>
+					<position x="0.1284649" y="1.407641" z="0.6179905"/>
+				</offset>
+				<parts>
+					<part name="detail_xs_crane_arm_01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.5251383" y="2.77271" z="14.41366"/>
+							<center x="4.353583E-02" y="2.240683" z="10.0708"/>
+						</size>
+						<size_raw>
+							<max x="0.4816024" y="0.5259458" z="4.342855"/>
+							<center x="4.353541E-02" y="1.237958" z="-1.908455"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part iklink detail_xl nocollision forceoutline  " parent="detail_xs_crane_arm_01">
+				<offset>
+					<position x="-0.4427549" y="2.314743" z="-3.655737"/>
+				</offset>
+				<parts>
+					<part name="detail_xs_crane_arm_02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.178931" y="2.529603" z="17.5561"/>
+							<center x="0.5790254" y="8.236599E-02" z="16.95632"/>
+						</size>
+						<size_raw>
+							<max x="0.5999053" y="2.447237" z="0.5997829"/>
+							<center x="0.5790249" y="-0.923727" z="3.228477"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_pickup01" tags="pickup " parent="detail_xs_crane_arm_02">
+				<offset>
+					<position x="0.7676705" y="-1.57786" z="15.80225"/>
+				</offset>
+			</connection>
+			<connection name="Connection05" tags="part nocollision animation textureanimation detail_l  ">
+				<offset>
+					<position x="-0.3227444" y="2.345123" z="21.45718"/>
+				</offset>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="100"/>
+					<animation name="deactivating" start="100" end="101"/>
+					<animation name="active" start="100" end="100"/>
+				</animations>
+				<parts>
+					<part name="fx_anim_pickup">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.highway_electric_03"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.224" y="1.836319" z="8.729982"/>
+							<center x="-2.194405E-03" y="-9.246826E-03" z="2.979851E-02"/>
+						</size>
+						<size_raw>
+							<max x="2.224" y="1.836319" z="8.729982"/>
+							<center x="-2.194405E-03" y="-9.246826E-03" z="2.979851E-02"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="-3"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="3">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="100" value="-1"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="100" value="1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection06" tags="part detail_xl animation textureanimation nocollision speedscale engineeffect  ">
+				<offset>
+					<position x="-3.927734" y="-1.077658" z="-11.69034"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="10"/>
+				</animations>
+				<parts>
+					<part name="anim_flame001">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="enginefxp1.engine_fx_arg_gas"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.4153211" y="0.4241921" z="2.597076"/>
+							<center x="-2.057052E-02" y="2.457249E-02" z="-2.324224"/>
+						</size>
+						<size_raw>
+							<max x="0.4153211" y="0.4241921" z="2.597076"/>
+							<center x="-2.057052E-02" y="2.457237E-02" z="-2.324224"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="10" value="-3.99"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part detail_xl animation textureanimation nocollision speedscale engineeffect  ">
+				<offset>
+					<position x="3.164053" y="-1.077658" z="-11.69034"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="10"/>
+				</animations>
+				<parts>
+					<part name="anim_flame002">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="enginefxp1.engine_fx_arg_gas"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.4153212" y="0.4241921" z="2.597076"/>
+							<center x="-2.057052E-02" y="2.457249E-02" z="-2.324224"/>
+						</size>
+						<size_raw>
+							<max x="0.4153211" y="0.4241921" z="2.597076"/>
+							<center x="-2.057052E-02" y="2.457237E-02" z="-2.324224"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="10" value="-3.99"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_pickuptarget01" tags="pickuptarget ">
+				<offset>
+					<position x="0" y="3.000002" z="30"/>
+				</offset>
+			</connection>
+			<connection name="con_engine_01" tags="engine small  standard ">
+				<offset>
+					<position x="0" y="5.636633" z="-5.791053"/>
+				</offset>
+			</connection>
+			<connection name="con_cockpit" tags="cockpit cockpit_visible">
+				<offset>
+					<position x="0" y="5.636633" z="-1.438226"/>
+				</offset>
+			</connection>
+			<connection name="con_storage01" tags="storage ">
+				<offset>
+					<position x="0" y="5.636633" z="0.6194208"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>
