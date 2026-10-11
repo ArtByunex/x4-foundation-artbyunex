@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2024-03-20 12:25:34-->
+<components>
+  <component name="props_09_room_gen_livingquarter_01" class="room">
+    <source geometry="extensions\ego_dlc_timelines\assets\interiors\room_props\props_09_room_gen_livingquarter_01_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="point_screen" shadow="0" r="86" g="149" b="255" intensity="0.7849907" specularintensity="1" range="4.23" shadowrange="4.23" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="2.502576" y="1.065363" z="2.775469" />
+            </offset>
+          </omni>
+          <arealight name="ego_area_door" areax="0.0529997" areay="0.4428" radius="0" spotattenuation="0.77" shadow="0" r="165" g="189" b="255" intensity="1.56217" specularintensity="1" range="1.45" shadowrange="1.45" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="3.455871" y="2.562467" z="0.74893" />
+              <quaternion qx="0" qy="0" qz="-0.2069299" qw="-0.9783558" />
+            </offset>
+          </arealight>
+          <arealight name="ego_area_main" areax="2.91" areay="2.029" radius="0" spotattenuation="0.5" shadow="0" r="255" g="143" b="111" intensity="2.277065" specularintensity="1" range="3.41" shadowrange="3.41" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="1.05349" y="3.241405" z="1.701936" />
+              <quaternion qx="0" qy="0" qz="1.49e-08" qw="-1" />
+            </offset>
+          </arealight>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_props_01" group=" " tags="component prop_roomdeco " />
+      <connection name="ConnectionForanim_cabinet_01" group="storage_cabinet_01 " tags="animation detail_xl part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-0.5351973" y="0.4844406" z="3.277839" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="30" startsound="1">
+            <sounds>
+              <sound ref="sfx_cabinet_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="30" end="31" />
+          <animation name="deactivating" start="31" end="60" startsound="1">
+            <sounds>
+              <sound ref="sfx_cabinet_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_cabinet_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.3343754" y="0.3023998" z="0.06775594" />
+              <center x="0" y="0.2589012" z="-0.0277884" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_main" tags="animation detail_l forceoutline fx nocollision part textureanimation ">
+        <animations>
+          <animation name="loop" start="1" end="413" />
+        </animations>
+        <parts>
+          <part name="anim_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_distortion_01" />
+                  <material id="2" ref="p2terran.ter_p2_holo_01_a" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.424315" y="0.6961983" z="0.2520146" />
+              <center x="1.64555" y="1.6469" z="2.821239" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                </uv_property>
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="413" value="-1" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_wardrobe_01" group="storage_wardrobe_01 " tags="animation detail_xl part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-1.515718" y="1.045097" z="3.264089" />
+          <quaternion qx="0" qy="-1" qz="0" qw="-1.947e-07" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="30" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_01" />
+              <sound ref="sfx_locker_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="30" end="31" />
+          <animation name="deactivating" start="31" end="60" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_02" />
+              <sound ref="sfx_locker_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_wardrobe_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.2766387" y="1.005627" z="0.01509869" />
+              <center x="-0.2682945" y="0.1002989" z="0.01509476" />
+            </size>
+            <offset>
+              <quaternion qx="0" qy="-3.18e-08" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_main" tags="detail_m part ">
+        <parts>
+          <part name="detail_m_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_02" />
+                  <material id="3" ref="p2natural.nat_p2_foliage_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.322698" y="1.240493" z="1.669409" />
+              <center x="-0.7689192" y="1.182661" z="2.25696" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_s_main" tags="detail_s forceoutline fx nocollision part ">
+        <parts>
+          <part name="fx_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.p1_chair_ui" />
+                  <material id="2" ref="p2terran.ter_p2_holo_01_a" />
+                  <material id="3" ref="p2generic.gen_p2_decal_01" />
+                  <material id="4" ref="p2generic.gen_p2_glassinterior_01" />
+                  <material id="5" ref="p2argon.arg_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.462244" y="1.467487" z="1.59185" />
+              <center x="-0.2489877" y="1.428168" z="1.688784" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_npc_sit_01" group=" " tags="npc npc_generic sit " value="-1">
+        <offset>
+          <position x="1.898577" y="0.03224984" z="1.985316" />
+          <quaternion qx="-1.279e-07" qy="0.5312049" qz="-8.02e-08" qw="-0.8472434" />
+        </offset>
+      </connection>
+    </connections>
+  </component>
+</components>

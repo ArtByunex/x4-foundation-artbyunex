@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2023-10-19 11:06:51-->
+<components>
+  <component name="interiors_gen_door_01" referenceable="1" class="positional">
+    <source geometry="extensions\ego_dlc_timelines\assets\interiors\xref_parts\interiors_gen_door_01_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="space" tags="positional" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="ConnectionForanim_door" tags="animation part platformcollision trigger_nearby walk_exclude ">
+        <offset>
+          <position x="-2.98694e-05" y="1.549041" z="-1.658e-07" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="10" startsound="1" />
+          <animation name="active" start="10" end="11" />
+          <animation name="deactivating" start="11" end="19" startsound="1" />
+        </animations>
+        <parts>
+          <part name="anim_door" wreck="anim_door_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="2.004669" y="1.285495" z="0.06364432" />
+              <center x="-1" y="-0.2638109" z="1.9e-09" />
+            </size>
+            <sounds>
+              <sound name="sfx_door_close" ref="hub_door_small_close">
+                <offset>
+                  <position x="2.9876e-05" y="0.0009592772" z="1.658e-07" />
+                </offset>
+              </sound>
+              <sound name="sfx_door_open" ref="hub_door_small_open">
+                <offset>
+                  <position x="2.9876e-05" y="-0.04904068" z="1.658e-07" />
+                </offset>
+              </sound>
+            </sounds>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_decals" tags="detail_xl fx nocollision part " parent="anim_door">
+        <offset>
+          <position x="-9e-10" y="0" z="0" />
+        </offset>
+        <parts>
+          <part name="fx_decals">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.90538" y="1.262985" z="0.05943449" />
+              <center x="-1" y="-0.285845" z="-2.79e-08" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

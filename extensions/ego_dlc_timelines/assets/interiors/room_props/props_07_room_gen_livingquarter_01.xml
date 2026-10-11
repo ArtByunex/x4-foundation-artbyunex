@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2024-02-27 15:55:43-->
+<components>
+  <component name="props_07_room_gen_livingquarter_01" class="room">
+    <source geometry="extensions\ego_dlc_timelines\assets\interiors\room_props\props_07_room_gen_livingquarter_01_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="point_screen" shadow="0" r="86" g="149" b="255" intensity="0.7849907" specularintensity="1" range="4.23" shadowrange="4.23" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="2.502576" y="1.065363" z="2.775469" />
+            </offset>
+          </omni>
+          <omni name="point_screen001" shadow="0" r="255" g="137" b="36" intensity="1.275182" specularintensity="1" range="2.25" shadowrange="2.25" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="1.416203" y="1.149859" z="2.633306" />
+              <quaternion qx="0" qy="0.7933534" qz="0" qw="-0.6087614" />
+            </offset>
+          </omni>
+          <spot name="ego_spot_lamp_01" angle="117.85" gradientindex="6" shadow="0" r="255" g="205" b="171" intensity="1.908217" specularintensity="1" range="5" shadowrange="5" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="1.322181" y="1.435002" z="2.828855" />
+              <quaternion qx="-0.1955842" qy="0.9039677" qz="0.1025763" qw="-0.3661521" />
+            </offset>
+          </spot>
+          <arealight name="ego_area_main" areax="2.91" areay="2.029" radius="0" spotattenuation="0.5" shadow="0" r="255" g="143" b="111" intensity="2.277065" specularintensity="1" range="3.41" shadowrange="3.41" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="1.05349" y="3.241405" z="1.701936" />
+              <quaternion qx="0" qy="0" qz="1.49e-08" qw="-1" />
+            </offset>
+          </arealight>
+          <arealight name="ego_area_wc" areax="0.0529997" areay="0.4428" radius="0" spotattenuation="0.77" shadow="0" r="165" g="189" b="255" intensity="1.56217" specularintensity="1" range="1.45" shadowrange="1.45" lighteffect="1" lenseffect="none" trigger="0">
+            <offset>
+              <position x="3.455871" y="2.562467" z="0.74893" />
+              <quaternion qx="0" qy="0" qz="-0.2069299" qw="-0.9783558" />
+            </offset>
+          </arealight>
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_props_01" group=" " tags="component prop_roomdeco " />
+      <connection name="ConnectionForanim_cabinet_01" group="storage_cabinet_01 " tags="animation detail_xl part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-0.5351973" y="0.4844406" z="3.277839" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="30" startsound="1">
+            <sounds>
+              <sound ref="sfx_cabinet_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="30" end="31" />
+          <animation name="deactivating" start="31" end="60" startsound="1">
+            <sounds>
+              <sound ref="sfx_cabinet_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_cabinet_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.3343754" y="0.3023998" z="0.06775594" />
+              <center x="0" y="0.2589012" z="-0.0277884" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_wardrobe_01" group="storage_wardrobe_01 " tags="animation detail_xl part platformcollision trigger_interact ui walk_ignoreanimation ">
+        <offset>
+          <position x="-1.515718" y="1.045097" z="3.264089" />
+          <quaternion qx="0" qy="-1" qz="0" qw="-1.947e-07" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="30" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_01" />
+              <sound ref="sfx_locker_open" />
+            </sounds>
+          </animation>
+          <animation name="active" start="30" end="31" />
+          <animation name="deactivating" start="31" end="60" startsound="1">
+            <sounds>
+              <sound ref="sfx_locker_02" />
+              <sound ref="sfx_locker_close" />
+            </sounds>
+          </animation>
+        </animations>
+        <parts>
+          <part name="anim_wardrobe_01">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.2766387" y="1.005627" z="0.01509869" />
+              <center x="-0.2682945" y="0.1002989" z="0.01509476" />
+            </size>
+            <offset>
+              <quaternion qx="0" qy="-3.18e-08" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_main" tags="detail_m part ">
+        <parts>
+          <part name="detail_m_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2fx.fx_p2_gradientcolour_02" />
+                  <material id="3" ref="p2natural.nat_p2_foliage_01" />
+                  <material id="4" ref="p2generic.gen_p2_hulltexture_02" />
+                  <material id="5" ref="p2generic.gen_p2_hulltexture_02_c" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.664979" y="1.504246" z="1.717828" />
+              <center x="-0.4266382" y="1.391409" z="2.208541" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_s_main" tags="detail_s forceoutline fx nocollision part ">
+        <parts>
+          <part name="fx_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.p1_chair_ui" />
+                  <material id="2" ref="p2terran.ter_p2_holo_01_a" />
+                  <material id="3" ref="p2generic.gen_p2_glassinterior_01" />
+                  <material id="4" ref="p2generic.gen_p2_decal_01" />
+                  <material id="5" ref="p2argon.arg_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.532947" y="1.132041" z="1.108192" />
+              <center x="-0.3196914" y="1.076417" z="2.194484" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_npc_sit_01" group=" " tags="npc npc_generic sit " value="-1">
+        <offset>
+          <position x="1.876115" y="-0.03349283" z="1.954938" />
+          <quaternion qx="-1.228e-07" qy="0.581937" qz="-8.79e-08" qw="-0.8132339" />
+        </offset>
+      </connection>
+    </connections>
+  </component>
+</components>

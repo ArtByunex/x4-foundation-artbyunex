@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2024-03-13 10:49:08-->
+<components>
+  <component name="room_gen_livingquarter_01" class="room">
+    <source geometry="extensions\ego_dlc_timelines\assets\interiors\rooms\room_gen_livingquarter_01_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="space" tags="room" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_room_snap_01" group=" " tags="room_snap " />
+      <connection name="con_npc_bed_01" group=" " tags="lying_bed npc " value="-1">
+        <offset>
+          <position x="-1.807484" y="0" z="1.730899" />
+          <quaternion qx="0" qy="-0.7071068" qz="0" qw="-0.7071067" />
+        </offset>
+      </connection>
+      <connection name="con_npc_stand_01" group=" " tags="npc npc_generic stand_lookat " value="-1">
+        <offset>
+          <position x="-1.560733" y="0.02193711" z="1.26831" />
+          <quaternion qx="0" qy="-1" qz="0" qw="-1.947e-07" />
+        </offset>
+      </connection>
+      <connection name="ConnectionFordetail_s_main" tags="detail_s forceoutline nocollision part ">
+        <parts>
+          <part name="detail_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="3" ref="p2generic.gen_p2_glassinterior_01" />
+                  <material id="4" ref="p2fx.fx_p2_gradientcolour_02" />
+                  <material id="5" ref="p2fx.fx_p2_gradientcolour_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="2.751936" y="1.212426" z="1.539399" />
+              <center x="0.7794214" y="1.14596" z="1.702765" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_s_main" tags="detail_s forceoutline fx nocollision part ">
+        <offset>
+          <position x="2.25802" y="0.7006871" z="2.244476" />
+          <quaternion qx="0.7071069" qy="-5.34e-08" qz="-0.7071066" qw="-5.34e-08" />
+        </offset>
+        <parts>
+          <part name="fx_s_main">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.p1_chair_ui" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                  <material id="3" ref="p2argon.arg_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.751437" y="1.388252" z="3.931513" />
+              <center x="0.3227502" y="-0.5924423" z="2.451139" />
+            </size>
+            <offset>
+              <position x="0" y="1.67e-08" z="0" />
+              <quaternion qx="0" qy="5.96e-08" qz="0" qw="-1" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_bedlight_switch" group=" room_bedlights_01 " tags="animation detail_m forceoutline part platformcollision trigger_interact ui ">
+        <offset>
+          <position x="-2.164612" y="0.9591221" z="0.5891103" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="8" />
+          <animation name="active" start="8" end="9" />
+          <animation name="deactivating" start="9" end="15" />
+        </animations>
+        <parts>
+          <part name="part_bedlight_switch">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2fx.fx_p2_gradientcolour_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.03297436" y="0.08624259" z="1.354646" />
+              <center x="2.384e-07" y="-0.006272674" z="1.338764" />
+            </size>
+            <lights>
+              <omni name="anim_point_bed_02" shadow="0" r="191" g="231" b="255" intensity="1.478897" specularintensity="1" range="1.4" shadowrange="1.4" lighteffect="1" lenseffect="none" trigger="0">
+                <offset>
+                  <position x="-0.4829855" y="-0.0338043" z="0.6070736" />
+                  <quaternion qx="0" qy="0" qz="-0.7071068" qw="-0.7071068" />
+                </offset>
+                <lightanimations>
+                  <lightanimation name="intensity" controller="linear_float">
+                    <key frame="1" value="1.410135" />
+                    <key frame="2" value="1.410135" />
+                    <key frame="8" value="0" />
+                    <key frame="9" value="0" />
+                    <key frame="15" value="1.410135" />
+                  </lightanimation>
+                </lightanimations>
+              </omni>
+              <omni name="anim_point_bed_01" shadow="0" r="191" g="231" b="255" intensity="1.478897" specularintensity="1" range="1.4" shadowrange="1.4" lighteffect="1" lenseffect="none" trigger="0">
+                <offset>
+                  <position x="-0.4829855" y="-0.0338043" z="1.747245" />
+                  <quaternion qx="0" qy="0" qz="-0.7071068" qw="-0.7071068" />
+                </offset>
+                <lightanimations>
+                  <lightanimation name="intensity" controller="linear_float">
+                    <key frame="1" value="1.410135" />
+                    <key frame="2" value="1.410135" />
+                    <key frame="8" value="0" />
+                    <key frame="9" value="0" />
+                    <key frame="15" value="1.410135" />
+                  </lightanimation>
+                </lightanimations>
+              </omni>
+              <arealight name="ego_area" areax="0.104" areay="0.56" radius="0" spotattenuation="0.6" shadow="1" r="153" g="206" b="255" intensity="0.5690228" specularintensity="1" range="2.9" shadowrange="2.9" lighteffect="1" lenseffect="none" trigger="0">
+                <offset>
+                  <position x="-2.028645" y="-0.009955883" z="0.7274131" />
+                  <quaternion qx="0" qy="0" qz="-0.7071068" qw="-0.7071068" />
+                </offset>
+                <lightanimations>
+                  <lightanimation name="intensity" controller="linear_float">
+                    <key frame="1" value="0.776816" />
+                    <key frame="2" value="0.776816" />
+                    <key frame="8" value="0" />
+                    <key frame="9" value="0" />
+                    <key frame="15" value="0.776816" />
+                  </lightanimation>
+                </lightanimations>
+              </arealight>
+            </lights>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_bedlight" group=" room_bedlights_01 " tags="animation detail_xl nocollision part textureanimation ">
+        <offset>
+          <position x="-2.811608" y="0.8751976" z="1.730205" />
+        </offset>
+        <animations>
+          <animation name="deactivated" start="1" end="2" />
+          <animation name="activating" start="2" end="8" />
+          <animation name="active" start="8" end="9" />
+          <animation name="deactivating" start="9" end="15" />
+        </animations>
+        <parts>
+          <part name="anim_bedlight">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2fx.fx_p2_gradientcolour_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.9048809" y="0.4268353" z="1.077" />
+              <center x="-0.489754" y="0.4268353" z="0.1199383" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="v_tile" controller="linear_float">
+                  <key frame="1" value="1" />
+                  <key frame="2" value="1" />
+                  <key frame="8" value="1" />
+                  <key frame="9" value="1" />
+                  <key frame="15" value="1" />
+                </uv_property>
+                <uv_property name="u_tile" controller="linear_float">
+                  <key frame="1" value="1" />
+                  <key frame="2" value="1" />
+                  <key frame="8" value="0.00999999" />
+                  <key frame="9" value="0.00999999" />
+                  <key frame="15" value="1" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="con_crate_s_hidden_01" group=" " tags="crate crate_hidden crate_s ">
+        <offset>
+          <position x="-0.5517793" y="0.6864609" z="3.459833" />
+          <quaternion qx="0" qy="0.3007059" qz="0" qw="-0.9537169" />
+        </offset>
+      </connection>
+      <connection name="con_crate_s_ontable_01" group=" " tags="crate crate_ontable crate_s ">
+        <offset>
+          <position x="1.068234" y="0.6904079" z="2.693735" />
+          <quaternion qx="0" qy="-0.9761047" qz="0" qw="-0.2173009" />
+        </offset>
+      </connection>
+      <connection name="con_props_01" group=" " tags="prop prop_roomdeco " />
+      <connection name="ConnectionForpart_main" tags="part platformcollision ">
+        <parts>
+          <part name="part_main" wreck="part_main_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2fx.fx_p2_gradientcolour_02" />
+                  <material id="3" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="4" ref="p2generic.gen_p2_hulltexture_02" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="3.996669" y="1.502365" z="1.893565" />
+              <center x="-0.2156709" y="1.405497" z="1.87967" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForanim_door2028780613888" group=" door_01 " tags="animation part platformcollision trigger_nearby walk_exclude ">
+        <offset>
+          <position x="0" y="1.531118" z="0.1002061" />
+          <quaternion qx="0" qy="-1" qz="2.19e-08" qw="-4.331e-07" />
+        </offset>
+        <parts>
+          <part name="anim_door" ref="interiors_gen_door_01.anim_door">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2multimat.p2_multimat_01" />
+                  <material id="2" ref="p2generic.gen_p2_glassinterior_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.004669" y="1.285495" z="0.06364432" />
+              <center x="-1.192e-07" y="-0.263811" z="0" />
+            </size>
+            <offset>
+              <position x="0" y="-4.4e-09" z="0" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForfx_decals2028782748480" group=" door_01 " tags="detail_xl fx nocollision part " parent="anim_door">
+        <offset>
+          <position x="0" y="-4.4e-09" z="0" />
+        </offset>
+        <parts>
+          <part name="fx_decals" ref="interiors_gen_door_01.fx_decals">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.9053794" y="1.262986" z="0.05943452" />
+              <center x="7.45e-08" y="-0.2858449" z="0" />
+            </size>
+            <offset>
+              <position x="0" y="-4.4e-09" z="0" />
+            </offset>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>
