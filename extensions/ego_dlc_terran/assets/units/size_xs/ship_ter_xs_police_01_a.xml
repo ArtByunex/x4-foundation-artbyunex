@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<components>
+	<component name="ship_ter_xs_police_01_a" class="ship_xs">
+		<source geometry="extensions\ego_dlc_terran\assets\units\size_xs\ship_ter_xs_police_01_a_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni Engine01" shadow="0" r="0" g="120" b="255" range="6.599998" shadowrange="6.599998" lighteffect="1" trigger="1" intensity="0.1" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="0.4119388" z="-5.20748"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="ship ship_xs">
+				<offset/>
+			</connection>
+			<connection name="Connection001" tags="nocollision part detail_xl animation speedscale_forward  ">
+				<offset>
+					<position x="-4.171467E-02" y="1.121242" z="-4.59494"/>
+				</offset>
+				<animations>
+					<animation name="scaling_range" start="0" end="100"/>
+				</animations>
+				<parts>
+					<part name="anim_engine_flame01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.2862957" y="0.283896" z="6.542653"/>
+							<center x="-9.015203E-07" y="-2.384186E-07" z="-6.542653"/>
+						</size>
+						<size_raw>
+							<max x="0.2862957" y="0.283896" z="0.0480673"/>
+							<center x="-9.089708E-07" y="-2.384186E-07" z="-4.806709E-02"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection002" tags="part  ">
+				<offset>
+					<position x="-2.384186E-07" y="1.092382" z="7.725921E-02"/>
+				</offset>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="argon.arg_masstraffic"/>
+									<material id="2" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="2.16569" y="1.377529" z="7.528133"/>
+							<center x="2.384186E-07" y="-0.5328309" z="2.3391"/>
+						</size>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection003" tags="part animation nocollision iklink  " parent="part_main">
+				<offset>
+					<position x="2.384186E-07" y="1.963615E-03" z="7.206684"/>
+				</offset>
+				<animations>
+					<animation name="mode_inactive" start="1" end="1"/>
+					<animation name="mode_activating" start="1" end="5"/>
+					<animation name="mode_active" start="5" end="105" startsound="1"/>
+					<animation name="mode_deactivating" start="105" end="110"/>
+				</animations>
+				<parts>
+					<part name="anim_scanner">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.scanfx_base"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.9677375" y="0.9677373" z="0.9677373"/>
+							<center x="5.960464E-08" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="4.838686E-03" y="4.838687E-03" z="4.838687E-03"/>
+							<center x="4.656613E-10" y="0" z="0"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter02" ref="ship_mt_police_scanning">
+								<offset>
+									<position x="8.892953E-02" y="0.150934" z="2.371828"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection004" tags="part animation nocollision iklink  " parent="anim_scanner">
+				<offset>
+					<position x="-3.60415E-03" y="7.247925E-05" z="1.437187E-02"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_scanline02">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="110.7858" y="110.7858" z="131.5079"/>
+							<center x="-0.272875" y="5.49531E-03" z="127.0321"/>
+						</size>
+						<size_raw>
+							<max x="0.3637451" y="0.4363516" z="2.781945E-02"/>
+							<center x="5.040783E-07" y="1.192093E-07" z="0.6297202"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection005" tags="part animation nocollision iklink  " parent="anim_scanner">
+				<offset>
+					<position x="1.558215E-03" y="-4.684687E-03" z="6.242561E-02"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_scanline01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.masstraffic_lights_fx"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="136.6048" y="136.6048" z="236.6386"/>
+							<center x="0.1179832" y="-0.3546486" z="180.9384"/>
+						</size>
+						<size_raw>
+							<max x="0.7181739" y="0.7181738" z="0.3021316"/>
+							<center x="6.967457E-08" y="2.384186E-07" z="0.8810616"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection006" tags="part animation textureanimation detail_xl nocollision iklink " parent="part_main">
+				<offset>
+					<position x="6.154633E-02" y="1.158467" z="-0.1514618"/>
+				</offset>
+				<animations>
+					<animation name="loop" start="1" end="30"/>
+				</animations>
+				<parts>
+					<part name="anim_alarmlights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.879015" y="1.044379" z="2.798631"/>
+							<center x="-0.1090255" y="-1.229017" z="-6.615463E-02"/>
+						</size>
+						<size_raw>
+							<max x="1.98804" y="2.273396" z="2.864786"/>
+							<center x="-0.1090255" y="-1.229017" z="-6.615463E-02"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="10" value="0.02"/>
+									<key frame="20" value="0.3"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection007" hidden="true" tags="part animation detail_xl nocollision  ">
+				<offset>
+					<position x="0" y="0.8825555" z="-8.456707E-03"/>
+					<quaternion qx="0.7057381" qy="-0" qz="-0" qw="-0.7084727"/>
+				</offset>
+				<animations>
+					<animation name="deactivated" start="0" end="0"/>
+					<animation name="activating" start="0" end="75" startsound="1"/>
+					<animation name="active" start="75" end="75"/>
+					<animation name="deactivating" start="75" end="75"/>
+				</animations>
+				<parts>
+					<part name="dummy_sound_animation">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="5.505853E-02" y="3.381616E-02" z="3.499983E-02"/>
+							<center x="0" y="1.307726E-04" z="-3.381591E-02"/>
+						</size>
+						<size_raw>
+							<max x="5.505853E-02" y="3.381616E-02" z="3.499982E-02"/>
+							<center x="0" y="1.307726E-04" z="-0.0338159"/>
+						</size_raw>
+						<sounds>
+							<sound name="XU SoundEmitter01" ref="ship_mt_police_siren">
+								<offset>
+									<position x="0" y="-1.192093E-07" z="1.490116E-08"/>
+								</offset>
+							</sound>
+						</sounds>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="connection_cockpit01" tags="cockpit ">
+				<offset>
+					<position x="-0.2315664" y="0.7593057" z="6.181892"/>
+				</offset>
+			</connection>
+			<connection name="speedscaleConnection01" tags="speeddependant ">
+				<offset>
+					<position x="-4.777431E-02" y="0.5048258" z="-8.71217"/>
+				</offset>
+			</connection>
+			<connection name="con_engine_01" tags="engine small standard">
+				<offset>
+					<position x="0.2323561" y="1.694226" z="-1.65418"/>
+				</offset>
+			</connection>
+			<connection name="connection_weapon_prim01" tags="weapon extrasmall standard combat">
+				<offset>
+					<position x="-7.932186E-02" y="-0.5291307" z="2.263699"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>
