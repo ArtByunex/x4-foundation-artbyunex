@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shield_spl_l_standard_01_mk1" class="shieldgenerator">
+		<source geometry="extensions\ego_dlc_split\assets\props\SurfaceElements\shield_spl_l_standard_01_mk1_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights>
+					<omni name="XU Omni01" shadow="0" r="255" g="200" b="122" range="20" shadowrange="20" lighteffect="1" trigger="1" intensity="2" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="10.95999" z="-17.35851"/>
+						</offset>
+					</omni>
+					<box name="XU BoxLight01" shadow="0" r="255" g="200" b="122" lighteffect="1" trigger="1" intensity="5" specularintensity="1">
+						<size x="40" y="13" z="13"/>
+						<lightanimations/>
+						<offset>
+							<position x="-5.194511" y="5.097515" z="4.40851"/>
+							<quaternion qx="-0" qy="0.7071068" qz="-0" qw="-0.7071067"/>
+						</offset>
+					</box>
+					<box name="XU BoxLight002" shadow="0" r="255" g="200" b="122" lighteffect="1" trigger="1" intensity="5" specularintensity="1">
+						<size x="40" y="13" z="13"/>
+						<lightanimations/>
+						<offset>
+							<position x="5.205458" y="5.097515" z="4.40851"/>
+							<quaternion qx="-0" qy="0.7071068" qz="-0" qw="-0.7071067"/>
+						</offset>
+					</box>
+					<omni name="XU Omni002" shadow="0" r="255" g="145" b="78" range="100" shadowrange="100" lighteffect="1" trigger="1" intensity="0.6999999" specularintensity="1">
+						<lightanimations/>
+						<offset>
+							<position x="0" y="18.79774" z="1.421146"/>
+						</offset>
+					</omni>
+				</lights>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="Connection01" tags="part  ">
+				<offset/>
+				<parts>
+					<part name="part_main" wreck="part_main_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+									<material id="2" ref="p1split.split_p1_hulltexture_01"/>
+									<material id="3" ref="generic.generic_p1_fx"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+									<material id="2" ref="p1split.split_p1_hulltexture_01"/>
+									<material id="3" ref="generic.generic_p1_fx"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+									<material id="2" ref="p1split.split_p1_hulltexture_01"/>
+									<material id="3" ref="generic.generic_p1_fx"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="generic.generic_p1_fx"/>
+									<material id="2" ref="p1split.split_p1_hulltexture_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="15.22101" y="5.091012" z="31.91511"/>
+							<center x="0" y="5.083698" z="8.488846E-02"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part detail_m nocollision forceoutline  ">
+				<offset>
+					<position x="0" y="0" z="-3.5"/>
+				</offset>
+				<parts>
+					<part name="detail_m_main">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+									<material id="2" ref="generic.generic_p1_alphatexture"/>
+									<material id="3" ref="generic.generic_p1_fx"/>
+									<material id="4" ref="p1effects.p1_lightcone_soft"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="15.79474" y="3.191074" z="24.98073"/>
+							<center x="0" y="3.068474" z="3.018522"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part nocollision forceoutline detail_l  ">
+				<offset/>
+				<parts>
+					<part name="detail_l_decals">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="14.70629" y="4.350618" z="28.09405"/>
+							<center x="0" y="5.444787" z="0.6447992"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="small_Con_shieldgen_01" tags="large shield component standard ">
+				<offset/>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget ">
+				<offset>
+					<position x="0" y="7.187459" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

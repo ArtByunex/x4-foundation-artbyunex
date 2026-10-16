@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-02-10 13:55:27-->
+<components>
+  <component name="weapon_spl_m_gatling_01_mk2" class="weapon">
+    <source geometry="extensions\ego_dlc_split\assets\props\WeaponSystems\heavy\weapon_spl_m_gatling_01_mk2_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="WeaponCon_01" tags="advanced combat component medium weapon " />
+      <connection name="position" tags="position" value="1" />
+      <connection name="ConnectionFordetail_m_mount_decals" tags="detail_m forceoutline nocollision part ">
+        <parts>
+          <part name="detail_m_mount_decals">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2split.spl_p2_decal_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.996797" y="1.243656" z="1.066556" />
+              <center x="1.49e-08" y="0" z="1.103798" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_mount" tags="forceoutline part platformcollision ">
+        <offset>
+          <position x="0" y="2.1e-07" z="0" />
+        </offset>
+        <parts>
+          <part name="part_mount" wreck="part_mount_wreck">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="1.149048" y="1.294472" z="1.913856" />
+              <center x="2.98e-08" y="0" z="1.913856" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="part_rotator" tags="nocollision ">
+        <offset>
+          <position x="0" y="2.1e-07" z="2.542555" />
+        </offset>
+      </connection>
+      <connection name="ConnectionFordummy_rotator" tags="geometryinvisible nocollision part ">
+        <offset>
+          <position x="0" y="2.1e-07" z="2.542555" />
+        </offset>
+        <restrictions>
+          <restriction type="rotation_y">
+            <limits>
+              <min value="-10" />
+              <max value="10" />
+            </limits>
+          </restriction>
+        </restrictions>
+        <parts>
+          <part name="dummy_rotator">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.02704623" y="0.02704625" z="0.02704623" />
+              <center x="0" y="1.49e-08" z="0" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_gun" tags="forceoutline iklink part platformcollision " parent="dummy_rotator">
+        <restrictions>
+          <restriction type="rotation_x">
+            <limits>
+              <min value="-10" />
+              <max value="10" />
+            </limits>
+          </restriction>
+        </restrictions>
+        <parts>
+          <part name="part_gun">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                  <material id="2" ref="p2split.spl_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.7464058" y="0.9496956" z="1.571702" />
+              <center x="0" y="0" z="1.357277" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Con_laser01" tags="laser " parent="part_gun">
+        <offset>
+          <position x="-0.001354486" y="0.2634167" z="7.797325" />
+        </offset>
+      </connection>
+      <connection name="ConnectionFordetail_m_gun_decals" tags="detail_m forceoutline nocollision part " parent="part_gun">
+        <offset>
+          <position x="0" y="0" z="1.665511" />
+        </offset>
+        <parts>
+          <part name="detail_m_gun_decals">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2split.spl_p2_decal_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.7478706" y="0.7806909" z="1.202752" />
+              <center x="1.49e-08" y="0" z="0.06124425" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_gun_decals_mk2" tags="detail_m forceoutline nocollision part " parent="part_gun">
+        <offset>
+          <position x="0" y="0" z="1.665511" />
+        </offset>
+        <parts>
+          <part name="detail_m_gun_decals_mk2">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2split.spl_p2_decal_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.7478706" y="0.7390113" z="0.9577556" />
+              <center x="1.49e-08" y="0" z="0.3062409" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetails_l_gun_mk2" tags="detail_l forceoutline nocollision part " parent="part_gun">
+        <parts>
+          <part name="details_l_gun_mk2">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2split.spl_p2_hulltexture_01" />
+                  <material id="2" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.2274937" y="0.961319" z="0.6340243" />
+              <center x="-4.84e-08" y="-2.682e-07" z="1.047519" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForpart_barrel" tags="animation forceoutline part platformcollision " parent="part_gun">
+        <offset>
+          <position x="0" y="-1.936e-07" z="2.557599" />
+        </offset>
+        <animations>
+          <animation name="weapon_firing" start="1" end="6" />
+        </animations>
+        <parts>
+          <part name="part_barrel">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="1">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="2">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+              <lod index="3">
+                <materials>
+                  <material id="1" ref="p2generic.gen_p2_hulltexture_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.5109696" y="0.5134926" z="2.756821" />
+              <center x="0" y="-7.6e-08" z="2.568442" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionFordetail_m_barrel_decals" tags="detail_m forceoutline nocollision part " parent="part_barrel">
+        <offset>
+          <position x="0" y="0" z="2.965136" />
+        </offset>
+        <parts>
+          <part name="detail_m_barrel_decals">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2split.spl_p2_decal_01" />
+                  <material id="2" ref="p2generic.gen_p2_decal_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="0.417944" y="0.4744538" z="2.360933" />
+              <center x="4.768e-07" y="1.35e-08" z="9.537e-07" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>
