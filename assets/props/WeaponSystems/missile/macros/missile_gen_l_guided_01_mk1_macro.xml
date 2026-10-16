@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: AJ (192.168.3.70) on 2026-04-22 08:45:13-->
+<macros>
+  <macro name="missile_gen_l_guided_01_mk1_macro" class="missile">
+    <component ref="missile_guided_heavy_mk1" />
+    <properties>
+      <identification name="{20105,6404}" basename="{20105,6401}" description="{20105,6402}" />
+      <ammunition value="2" reload="21" />
+      <missile amount="1" barrelamount="1" timediff="1.3" lifetime="88" range="12000" guided="1" icon="hud_ms_guided_heavy_mk1" retarget="0" tags="largeguided" targetable="1" />
+      <explosiondamage value="8400" shielddisruption="10" />
+      <reload time="1" />
+      <hull max="90" />
+      <effects>
+        <explosion ref="missile_explosion_heavy_01" />
+        <launch ref="missile_guided_muzzle" />
+      </effects>
+      <weapon system="missile_guided" />
+      <countermeasure resilience="0.984" />
+      <physics mass="5">
+        <inertia pitch="13" yaw="13" roll="13" />
+        <drag forward="0.32" reverse="3" horizontal="20" vertical="20" pitch="4.8" yaw="4.8" roll="4.8" />
+        <accfactors reverse="3.8" />
+      </physics>
+    </properties>
+    <connections>
+      <connection ref="con_engine01">
+        <macro ref="engine_missile_guided_mk1_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

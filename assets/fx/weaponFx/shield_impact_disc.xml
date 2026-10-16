@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<components>
+	<component name="shield_impact_disc" class="effectobject">
+		<source geometry="assets\fx\weaponFx\shield_impact_disc_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="space" tags="effectobject">
+				<offset/>
+			</connection>
+			<connection name="Connection01" tags="part animation textureanimation  ">
+				<offset>
+					<quaternion qx="-5.338508E-08" qy="-0.7071068" qz="-0.7071068" qw="5.338508E-08"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="0" end="60"/>
+				</animations>
+				<parts>
+					<part name="anim_explosiondisc">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.shieldeffect"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="202.9287" y="22.53728" z="202.9287"/>
+							<center x="-5.340576E-05" y="2.441406E-04" z="-14.23095"/>
+						</size>
+						<size_raw>
+							<max x="2.0292" y="0.2253632" z="2.0292"/>
+							<center x="-4.768372E-07" y="2.384186E-06" z="-0.1423034"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="2">
+								<uv_property name="u_offset" controller="bezier_float">
+									<key frame="0" value="0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="60" value="2" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-0" in_tangent_type="auto" out_tangent_type="auto"/>
+									<key frame="60" value="2" in_tangent_type="auto" out_tangent_type="auto"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection02" tags="part animation  ">
+				<offset>
+					<position x="0" y="0" z="-0.2367201"/>
+					<quaternion qx="-5.338508E-08" qy="-0.7071068" qz="-0.7071068" qw="5.338508E-08"/>
+				</offset>
+				<animations>
+					<animation name="playonce" start="0" end="60"/>
+				</animations>
+				<parts>
+					<part name="anim_explosiondisc001">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_bullet_distortion_02"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="202.9287" y="95.45856" z="202.9287"/>
+							<center x="-1.220703E-04" y="2.365112E-04" z="-9.721269"/>
+						</size>
+						<size_raw>
+							<max x="2.0292" y="0.2253632" z="2.0292"/>
+							<center x="-4.768372E-07" y="2.384186E-06" z="-0.1423034"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+		</connections>
+	</component>
+</components>

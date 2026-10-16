@@ -1,0 +1,316 @@
+<?xml version="1.0"?>
+<components>
+	<component name="turret_par_m_dumbfire_01_mk1" class="missileturret">
+		<source geometry="assets\props\WeaponSystems\dumbfire\turret_par_m_dumbfire_01_mk1_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="Connection01" tags="part animation nocollision forceoutline ">
+				<offset/>
+				<animations>
+					<animation name="turret_inactive" start="0" end="0"/>
+					<animation name="turret_activating" start="0" end="45"/>
+					<animation name="turret_active" start="50" end="50"/>
+					<animation name="turret_deactivating" start="55" end="100"/>
+					<animation name="gun_firing" start="50" end="55"/>
+				</animations>
+				<parts>
+					<part name="part_socket" wreck="part_socket_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.794348" y="1.519575" z="8"/>
+							<center x="0" y="1.519575" z="0"/>
+						</size>
+						<size_raw>
+							<max x="7.794348" y="1.519575" z="8"/>
+							<center x="0" y="1.519575" z="0"/>
+						</size_raw>
+						<lights>
+							<arealight name="XU AreaLight01" areax="0" areay="0" radius="0.6" r="255" g="0" b="0" lighteffect="1" range="15" spotattenuation="0" specularintensity="1" trigger="1" intensity="0">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0"/>
+										<key frame="40" value="1"/>
+										<key frame="60" value="1"/>
+										<key frame="100" value="0"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.912448E-03" y="3.256252" z="7.274035"/>
+									<quaternion qx="-0" qy="-0" qz="-1" qw="4.371139E-08"/>
+								</offset>
+							</arealight>
+							<arealight name="XU AreaLight002" areax="0" areay="0" radius="0.6" r="255" g="0" b="0" lighteffect="1" range="15" spotattenuation="0" specularintensity="1" trigger="1" intensity="0">
+								<lightanimations>
+									<lightanimation name="intensity" controller="linear_float">
+										<key frame="0" value="0"/>
+										<key frame="40" value="1"/>
+										<key frame="60" value="1"/>
+										<key frame="100" value="0"/>
+									</lightanimation>
+								</lightanimations>
+								<offset>
+									<position x="-3.912448E-03" y="3.256252" z="-7.27115"/>
+									<quaternion qx="-0" qy="-0" qz="-1" qw="4.371139E-08"/>
+								</offset>
+							</arealight>
+						</lights>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part animation textureanimation nocollision forceoutline detail_xl iklink " parent="part_socket">
+				<offset>
+					<position x="0" y="1.003572" z="0"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.6818265" y="0.1091455" z="7.56912"/>
+							<center x="0" y="1.532876" z="7.466316E-03"/>
+						</size>
+						<size_raw>
+							<max x="0.6818265" y="1.423731" z="7.561654"/>
+							<center x="0" y="1.532876" z="7.466555E-03"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="u_offset" controller="linear_float">
+									<key frame="0" value="0"/>
+									<key frame="35" value="0.67"/>
+									<key frame="65" value="0.67"/>
+									<key frame="100" value="0"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part iklink nocollision forceoutline " parent="part_socket">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="-2.929517E-07" y="1.681125" z="2.678328E-02"/>
+				</offset>
+				<parts>
+					<part name="detail_xl_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.015451" y="2.70881" z="2.601603"/>
+							<center x="2.929517E-07" y="1.673437" z="-6.848264E-03"/>
+						</size>
+						<size_raw>
+							<max x="1.01545" y="1.035373" z="2.60845"/>
+							<center x="1.737424E-07" y="0.6926881" z="-6.847907E-03"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part nocollision forceoutline detail_xl " parent="detail_xl_rotator">
+				<offset>
+					<position x="-3.111722E-08" y="-1.111877E-02" z="1.196471"/>
+				</offset>
+				<parts>
+					<part name="fx_rotator_decal">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="0.8345604" y="1.971393" z="2.373171"/>
+							<center x="-1.937048E-07" y="1.739142" z="-1.252746"/>
+						</size>
+						<size_raw>
+							<max x="0.8345608" y="0.2322511" z="3.625915"/>
+							<center x="-1.341002E-07" y="0.758393" z="-1.252745"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection05" tags="part iklink nocollision forceoutline  " parent="detail_xl_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-10"/>
+							<max value="90"/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="2.646326E-07" y="1.326004" z="-0.9534885"/>
+				</offset>
+				<parts>
+					<part name="detail_xl_gun">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+							<lod index="3">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.132533" y="2.74979" z="2.656773"/>
+							<center x="-1.794529E-07" y="1.113302" z="0.7881609"/>
+						</size>
+						<size_raw>
+							<max x="4.132532" y="1.636488" z="1.868611"/>
+							<center x="-1.794529E-07" y="0.1325536" z="0.7881612"/>
+						</size_raw>
+						<pivot>
+							<offset>
+								<position x="4.653882E-02" y="0" z="0"/>
+							</offset>
+						</pivot>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_dumbfire_04" tags="rocket " parent="detail_xl_gun">
+				<offset>
+					<position x="-3.085517" y="-0.6341681" z="3.475951"/>
+				</offset>
+			</connection>
+			<connection name="con_dumbfire_03" tags="rocket" parent="detail_xl_gun">
+				<offset>
+					<position x="-2.233358" y="0.8533309" z="3.475951"/>
+				</offset>
+			</connection>
+			<connection name="con_dumbfire_02" tags="rocket " parent="detail_xl_gun">
+				<offset>
+					<position x="2.256982" y="0.8789628" z="3.475952"/>
+				</offset>
+			</connection>
+			<connection name="con_dumbfire_01" tags="rocket" parent="detail_xl_gun">
+				<offset>
+					<position x="3.064769" y="-0.5309541" z="3.475952"/>
+				</offset>
+			</connection>
+			<connection name="Connection06" tags="part nocollision forceoutline detail_xl " parent="detail_xl_rotator">
+				<offset>
+					<position x="3.96979E-07" y="3.162111" z="-0.1791887"/>
+				</offset>
+				<parts>
+					<part name="fx_gun_decal">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="4.095819" y="2.697677" z="1.791404"/>
+							<center x="1.841832E-07" y="-0.6708364" z="0.6320904"/>
+						</size>
+						<size_raw>
+							<max x="4.095819" y="3.368514" z="1.159312"/>
+							<center x="-5.423539E-08" y="-1.651586" z="0.6320904"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection07" tags="part nocollision forceoutline detail_m ">
+				<offset>
+					<position x="0" y="0.2833051" z="0"/>
+				</offset>
+				<parts>
+					<part name="detail_m_decals">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1paint.paint_p1_decal_01"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="7.814347" y="1.161197" z="8.02"/>
+							<center x="0" y="1.034559" z="0"/>
+						</size>
+					</part>
+				</parts>
+			</connection>
+			<connection name="con_dumbfire_turret" tags="turret medium missile component unhittable  standard ">
+				<offset/>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget ">
+				<offset>
+					<position x="0" y="5.425042" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

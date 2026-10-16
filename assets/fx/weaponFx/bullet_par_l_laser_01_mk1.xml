@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-04-02 11:02:42-->
+<components>
+  <component name="bullet_par_l_laser_01_mk1" class="bullet">
+    <source geometry="assets\fx\weaponFx\bullet_par_l_laser_01_mk1_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="Connection_Laser01" tags="laser " />
+      <connection name="position" tags="position" value="1" />
+      <connection name="Connection01002" tags="animation part ">
+        <animations>
+          <animation name="loop" start="1" end="101" />
+        </animations>
+        <parts>
+          <part name="bullet_l_par">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="effects.bullets_fx_master_noscaling" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="50.28078" y="50.28078" z="126.661" />
+              <center x="0.02432251" y="-0.02612686" z="-123.5853" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection02002" tags="animation iklink part textureanimation " parent="bullet_l_par">
+        <animations>
+          <animation name="loop" start="1" end="50" />
+        </animations>
+        <parts>
+          <part name="bullet_l_par_shockwave">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="effects.bullets_fx_master_multilayer_noscaling" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="19.95589" y="19.95589" z="53.20654" />
+              <center x="0.02111053" y="0.02878571" z="-50.83426" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="2">
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0.08" />
+                  <key frame="50" value="4" />
+                </uv_property>
+              </uv_animation>
+              <uv_animation rotaroundcenter="1" mapchannel="3">
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="-0.04" />
+                  <key frame="50" value="-2" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="Connection03002" tags="nocollision part " parent="bullet_l_par">
+        <offset>
+          <position x="0" y="0" z="-0.383873" />
+        </offset>
+        <parts>
+          <part name="bullet_l_par_distortion">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p1effects.p1_bullet_distortion_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="50" y="50" z="0.01938324" />
+              <center x="0" y="0" z="-0.01938108" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

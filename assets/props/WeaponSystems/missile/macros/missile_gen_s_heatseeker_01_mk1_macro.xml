@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: AJ (192.168.3.70) on 2026-04-22 09:20:09-->
+<macros>
+  <macro name="missile_gen_s_heatseeker_01_mk1_macro" class="missile">
+    <component ref="missile_heatseeker_light_mk1" />
+    <properties>
+      <identification name="{20105,6424}" basename="{20105,6421}" description="{20105,6422}" />
+      <ammunition value="2" reload="4.4" />
+      <missile amount="1" barrelamount="1" timediff="0.5" lifetime="8" range="7000" guided="1" icon="hud_ms_heatseeker_light_mk1" retarget="0" tags="smallguided" />
+      <explosiondamage value="940" />
+      <reload time="1" />
+      <hull max="1" />
+      <effects>
+        <explosion ref="missile_explosion_light_01" />
+        <launch ref="missile_guided_muzzle" />
+      </effects>
+      <weapon system="missile_guided" />
+      <countermeasure resilience="0.94" />
+      <physics mass="0.6">
+        <inertia pitch="0.5" yaw="0.5" roll="0.5" />
+        <drag forward="0.04" reverse="0.231" horizontal="2" vertical="2" pitch="0.4" yaw="0.4" roll="0.4" />
+      </physics>
+    </properties>
+    <connections>
+      <connection ref="con_engine01">
+        <macro ref="engine_missile_guided_mk1_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>

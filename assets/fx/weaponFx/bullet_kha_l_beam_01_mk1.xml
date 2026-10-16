@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-05-12 12:21:50-->
+<components>
+  <component name="bullet_kha_l_beam_01_mk1" class="bullet">
+    <source geometry="assets\fx\weaponFx\bullet_kha_l_beam_01_mk1_data" />
+    <layers>
+      <layer />
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_laser_01" tags="laser ">
+        <offset>
+          <quaternion qx="-2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForbullet_l" tags="animation part textureanimation ">
+        <animations>
+          <animation name="loop_random" start="1" end="101" />
+        </animations>
+        <parts>
+          <part name="bullet_l">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_mining_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="31.56645" y="31.56645" z="0.5" />
+              <center x="-0.003448486" y="0.003448486" z="0.5" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="101" value="5" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForbullet_l_distortion" tags="animation part textureanimation " parent="bullet_l">
+        <offset>
+          <quaternion qx="-2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+        <animations>
+          <animation name="loop_random" start="1" end="101" />
+        </animations>
+        <parts>
+          <part name="bullet_l_distortion">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_distortion_01" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="54.84428" y="63.15228" z="0.5" />
+              <center x="-0.008430481" y="0.00315094" z="0.5" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="1">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="101" value="5" />
+                </uv_property>
+                <uv_property name="v_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="101" value="-25" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+  </component>
+</components>

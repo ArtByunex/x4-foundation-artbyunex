@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported on 2026-03-24 11:47:25-->
+<components>
+  <component name="bullet_xen_l_plasma_01_mk1" class="bullet">
+    <source geometry="assets\fx\weaponFx\bullet_xen_l_plasma_01_mk1_data" />
+    <layers>
+      <layer>
+        <lights>
+          <omni name="point" shadow="0" r="255" g="44" b="0" intensity="4.255692" specularintensity="1" range="400" shadowrange="400" lighteffect="1" lenseffect="none" trigger="0" />
+        </lights>
+      </layer>
+    </layers>
+    <connections>
+      <connection name="space" tags="bullet" />
+      <connection name="position" tags="position" value="1" />
+      <connection name="con_laser_01" tags="laser ">
+        <offset>
+          <quaternion qx="-2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+      </connection>
+      <connection name="ConnectionForbullet_l" tags="animation part textureanimation ">
+        <animations>
+          <animation name="loop" start="1" end="121" />
+        </animations>
+        <parts>
+          <part name="bullet_l">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_disruptor_01_core" />
+                  <material id="2" ref="p2fx.fx_p2_distortion_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="40.72291" y="40.7276" z="40.72108" />
+              <center x="-0.04431152" y="-0.03834534" z="0.127533" />
+            </size>
+            <uv_animations>
+              <uv_animation rotaroundcenter="1" mapchannel="2">
+                <uv_property name="u_offset" controller="linear_float">
+                  <key frame="1" value="0" />
+                  <key frame="101" value="0" />
+                  <key frame="121" value="-1" />
+                </uv_property>
+              </uv_animation>
+            </uv_animations>
+          </part>
+        </parts>
+      </connection>
+      <connection name="ConnectionForbullet_l_distortion" tags="detail_s nocollision part " parent="bullet_l">
+        <offset>
+          <quaternion qx="2.19e-08" qy="0" qz="0" qw="-1" />
+        </offset>
+        <parts>
+          <part name="bullet_l_distortion">
+            <lods>
+              <lod index="0">
+                <materials>
+                  <material id="1" ref="p2fx.fx_p2_disruptor_01_core" />
+                  <material id="2" ref="p2fx.fx_p2_distortion_02" />
+                </materials>
+              </lod>
+            </lods>
+            <size>
+              <max x="40.90736" y="40.90735" z="40.90736" />
+              <center x="0.02283478" y="0" z="-0.03762436" />
+            </size>
+          </part>
+        </parts>
+      </connection>
+    </connections>
+    <properties>
+      <bullet maxhits="1" ricochet="0" restitution="1" scale="0" attach="0" />
+      <damage repair="0" />
+    </properties>
+  </component>
+</components>

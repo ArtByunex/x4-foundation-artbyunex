@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<components>
+	<component name="turret_kha_m_beam_01_mk1" class="turret">
+		<source geometry="assets\props\WeaponSystems\heavy\turret_kha_m_beam_01_mk1_data"/>
+		<layers>
+			<layer>
+				<waypoints/>
+				<lights/>
+			</layer>
+		</layers>
+		<connections>
+			<connection name="container" tags="contents" value="0"/>
+			<connection name="position" tags="position" value="1"/>
+			<connection name="Connection01" tags="part animation  ">
+				<offset/>
+				<animations>
+					<animation name="turret_inactive" start="1" end="1"/>
+					<animation name="turret_activating" start="1" end="25"/>
+					<animation name="turret_deactivating" start="35" end="60"/>
+					<animation name="turret_active" start="25" end="25"/>
+					<animation name="gun_firing" start="25" end="35"/>
+				</animations>
+				<parts>
+					<part name="anim_socket" wreck="anim_socket_wreck">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+								</materials>
+							</lod>
+							<lod index="1">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+								</materials>
+							</lod>
+							<lod index="2">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="16.4637" y="3.441761" z="15.89184"/>
+							<center x="1.907349E-06" y="0.9885035" z="-5.026485"/>
+						</size>
+						<size_raw>
+							<max x="16.4637" y="3.441761" z="15.89184"/>
+							<center x="1.907349E-06" y="0.9885035" z="-5.026485"/>
+						</size_raw>
+					</part>
+				</parts>
+				<waypoints/>
+			</connection>
+			<connection name="Connection02" tags="part iklink detail_xl nocollision forceoutline  " parent="anim_socket">
+				<restrictions>
+					<restriction type="rotation_y"/>
+				</restrictions>
+				<offset>
+					<position x="0" y="7.559426" z="0"/>
+				</offset>
+				<parts>
+					<part name="detail_s_rotator">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="16.98925" y="8.512091" z="15.32161"/>
+							<center x="0" y="3.553277" z="-5.502455"/>
+						</size>
+						<size_raw>
+							<max x="16.98925" y="4.958814" z="20.82407"/>
+							<center x="9.536743E-07" y="2.753427" z="-5.502455"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection03" tags="part animation textureanimation iklink nocollision detail_l  " parent="detail_s_rotator">
+				<offset>
+					<position x="-0.2548876" y="8.073614" z="-18.3023"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="fx_smoke01">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="effects.fume2"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="19.26206" y="7.969744" z="9.404129"/>
+							<center x="9.536743E-07" y="0.7998505" z="-1.907349E-06"/>
+						</size>
+						<size_raw>
+							<max x="19.26206" y="7.169893" z="9.404129"/>
+							<center x="9.536743E-07" y="-9.536743E-07" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="4">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="0" value="-0"/>
+									<key frame="1" value="-0"/>
+									<key frame="25" value="-1"/>
+									<key frame="35" value="-1"/>
+									<key frame="36" value="-0"/>
+									<key frame="59" value="-1"/>
+									<key frame="60" value="-1"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="2">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="1" value="-0"/>
+									<key frame="25" value="-4"/>
+									<key frame="35" value="-4"/>
+									<key frame="36" value="-0"/>
+									<key frame="59" value="-4"/>
+								</uv_property>
+							</uv_animation>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="linear_float">
+									<key frame="1" value="-0"/>
+									<key frame="25" value="-1"/>
+									<key frame="35" value="-1"/>
+									<key frame="36" value="-0"/>
+									<key frame="59" value="-1"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="Connection04" tags="part detail_xl iklink nocollision forceoutline  " parent="detail_s_rotator">
+				<restrictions>
+					<restriction type="rotation_x">
+						<limits>
+							<min value="-45"/>
+							<max value="40"/>
+						</limits>
+					</restriction>
+				</restrictions>
+				<offset>
+					<position x="3.036112E-07" y="2.365112E-03" z="0.0188446"/>
+				</offset>
+				<parts>
+					<part name="detail_m_barrel">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="generic.generic_p1_hulltexture_01_aged"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="1.996818" y="7.104516" z="11.42304"/>
+							<center x="1.007691E-06" y="3.88077" z="2.953274"/>
+						</size>
+						<size_raw>
+							<max x="1.996817" y="2.000953" z="8.469767"/>
+							<center x="1.007691E-06" y="-4.135132E-03" z="2.953274"/>
+						</size_raw>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_laser01" tags="laser" parent="detail_m_barrel">
+				<offset>
+					<position x="0" y="-0.0374589" z="15.19744"/>
+				</offset>
+			</connection>
+			<connection name="Connection05" tags="part animation detail_xl iklink nocollision forceoutline  " parent="anim_socket">
+				<offset>
+					<position x="1.430511E-06" y="3.764518" z="-16.46586"/>
+				</offset>
+				<animations/>
+				<parts>
+					<part name="anim_lights">
+						<lods>
+							<lod index="0">
+								<materials>
+									<material id="1" ref="p1effects.p1_gradient_colour"/>
+								</materials>
+							</lod>
+						</lods>
+						<size>
+							<max x="12.74652" y="0.3908658" z="2.359131"/>
+							<center x="4.768372E-07" y="0" z="0"/>
+						</size>
+						<size_raw>
+							<max x="12.74652" y="0.3908658" z="2.359131"/>
+							<center x="4.768372E-07" y="0" z="0"/>
+						</size_raw>
+						<uv_animations>
+							<uv_animation mapchannel="1">
+								<uv_property name="v_offset" controller="bezier_float">
+									<key frame="0" value="-1" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="4" value="-1" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="5" value="-0.74" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="25" value="-0.74" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="35" value="-0.74" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="55" value="-0.74" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="56" value="-1" in_tangent_type="step" out_tangent_type="step"/>
+									<key frame="60" value="-1" in_tangent_type="step" out_tangent_type="step"/>
+								</uv_property>
+							</uv_animation>
+						</uv_animations>
+					</part>
+				</parts>
+			</connection>
+			<connection name="connection_component01" tags="component turret medium standard hittable   combat ">
+				<offset/>
+			</connection>
+			<connection name="con_aimtarget_01" tags="aimtarget ">
+				<offset>
+					<position x="0" y="13.28383" z="0"/>
+				</offset>
+			</connection>
+		</connections>
+	</component>
+</components>

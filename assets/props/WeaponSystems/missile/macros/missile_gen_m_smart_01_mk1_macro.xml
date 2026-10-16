@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported by: AJ (192.168.3.57) on 2026-05-26 09:06:49-->
+<macros>
+  <macro name="missile_gen_m_smart_01_mk1_macro" class="missile">
+    <component ref="missile_smart_heavy_mk1" />
+    <properties>
+      <identification name="{20105,6454}" basename="{20105,6451}" description="{20105,6452}" />
+      <ammunition value="1" />
+      <missile amount="1" barrelamount="1" timediff="1" lifetime="20" range="9000" guided="1" icon="hud_ms_smart_heavy_mk1" retarget="1" tags="mediumguided" targetable="1" />
+      <explosiondamage value="980" />
+      <reload time="18" />
+      <hull max="1" />
+      <effects>
+        <explosion ref="missile_explosion_medium_01" />
+        <launch ref="missile_guided_muzzle" />
+      </effects>
+      <weapon system="missile_guided" />
+      <countermeasure resilience="0.988" />
+      <physics mass="1.3">
+        <inertia pitch="0.9" yaw="0.9" roll="0.9" />
+        <drag forward="0.072" reverse="1.36" horizontal="2" vertical="2" pitch="0.6" yaw="0.6" roll="0.6" />
+      </physics>
+    </properties>
+    <connections>
+      <connection ref="con_engine01">
+        <macro ref="engine_missile_guided_mk1_macro" connection="ship" />
+      </connection>
+    </connections>
+  </macro>
+</macros>
